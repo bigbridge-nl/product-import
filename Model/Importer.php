@@ -18,7 +18,7 @@ class Importer
     /** @var ConfigurableProduct[] */
     private $configurableProducts = [];
 
-    /** @var  Config */
+    /** @var  ImportConfig */
     private $config;
 
     /** @var  Simples */
@@ -26,6 +26,11 @@ class Importer
 
     /** @var  Configurables */
     private $configurableStorage;
+
+    public function __construct(ImportConfig $config)
+    {
+        $this->config = $config;
+    }
 
     /**
      * @param SimpleProduct $product
