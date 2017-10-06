@@ -11,7 +11,7 @@ use BigBridge\ProductImport\Model\Data\SimpleProduct;
 /**
  * @author Patrick van Bergen
  */
-class Simples
+class SimplesStorage
 {
     const ATT_SKU = 'sku';
 

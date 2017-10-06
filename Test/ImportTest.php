@@ -3,8 +3,8 @@
 namespace BigBridge\ProductImport\Test;
 
 use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\Importer;
 use BigBridge\ProductImport\Model\ImporterFactory;
+use BigBridge\ProductImport\Model\Utils;
 use BigBridge\ProductImport\Test\Resources\MySimpleProduct;
 
 /**
@@ -18,17 +18,26 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     {
         require __DIR__ . '/../../../../index.php';
 
-        $config = new ImportConfig();
-
         $om = \Magento\Framework\App\ObjectManager::getInstance();
+
+        /** @var ImporterFactory $factory */
         $factory = $om->get(ImporterFactory::class);
+
+        /** @var Utils $utils */
+        $utils = $om->get(Utils::class);
+
+        $config = new ImportConfig();
+        $config->batchSize = 200;
+
         $importer = $factory->create($config);
 
         $product = new MySimpleProduct();
         $product->name = "Big Blue Box";
         $product->sku = "bb1103";
 
-        $importer->importSimpleProduct($product);
-        $importer->completeFullImport();
+        $importer->insert($product);
+        $importer->flush();
+
+        $this->assertNotEquals(null, $utils->getProductIdBySku("bb1103"));
     }
 }

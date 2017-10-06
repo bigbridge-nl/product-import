@@ -4,8 +4,8 @@ namespace BigBridge\ProductImport\Model;
 
 use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\Storage\Configurables;
-use BigBridge\ProductImport\Model\Storage\Simples;
+use BigBridge\ProductImport\Model\Storage\ConfigurablesStorage;
+use BigBridge\ProductImport\Model\Storage\SimplesStorage;
 
 /**
  * @author Patrick van Bergen
@@ -21,21 +21,23 @@ class Importer
     /** @var  ImportConfig */
     private $config;
 
-    /** @var  Simples */
+    /** @var  SimplesStorage */
     private $simpleStorage;
 
-    /** @var  Configurables */
+    /** @var  ConfigurablesStorage */
     private $configurableStorage;
 
-    public function __construct(ImportConfig $config)
+    public function __construct(ImportConfig $config, SimplesStorage $simplesStorage, ConfigurablesStorage $configurablesStorage)
     {
         $this->config = $config;
+        $this->simpleStorage = $simplesStorage;
+        $this->configurableStorage = $configurablesStorage;
     }
 
     /**
      * @param SimpleProduct $product
      */
-    public function importSimpleProduct(SimpleProduct $product)
+    public function insert(SimpleProduct $product)
     {
         $this->simpleProducts[] = $product;
         if (count($this->simpleProducts) == $this->config->batchSize) {
@@ -59,7 +61,7 @@ class Importer
      * Call this function only once, at the end of the full import.
      * Not once for every product!
      */
-    public function completeFullImport()
+    public function flush()
     {
         $this->flushSimpleProducts();
         $this->flushConfigurableProducts();

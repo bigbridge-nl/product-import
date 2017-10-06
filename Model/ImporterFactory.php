@@ -7,8 +7,15 @@ namespace BigBridge\ProductImport\Model;
  */
 class ImporterFactory
 {
+    /**
+     * @param ImportConfig $config
+     * @return Importer
+     */
     public function create(ImportConfig $config)
     {
-        return new Importer($config);
+        $om = \Magento\Framework\App\ObjectManager::getInstance();
+        $importer = $om->create(Importer::class, ['config' => $config]);
+
+        return $importer;
     }
 }
