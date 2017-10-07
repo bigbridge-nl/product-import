@@ -38,6 +38,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $importer->insert($product);
         $importer->flush();
 
-        $this->assertNotEquals(null, $utils->getProductIdBySku("bb1103"));
+        $this->assertNotSame(null, $utils->getProductIdBySku("bb1103"));
     }
 }

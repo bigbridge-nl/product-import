@@ -4,8 +4,8 @@ namespace BigBridge\ProductImport\Model;
 
 use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\Storage\ConfigurablesStorage;
-use BigBridge\ProductImport\Model\Storage\SimplesStorage;
+use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
+use BigBridge\ProductImport\Model\Resource\SimpleStorage;
 
 /**
  * @author Patrick van Bergen
@@ -21,13 +21,13 @@ class Importer
     /** @var  ImportConfig */
     private $config;
 
-    /** @var  SimplesStorage */
+    /** @var  SimpleStorage */
     private $simpleStorage;
 
-    /** @var  ConfigurablesStorage */
+    /** @var  ConfigurableStorage */
     private $configurableStorage;
 
-    public function __construct(ImportConfig $config, SimplesStorage $simplesStorage, ConfigurablesStorage $configurablesStorage)
+    public function __construct(ImportConfig $config, SimpleStorage $simplesStorage, ConfigurableStorage $configurablesStorage)
     {
         $this->config = $config;
         $this->simpleStorage = $simplesStorage;

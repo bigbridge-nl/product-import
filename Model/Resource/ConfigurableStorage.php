@@ -1,13 +1,13 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Storage;
+namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
 
 /**
  * @author Patrick van Bergen
  */
-class ConfigurablesStorage
+class ConfigurableStorage
 {
 
     /**

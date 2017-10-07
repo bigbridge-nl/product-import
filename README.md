@@ -1,8 +1,26 @@
 # Product Import
 
-Imports products into Magento 2.
+Imports product data into Magento 2 via direct database access.
 
-## Aims
+Use this library if you need speed and don't care about plugins and custom event handling that is normally done by Magento.
+
+## To be supported
+
+* all types of products
+* categories
+* product-categorie links (by id, by name)
+* auto create categorie (from name)
+* stock
+* multiple store views, multiple sites
+* auto add attribute option
+* csv import
+* rest request
+* validation
+* error reporting, per product
+* flat tables
+* indexes
+
+## Goals
 
 * fast
 * easy to use
@@ -10,3 +28,11 @@ Imports products into Magento 2.
 * hard to make mistakes
 * flexible
 * complete
+
+## Assumptions
+
+* Input in UTF-8
+
+## Thanks to
+
+This project ows a great deal of ideas and code from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)
