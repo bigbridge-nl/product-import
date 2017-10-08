@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
+use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 
 /**
@@ -28,6 +29,47 @@ class ProductStorage
 
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
         $this->attributeSetMap = $this->getProductAttributeSetMap();
+    }
+
+    /**
+     * Checks $product for all known requirements.
+     *
+     * @param Product $product
+     * @return array An array with [ok, error]
+     */
+    public function validate(Product $product)
+    {
+        $ok = true;
+        $error = "";
+        $sep = "";
+
+        $sku = is_string($product->sku) ? trim($product->sku) : "";
+        $name = is_string($product->name) ? trim($product->name) : "";
+        $attributeSetName = is_string($product->attributeSetName) ? trim($product->attributeSetName) : "";
+
+        if ($sku === "") {
+            $ok = false;
+            $error .= $sep . "missing sku";
+            $sep = "; ";
+        }
+
+        if ($name === "") {
+            $ok = false;
+            $error .= $sep . "missing name";
+            $sep = "; ";
+        }
+
+        if ($attributeSetName === "") {
+            $ok = false;
+            $error .= $sep . "missing attribute set name";
+            $sep = "; ";
+        } elseif (!isset($this->attributeSetMap[$attributeSetName])) {
+            $ok = false;
+            $error .= $sep . "unknown attribute set name: " . $attributeSetName;
+            $sep = "; ";
+        }
+
+        return [$ok, $error];
     }
 
     /**

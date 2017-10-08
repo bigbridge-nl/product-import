@@ -34,11 +34,14 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
+        $sku3 = uniqid("bb");
 
         $products = [
             ["Big Blue Box", $sku1, 'Default'],
             ["Big Yellow Box", null, 'Default'],
             ["Big Red Box", $sku2, 'Default'],
+            [null, '', ''],
+            ["Big Blue Box", $sku3, 'Boxes'],
         ];
 
         $results = [];
@@ -58,6 +61,14 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEquals(null, $utils->getProductIdBySku($sku1));
         $this->assertNotEquals(null, $utils->getProductIdBySku($sku2));
 
-        $this->assertEquals([[true, ""], [false, "Missing SKU"], [true, ""]], $results);
+        $expected = [
+            [true, ""],
+            [false, "missing sku"],
+            [true, ""],
+            [false, "missing sku; missing name; missing attribute set name"],
+            [false, "unknown attribute set name: Boxes"]
+        ];
+
+        $this->assertEquals($expected, $results);
     }
 }

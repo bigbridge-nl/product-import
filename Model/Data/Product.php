@@ -15,5 +15,4 @@ class Product
 
     /** @var  string */
     public $attributeSetName;
-
 }

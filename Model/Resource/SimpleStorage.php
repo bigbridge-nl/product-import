@@ -33,13 +33,7 @@ class SimpleStorage
      */
     public function validate(SimpleProduct $product)
     {
-        $ok = true;
-        $error = "";
-
-        if ($product->sku === null) {
-            $ok = false;
-            $error = "Missing SKU";
-        }
+        list($ok, $error) = $this->shared->validate($product);
 
         return [$ok, $error];
     }
