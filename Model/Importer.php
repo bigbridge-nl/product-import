@@ -36,10 +36,11 @@ class Importer
 
     /**
      * @param SimpleProduct $product
+     * @return array An array with [ok, error]
      */
     public function insert(SimpleProduct $product)
     {
-        list($ok, $error) = $this->validate($product);
+        list($ok, $error) = $this->simpleStorage->validate($product);
 
         if ($ok) {
             $this->simpleProducts[] = $product;
@@ -52,29 +53,12 @@ class Importer
     }
 
     /**
-     * Checks $product for all known requirements.
-     *
-     * @param SimpleProduct $product
-     * @return array An array with [ok, error]
-     */
-    private function validate(SimpleProduct $product)
-    {
-        $ok = true;
-        $error = "";
-
-        if ($product->sku === null) {
-            $ok = false;
-            $error = "Missing SKU";
-        }
-
-        return [$ok, $error];
-    }
-
-    /**
      * @param ConfigurableProduct $product
      */
     public function importConfigurableProduct(ConfigurableProduct $product)
     {
+        list($ok, $error) = $this->configurableStorage->validate($product);
+
         $this->configurableProducts[] = $product;
         if (count($this->configurableProducts) == $this->config->batchSize) {
             $this->flushSimpleProducts();

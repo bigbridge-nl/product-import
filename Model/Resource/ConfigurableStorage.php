@@ -24,6 +24,25 @@ class ConfigurableStorage
     }
 
     /**
+     * Checks $product for all known requirements.
+     *
+     * @param ConfigurableProduct $product
+     * @return array An array with [ok, error]
+     */
+    public function validate(ConfigurableProduct $product)
+    {
+        $ok = true;
+        $error = "";
+
+        if ($product->sku === null) {
+            $ok = false;
+            $error = "Missing SKU";
+        }
+
+        return [$ok, $error];
+    }
+
+    /**
      * @param ConfigurableProduct[] $configurableProducts
      */
     public function storeConfigurableProducts(array $configurableProducts)

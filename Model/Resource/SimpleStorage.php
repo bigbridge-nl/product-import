@@ -26,6 +26,25 @@ class SimpleStorage
     }
 
     /**
+     * Checks $product for all known requirements.
+     *
+     * @param SimpleProduct $product
+     * @return array An array with [ok, error]
+     */
+    public function validate(SimpleProduct $product)
+    {
+        $ok = true;
+        $error = "";
+
+        if ($product->sku === null) {
+            $ok = false;
+            $error = "Missing SKU";
+        }
+
+        return [$ok, $error];
+    }
+
+    /**
      * @param SimpleProduct[] $simpleProducts
      */
     public function storeSimpleProducts(array $simpleProducts)
