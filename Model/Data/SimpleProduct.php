@@ -12,4 +12,8 @@ class SimpleProduct
 
     /** @var  string */
     public $sku;
+
+    /** @var  string */
+    public $attributeSetName;
+
 }

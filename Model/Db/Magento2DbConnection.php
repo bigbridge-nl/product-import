@@ -45,9 +45,42 @@ class Magento2DbConnection
         $this->pdo->query($query);
     }
 
-    public function quote(string $query)
+    /**
+     * Returns the first cell of the first result of $query.
+     *
+     * @param string $query
+     * @return string|null
+     */
+    public function fetchSingleCell(string $query)
     {
-        return $this->pdo->quote($query);
+        $column = $this->pdo->query($query)->fetchColumn(0);
+        return $column === false ? null : $column;
+    }
+
+    /**
+     * Returns a key => value array based on the first two select fields of $query.
+     *
+     * @param string $query
+     * @return array
+     */
+    public function fetchMap(string $query)
+    {
+        $map = [];
+        foreach ($this->pdo->query($query)->fetchAll() as $row) {
+            $map[$row[0]] = $row[1];
+        }
+        return $map;
+    }
+
+    /**
+     * Escapes $value for use in a query. Adds quotes.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function quote(string $value)
+    {
+        return $this->pdo->quote($value);
     }
 
     /**

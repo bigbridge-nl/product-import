@@ -33,11 +33,12 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product = new MySimpleProduct();
         $product->name = "Big Blue Box";
-        $product->sku = "bb1103";
+        $product->sku = uniqid("bb");
+        $product->attributeSetName = 'Default';
 
         $importer->insert($product);
         $importer->flush();
 
-        $this->assertNotSame(null, $utils->getProductIdBySku("bb1103"));
+        $this->assertNotSame(null, $utils->getProductIdBySku($product->sku));
     }
 }

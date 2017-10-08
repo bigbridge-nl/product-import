@@ -7,7 +7,7 @@ use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
 /**
  * @author Patrick van Bergen
  */
-class ConfigurableStorage
+class ConfigurableStorage extends ProductStorage
 {
 
     /**

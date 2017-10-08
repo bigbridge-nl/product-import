@@ -14,24 +14,18 @@ use BigBridge\ProductImport\Model\Data\SimpleProduct;
  */
 class SimpleStorage
 {
-    const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
-
     const ATT_SKU = 'sku';
 
     /** @var  Magento2DbConnection */
     private $db;
 
-    /** @var  string  */
-    private $productEntityTable;
+    /** @var  ProductStorage */
+    private $shared;
 
-    public function __construct(Magento2DbConnection $db)
+    public function __construct(Magento2DbConnection $db, ProductStorage $shared)
     {
         $this->db = $db;
-        $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
-    }
-
-    public function prepare()
-    {
+        $this->shared = $shared;
     }
 
     /**
@@ -85,19 +79,17 @@ class SimpleStorage
             'updated_at',
         ];
 
-$attributeSetId = 4;
-
         $values = '';
         $sep = '';
         foreach ($products as $product) {
             $sku = $this->db->quote($product->sku);
+            $attributeSetId = $this->shared->attributeSetMap[$product->attributeSetName] ?: null;
             $values .= $sep . "({$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
             $sep = ', ';
         }
 
-        $sql = "INSERT INTO `{$this->productEntityTable}` (" . implode(",", $columns) . ") VALUES " . $values;
+        $sql = "INSERT INTO `{$this->shared->productEntityTable}` (" . implode(",", $columns) . ") VALUES " . $values;
 
-echo $sql;
         $this->db->insert($sql);
     }
 }
