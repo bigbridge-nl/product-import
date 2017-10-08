@@ -27,11 +27,11 @@ class Importer
     /** @var  ConfigurableStorage */
     private $configurableStorage;
 
-    public function __construct(ImportConfig $config, SimpleStorage $simplesStorage, ConfigurableStorage $configurablesStorage)
+    public function __construct(ImportConfig $config, SimpleStorage $simpleStorage, ConfigurableStorage $configurableStorage)
     {
         $this->config = $config;
-        $this->simpleStorage = $simplesStorage;
-        $this->configurableStorage = $configurablesStorage;
+        $this->simpleStorage = $simpleStorage;
+        $this->configurableStorage = $configurableStorage;
     }
 
     /**
@@ -39,10 +39,35 @@ class Importer
      */
     public function insert(SimpleProduct $product)
     {
-        $this->simpleProducts[] = $product;
-        if (count($this->simpleProducts) == $this->config->batchSize) {
-            $this->flushSimpleProducts();
+        list($ok, $error) = $this->validate($product);
+
+        if ($ok) {
+            $this->simpleProducts[] = $product;
+            if (count($this->simpleProducts) == $this->config->batchSize) {
+                $this->flushSimpleProducts();
+            }
         }
+
+        return [$ok, $error];
+    }
+
+    /**
+     * Checks $product for all known requirements.
+     *
+     * @param SimpleProduct $product
+     * @return array An array with [ok, error]
+     */
+    private function validate(SimpleProduct $product)
+    {
+        $ok = true;
+        $error = "";
+
+        if ($product->sku === null) {
+            $ok = false;
+            $error = "Missing SKU";
+        }
+
+        return [$ok, $error];
     }
 
     /**

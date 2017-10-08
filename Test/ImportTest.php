@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test;
 
+use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use BigBridge\ProductImport\Model\Utils;
@@ -31,14 +32,32 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer = $factory->create($config);
 
-        $product = new MySimpleProduct();
-        $product->name = "Big Blue Box";
-        $product->sku = uniqid("bb");
-        $product->attributeSetName = 'Default';
+        $sku1 = uniqid("bb");
+        $sku2 = uniqid("bb");
 
-        $importer->insert($product);
+        $products = [
+            ["Big Blue Box", $sku1, 'Default'],
+            ["Big Yellow Box", null, 'Default'],
+            ["Big Red Box", $sku2, 'Default'],
+        ];
+
+        $results = [];
+
+        /** @var SimpleProduct $product */
+        foreach ($products as $data) {
+            $product = new MySimpleProduct();
+            $product->name = $data[0];
+            $product->sku = $data[1];
+            $product->attributeSetName = $data[2];
+            list($ok, $error) = $importer->insert($product);
+            $results[] = [$ok, $error];
+        }
+
         $importer->flush();
 
-        $this->assertNotSame(null, $utils->getProductIdBySku($product->sku));
+        $this->assertNotEquals(null, $utils->getProductIdBySku($sku1));
+        $this->assertNotEquals(null, $utils->getProductIdBySku($sku2));
+
+        $this->assertEquals([[true, ""], [false, "Missing SKU"], [true, ""]], $results);
     }
 }

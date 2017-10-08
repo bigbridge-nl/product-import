@@ -5,17 +5,14 @@ namespace BigBridge\ProductImport\Model\Resource;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 
-
+// https://dev.mysql.com/doc/refman/5.6/en/insert-optimization.html
 // https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
-
 
 /**
  * @author Patrick van Bergen
  */
 class SimpleStorage
 {
-    const ATT_SKU = 'sku';
-
     /** @var  Magento2DbConnection */
     private $db;
 
@@ -38,7 +35,7 @@ class SimpleStorage
         }
 
         // collect skus
-        $skus = array_column($simpleProducts, self::ATT_SKU);
+        $skus = array_column($simpleProducts, 'sku');
 
         // collect inserts and updates
         $updateSkus = $this->getExistingSkus($skus);
@@ -58,10 +55,20 @@ class SimpleStorage
         // update flat table
     }
 
+    /**
+     * Returns an sku => id map for all existing skus.
+     *
+     * @param array $skus
+     * @return array
+     */
     private function getExistingSkus(array $skus)
     {
-        // SELECT `entity_id` FROM catalog_product_entity WHERE `sku` in ()
-        return [];
+        if (count($skus) == 0) {
+            return [];
+        }
+
+        $serialized = $this->db->quoteSet($skus);
+        return $this->db->fetchMap("SELECT `sku`, `entity_id` FROM {$this->shared->productEntityTable} WHERE `sku` in ({$serialized})");
     }
 
     /**
@@ -78,6 +85,8 @@ class SimpleStorage
             'created_at',
             'updated_at',
         ];
+
+#todo has_options, required_options
 
         $values = '';
         $sep = '';

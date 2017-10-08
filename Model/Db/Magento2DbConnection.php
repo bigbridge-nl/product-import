@@ -58,6 +58,21 @@ class Magento2DbConnection
     }
 
     /**
+     * Returns an array containing the first cells of each result of $query.
+     *
+     * @param string $query
+     * @return array
+     */
+    public function fetchSingleColumn(string $query)
+    {
+        $map = [];
+        foreach ($this->pdo->query($query)->fetchAll() as $row) {
+            $map[] = $row[0];
+        }
+        return $map;
+    }
+
+    /**
      * Returns a key => value array based on the first two select fields of $query.
      *
      * @param string $query
@@ -65,6 +80,7 @@ class Magento2DbConnection
      */
     public function fetchMap(string $query)
     {
+#echo $query."\n";
         $map = [];
         foreach ($this->pdo->query($query)->fetchAll() as $row) {
             $map[$row[0]] = $row[1];
@@ -81,6 +97,25 @@ class Magento2DbConnection
     public function quote(string $value)
     {
         return $this->pdo->quote($value);
+    }
+
+    /**
+     * Escapes a set of values for IN
+     *
+     * @param array $set
+     * @return string
+     */
+    public function quoteSet(array $set)
+    {
+        $esc = "";
+        $sep = "";
+
+        foreach ($set as $value) {
+            $esc .= $sep . $this->pdo->quote($value);
+            $sep = ",";
+        }
+
+        return $esc;
     }
 
     /**
