@@ -35,6 +35,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
         $sku3 = uniqid("bb");
+        $sku4 = uniqid("bb");
+        $sku5 = uniqid("bb");
 
         $products = [
             ["Big Blue Box", $sku1, 'Default', '3.25'],
@@ -42,6 +44,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Big Red Box", $sku2, 'Default', '127.95'],
             [null, '', '', null],
             ["Big Blue Box", $sku3, 'Boxes', '11.45'],
+            ["Big Orange Box", $sku4, 'Default', '11,45'],
+            ["Big Pink Box", $sku5, 'Default', 11.45],
         ];
 
         $results = [];
@@ -74,8 +78,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             [true, ""],
             [false, "missing sku"],
             [true, ""],
-            [false, "missing sku; missing name; missing attribute set name"],
-            [false, "unknown attribute set name: Boxes"]
+            [false, "missing sku; missing attribute set name; missing required name; missing required price"],
+            [false, "unknown attribute set name: Boxes"],
+            [false, "price is not a decimal number (11,45)"],
+            [false, "price is not a string type"],
         ];
 
         $this->assertEquals($expected, $results);

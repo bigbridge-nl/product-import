@@ -35,41 +35,60 @@ class Validator
      */
     public function validate(Product $product)
     {
+        $attributeInfo = $this->metaData->attributeInfo;
+
 #todo no need to check required fields for existing products
-        $ok = true;
+
         $error = "";
-        $sep = "";
 
         $sku = is_string($product->sku) ? trim($product->sku) : "";
-        $name = is_string($product->name) ? trim($product->name) : "";
         $attributeSetName = is_string($product->attributeSetName) ? trim($product->attributeSetName) : "";
 
         if ($sku === "") {
-            $ok = false;
-            $error .= $sep . "missing sku";
-            $sep = "; ";
-        }
-
-        if ($name === "") {
-            $ok = false;
-            $error .= $sep . "missing name";
-            $sep = "; ";
+            $error .= "; missing sku";
         }
 
         if ($attributeSetName === "") {
-            $ok = false;
-            $error .= $sep . "missing attribute set name";
-            $sep = "; ";
+            $error .= "; missing attribute set name";
         } elseif (!array_key_exists($attributeSetName, $this->metaData->attributeSetMap)) {
-            $ok = false;
-            $error .= $sep . "unknown attribute set name: " . $attributeSetName;
-            $sep = "; ";
+            $error .= "; unknown attribute set name: " . $attributeSetName;
         }
 
         foreach ($this->config->eavAttributes as $eavAttribute) {
+            // this check be done once for config: if (array_key_exists($eavAttribute, $attributeInfo)) {
 
+            $info = $attributeInfo[$eavAttribute];
+
+            $value = $product->$eavAttribute;
+            if (is_null($value)) {
+
+                if ($info->isRequired) {
+                    $error .= "; missing required " . $eavAttribute;
+                }
+
+            } elseif (is_string($value)) {
+
+                $value = trim($value);
+
+                if ($info->isRequired && $value === "") {
+                    $error .= "; missing required " . $eavAttribute;
+                }
+
+                if ($info->backendType === MetaData::TYPE_DECIMAL) {
+                    if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
+                        $error .= "; " . $eavAttribute . " is not a decimal number (" . $value . ")";
+                    }
+                }
+
+                $product->$eavAttribute = $value;
+
+            } else {
+                $error .= "; " . $eavAttribute . " is not a string type";
+            }
         }
 
-        return [$ok, $error];
+        $error = preg_replace("/^; /", "", $error);
+
+        return [$error == "", $error];
     }
 }

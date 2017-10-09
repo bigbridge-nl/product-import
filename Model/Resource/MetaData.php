@@ -14,6 +14,9 @@ class MetaData
     const ATTRIBUTE_SET_TABLE = 'eav_attribute_set';
     const ATTRIBUTE_TABLE = 'eav_attribute';
 
+    const TYPE_DATETIME = 'datetime';
+    const TYPE_DECIMAL = 'decimal';
+
     /** @var  Magento2DbConnection */
     private $db;
 
@@ -77,6 +80,7 @@ class MetaData
                 $row['attribute_code'],
                 (int)$row['attribute_id'],
                 (bool)$row['is_required'],
+                $row['backend_type'],
                 $this->productEntityTable . '_' . $row['backend_type']);
         }
         return $info;
