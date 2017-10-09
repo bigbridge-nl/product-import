@@ -89,6 +89,15 @@ class Magento2DbConnection
     }
 
     /**
+     * @param string $query
+     * @return array
+     */
+    public function fetchAll(string $query)
+    {
+        return $this->pdo->query($query)->fetchAll();
+    }
+
+    /**
      * Escapes $value for use in a query. Adds quotes.
      *
      * @param string $value

@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\ImportConfig;
 
 /**
  * @author Patrick van Bergen
@@ -14,10 +15,10 @@ class ConfigurableStorage
     /** @var  Magento2DbConnection */
     private $db;
 
-    /** @var  ProductStorage */
+    /** @var  Shared */
     private $shared;
 
-    public function __construct(Magento2DbConnection $db, ProductStorage $shared)
+    public function __construct(Magento2DbConnection $db, Shared $shared)
     {
         $this->db = $db;
         $this->shared = $shared;
@@ -38,8 +39,9 @@ class ConfigurableStorage
 
     /**
      * @param ConfigurableProduct[] $configurableProducts
+     * @param ImportConfig $config
      */
-    public function storeConfigurableProducts(array $configurableProducts)
+    public function storeConfigurableProducts(array $configurableProducts, ImportConfig $config)
     {
 
     }

@@ -64,6 +64,8 @@ class Importer
             $this->flushSimpleProducts();
             $this->flushConfigurableProducts();
         }
+
+        return [$ok, $error];
     }
 
     /**
@@ -78,13 +80,13 @@ class Importer
 
     private function flushSimpleProducts()
     {
-        $this->simpleStorage->storeSimpleProducts($this->simpleProducts);
+        $this->simpleStorage->storeSimpleProducts($this->simpleProducts, $this->config);
         $this->simpleProducts = [];
     }
 
     private function flushConfigurableProducts()
     {
-        $this->configurableStorage->storeConfigurableProducts($this->configurableProducts);
+        $this->configurableStorage->storeConfigurableProducts($this->configurableProducts, $this->config);
         $this->configurableProducts = [];
     }
 }

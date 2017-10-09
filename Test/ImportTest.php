@@ -2,11 +2,11 @@
 
 namespace BigBridge\ProductImport\Test;
 
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use BigBridge\ProductImport\Model\Utils;
-use BigBridge\ProductImport\Test\Resources\MySimpleProduct;
 
 /**
  * Integration test
@@ -15,7 +15,7 @@ use BigBridge\ProductImport\Test\Resources\MySimpleProduct;
  */
 class ImportTest extends \PHPUnit_Framework_TestCase
 {
-    public function test()
+    public function testInsert()
     {
         require __DIR__ . '/../../../../index.php';
 
@@ -24,11 +24,15 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         /** @var ImporterFactory $factory */
         $factory = $om->get(ImporterFactory::class);
 
+        /** @var ProductRepositoryInterface $repository */
+        $repository = $om->get(ProductRepositoryInterface::class);
+
         /** @var Utils $utils */
         $utils = $om->get(Utils::class);
 
         $config = new ImportConfig();
         $config->batchSize = 200;
+        $config->eavAttributes = ['name'];
 
         $importer = $factory->create($config);
 
@@ -46,20 +50,26 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $results = [];
 
-        /** @var SimpleProduct $product */
         foreach ($products as $data) {
-            $product = new MySimpleProduct();
+            $product = new SimpleProduct();
             $product->name = $data[0];
             $product->sku = $data[1];
             $product->attributeSetName = $data[2];
+
             list($ok, $error) = $importer->insert($product);
+
             $results[] = [$ok, $error];
         }
 
         $importer->flush();
 
-        $this->assertNotEquals(null, $utils->getProductIdBySku($sku1));
-        $this->assertNotEquals(null, $utils->getProductIdBySku($sku2));
+        $product1 = $repository->get($sku1);
+        $this->assertTrue($product1->getAttributeSetId() > 0);
+        $this->assertEquals($products[0][0], $product1->getName());
+
+        $product2 = $repository->get($sku2);
+        $this->assertTrue($product2->getAttributeSetId() > 0);
+        $this->assertEquals($products[2][0], $product2->getName());
 
         $expected = [
             [true, ""],

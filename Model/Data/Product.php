@@ -7,6 +7,9 @@ namespace BigBridge\ProductImport\Model\Data;
  */
 class Product
 {
+    /** @var  int */
+    public $id;
+
     /** @var  string */
     public $name;
 

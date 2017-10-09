@@ -9,7 +9,7 @@ Use this library if you need speed and don't care about plugins and custom event
 * all types of products
 * categories
 * product-categorie links (by id, by name)
-* auto create categorie (from name)
+* auto create category (from name)
 * stock
 * multiple store views, multiple sites
 * auto add attribute option
@@ -32,6 +32,10 @@ Use this library if you need speed and don't care about plugins and custom event
 ## Assumptions
 
 * Input in UTF-8
+
+## Test
+
+* Think about very long field values (not crossing default 1MB query size?)
 
 ## Thanks to
 
