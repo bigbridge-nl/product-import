@@ -6,9 +6,6 @@ use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
 
-// https://dev.mysql.com/doc/refman/5.6/en/insert-optimization.html
-// https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
-
 /**
  * @author Patrick van Bergen
  */
@@ -17,26 +14,21 @@ class SimpleStorage
     /** @var  Magento2DbConnection */
     private $db;
 
-    /** @var  Shared */
-    private $shared;
+    /** @var  MetaData */
+    private $metaData;
 
-    public function __construct(Magento2DbConnection $db, Shared $shared)
+    /** @var  ImportConfig */
+    private $config;
+
+    public function __construct(Magento2DbConnection $db, MetaData $metaData)
     {
         $this->db = $db;
-        $this->shared = $shared;
+        $this->metaData = $metaData;
     }
 
-    /**
-     * Checks $product for all known requirements.
-     *
-     * @param SimpleProduct $product
-     * @return array An array with [ok, error]
-     */
-    public function validate(SimpleProduct $product)
+    public function setConfig(ImportConfig $config)
     {
-        list($ok, $error) = $this->shared->validate($product);
-
-        return [$ok, $error];
+        $this->config = $config;
     }
 
     /**
@@ -83,7 +75,7 @@ class SimpleStorage
         }
 
         $serialized = $this->db->quoteSet($skus);
-        return $this->db->fetchMap("SELECT `sku`, `entity_id` FROM {$this->shared->productEntityTable} WHERE `sku` in ({$serialized})");
+        return $this->db->fetchMap("SELECT `sku`, `entity_id` FROM {$this->metaData->productEntityTable} WHERE `sku` in ({$serialized})");
     }
 
     /**
@@ -110,17 +102,17 @@ class SimpleStorage
         foreach ($products as $product) {
             $skus[] = $product->sku;
             $sku = $this->db->quote($product->sku);
-            $attributeSetId = $this->shared->attributeSetMap[$product->attributeSetName] ?: null;
+            $attributeSetId = $this->metaData->attributeSetMap[$product->attributeSetName] ?: null;
             $values .= $sep . "({$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
             $sep = ', ';
         }
 
-        $sql = "INSERT INTO `{$this->shared->productEntityTable}` (`attribute_set_id`,`type_id`,`sku`,`has_options`,`required_options`,`created_at`,`updated_at`) VALUES " . $values;
+        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`,`type_id`,`sku`,`has_options`,`required_options`,`created_at`,`updated_at`) VALUES " . $values;
         $this->db->insert($sql);
 
         // store the new ids with the products
         $serialized = $this->db->quoteSet($skus);
-        $sql = "SELECT `sku`, `entity_id` FROM `{$this->shared->productEntityTable}` WHERE `sku` IN ({$serialized})";
+        $sql = "SELECT `sku`, `entity_id` FROM `{$this->metaData->productEntityTable}` WHERE `sku` IN ({$serialized})";
         $sku2id = $this->db->fetchMap($sql);
 
         foreach ($products as $product) {
@@ -137,7 +129,7 @@ class SimpleStorage
 
         foreach ($eavAttributes as $eavAttribute) {
 
-            $attributeInfo = $this->shared->attributeInfo[$eavAttribute];
+            $attributeInfo = $this->metaData->attributeInfo[$eavAttribute];
             $tableName = $attributeInfo->tableName;
             $attributeId = $attributeInfo->attributeId;
 

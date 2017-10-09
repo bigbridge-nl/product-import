@@ -13,7 +13,10 @@ class Product
     /** @var  string */
     public $name;
 
-    /** @var  string */
+    /** @var  string A 12.4 decimal field */
+    public $price;
+
+    /** @var  string 64 character */
     public $sku;
 
     /** @var  string */

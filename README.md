@@ -40,3 +40,7 @@ Use this library if you need speed and don't care about plugins and custom event
 ## Thanks to
 
 This project ows a great deal of ideas and code from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)
+
+https://dev.mysql.com/doc/refman/5.6/en/insert-optimization.html
+https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
+

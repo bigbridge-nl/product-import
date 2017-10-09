@@ -15,26 +15,21 @@ class ConfigurableStorage
     /** @var  Magento2DbConnection */
     private $db;
 
-    /** @var  Shared */
+    /** @var  MetaData */
     private $shared;
 
-    public function __construct(Magento2DbConnection $db, Shared $shared)
+    /** @var  ImportConfig */
+    private $config;
+
+    public function __construct(Magento2DbConnection $db, MetaData $metaData)
     {
         $this->db = $db;
-        $this->shared = $shared;
+        $this->shared = $metaData;
     }
 
-    /**
-     * Checks $product for all known requirements.
-     *
-     * @param ConfigurableProduct $product
-     * @return array An array with [ok, error]
-     */
-    public function validate(ConfigurableProduct $product)
+    public function setConfig(ImportConfig $config)
     {
-        list($ok, $error) = $this->shared->validate($product);
-
-        return [$ok, $error];
+        $this->config = $config;
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace BigBridge\ProductImport\Model;
 
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Resource\Shared;
+use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
  * @author Patrick van Bergen
@@ -19,7 +19,7 @@ class Utils
     public function __construct(Magento2DbConnection $db)
     {
         $this->db = $db;
-        $this->productEntityTable = $db->getFullTableName(Shared::PRODUCT_ENTITY_TABLE);
+        $this->productEntityTable = $db->getFullTableName(MetaData::PRODUCT_ENTITY_TABLE);
     }
 
     public function getProductIdBySku($quoted)

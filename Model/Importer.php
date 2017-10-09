@@ -6,6 +6,7 @@ use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;
+use BigBridge\ProductImport\Model\Resource\Validator;
 
 /**
  * @author Patrick van Bergen
@@ -27,11 +28,19 @@ class Importer
     /** @var  ConfigurableStorage */
     private $configurableStorage;
 
-    public function __construct(ImportConfig $config, SimpleStorage $simpleStorage, ConfigurableStorage $configurableStorage)
+    /** @var  Validator */
+    private $validator;
+
+    public function __construct(ImportConfig $config, SimpleStorage $simpleStorage, ConfigurableStorage $configurableStorage, Validator $validator)
     {
         $this->config = $config;
         $this->simpleStorage = $simpleStorage;
         $this->configurableStorage = $configurableStorage;
+        $this->validator = $validator;
+
+        $this->simpleStorage->setConfig($config);
+        $this->configurableStorage->setConfig($config);
+        $this->validator->setConfig($config);
     }
 
     /**
@@ -40,7 +49,7 @@ class Importer
      */
     public function insert(SimpleProduct $product)
     {
-        list($ok, $error) = $this->simpleStorage->validate($product);
+        list($ok, $error) = $this->validator->validate($product);
 
         if ($ok) {
             $this->simpleProducts[] = $product;
@@ -57,7 +66,7 @@ class Importer
      */
     public function importConfigurableProduct(ConfigurableProduct $product)
     {
-        list($ok, $error) = $this->configurableStorage->validate($product);
+        list($ok, $error) = $this->validator->validate($product);
 
         $this->configurableProducts[] = $product;
         if (count($this->configurableProducts) == $this->config->batchSize) {
