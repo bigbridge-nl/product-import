@@ -51,7 +51,9 @@ class SimpleStorage
                 $updateProducts[] = $product;
                 $product->id = $sku2id[$product->sku];
             } else {
-                $insertProducts[] = $product;
+                // index with sku to prevent multiple products with the same sku
+                // (this happens when products with different store views are inserted at once)
+                $insertProducts[$product->sku] = $product;
             }
         }
 
@@ -118,7 +120,7 @@ class SimpleStorage
             $sep = ', ';
         }
 
-        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`,`type_id`,`sku`,`has_options`,`required_options`,`created_at`,`updated_at`) VALUES " . $values;
+        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) VALUES " . $values;
         $this->db->insert($sql);
 
         // store the new ids with the products
@@ -147,19 +149,16 @@ class SimpleStorage
         }
 
         $sql = "INSERT INTO `{$this->metaData->productEntityTable}` " .
-            "(`entity_id`,`attribute_set_id`,`type_id`,`sku`,`has_options`,`required_options`,`created_at`,`updated_at`) " .
-            "VALUES " . $values .
-            "ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`),`has_options`=VALUES(`has_options`),`required_options`=VALUES(`required_options`)," .
-            "`updated_at`='{$this->db->time}'";
+            "(`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) " .
+            "VALUES " . $values . " " .
+            "ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)," .
+            "`updated_at` = '{$this->db->time}'";
         $this->db->insert($sql);
     }
 
     private function insertEavAttributes(array $products, array $eavAttributes)
     {
         // $eavAttributes de attributen die hier gebruikt worden
-
-#todo
-        $storeId = 0;
 
         foreach ($eavAttributes as $eavAttribute) {
 
@@ -172,11 +171,12 @@ class SimpleStorage
             foreach ($products as $product) {
                 $entityId = $product->id;
                 $value = $this->db->quote($product->$eavAttribute);
-                $values .= $sep . "({$entityId},{$attributeId},{$storeId},{$value})";
+                $values .= $sep . "({$entityId},{$attributeId},{$product->storeId},{$value})";
                 $sep = ', ';
             }
 
-            $sql = "INSERT INTO `{$tableName}` (`entity_id`,`attribute_id`,`store_id`,`value`) VALUES " . $values .
+            $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`) " .
+                "VALUES " . $values .
                 "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
             $this->db->insert($sql);

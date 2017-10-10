@@ -10,6 +10,9 @@ class Product
     /** @var  int */
     public $id;
 
+    /** @var  int */
+    public $storeId = 0;
+
     /** @var  string */
     public $name;
 

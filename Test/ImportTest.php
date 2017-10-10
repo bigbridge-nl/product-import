@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test;
 
+use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
@@ -14,24 +15,32 @@ use BigBridge\ProductImport\Model\ImporterFactory;
  */
 class ImportTest extends \PHPUnit_Framework_TestCase
 {
-    public function testInsert()
-    {
-        require __DIR__ . '/../../../../index.php';
+    /** @var  ImporterFactory */
+    private static $factory;
 
-        $om = \Magento\Framework\App\ObjectManager::getInstance();
+    /** @var ProductRepositoryInterface $repository */
+    private static $repository;
+
+    public static function setUpBeforeClass()
+    {
+        // include Magento
+        require_once __DIR__ . '/../../../../index.php';
 
         /** @var ImporterFactory $factory */
-        $factory = $om->get(ImporterFactory::class);
+        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
 
         /** @var ProductRepositoryInterface $repository */
-        $repository = $om->get(ProductRepositoryInterface::class);
+        self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
+    }
 
+    public function testInsert()
+    {
         $config = new ImportConfig();
 #todo: not up to the user
         $config->batchSize = 200;
         $config->eavAttributes = ['name', 'price'];
 
-        $importer = $factory->create($config);
+        $importer = self::$factory->create($config);
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
@@ -69,17 +78,17 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $product1 = $repository->get($sku1);
+        $product1 = self::$repository->get($sku1);
         $this->assertTrue($product1->getAttributeSetId() > 0);
         $this->assertEquals($products[0][0], $product1->getName());
         $this->assertEquals($products[0][3], $product1->getPrice());
 
-        $product2 = $repository->get($sku2);
+        $product2 = self::$repository->get($sku2);
         $this->assertTrue($product2->getAttributeSetId() > 0);
         $this->assertEquals($products[2][0], $product2->getName());
         $this->assertEquals($products[2][3], $product2->getPrice());
 
-        $product6 = $repository->get(trim($sku6));
+        $product6 = self::$repository->get(trim($sku6));
         $this->assertTrue($product6->getAttributeSetId() > 0);
         $this->assertEquals(trim($products[8][0]), $product6->getName());
         $this->assertEquals(trim($products[8][3]), $product6->getPrice());
@@ -101,27 +110,18 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdate()
     {
-        require __DIR__ . '/../../../../index.php';
-
-        $om = \Magento\Framework\App\ObjectManager::getInstance();
-
-        /** @var ImporterFactory $factory */
-        $factory = $om->get(ImporterFactory::class);
-
-        /** @var ProductRepositoryInterface $repository */
-        $repository = $om->get(ProductRepositoryInterface::class);
-
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'price'];
 
-        $importer = $factory->create($config);
+        $importer = self::$factory->create($config);
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
 
         $products = [
-            ["Big Blue Box", $sku1, 'Default', '3.25'],
-            ["Big Yellow Box", $sku2, 'Default', '4.00'],
+            ["Big Blue Box", $sku1, 'Default', '3.25', 0],
+            ["Big Yellow Box", $sku2, 'Default', '4.00', 0],
+            ["Grote Gele Doos", $sku2, 'Default', '4.25', 1],
         ];
 
         $results = [];
@@ -132,6 +132,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->sku = $data[1];
             $product->attributeSetName = $data[2];
             $product->price = $data[3];
+            $product->storeId = $data[4];
 
             list($ok, $error) = $importer->insert($product);
 
@@ -141,8 +142,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $importer->flush();
 
         $products2 = [
-            ["Big Blueish Box", $sku1, 'Default', '3.45'],
-            ["Big Yellowish Box", $sku2, 'Default', '3.95'],
+            ["Big Blueish Box", $sku1, 'Default', '3.45', 0],
+            ["Big Yellowish Box", $sku2, 'Default', '3.95', 0],
+            ["Grote Gelige Doos", $sku2, 'Default', '4.30', 1],
         ];
 
         foreach ($products2 as $data) {
@@ -151,6 +153,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->sku = $data[1];
             $product->attributeSetName = $data[2];
             $product->price = $data[3];
+            $product->storeId = $data[4];
 
             list($ok, $error) = $importer->insert($product);
 
@@ -159,14 +162,19 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $product1 = $repository->get($sku1);
+        $product1 = self::$repository->get($sku1);
         $this->assertTrue($product1->getAttributeSetId() > 0);
         $this->assertEquals($products2[0][0], $product1->getName());
         $this->assertEquals($products2[0][3], $product1->getPrice());
 
-        $product2 = $repository->get($sku2);
+        $product2 = self::$repository->get($sku2, false, 0);
         $this->assertTrue($product2->getAttributeSetId() > 0);
         $this->assertEquals($products2[1][0], $product2->getName());
         $this->assertEquals($products2[1][3], $product2->getPrice());
+
+        $product2a = self::$repository->get($sku2, false, 1);
+        $this->assertTrue($product2a->getAttributeSetId() > 0);
+        $this->assertEquals($products2[2][0], $product2a->getName());
+        $this->assertEquals($products2[2][3], $product2a->getPrice());
     }
 }

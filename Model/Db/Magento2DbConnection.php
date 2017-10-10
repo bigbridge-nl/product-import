@@ -42,7 +42,7 @@ class Magento2DbConnection
      */
     public function insert(string $query)
     {
-#echo $query;
+#echo $query."\n";
         $this->pdo->query($query);
     }
 
