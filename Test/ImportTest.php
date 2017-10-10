@@ -43,7 +43,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Big Blue Box", $sku1, 'Default', '3.25'],
             ["Big Yellow Box", null, 'Default', '4.00'],
             ["Big Red Box", $sku2, 'Default', '127.95'],
-            [null, '', '', null],
+            [null, ' ', "\n", null],
             ["Big Blue Box", $sku3, 'Boxes', '11.45'],
             ["Big Orange Box", $sku4, 'Default', '11,45'],
             ["Big Pink Box", $sku5, 'Default', 11.45],
