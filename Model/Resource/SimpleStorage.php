@@ -37,29 +37,26 @@ class SimpleStorage
      */
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config)
     {
-        if (empty($simpleProducts)) {
-            return;
-        }
-
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
 
         // collect inserts and updates
-        $updateSkus = $this->getExistingSkus($skus);
-        $insertSkus = array_diff($skus, $updateSkus);
+        $sku2id = $this->getExistingSkus($skus);
 
-        $newProducts = $simpleProducts;
+        $insertProducts = [];
+        $updateProducts = [];
+        foreach ($simpleProducts as $product) {
 
-        // main table attributes
+            if (array_key_exists($product->sku, $sku2id)) {
+                $updateProducts[] = $product;
+                $product->id = $sku2id[$product->sku];
+            } else {
+                $insertProducts[] = $product;
+            }
+        }
 
-        // for each attribute
-
-            // store all values in one insert
-        $this->insertProducts($newProducts, $config->eavAttributes);
-
-            // store all values in one update
-
-        // update flat table
+        $this->insertProducts($insertProducts, $config->eavAttributes);
+        $this->updateProducts($updateProducts, $config->eavAttributes);
     }
 
     /**
@@ -92,6 +89,20 @@ class SimpleStorage
         $this->insertEavAttributes($products, $eavAttributes);
     }
 
+    /**
+     * @param SimpleProduct[] $products
+     */
+    private function updateProducts(array $products, $eavAttributes)
+    {
+
+        if (count($products) == 0) {
+            return;
+        }
+
+        $this->updateMainTable($products);
+        $this->insertEavAttributes($products, $eavAttributes);
+    }
+
     private function insertMainTable(array $products)
     {
 #todo has_options, required_options
@@ -120,6 +131,29 @@ class SimpleStorage
         }
     }
 
+    private function updateMainTable(array $products)
+    {
+#todo has_options, required_options
+
+        $values = '';
+        $sep = '';
+        $skus = [];
+        foreach ($products as $product) {
+            $skus[] = $product->sku;
+            $sku = $this->db->quote($product->sku);
+            $attributeSetId = $this->metaData->attributeSetMap[$product->attributeSetName] ?: null;
+            $values .= $sep . "({$product->id},{$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
+            $sep = ', ';
+        }
+
+        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` " .
+            "(`entity_id`,`attribute_set_id`,`type_id`,`sku`,`has_options`,`required_options`,`created_at`,`updated_at`) " .
+            "VALUES " . $values .
+            "ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`),`has_options`=VALUES(`has_options`),`required_options`=VALUES(`required_options`)," .
+            "`updated_at`='{$this->db->time}'";
+        $this->db->insert($sql);
+    }
+
     private function insertEavAttributes(array $products, array $eavAttributes)
     {
         // $eavAttributes de attributen die hier gebruikt worden
@@ -138,11 +172,12 @@ class SimpleStorage
             foreach ($products as $product) {
                 $entityId = $product->id;
                 $value = $this->db->quote($product->$eavAttribute);
-                $values .= $sep . "({$attributeId},{$storeId},{$entityId},{$value})";
+                $values .= $sep . "({$entityId},{$attributeId},{$storeId},{$value})";
                 $sep = ', ';
             }
 
-            $sql = "INSERT INTO `{$tableName}` (`attribute_id`,`store_id`,`entity_id`,`value`) VALUES " . $values;
+            $sql = "INSERT INTO `{$tableName}` (`entity_id`,`attribute_id`,`store_id`,`value`) VALUES " . $values .
+                "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
             $this->db->insert($sql);
         }

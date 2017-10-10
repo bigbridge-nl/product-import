@@ -11,7 +11,7 @@ Use this library if you need speed and don't care about plugins and custom event
 * product-categorie links (by id, by name)
 * auto create category (from name)
 * stock
-* multiple store views, multiple sites
+* multiple store views, multiple sites (by id, by name)
 * auto add attribute option
 * csv import
 * rest request
@@ -20,6 +20,8 @@ Use this library if you need speed and don't care about plugins and custom event
 * flat tables
 * indexes
 * using new product ids to perform consecutive actions
+* import images using files, urls
+* plugins
 
 ## Goals
 
@@ -37,6 +39,8 @@ Use this library if you need speed and don't care about plugins and custom event
 ## Test
 
 * Think about very long field values (not crossing default 1MB query size?)
+* People might import configurables before simples
+* check for non-utf-8 in csv imports
 
 ## Thanks to
 

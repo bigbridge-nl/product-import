@@ -27,6 +27,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $repository = $om->get(ProductRepositoryInterface::class);
 
         $config = new ImportConfig();
+#todo: not up to the user
         $config->batchSize = 200;
         $config->eavAttributes = ['name', 'price'];
 
@@ -96,5 +97,76 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         ];
 
         $this->assertEquals($expected, $results);
+    }
+
+    public function testUpdate()
+    {
+        require __DIR__ . '/../../../../index.php';
+
+        $om = \Magento\Framework\App\ObjectManager::getInstance();
+
+        /** @var ImporterFactory $factory */
+        $factory = $om->get(ImporterFactory::class);
+
+        /** @var ProductRepositoryInterface $repository */
+        $repository = $om->get(ProductRepositoryInterface::class);
+
+        $config = new ImportConfig();
+        $config->eavAttributes = ['name', 'price'];
+
+        $importer = $factory->create($config);
+
+        $sku1 = uniqid("bb");
+        $sku2 = uniqid("bb");
+
+        $products = [
+            ["Big Blue Box", $sku1, 'Default', '3.25'],
+            ["Big Yellow Box", $sku2, 'Default', '4.00'],
+        ];
+
+        $results = [];
+
+        foreach ($products as $data) {
+            $product = new SimpleProduct();
+            $product->name = $data[0];
+            $product->sku = $data[1];
+            $product->attributeSetName = $data[2];
+            $product->price = $data[3];
+
+            list($ok, $error) = $importer->insert($product);
+
+            $results[] = [$ok, $error];
+        }
+
+        $importer->flush();
+
+        $products2 = [
+            ["Big Blueish Box", $sku1, 'Default', '3.45'],
+            ["Big Yellowish Box", $sku2, 'Default', '3.95'],
+        ];
+
+        foreach ($products2 as $data) {
+            $product = new SimpleProduct();
+            $product->name = $data[0];
+            $product->sku = $data[1];
+            $product->attributeSetName = $data[2];
+            $product->price = $data[3];
+
+            list($ok, $error) = $importer->insert($product);
+
+            $results[] = [$ok, $error];
+        }
+
+        $importer->flush();
+
+        $product1 = $repository->get($sku1);
+        $this->assertTrue($product1->getAttributeSetId() > 0);
+        $this->assertEquals($products2[0][0], $product1->getName());
+        $this->assertEquals($products2[0][3], $product1->getPrice());
+
+        $product2 = $repository->get($sku2);
+        $this->assertTrue($product2->getAttributeSetId() > 0);
+        $this->assertEquals($products2[1][0], $product2->getName());
+        $this->assertEquals($products2[1][3], $product2->getPrice());
     }
 }
