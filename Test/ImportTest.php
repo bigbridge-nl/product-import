@@ -33,14 +33,53 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
     }
 
+    public function testConfig()
+    {
+        $config = new ImportConfig();
+        $config->eavAttributes = ['name', 'price'];
+
+        list($importer, $error) = self::$factory->create($config);
+
+        $this->assertNotNull($importer);
+        $this->assertEquals("", $error);
+
+        // --------------------
+
+        $config = new ImportConfig();
+        $config->eavAttributes = null;
+
+        list($importer, $error) = self::$factory->create($config);
+
+        $this->assertNull($importer);
+        $this->assertEquals("config: eavAttributes is not an array", $error);
+
+        // --------------------
+
+        $config = new ImportConfig();
+        $config->eavAttributes = ['name', 'price', 0.1];
+
+        list($importer, $error) = self::$factory->create($config);
+
+        $this->assertNull($importer);
+        $this->assertEquals("config: eavAttributes should be strings", $error);
+
+        // --------------------
+
+        $config = new ImportConfig();
+        $config->eavAttributes = ['name', 'price', 'shrdlu', 'sasquatch'];
+
+        list($importer, $error) = self::$factory->create($config);
+
+        $this->assertNull($importer);
+        $this->assertEquals("config: eavAttributes: not an eav attribute: shrdlu, sasquatch", $error);
+    }
+
     public function testInsert()
     {
         $config = new ImportConfig();
-#todo: not up to the user
-        $config->batchSize = 200;
         $config->eavAttributes = ['name', 'price'];
 
-        $importer = self::$factory->create($config);
+        list($importer, $error) = self::$factory->create($config);
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
@@ -113,7 +152,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'price'];
 
-        $importer = self::$factory->create($config);
+        list($importer, $error) = self::$factory->create($config);
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");

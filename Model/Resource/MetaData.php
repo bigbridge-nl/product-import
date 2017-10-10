@@ -29,8 +29,8 @@ class MetaData
     /** @var int  */
     public $productEntityTypeId;
 
-    /** @var  AttributeInfo[] */
-    public $attributeInfo;
+    /** @var  EavAttributeInfo[] */
+    public $eavAttributeInfo;
 
     public function __construct(Magento2DbConnection $db)
     {
@@ -39,7 +39,7 @@ class MetaData
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->attributeSetMap = $this->getProductAttributeSetMap();
-        $this->attributeInfo = $this->getAttributeInfo();
+        $this->eavAttributeInfo = $this->getEavAttributeInfo();
     }
 
     /**
@@ -69,14 +69,17 @@ class MetaData
     /**
      * @return array An attribute code indexed array of AttributeInfo
      */
-    private function getAttributeInfo()
+    private function getEavAttributeInfo()
     {
         $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
-        $rows = $this->db->fetchAll("SELECT `attribute_id`, `attribute_code`, `is_required`, `backend_type` FROM {$attributeTable} WHERE `entity_type_id` = {$this->productEntityTypeId} AND backend_type != 'static'");
+        $rows = $this->db->fetchAll("
+            SELECT `attribute_id`, `attribute_code`, `is_required`, `backend_type` 
+            FROM {$attributeTable} 
+            WHERE `entity_type_id` = {$this->productEntityTypeId} AND backend_type != 'static'");
 
         $info = [];
         foreach ($rows as $row) {
-            $info[$row['attribute_code']] = new AttributeInfo(
+            $info[$row['attribute_code']] = new EavAttributeInfo(
                 $row['attribute_code'],
                 (int)$row['attribute_id'],
                 (bool)$row['is_required'],

@@ -35,9 +35,10 @@ class Validator
      */
     public function validate(Product $product)
     {
-        $attributeInfo = $this->metaData->attributeInfo;
+        $attributeInfo = $this->metaData->eavAttributeInfo;
 
 #todo no need to check required fields for existing products
+#todo check for store_id
 
         $error = "";
 
@@ -55,7 +56,6 @@ class Validator
         }
 
         foreach ($this->config->eavAttributes as $eavAttribute) {
-            // this check be done once for config: if (array_key_exists($eavAttribute, $attributeInfo)) {
 
             $info = $attributeInfo[$eavAttribute];
 

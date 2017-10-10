@@ -45,7 +45,7 @@ class Importer
 
     /**
      * @param SimpleProduct $product
-     * @return array An array with [ok, error]
+     * @return bool[] An array with [ok, error]
      */
     public function insert(SimpleProduct $product)
     {

@@ -48,8 +48,8 @@ class SimpleStorage
         foreach ($simpleProducts as $product) {
 
             if (array_key_exists($product->sku, $sku2id)) {
-                $updateProducts[] = $product;
                 $product->id = $sku2id[$product->sku];
+                $updateProducts[] = $product;
             } else {
                 // index with sku to prevent multiple products with the same sku
                 // (this happens when products with different store views are inserted at once)
@@ -82,7 +82,6 @@ class SimpleStorage
      */
     private function insertProducts(array $products, $eavAttributes)
     {
-
         if (count($products) == 0) {
             return;
         }
@@ -96,7 +95,6 @@ class SimpleStorage
      */
     private function updateProducts(array $products, $eavAttributes)
     {
-
         if (count($products) == 0) {
             return;
         }
@@ -162,7 +160,7 @@ class SimpleStorage
 
         foreach ($eavAttributes as $eavAttribute) {
 
-            $attributeInfo = $this->metaData->attributeInfo[$eavAttribute];
+            $attributeInfo = $this->metaData->eavAttributeInfo[$eavAttribute];
             $tableName = $attributeInfo->tableName;
             $attributeId = $attributeInfo->attributeId;
 

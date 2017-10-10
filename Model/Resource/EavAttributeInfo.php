@@ -3,9 +3,11 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 /**
+ * Data from eav_attribute
+ *
  * @author Patrick van Bergen
  */
-class AttributeInfo
+class EavAttributeInfo
 {
     /** @var  string */
     public $attributeCode;
