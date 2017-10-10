@@ -19,6 +19,7 @@ Use this library if you need speed and don't care about plugins and custom event
 * error reporting, per product
 * flat tables
 * indexes
+* using new product ids to perform consecutive actions
 
 ## Goals
 

@@ -46,6 +46,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Big Blue Box", $sku3, 'Boxes', '11.45'],
             ["Big Orange Box", $sku4, 'Default', '11,45'],
             ["Big Pink Box", $sku5, 'Default', 11.45],
+            ["Big Pink Box", $sku5, 'Default', new \SimpleXMLElement("<xml></xml>")],
         ];
 
         $results = [];
@@ -78,10 +79,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             [true, ""],
             [false, "missing sku"],
             [true, ""],
-            [false, "missing sku; missing attribute set name; missing required name; missing required price"],
+            [false, "missing sku; missing attribute set name; missing name; missing price"],
             [false, "unknown attribute set name: Boxes"],
             [false, "price is not a decimal number (11,45)"],
-            [false, "price is not a string type"],
+            [false, "price is a double, should be a string"],
+            [false, "price is an object (SimpleXMLElement), should be a string"],
         ];
 
         $this->assertEquals($expected, $results);

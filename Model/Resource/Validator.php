@@ -63,7 +63,7 @@ class Validator
             if (is_null($value)) {
 
                 if ($info->isRequired) {
-                    $error .= "; missing required " . $eavAttribute;
+                    $error .= "; missing " . $eavAttribute;
                 }
 
             } elseif (is_string($value)) {
@@ -71,7 +71,7 @@ class Validator
                 $value = trim($value);
 
                 if ($info->isRequired && $value === "") {
-                    $error .= "; missing required " . $eavAttribute;
+                    $error .= "; missing " . $eavAttribute;
                 }
 
                 if ($info->backendType === MetaData::TYPE_DECIMAL) {
@@ -82,12 +82,16 @@ class Validator
 
                 $product->$eavAttribute = $value;
 
+            } elseif (is_object($value)) {
+                $error .= "; " . $eavAttribute . " is an object (" . get_class($value) . "), should be a string";
             } else {
-                $error .= "; " . $eavAttribute . " is not a string type";
+                $error .= "; " . $eavAttribute . " is a " . gettype($value) . ", should be a string";
             }
         }
 
-        $error = preg_replace("/^; /", "", $error);
+        if ($error !== "") {
+            $error = preg_replace("/^; /", "", $error);
+        }
 
         return [$error == "", $error];
     }
