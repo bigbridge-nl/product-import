@@ -41,8 +41,8 @@ class Validator
 
         $error = "";
 
-        $sku = is_string($product->sku) ? trim($product->sku) : "";
-        $attributeSetName = is_string($product->attributeSetName) ? trim($product->attributeSetName) : "";
+        $product->sku = $sku = is_string($product->sku) ? trim($product->sku) : "";
+        $product->attributeSetName = $attributeSetName = is_string($product->attributeSetName) ? trim($product->attributeSetName) : "";
 
         if ($sku === "") {
             $error .= "; missing sku";
@@ -60,13 +60,7 @@ class Validator
             $info = $attributeInfo[$eavAttribute];
 
             $value = $product->$eavAttribute;
-            if (is_null($value)) {
-
-                if ($info->isRequired) {
-                    $error .= "; missing " . $eavAttribute;
-                }
-
-            } elseif (is_string($value)) {
+            if (is_string($value)) {
 
                 $value = trim($value);
 
@@ -81,6 +75,12 @@ class Validator
                 }
 
                 $product->$eavAttribute = $value;
+
+            } elseif (is_null($value)) {
+
+                if ($info->isRequired) {
+                    $error .= "; missing " . $eavAttribute;
+                }
 
             } elseif (is_object($value)) {
                 $error .= "; " . $eavAttribute . " is an object (" . get_class($value) . "), should be a string";

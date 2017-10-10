@@ -37,6 +37,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $sku3 = uniqid("bb");
         $sku4 = uniqid("bb");
         $sku5 = uniqid("bb");
+        $sku6 = uniqid("bb");
 
         $products = [
             ["Big Blue Box", $sku1, 'Default', '3.25'],
@@ -46,7 +47,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Big Blue Box", $sku3, 'Boxes', '11.45'],
             ["Big Orange Box", $sku4, 'Default', '11,45'],
             ["Big Pink Box", $sku5, 'Default', 11.45],
-            ["Big Pink Box", $sku5, 'Default', new \SimpleXMLElement("<xml></xml>")],
+            ["Big Turquoise Box", $sku5, 'Default', new \SimpleXMLElement("<xml></xml>")],
+            // extra whitespace
+            [" Big Empty Box ", " " . $sku6 . " ", ' Default ', ' 127.95 '],
         ];
 
         $results = [];
@@ -75,6 +78,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($products[2][0], $product2->getName());
         $this->assertEquals($products[2][3], $product2->getPrice());
 
+        $product6 = $repository->get(trim($sku6));
+        $this->assertTrue($product6->getAttributeSetId() > 0);
+        $this->assertEquals(trim($products[8][0]), $product6->getName());
+        $this->assertEquals(trim($products[8][3]), $product6->getPrice());
+
         $expected = [
             [true, ""],
             [false, "missing sku"],
@@ -84,6 +92,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             [false, "price is not a decimal number (11,45)"],
             [false, "price is a double, should be a string"],
             [false, "price is an object (SimpleXMLElement), should be a string"],
+            [true, ""],
         ];
 
         $this->assertEquals($expected, $results);
