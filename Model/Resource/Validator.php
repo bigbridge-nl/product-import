@@ -10,6 +10,7 @@ use BigBridge\ProductImport\Model\ImportConfig;
  */
 class Validator
 {
+    const SKU_MAX_LENGTH = 64;
 
     /** @var  MetaData */
     private $metaData;
@@ -38,21 +39,53 @@ class Validator
         $attributeInfo = $this->metaData->eavAttributeInfo;
 
 #todo no need to check required fields for existing products
-#todo check for store_id
 
         $error = "";
 
-        $product->sku = $sku = is_string($product->sku) ? trim($product->sku) : "";
-        $product->attributeSetName = $attributeSetName = is_string($product->attributeSetName) ? trim($product->attributeSetName) : "";
-
-        if ($sku === "") {
+        // sku
+        $sku = $product->sku;
+        if (is_string($sku)) {
+            $product->sku = $sku = trim($product->sku);
+            if ($sku === "") {
+                $error .= "; missing sku";
+            } elseif (mb_strlen($sku) > self::SKU_MAX_LENGTH) {
+                $error .= "; sku exceeds " . self::SKU_MAX_LENGTH . " characters";
+            }
+        } elseif (is_null($sku)) {
             $error .= "; missing sku";
+        } else {
+            $error .= "; sku is a " . gettype($sku) . ", should be a string";
         }
 
-        if ($attributeSetName === "") {
+        // attribute set name
+        $attributeSetName = $product->attributeSetName;
+        if (is_string($attributeSetName)) {
+            $product->attributeSetName = $attributeSetName = trim($product->attributeSetName);
+            if ($attributeSetName === "") {
+                $error .= "; missing attribute set name";
+            } elseif (!array_key_exists($attributeSetName, $this->metaData->attributeSetMap)) {
+                $error .= "; unknown attribute set name: " . $attributeSetName;
+            }
+        } elseif (is_null($attributeSetName)) {
             $error .= "; missing attribute set name";
-        } elseif (!array_key_exists($attributeSetName, $this->metaData->attributeSetMap)) {
-            $error .= "; unknown attribute set name: " . $attributeSetName;
+        } else {
+            $error .= "; attribute set name is a " . gettype($attributeSetName) . ", should be a string";
+        }
+
+        // store view code
+        $storeViewCode = $product->storeViewCode;
+        if (is_string($storeViewCode)) {
+            $product->storeViewCode = $storeViewCode = trim($storeViewCode);
+            if ($storeViewCode === "") {
+                $error .= "; missing store view code";
+            }
+            if (!array_key_exists($storeViewCode, $this->metaData->storeViewMap)) {
+                $error .= "; unknown store view code: " . $storeViewCode;
+            }
+        } elseif (is_null($storeViewCode)) {
+            $error .= "; missing store view code";
+        } else {
+            $error .= "; store view code is a " . gettype($storeViewCode) . ", should be a string";
         }
 
         foreach ($this->config->eavAttributes as $eavAttribute) {

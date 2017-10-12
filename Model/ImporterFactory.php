@@ -39,6 +39,12 @@ class ImporterFactory
     {
         $error = "";
 
+        if (!is_integer($config->batchSize)) {
+            $error = "config: batchSize is not an integer";
+        } else if ($config->batchSize <= 0) {
+            $error = "config: batchSize should be 1 or more";
+        }
+
         if (!is_array($config->eavAttributes)) {
 
             $error = "config: eavAttributes is not an array";

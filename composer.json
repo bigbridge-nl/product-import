@@ -1,8 +1,12 @@
 {
     "name": "bigbridge/product-import",
-    "description": "Imports products",
+    "description": "Imports products with raw database queries",
     "type": "magento2-module",
     "version": "100.0.0",
+    "require": {
+      "php": "~7.0",
+      "magento/module-catalog": "~100.0|~101.0"
+    },
     "license": [
         "MIT"
     ],

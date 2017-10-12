@@ -13,6 +13,7 @@ class MetaData
     const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
     const ATTRIBUTE_SET_TABLE = 'eav_attribute_set';
     const ATTRIBUTE_TABLE = 'eav_attribute';
+    const STORE_TABLE = 'store';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -25,6 +26,9 @@ class MetaData
 
     /** @var array Maps attribute set name to id */
     public $attributeSetMap;
+
+    /** @var  array Maps store view code to id */
+    public $storeViewMap;
 
     /** @var int  */
     public $productEntityTypeId;
@@ -40,6 +44,7 @@ class MetaData
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->attributeSetMap = $this->getProductAttributeSetMap();
         $this->eavAttributeInfo = $this->getEavAttributeInfo();
+        $this->storeViewMap = $this->getStoreViewMap();
     }
 
     /**
@@ -63,6 +68,18 @@ class MetaData
     {
         $attributeSetTable = $this->db->getFullTableName(self::ATTRIBUTE_SET_TABLE);
         $map = $this->db->fetchMap("SELECT `attribute_set_name`, `attribute_set_id` FROM {$attributeSetTable} WHERE `entity_type_id` = {$this->productEntityTypeId}");
+        return $map;
+    }
+
+    /**
+     * Returns a code => id map for store views.
+     *
+     * @return array
+     */
+    private function getStoreViewMap()
+    {
+        $storeTable = $this->db->getFullTableName(self::STORE_TABLE);
+        $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$storeTable}");
         return $map;
     }
 

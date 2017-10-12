@@ -113,7 +113,7 @@ class SimpleStorage
         foreach ($products as $product) {
             $skus[] = $product->sku;
             $sku = $this->db->quote($product->sku);
-            $attributeSetId = $this->metaData->attributeSetMap[$product->attributeSetName] ?: null;
+            $attributeSetId = $this->metaData->attributeSetMap[$product->attributeSetName];
             $values .= $sep . "({$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
             $sep = ', ';
         }
@@ -141,7 +141,7 @@ class SimpleStorage
         foreach ($products as $product) {
             $skus[] = $product->sku;
             $sku = $this->db->quote($product->sku);
-            $attributeSetId = $this->metaData->attributeSetMap[$product->attributeSetName] ?: null;
+            $attributeSetId = $this->metaData->attributeSetMap[$product->attributeSetName];
             $values .= $sep . "({$product->id},{$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
             $sep = ', ';
         }
@@ -154,6 +154,10 @@ class SimpleStorage
         $this->db->insert($sql);
     }
 
+    /**
+     * @param SimpleProduct[] $products
+     * @param string[] $eavAttributes
+     */
     private function insertEavAttributes(array $products, array $eavAttributes)
     {
         // $eavAttributes de attributen die hier gebruikt worden
@@ -168,8 +172,9 @@ class SimpleStorage
             $sep = '';
             foreach ($products as $product) {
                 $entityId = $product->id;
+                $storeViewId = $this->metaData->storeViewMap[$product->storeViewCode];
                 $value = $this->db->quote($product->$eavAttribute);
-                $values .= $sep . "({$entityId},{$attributeId},{$product->storeId},{$value})";
+                $values .= $sep . "({$entityId},{$attributeId},{$storeViewId},{$value})";
                 $sep = ', ';
             }
 

@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Test;
 
+use IntlChar;
+use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
@@ -9,7 +11,10 @@ use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 
 /**
- * Integration test
+ * Integration test. It can only be executed from within a shop that has
+ *
+ * - a attribute set called 'Default'
+ * - a store view called 'default'
  *
  * @author Patrick van Bergen
  */
@@ -99,6 +104,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Big Turquoise Box", $sku5, 'Default', new \SimpleXMLElement("<xml></xml>")],
             // extra whitespace
             [" Big Empty Box ", " " . $sku6 . " ", ' Default ', ' 127.95 '],
+            ["Large Box", "1234567890123456789012345678901234567890123456789012345678901234", ' Default ', '10.00'],
+            ["Too Large Box 1", "12345678901234567890123456789012345678901234567890123456789012345", ' Default ', '10.00'],
+            // 64 2-byte chars is ok
+            ["Large Box 2", '<' . str_repeat(IntlChar::chr(0x010F), 62) . '>', ' Default ', '10.00'],
         ];
 
         $results = [];
@@ -142,6 +151,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             [false, "price is a double, should be a string"],
             [false, "price is an object (SimpleXMLElement), should be a string"],
             [true, ""],
+            [true, ""],
+            [false, "sku exceeds " . Validator::SKU_MAX_LENGTH . " characters"],
+            [true, ""],
         ];
 
         $this->assertEquals($expected, $results);
@@ -158,9 +170,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $sku2 = uniqid("bb");
 
         $products = [
-            ["Big Blue Box", $sku1, 'Default', '3.25', 0],
-            ["Big Yellow Box", $sku2, 'Default', '4.00', 0],
-            ["Grote Gele Doos", $sku2, 'Default', '4.25', 1],
+            ["Big Blue Box", $sku1, 'Default', '3.25', 'admin'],
+            ["Big Yellow Box", $sku2, 'Default', '4.00', 'admin'],
+            ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default'],
         ];
 
         $results = [];
@@ -171,7 +183,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->sku = $data[1];
             $product->attributeSetName = $data[2];
             $product->price = $data[3];
-            $product->storeId = $data[4];
+            $product->storeViewCode = $data[4];
 
             list($ok, $error) = $importer->insert($product);
 
@@ -181,9 +193,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $importer->flush();
 
         $products2 = [
-            ["Big Blueish Box", $sku1, 'Default', '3.45', 0],
-            ["Big Yellowish Box", $sku2, 'Default', '3.95', 0],
-            ["Grote Gelige Doos", $sku2, 'Default', '4.30', 1],
+            ["Big Blueish Box", $sku1, 'Default', '3.45', 'admin'],
+            ["Big Yellowish Box", $sku2, 'Default', '3.95', 'admin'],
+            ["Grote Gelige Doos", $sku2, 'Default', '4.30', 'default'],
         ];
 
         foreach ($products2 as $data) {
@@ -192,7 +204,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->sku = $data[1];
             $product->attributeSetName = $data[2];
             $product->price = $data[3];
-            $product->storeId = $data[4];
+            $product->storeViewCode = $data[4];
 
             list($ok, $error) = $importer->insert($product);
 
