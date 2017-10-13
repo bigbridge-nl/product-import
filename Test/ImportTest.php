@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test;
 
+use BigBridge\ProductImport\Model\Data\Product;
 use IntlChar;
 use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
@@ -79,10 +80,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("config: eavAttributes: not an eav attribute: shrdlu, sasquatch", $error);
     }
 
-    public function testInsert()
+    public function testValidation()
     {
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'price'];
+        $config->eavAttributes = ['name', 'price', 'status'];
 
         list($importer, $error) = self::$factory->create($config);
 
@@ -94,20 +95,21 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $sku6 = uniqid("bb");
 
         $products = [
-            ["Big Blue Box", $sku1, 'Default', '3.25'],
-            ["Big Yellow Box", null, 'Default', '4.00'],
-            ["Big Red Box", $sku2, 'Default', '127.95'],
-            [null, ' ', "\n", null],
-            ["Big Blue Box", $sku3, 'Boxes', '11.45'],
-            ["Big Orange Box", $sku4, 'Default', '11,45'],
-            ["Big Pink Box", $sku5, 'Default', 11.45],
-            ["Big Turquoise Box", $sku5, 'Default', new \SimpleXMLElement("<xml></xml>")],
+            ["Big Blue Box", $sku1, 'Default', '3.25', 1],
+            // NB: erroneous 3 is not checked
+            ["Big Yellow Box", null, 'Default', '4.00', 3],
+            ["Big Red Box", $sku2, 'Default', '127.95', "2"],
+            [null, ' ', "\n", null, "Enabled"],
+            ["Big Blue Box", $sku3, 'Boxes', '11.45', 1],
+            ["Big Orange Box", $sku4, 'Default', '11,45', 1],
+            ["Big Pink Box", $sku5, 'Default', 11.45, 1],
+            ["Big Turquoise Box", $sku5, 'Default', new \SimpleXMLElement("<xml></xml>"), 1],
             // extra whitespace
-            [" Big Empty Box ", " " . $sku6 . " ", ' Default ', ' 127.95 '],
-            ["Large Box", "1234567890123456789012345678901234567890123456789012345678901234", ' Default ', '10.00'],
-            ["Too Large Box 1", "12345678901234567890123456789012345678901234567890123456789012345", ' Default ', '10.00'],
+            [" Big Empty Box ", " " . $sku6 . " ", ' Default ', ' 127.95 ', 1],
+            ["Large Box", "1234567890123456789012345678901234567890123456789012345678901234", ' Default ', '10.00', 1],
+            ["Too Large Box 1", "12345678901234567890123456789012345678901234567890123456789012345", ' Default ', '10.00', 1],
             // 64 2-byte chars is ok
-            ["Large Box 2", '<' . str_repeat(IntlChar::chr(0x010F), 62) . '>', ' Default ', '10.00'],
+            ["Large Box 2", '<' . str_repeat(IntlChar::chr(0x010F), 62) . '>', ' Default ', '10.00', 1],
         ];
 
         $results = [];
@@ -118,6 +120,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->sku = $data[1];
             $product->attributeSetName = $data[2];
             $product->price = $data[3];
+            $product->status = $data[4];
 
             list($ok, $error) = $importer->insert($product);
 
@@ -126,26 +129,34 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $product1 = self::$repository->get($sku1);
-        $this->assertTrue($product1->getAttributeSetId() > 0);
-        $this->assertEquals($products[0][0], $product1->getName());
-        $this->assertEquals($products[0][3], $product1->getPrice());
+        if ($results[0][0]) {
+            $product1 = self::$repository->get($sku1);
+            $this->assertTrue($product1->getAttributeSetId() > 0);
+            $this->assertEquals($products[0][0], $product1->getName());
+            $this->assertEquals($products[0][3], $product1->getPrice());
+            $this->assertEquals($products[0][4], $product1->getStatus());
+        }
 
-        $product2 = self::$repository->get($sku2);
-        $this->assertTrue($product2->getAttributeSetId() > 0);
-        $this->assertEquals($products[2][0], $product2->getName());
-        $this->assertEquals($products[2][3], $product2->getPrice());
+        if ($results[2][0]) {
+            $product2 = self::$repository->get($sku2);
+            $this->assertTrue($product2->getAttributeSetId() > 0);
+            $this->assertEquals($products[2][0], $product2->getName());
+            $this->assertEquals($products[2][3], $product2->getPrice());
+            $this->assertEquals($products[2][4], $product2->getStatus());
+        }
 
-        $product6 = self::$repository->get(trim($sku6));
-        $this->assertTrue($product6->getAttributeSetId() > 0);
-        $this->assertEquals(trim($products[8][0]), $product6->getName());
-        $this->assertEquals(trim($products[8][3]), $product6->getPrice());
+        if ($results[8][0]) {
+            $product6 = self::$repository->get(trim($sku6));
+            $this->assertTrue($product6->getAttributeSetId() > 0);
+            $this->assertEquals(trim($products[8][0]), $product6->getName());
+            $this->assertEquals(trim($products[8][3]), $product6->getPrice());
+        }
 
         $expected = [
             [true, ""],
             [false, "missing sku"],
             [true, ""],
-            [false, "missing sku; missing attribute set name; missing name; missing price"],
+            [false, "missing sku; missing attribute set name; missing name; missing price; status is not an integer (Enabled)"],
             [false, "unknown attribute set name: Boxes"],
             [false, "price is not a decimal number (11,45)"],
             [false, "price is a double, should be a string"],

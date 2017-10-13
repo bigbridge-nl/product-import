@@ -52,12 +52,13 @@ You need to perform logging yourself.
 
 * Input in UTF-8
 
-## Test
+## Notes
 
 * Think about very long field values (not crossing default 1MB query size?)
 * People might import configurables before simples
 * check for non-utf-8 in csv imports
 * Is there no better way to ensure that no 2 products get the same sku?
+* Other values than 1 and 2 can be entered for 'status'
 
 ## Thanks to
 

@@ -93,32 +93,69 @@ class Validator
             $info = $attributeInfo[$eavAttribute];
 
             $value = $product->$eavAttribute;
-            if (is_string($value)) {
 
-                $value = trim($value);
-
-                if ($info->isRequired && $value === "") {
-                    $error .= "; missing " . $eavAttribute;
-                }
-
-                if ($info->backendType === MetaData::TYPE_DECIMAL) {
-                    if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
-                        $error .= "; " . $eavAttribute . " is not a decimal number (" . $value . ")";
-                    }
-                }
-
-                $product->$eavAttribute = $value;
-
-            } elseif (is_null($value)) {
+            if (is_null($value)) {
 
                 if ($info->isRequired) {
                     $error .= "; missing " . $eavAttribute;
+                    continue;
                 }
 
-            } elseif (is_object($value)) {
-                $error .= "; " . $eavAttribute . " is an object (" . get_class($value) . "), should be a string";
             } else {
-                $error .= "; " . $eavAttribute . " is a " . gettype($value) . ", should be a string";
+
+                // convert all to trimmed string
+
+                if (is_string($value)) {
+
+                    $value = trim($value);
+
+                    $product->$eavAttribute = $value;
+
+                } elseif (is_integer($value)) {
+
+                    if ($info->backendType != MetaData::TYPE_INTEGER) {
+                        $error .= "; " . $eavAttribute . " is an integer (" . $value . "), should be a string";
+                        continue;
+                    }
+
+                    $product->$eavAttribute = (string)$value;
+
+                } elseif (is_object($value)) {
+                    $error .= "; " . $eavAttribute . " is an object (" . get_class($value) . "), should be a string";
+                    continue;
+                } else {
+                    $error .= "; " . $eavAttribute . " is a " . gettype($value) . ", should be a string";
+                    continue;
+                }
+
+                // check required values
+
+                if ($info->isRequired && $value === "") {
+                    $error .= "; missing " . $eavAttribute;
+                    continue;
+                }
+
+                // validate value
+
+                switch ($info->backendType) {
+                    case MetaData::TYPE_DECIMAL:
+                        if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
+                            $error .= "; " . $eavAttribute . " is not a decimal number (" . $value . ")";
+                        }
+                        break;
+                    case MetaData::TYPE_INTEGER:
+                        if (!preg_match('/^-?\d+$/', $value)) {
+                            $error .= "; " . $eavAttribute . " is not an integer (" . $value . ")";
+                        } else {
+                            // validate possible options
+                            if ($info->frontendInput === MetaData::FRONTEND_SELECT) {
+                                if (!array_key_exists($value, $info->optionValues)) {
+//                                      $error .= "; illegal value for " . $eavAttribute . " status: (" . $value  . "), 3 (allowed = " . implode(", ", $info->optionValues) . ")";
+                                }
+                            }
+                        }
+                        break;
+                }
             }
         }
 

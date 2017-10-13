@@ -22,14 +22,22 @@ class EavAttributeInfo
     public $backendType;
 
     /** @var  string */
+    public $frontendInput;
+
+    /** @var array  */
+    public $optionValues;
+
+    /** @var  string */
     public $tableName;
 
-    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string  $backendType, string $tableName)
+    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string  $backendType, string $tableName, $frontendInput, array $optionValues)
     {
         $this->attributeCode = $attributeCode;
         $this->attributeId = $attributeId;
         $this->isRequired = $isRequired;
         $this->backendType = $backendType;
         $this->tableName = $tableName;
+        $this->frontendInput = $frontendInput;
+        $this->optionValues = $optionValues;
     }
 }

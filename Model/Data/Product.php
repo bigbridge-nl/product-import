@@ -2,13 +2,21 @@
 
 namespace BigBridge\ProductImport\Model\Data;
 
+use Magento\Catalog\Model\Product\Attribute\Source\Status;
+
 /**
  * @author Patrick van Bergen
  */
 class Product
 {
+    const STATUS_ENABLED = Status::STATUS_ENABLED;
+    const STATUS_DISABLED = Status::STATUS_DISABLED;
+
     /** @var  int */
     public $id;
+
+    /** @var  int  */
+    public $status = self::STATUS_ENABLED;
 
     /** @var  string */
     public $attributeSetName;
