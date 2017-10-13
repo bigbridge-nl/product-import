@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test;
 
+use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
@@ -34,7 +35,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
     public function testInsertSpeed()
     {
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'price'];
+        $config->eavAttributes = ['name', 'status', 'price', 'special_from_date'];
 
         $before = microtime(true);
 
@@ -48,7 +49,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->name = uniqid("name");
             $product->sku = uniqid("bb");
             $product->attributeSetName = "Default";
+            $product->status = Product::STATUS_ENABLED;
             $product->price = (string)rand(1, 100);
+            $product->special_from_date = "2017-10-14 01:22:03";
 
             list($ok, $error) = $importer->insert($product);
             $success = $success && $ok;
@@ -64,7 +67,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo $time . ' seconds';
 
         $this->assertTrue($success);
-        $this->assertLessThan(2.4, $time);
+        $this->assertLessThan(3.3, $time);
     }
 
 }

@@ -132,10 +132,14 @@ class Validator
                     continue;
                 }
 
-                // check required values
+                // empty values
 
-                if ($info->isRequired && $value === "") {
-                    $error .= "; missing " . $eavAttribute;
+                if ($value === "") {
+                    if ($info->isRequired) {
+                        $error .= "; missing " . $eavAttribute;
+                    } elseif (!in_array($info->backendType, [MetaData::TYPE_VARCHAR, MetaData::TYPE_TEXT])) {
+                        $product->$eavAttribute = null;
+                    }
                     continue;
                 }
 
@@ -147,9 +151,19 @@ class Validator
                             $error .= "; " . $eavAttribute . " has " . mb_strlen($value) . " characters (max 255)";
                         }
                         break;
+                    case MetaData::TYPE_TEXT:
+                        if (strlen($value) > 65536) {
+                            $error .= "; " . $eavAttribute . " has " . strlen($value) . " bytes (max 65536)";
+                        }
+                        break;
                     case MetaData::TYPE_DECIMAL:
                         if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
                             $error .= "; " . $eavAttribute . " is not a decimal number (" . $value . ")";
+                        }
+                        break;
+                    case MetaData::TYPE_DATETIME:
+                        if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $value)) {
+                            $error .= "; " . $eavAttribute . " is not a MySQL date time (" . $value . ")";
                         }
                         break;
                     case MetaData::TYPE_INTEGER:

@@ -60,6 +60,12 @@ You need to perform logging yourself.
 * Is there no better way to ensure that no 2 products get the same sku?
 * Other values than 1 and 2 can be entered for 'status'
 
+## On empty values
+
+* An unassigned property will not be stored at all
+* A value of null will not be stored at all
+* A value of "" will be stored as an empty string for varchar and text attributes, otherwise will not be stored at all
+
 ## Thanks to
 
 This project ows a great deal of ideas and code from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)

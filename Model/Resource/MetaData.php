@@ -21,6 +21,7 @@ class MetaData
     const TYPE_DECIMAL = 'decimal';
     const TYPE_INTEGER = 'int';
     const TYPE_VARCHAR = 'varchar';
+    const TYPE_TEXT = 'text';
 
     const FRONTEND_SELECT = 'select';
 
