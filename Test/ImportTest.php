@@ -101,7 +101,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Big Red Box", $sku2, 'Default', '127.95', "2"],
             [null, ' ', "\n", null, "Enabled"],
             ["Big Blue Box", $sku3, 'Boxes', '11.45', 1],
-            ["Big Orange Box", $sku4, 'Default', '11,45', 1],
+            ["Big Orange Box " . str_repeat('-', 241), $sku4, 'Default', '11,45', 1],
             ["Big Pink Box", $sku5, 'Default', 11.45, 1],
             ["Big Turquoise Box", $sku5, 'Default', new \SimpleXMLElement("<xml></xml>"), 1],
             // extra whitespace
@@ -158,7 +158,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             [true, ""],
             [false, "missing sku; missing attribute set name; missing name; missing price; status is not an integer (Enabled)"],
             [false, "unknown attribute set name: Boxes"],
-            [false, "price is not a decimal number (11,45)"],
+            [false, "name has 256 characters (max 255); price is not a decimal number (11,45)"],
             [false, "price is a double, should be a string"],
             [false, "price is an object (SimpleXMLElement), should be a string"],
             [true, ""],
@@ -168,6 +168,34 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         ];
 
         $this->assertEquals($expected, $results);
+    }
+
+    public function testEmptyFields()
+    {
+        $config = new ImportConfig();
+        $config->eavAttributes = ['name', 'color', 'special_price'];
+
+        list($importer, $error) = self::$factory->create($config);
+
+        $sku1 = uniqid("bb");
+
+        $product = new SimpleProduct();
+        $product->name = "Big Purple Box";
+        $product->sku = $sku1;
+        $product->attributeSetName = "Default";
+        $product->special_price = null;
+        // note: color is missing completely
+
+        list($ok, $error) = $importer->insert($product);
+
+        echo $error;
+
+        $this->assertTrue($ok);
+
+        $importer->flush();
+
+        $product1 = self::$repository->get($sku1);
+        $this->assertEquals(null, $product1->getPrice());
     }
 
     public function testUpdate()

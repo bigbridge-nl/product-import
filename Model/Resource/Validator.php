@@ -92,6 +92,10 @@ class Validator
 
             $info = $attributeInfo[$eavAttribute];
 
+            if (!property_exists($product, $eavAttribute)) {
+                $product->$eavAttribute = null;
+            }
+
             $value = $product->$eavAttribute;
 
             if (is_null($value)) {
@@ -138,6 +142,11 @@ class Validator
                 // validate value
 
                 switch ($info->backendType) {
+                    case MetaData::TYPE_VARCHAR:
+                        if (mb_strlen($value) > 255) {
+                            $error .= "; " . $eavAttribute . " has " . mb_strlen($value) . " characters (max 255)";
+                        }
+                        break;
                     case MetaData::TYPE_DECIMAL:
                         if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
                             $error .= "; " . $eavAttribute . " is not a decimal number (" . $value . ")";

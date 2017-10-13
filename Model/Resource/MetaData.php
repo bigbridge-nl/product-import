@@ -20,6 +20,7 @@ class MetaData
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
     const TYPE_INTEGER = 'int';
+    const TYPE_VARCHAR = 'varchar';
 
     const FRONTEND_SELECT = 'select';
 

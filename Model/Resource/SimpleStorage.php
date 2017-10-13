@@ -171,6 +171,11 @@ class SimpleStorage
             $values = '';
             $sep = '';
             foreach ($products as $product) {
+
+                if (is_null($product->$eavAttribute)) {
+                    continue;
+                }
+
                 $entityId = $product->id;
                 $storeViewId = $this->metaData->storeViewMap[$product->storeViewCode];
                 $value = $this->db->quote($product->$eavAttribute);
@@ -178,11 +183,14 @@ class SimpleStorage
                 $sep = ', ';
             }
 
-            $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`) " .
-                "VALUES " . $values .
-                "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+            if ($values !== "") {
 
-            $this->db->insert($sql);
+                $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`) " .
+                    "VALUES " . $values .
+                    "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+
+                $this->db->insert($sql);
+            }
         }
     }
 }
