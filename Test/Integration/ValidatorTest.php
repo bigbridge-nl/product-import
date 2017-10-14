@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Test;
+namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Data\Product;
 use IntlChar;
@@ -26,7 +26,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         // include Magento
-        require_once __DIR__ . '/../../../../index.php';
+        require_once __DIR__ . '/../../../../../index.php';
 
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
@@ -123,12 +123,12 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             // attribute set name
 
             // missing
-            [['attributeSetName' => ''], false, "missing attribute set name"],
+            [['attribute_set_name' => ''], false, "missing attribute set name"],
 
             // store view code
 
             // missing
-            [['storeViewCode' => ''], false, "missing store view code"],
+            [['store_view_code' => ''], false, "missing store view code"],
         ];
 
         foreach ($tests as $test) {

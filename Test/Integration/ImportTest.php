@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Test;
+namespace BigBridge\ProductImport\Test\Integration;
 
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -27,7 +27,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         // include Magento
-        require_once __DIR__ . '/../../../../index.php';
+        require_once __DIR__ . '/../../../../../index.php';
 
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
@@ -58,9 +58,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = $data[0];
             $product->sku = $data[1];
-            $product->attributeSetName = $data[2];
+            $product->attribute_set_name = $data[2];
             $product->price = $data[3];
-            $product->storeViewCode = $data[4];
+            $product->store_view_code = $data[4];
 
             list($ok, $error) = $importer->insert($product);
 
@@ -79,9 +79,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = $data[0];
             $product->sku = $data[1];
-            $product->attributeSetName = $data[2];
+            $product->attribute_set_name = $data[2];
             $product->price = $data[3];
-            $product->storeViewCode = $data[4];
+            $product->store_view_code = $data[4];
 
             list($ok, $error) = $importer->insert($product);
 
@@ -118,7 +118,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product = new SimpleProduct();
         $product->name = "Big Purple Box";
         $product->sku = $sku1;
-        $product->attributeSetName = "Default";
+        $product->attribute_set_name = "Default";
         $product->special_price = null;
         // note: color is missing completely
 

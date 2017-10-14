@@ -1,9 +1,8 @@
 <?php
 
-namespace BigBridge\ProductImport\Test;
+namespace BigBridge\ProductImport\Test\Integration;
 
 use Magento\Framework\App\ObjectManager;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 
@@ -18,7 +17,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         // include Magento
-        require_once __DIR__ . '/../../../../index.php';
+        require_once __DIR__ . '/../../../../../index.php';
 
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);

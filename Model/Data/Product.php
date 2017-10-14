@@ -5,6 +5,9 @@ namespace BigBridge\ProductImport\Model\Data;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 
 /**
+ * Product fields.
+ * Use underscores, not camelcase, to keep close to import columns.
+ *
  * @author Patrick van Bergen
  */
 class Product
@@ -19,10 +22,10 @@ class Product
     public $status = self::STATUS_ENABLED;
 
     /** @var  string */
-    public $attributeSetName = 'Default';
+    public $attribute_set_name = 'Default';
 
     /** @var  string */
-    public $storeViewCode = 'admin';
+    public $store_view_code = 'admin';
 
     /** @var  string 64 character */
     public $sku;

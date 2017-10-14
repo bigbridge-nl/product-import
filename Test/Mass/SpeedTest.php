@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Test;
+namespace BigBridge\ProductImport\Test\Integration\Mass;
 
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
@@ -23,7 +23,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
     public static function setUpBeforeClass()
     {
         // include Magento
-        require_once __DIR__ . '/../../../../index.php';
+        require_once __DIR__ . '/../../../../../index.php';
 
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
@@ -37,6 +37,11 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'status', 'price', 'special_from_date'];
 
+        $skus = [];
+        for ($i = 0; $i < 5000; $i++) {
+            $skus[$i] = uniqid("bb");
+        }
+
         $before = microtime(true);
 
         list($importer, $error) = self::$factory->create($config);
@@ -47,8 +52,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct();
             $product->name = uniqid("name");
-            $product->sku = uniqid("bb");
-            $product->attributeSetName = "Default";
+            $product->sku = $skus[$i];
+            $product->attribute_set_name = "Default";
             $product->status = Product::STATUS_ENABLED;
             $product->price = (string)rand(1, 100);
             $product->special_from_date = "2017-10-14 01:22:03";
@@ -64,10 +69,41 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $after = microtime(true);
         $time = $after - $before;
 
-        echo $time . ' seconds';
+        echo "Inserts: " . $time . " seconds\n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.3, $time);
-    }
+        $this->assertLessThan(2.5, $time);
 
+        // --------------------------
+
+        $before = microtime(true);
+
+        $success = true;
+
+        for ($i = 0; $i < 5000; $i++) {
+
+            $product = new SimpleProduct();
+            $product->name = uniqid("name");
+            $product->sku = $skus[$i];
+            $product->attribute_set_name = "Default";
+            $product->status = Product::STATUS_DISABLED;
+            $product->price = (string)rand(1, 100);
+            $product->special_from_date = "2017-10-15 02:11:59";
+
+            list($ok, $error) = $importer->insert($product);
+            $success = $success && $ok;
+
+            $results[] = [$ok, $error];
+        }
+
+        $importer->flush();
+
+        $after = microtime(true);
+        $time = $after - $before;
+
+        echo "Updates: " . $time . " seconds\n";
+
+        $this->assertTrue($success);
+        $this->assertLessThan(3.0, $time);
+    }
 }

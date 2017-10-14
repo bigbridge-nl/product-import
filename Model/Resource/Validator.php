@@ -58,9 +58,9 @@ class Validator
         }
 
         // attribute set name
-        $attributeSetName = $product->attributeSetName;
+        $attributeSetName = $product->attribute_set_name;
         if (is_string($attributeSetName)) {
-            $product->attributeSetName = $attributeSetName = trim($product->attributeSetName);
+            $product->attribute_set_name = $attributeSetName = trim($product->attribute_set_name);
             if ($attributeSetName === "") {
                 $error .= "; missing attribute set name";
             } elseif (!array_key_exists($attributeSetName, $this->metaData->attributeSetMap)) {
@@ -73,9 +73,9 @@ class Validator
         }
 
         // store view code
-        $storeViewCode = $product->storeViewCode;
+        $storeViewCode = $product->store_view_code;
         if (is_string($storeViewCode)) {
-            $product->storeViewCode = $storeViewCode = trim($storeViewCode);
+            $product->store_view_code = $storeViewCode = trim($storeViewCode);
             if ($storeViewCode === "") {
                 $error .= "; missing store view code";
             } elseif (!array_key_exists($storeViewCode, $this->metaData->storeViewMap)) {
