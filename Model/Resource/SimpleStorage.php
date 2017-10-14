@@ -42,6 +42,10 @@ class SimpleStorage
      */
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config)
     {
+        // https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
+        $this->db->insert("SET foreign_key_checks = 0");
+        $this->db->insert("SET autocommit = 0");
+
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
 
@@ -78,6 +82,9 @@ class SimpleStorage
                 call_user_func($callback, $product);
             }
         }
+
+        $this->db->insert("commit");
+        $this->db->insert("SET foreign_key_checks = 1");
     }
 
     /**
@@ -168,8 +175,7 @@ class SimpleStorage
         $sql = "INSERT INTO `{$this->metaData->productEntityTable}` " .
             "(`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) " .
             "VALUES " . $values . " " .
-            "ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)," .
-            "`updated_at` = '{$this->db->time}'";
+            "ON DUPLICATE KEY UPDATE `updated_at` = '{$this->db->time}'";
         $this->db->insert($sql);
     }
 

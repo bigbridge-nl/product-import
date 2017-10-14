@@ -56,6 +56,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         echo "Factory: " . $time . " seconds\n";
 
+        $this->assertLessThan(0.1, $time);
+
         // ----------------------------------------------------
 
         $before = microtime(true);
@@ -81,7 +83,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds\n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(2.6, $time);
+        $this->assertLessThan(2.4, $time);
 
         // ----------------------------------------------------
 

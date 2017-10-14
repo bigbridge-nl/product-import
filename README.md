@@ -12,8 +12,18 @@ After an import has completed, the product and category indexers need to be run.
 
 You need to perform logging yourself.
 
+## Approach
+
+This extension writes product data directly to the database. For more speed, it performs all inserts with 1000 records at once. Thus, it works with batches.
+
+The developer may consider the importer as a queue, that is flushed to the database when it is full (1000 products). At the end of the import a manual flush() needs to be done, to write the remaining data to the database.
+
+For each product user defined "result callbacks" are called. This allows you to handle the new ids, and process errors.
 
 ## Example
+
+    // load the import factory (preferably via DI)
+    $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
 
     $log = "";
 
@@ -29,7 +39,6 @@ You need to perform logging yourself.
 
     };
 
-    $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
     list($importer, $error) = $factory->create($config);
 
     $lines = [
@@ -61,9 +70,11 @@ You need to perform logging yourself.
 
 * trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
 * input is validated on data type, requiredness,  and length restrictions
+* result callback, a function that is called with the results of the import (id, error)
 
 ## To be supported
 
+* import text entries per row
 * dry run
 * all types of products
 * categories
@@ -76,7 +87,6 @@ You need to perform logging yourself.
 * rest request
 * error reporting of failed imports
 * import images using files, urls
-* plugins (ie using new product ids to perform consecutive actions)
 * trim: none, all except text fields
 
 ## Goals
@@ -84,8 +94,6 @@ You need to perform logging yourself.
 * fast
 * easy to use
 * robust
-* hard to make mistakes
-* flexible
 * complete
 
 ## Assumptions
@@ -100,6 +108,7 @@ You need to perform logging yourself.
 * Is there no better way to ensure that no 2 products get the same sku?
 * Other values than 1 and 2 can be entered for 'status'
 * Updates: do not use default value for attribute_set_code, because it may unintentionally overwrite an existing one
+* attribute_set_id can currently not be updated. Reason: if one would forget it as a field, it would default to something, and this could produce an unsolicited change.
 
 ## On empty values
 
