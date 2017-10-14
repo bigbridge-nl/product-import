@@ -65,6 +65,7 @@ For each product user defined "result callbacks" are called. This allows you to 
 * updates (using sku as a key)
 * input validation
 * import at global and store view level
+* category ids
 
 ## Features
 
@@ -102,6 +103,7 @@ For each product user defined "result callbacks" are called. This allows you to 
 
 ## Notes
 
+* If category_ids contains an id that does not belong to a category, it is discarded without an error message
 * Think about very long field values (not crossing default 1MB query size?)
 * People might import configurables before simples
 * check for non-utf-8 in csv imports

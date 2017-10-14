@@ -65,9 +65,7 @@ class SimpleStorage
                     $product->id = $sku2id[$product->sku];
                     $updateProducts[] = $product;
                 } else {
-                    // index with sku to prevent multiple products with the same sku
-                    // (this happens when products with different store views are inserted at once)
-                    $insertProducts[$product->sku] = $product;
+                    $insertProducts[] = $product;
                 }
             }
         }
@@ -103,8 +101,9 @@ class SimpleStorage
 
     /**
      * @param SimpleProduct[] $products
+     * @param array $eavAttributes
      */
-    protected function insertProducts(array $products, $eavAttributes)
+    protected function insertProducts(array $products, array $eavAttributes)
     {
         if (count($products) == 0) {
             return;
@@ -112,12 +111,14 @@ class SimpleStorage
 
         $this->insertMainTable($products);
         $this->insertEavAttributes($products, $eavAttributes);
+        $this->insertCategoryIds($products);
     }
 
     /**
      * @param SimpleProduct[] $products
+     * @param array $eavAttributes
      */
-    protected function updateProducts(array $products, $eavAttributes)
+    protected function updateProducts(array $products, array $eavAttributes)
     {
         if (count($products) == 0) {
             return;
@@ -125,6 +126,7 @@ class SimpleStorage
 
         $this->updateMainTable($products);
         $this->insertEavAttributes($products, $eavAttributes);
+        $this->insertCategoryIds($products);
     }
 
     protected function insertMainTable(array $products)
@@ -135,7 +137,15 @@ class SimpleStorage
         $sep = '';
         $skus = [];
         foreach ($products as $product) {
-            $skus[] = $product->sku;
+
+            // index with sku to prevent creation of multiple products with the same sku
+            // (this happens when products with different store views are inserted at once)
+            if (array_key_exists($product->sku, $skus)) {
+                continue;
+            }
+
+            $skus[$product->sku] = $product->sku;
+
             $sku = $this->db->quote($product->sku);
             $attributeSetId = $this->metaData->attributeSetMap[$product->attribute_set_name];
             $values .= $sep . "({$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
@@ -170,10 +180,10 @@ class SimpleStorage
             $sep = ', ';
         }
 
-        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` " .
-            "(`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) " .
-            "VALUES " . $values . " " .
-            "ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)," .
+        $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
+            " (`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) " .
+            " VALUES " . $values .
+            " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)," .
             "`updated_at` = '{$this->db->time}'";
         $this->db->insert($sql);
     }
@@ -207,12 +217,33 @@ class SimpleStorage
 
             if ($values !== "") {
 
-                $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`) " .
-                    "VALUES " . $values .
-                    "ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+                $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
+                    " VALUES " . $values .
+                    " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
                 $this->db->insert($sql);
             }
+        }
+    }
+
+    protected function insertCategoryIds(array $products)
+    {
+        $values = '';
+        $sep = '';
+        foreach ($products as $product) {
+            foreach ($product->category_ids as $categoryId) {
+                $values .= $sep . "({$categoryId}, {$product->id})";
+                $sep = ', ';
+            }
+        }
+
+        if ($values !== "") {
+
+            $sql = "
+                INSERT IGNORE INTO `{$this->metaData->categoryProductTable}` (`category_id`, `product_id`) 
+                VALUES " . $values;
+
+            $this->db->insert($sql);
         }
     }
 }

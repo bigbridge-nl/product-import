@@ -120,6 +120,14 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // missing
             [['store_view_code' => ''], false, "missing store view code"],
+
+            // category_ids
+
+            // plain
+            [['category_ids' => [1, 2]], true, ""],
+            // corrupt
+            [['category_ids' => "1, 2"], false, "category_ids is string, should be array of integers"],
+
         ];
 
         foreach ($tests as $test) {

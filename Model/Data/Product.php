@@ -36,6 +36,9 @@ class Product
     /** @var  string A 12.4 decimal field */
     public $price;
 
+    /** @var int[] */
+    public $category_ids = [];
+
     // =========================================
     // importer data
     // =========================================

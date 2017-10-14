@@ -53,9 +53,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $sku2 = uniqid("bb");
 
         $products = [
-            ["Big Blue Box", $sku1, 'Default', '3.25', 'admin'],
-            ["Big Yellow Box", $sku2, 'Default', '4.00', 'admin'],
-            ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default'],
+            ["Big Blue Box", $sku1, 'Default', '3.25', 'admin', [1]],
+            ["Big Yellow Box", $sku2, 'Default', '4.00', 'admin', [1, 2, 999]],
+            ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default', []],
         ];
 
         foreach ($products as $data) {
@@ -65,16 +65,33 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->attribute_set_name = $data[2];
             $product->price = $data[3];
             $product->store_view_code = $data[4];
+            $product->category_ids = $data[5];
 
             $importer->insert($product);
         }
 
         $importer->flush();
 
+        $product1 = self::$repository->get($sku1);
+        $this->assertTrue($product1->getAttributeSetId() > 0);
+        $this->assertEquals($products[0][0], $product1->getName());
+        $this->assertEquals($products[0][3], $product1->getPrice());
+        $this->assertEquals([1], $product1->getCategoryIds());
+
+        $product2 = self::$repository->get($sku2, false, 0);
+        $this->assertEquals($products[1][0], $product2->getName());
+        $this->assertEquals($products[1][3], $product2->getPrice());
+        $this->assertEquals([1, 2], $product2->getCategoryIds());
+
+        $product2a = self::$repository->get($sku2, false, 1);
+        $this->assertEquals($products[2][0], $product2a->getName());
+        $this->assertEquals($products[2][3], $product2a->getPrice());
+        $this->assertEquals([1, 2], $product2a->getCategoryIds());
+
         $products2 = [
-            ["Big Blueish Box", $sku1, 'Default', '3.45', 'admin'],
-            ["Big Yellowish Box", $sku2, 'Default', '3.95', 'admin'],
-            ["Grote Gelige Doos", $sku2, 'Default', '4.30', 'default'],
+            ["Big Blueish Box", $sku1, 'Default', '3.45', 'admin', [1, 2]],
+            ["Big Yellowish Box", $sku2, 'Default', '3.95', 'admin', []],
+            ["Grote Gelige Doos", $sku2, 'Default', '4.30', 'default', []],
         ];
 
         foreach ($products2 as $data) {
@@ -84,24 +101,24 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->attribute_set_name = $data[2];
             $product->price = $data[3];
             $product->store_view_code = $data[4];
+            $product->category_ids = $data[5];
 
             $importer->insert($product);
         }
 
         $importer->flush();
 
-        $product1 = self::$repository->get($sku1);
-        $this->assertTrue($product1->getAttributeSetId() > 0);
+        $product1 = self::$repository->get($sku1, false, 0, true);
         $this->assertEquals($products2[0][0], $product1->getName());
         $this->assertEquals($products2[0][3], $product1->getPrice());
+        $this->assertEquals([1, 2], $product1->getCategoryIds());
 
-        $product2 = self::$repository->get($sku2, false, 0);
-        $this->assertTrue($product2->getAttributeSetId() > 0);
+        $product2 = self::$repository->get($sku2, false, 0, true);
         $this->assertEquals($products2[1][0], $product2->getName());
         $this->assertEquals($products2[1][3], $product2->getPrice());
+        $this->assertEquals([1, 2], $product2->getCategoryIds());
 
-        $product2a = self::$repository->get($sku2, false, 1);
-        $this->assertTrue($product2a->getAttributeSetId() > 0);
+        $product2a = self::$repository->get($sku2, false, 1, true);
         $this->assertEquals($products2[2][0], $product2a->getName());
         $this->assertEquals($products2[2][3], $product2a->getPrice());
     }

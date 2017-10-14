@@ -11,6 +11,7 @@ class MetaData
 {
     const ENTITY_TYPE_TABLE = 'eav_entity_type';
     const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
+    const CATEGORY_PRODUCT_TABLE = 'catalog_category_product';
     const ATTRIBUTE_SET_TABLE = 'eav_attribute_set';
     const ATTRIBUTE_TABLE = 'eav_attribute';
     const ATTRIBUTE_OPTION_TABLE = 'eav_attribute_option';
@@ -31,6 +32,9 @@ class MetaData
     /** @var  string  */
     public $productEntityTable;
 
+    /** @var  string */
+    public $categoryProductTable;
+
     /** @var array Maps attribute set name to id */
     public $attributeSetMap;
 
@@ -48,6 +52,8 @@ class MetaData
         $this->db = $db;
 
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
+        $this->categoryProductTable = $db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
+
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->attributeSetMap = $this->getProductAttributeSetMap();
         $this->eavAttributeInfo = $this->getEavAttributeInfo();

@@ -38,8 +38,6 @@ class Validator
     {
         $attributeInfo = $this->metaData->eavAttributeInfo;
 
-#todo no need to check required fields for existing products
-
         $error = "";
 
         // sku
@@ -85,6 +83,11 @@ class Validator
             $error .= "; missing store view code";
         } else {
             $error .= "; store view code is a " . gettype($storeViewCode) . ", should be a string";
+        }
+
+        // category_ids
+        if (!is_array($product->category_ids)) {
+            $error .= "; category_ids is string, should be array of integers";
         }
 
         foreach ($this->config->eavAttributes as $eavAttribute) {
