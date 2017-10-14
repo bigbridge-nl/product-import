@@ -34,8 +34,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
     public function testInsertSpeed()
     {
+        $success = true;
+
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'status', 'price', 'special_from_date'];
+        $config->resultCallbacks[] = function (Product $product) use (&$success) {
+            $success = $success && $product->ok;
+        };
 
         $skus = [];
         for ($i = 0; $i < 5000; $i++) {
@@ -46,7 +51,14 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->create($config);
 
-        $success = true;
+        $after = microtime(true);
+        $time = $after - $before;
+
+        echo "Factory: " . $time . " seconds\n";
+
+        // ----------------------------------------------------
+
+        $before = microtime(true);
 
         for ($i = 0; $i < 5000; $i++) {
 
@@ -58,10 +70,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->price = (string)rand(1, 100);
             $product->special_from_date = "2017-10-14 01:22:03";
 
-            list($ok, $error) = $importer->insert($product);
-            $success = $success && $ok;
-
-            $results[] = [$ok, $error];
+            $importer->insert($product);
         }
 
         $importer->flush();
@@ -72,13 +81,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds\n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(2.5, $time);
+        $this->assertLessThan(2.6, $time);
 
-        // --------------------------
-
-        $before = microtime(true);
+        // ----------------------------------------------------
 
         $success = true;
+
+        $before = microtime(true);
 
         for ($i = 0; $i < 5000; $i++) {
 
@@ -90,10 +99,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->price = (string)rand(1, 100);
             $product->special_from_date = "2017-10-15 02:11:59";
 
-            list($ok, $error) = $importer->insert($product);
-            $success = $success && $ok;
-
-            $results[] = [$ok, $error];
+            $importer->insert($product);
         }
 
         $importer->flush();
@@ -104,6 +110,6 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds\n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.0, $time);
+        $this->assertLessThan(2.9, $time);
     }
 }

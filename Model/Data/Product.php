@@ -35,4 +35,17 @@ class Product
 
     /** @var  string A 12.4 decimal field */
     public $price;
+
+    // =========================================
+    // importer data
+    // =========================================
+
+    /** @var bool  */
+    public $ok = false;
+
+    /** @var  string */
+    public $error = "";
+
+    /** @var string  */
+    public $lineNumber = "";
 }

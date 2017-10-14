@@ -20,15 +20,20 @@ class SimpleStorage
     /** @var  ImportConfig */
     protected $config;
 
-    public function __construct(Magento2DbConnection $db, MetaData $metaData)
+    /** @var Validator  */
+    private $validator;
+
+    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator)
     {
         $this->db = $db;
         $this->metaData = $metaData;
+        $this->validator = $validator;
     }
 
     public function setConfig(ImportConfig $config)
     {
         $this->config = $config;
+        $this->validator->setConfig($config);
     }
 
     /**
@@ -47,18 +52,32 @@ class SimpleStorage
         $updateProducts = [];
         foreach ($simpleProducts as $product) {
 
-            if (array_key_exists($product->sku, $sku2id)) {
-                $product->id = $sku2id[$product->sku];
-                $updateProducts[] = $product;
-            } else {
-                // index with sku to prevent multiple products with the same sku
-                // (this happens when products with different store views are inserted at once)
-                $insertProducts[$product->sku] = $product;
+            list($ok, $error) = $this->validator->validate($product);
+
+            $product->ok = $ok;
+            $product->error = $error;
+
+            if ($ok) {
+                if (array_key_exists($product->sku, $sku2id)) {
+                    $product->id = $sku2id[$product->sku];
+                    $updateProducts[] = $product;
+                } else {
+                    // index with sku to prevent multiple products with the same sku
+                    // (this happens when products with different store views are inserted at once)
+                    $insertProducts[$product->sku] = $product;
+                }
             }
         }
 
         $this->insertProducts($insertProducts, $config->eavAttributes);
         $this->updateProducts($updateProducts, $config->eavAttributes);
+
+        // call user defined functions to let them process the results
+        foreach ($config->resultCallbacks as $callback) {
+            foreach ($simpleProducts as $product) {
+                call_user_func($callback, $product);
+            }
+        }
     }
 
     /**
@@ -160,8 +179,6 @@ class SimpleStorage
      */
     protected function insertEavAttributes(array $products, array $eavAttributes)
     {
-        // $eavAttributes de attributen die hier gebruikt worden
-
         foreach ($eavAttributes as $eavAttribute) {
 
             $attributeInfo = $this->metaData->eavAttributeInfo[$eavAttribute];

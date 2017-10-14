@@ -12,6 +12,44 @@ After an import has completed, the product and category indexers need to be run.
 
 You need to perform logging yourself.
 
+
+## Example
+
+    $log = "";
+
+    $config = new ImportConfig();
+    $config->eavAttributes = ['name', 'price'];
+    $config->resultCallback[] = function(Product $product) use (&$log) {
+
+        if ($product->ok) {
+            $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->sku, $product->id);
+        } else {
+            $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, $product->error);
+        }
+
+    };
+
+    $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+    list($importer, $error) = $factory->create($config);
+
+    $lines = [
+        ['Purple Box', "purple-box", "3.95"],
+        ['Yellow Box', "yellow-box", "2.95"]
+    ];
+
+    foreach ($lines as $i => $line) {
+
+        $product = new SimpleProduct();
+        $product->name = $line[0];
+        $product->sku = $line[1];
+        $product->price = $line[2];
+        $product->lineNumber = $i + 1;
+
+        $importer->insert($product);
+    }
+
+    $importer->flush();
+
 ## Supported
 
 * inserts
@@ -22,9 +60,11 @@ You need to perform logging yourself.
 ## Features
 
 * trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
+* input is validated on data type, requiredness,  and length restrictions
 
 ## To be supported
 
+* dry run
 * all types of products
 * categories
 * product-category links (by id, by name)
@@ -59,6 +99,7 @@ You need to perform logging yourself.
 * check for non-utf-8 in csv imports
 * Is there no better way to ensure that no 2 products get the same sku?
 * Other values than 1 and 2 can be entered for 'status'
+* Updates: do not use default value for attribute_set_code, because it may unintentionally overwrite an existing one
 
 ## On empty values
 

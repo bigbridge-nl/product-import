@@ -18,4 +18,15 @@ class ImportConfig
      * @var string[] An array of the attribute codes of eav attributes that need to be imported
      */
     public $eavAttributes = ['name'];
+
+    /**
+     * @var callable[]
+     *
+     * These functions will be called with the result of the import.
+     *
+     * Function signature:
+     *
+     * function(BigBridge\ProductImport\Model\Data\Product $product, $ok, $error);
+     */
+    public $resultCallbacks = [];
 }

@@ -6,7 +6,6 @@ use BigBridge\ProductImport\Model\Data\Product;
 use IntlChar;
 use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
@@ -20,9 +19,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     /** @var  ImporterFactory */
     private static $factory;
 
-    /** @var ProductRepositoryInterface $repository */
-    private static $repository;
-
     public static function setUpBeforeClass()
     {
         // include Magento
@@ -30,17 +26,12 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
-
-        /** @var ProductRepositoryInterface $repository */
-        self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
     }
 
     public function testValidation()
     {
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'price', 'status', 'description', 'special_from_date'];
-
-        list($importer, $error) = self::$factory->create($config);
 
         /** @var Validator $validator */
         $validator = ObjectManager::getInstance()->get(Validator::class);

@@ -7,6 +7,7 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
+use BigBridge\ProductImport\Model\Data\Product;
 
 /**
  * Integration test. It can only be executed from within a shop that has
@@ -38,8 +39,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
     public function testInsertAndUpdate()
     {
+        $success = true;
+
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'price'];
+        $config->resultCallbacks[] = function (Product $product) use (&$success) {
+            $success = $success && $product->ok;
+        };
 
         list($importer, $error) = self::$factory->create($config);
 
@@ -52,8 +58,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default'],
         ];
 
-        $results = [];
-
         foreach ($products as $data) {
             $product = new SimpleProduct();
             $product->name = $data[0];
@@ -62,9 +66,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->price = $data[3];
             $product->store_view_code = $data[4];
 
-            list($ok, $error) = $importer->insert($product);
-
-            $results[] = [$ok, $error];
+            $importer->insert($product);
         }
 
         $importer->flush();
@@ -83,9 +85,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->price = $data[3];
             $product->store_view_code = $data[4];
 
-            list($ok, $error) = $importer->insert($product);
-
-            $results[] = [$ok, $error];
+            $importer->insert($product);
         }
 
         $importer->flush();
@@ -122,16 +122,54 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product->special_price = null;
         // note: color is missing completely
 
-        list($ok, $error) = $importer->insert($product);
-
-        echo $error;
-
-        $this->assertTrue($ok);
+        $importer->insert($product);
 
         $importer->flush();
+
+        $this->assertTrue($product->ok);
 
         $product1 = self::$repository->get($sku1);
         $this->assertEquals(null, $product1->getPrice());
     }
 
+    public function testResultCallback()
+    {
+        $log = "";
+        $lastId = null;
+
+        $config = new ImportConfig();
+        $config->eavAttributes = ['name', 'price'];
+        $config->resultCallbacks[] = function(Product $product) use (&$log, &$lastId) {
+
+            if ($product->ok) {
+                $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->sku, $product->id);
+                $lastId = $product->id;
+            } else {
+                $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, $product->error);
+            }
+
+        };
+
+        list($importer, $error) = self::$factory->create($config);
+
+        $lines = [
+            ['Purple Box', "", "3.95"],
+            ['Yellow Box', uniqid('bb'), "2.95"]
+        ];
+
+        foreach ($lines as $i => $line) {
+
+            $product = new SimpleProduct();
+            $product->name = $line[0];
+            $product->sku = $line[1];
+            $product->price = $line[2];
+            $product->lineNumber = $i + 1;
+
+            $importer->insert($product);
+        }
+
+        $importer->flush();
+
+        $this->assertEquals("1: failed! error = missing sku\n2: success! sku = {$lines[1][1]}, id = {$lastId}\n", $log);
+    }
 }
