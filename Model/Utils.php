@@ -11,10 +11,10 @@ use BigBridge\ProductImport\Model\Resource\MetaData;
 class Utils
 {
     /** @var  Magento2DbConnection */
-    private $db;
+    protected $db;
 
     /** @var  string  */
-    private $productEntityTable;
+    protected $productEntityTable;
 
     public function __construct(Magento2DbConnection $db)
     {

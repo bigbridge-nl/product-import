@@ -19,7 +19,7 @@ class Product
     public $status = self::STATUS_ENABLED;
 
     /** @var  string */
-    public $attributeSetName;
+    public $attributeSetName = 'Default';
 
     /** @var  string */
     public $storeViewCode = 'admin';

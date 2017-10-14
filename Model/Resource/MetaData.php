@@ -26,7 +26,7 @@ class MetaData
     const FRONTEND_SELECT = 'select';
 
     /** @var  Magento2DbConnection */
-    private $db;
+    protected $db;
 
     /** @var  string  */
     public $productEntityTable;
@@ -59,7 +59,7 @@ class MetaData
      *
      * @return int
      */
-    private function getProductEntityTypeId()
+    protected function getProductEntityTypeId()
     {
         $entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $productEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$entityTypeTable} WHERE `entity_type_code` = 'catalog_product'");
@@ -71,7 +71,7 @@ class MetaData
      *
      * @return array
      */
-    private function getProductAttributeSetMap()
+    protected function getProductAttributeSetMap()
     {
         $attributeSetTable = $this->db->getFullTableName(self::ATTRIBUTE_SET_TABLE);
         $map = $this->db->fetchMap("SELECT `attribute_set_name`, `attribute_set_id` FROM {$attributeSetTable} WHERE `entity_type_id` = {$this->productEntityTypeId}");
@@ -83,7 +83,7 @@ class MetaData
      *
      * @return array
      */
-    private function getStoreViewMap()
+    protected function getStoreViewMap()
     {
         $storeTable = $this->db->getFullTableName(self::STORE_TABLE);
         $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$storeTable}");
@@ -93,7 +93,7 @@ class MetaData
     /**
      * @return array An attribute code indexed array of AttributeInfo
      */
-    private function getEavAttributeInfo()
+    protected function getEavAttributeInfo()
     {
         $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
         $attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);

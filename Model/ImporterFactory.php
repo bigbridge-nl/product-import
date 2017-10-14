@@ -10,7 +10,7 @@ use BigBridge\ProductImport\Model\Resource\MetaData;
 class ImporterFactory
 {
     /** @var  MetaData */
-    private $metaData;
+    protected $metaData;
 
     public function __construct(MetaData $metaData)
     {
@@ -35,7 +35,7 @@ class ImporterFactory
         return [$importer, $error];
     }
 
-    private function validateConfig(ImportConfig $config)
+    protected function validateConfig(ImportConfig $config)
     {
         $error = "";
 

@@ -13,13 +13,13 @@ class ConfigurableStorage
 {
 
     /** @var  Magento2DbConnection */
-    private $db;
+    protected $db;
 
     /** @var  MetaData */
-    private $shared;
+    protected $shared;
 
     /** @var  ImportConfig */
-    private $config;
+    protected $config;
 
     public function __construct(Magento2DbConnection $db, MetaData $metaData)
     {

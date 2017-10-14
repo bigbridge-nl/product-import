@@ -13,10 +13,10 @@ class Validator
     const SKU_MAX_LENGTH = 64;
 
     /** @var  MetaData */
-    private $metaData;
+    protected $metaData;
 
     /** @var  ImportConfig */
-    private $config;
+    protected $config;
 
     public function __construct(MetaData $metaData)
     {
@@ -49,7 +49,7 @@ class Validator
             if ($sku === "") {
                 $error .= "; missing sku";
             } elseif (mb_strlen($sku) > self::SKU_MAX_LENGTH) {
-                $error .= "; sku exceeds " . self::SKU_MAX_LENGTH . " characters";
+                $error .= "; sku has " . mb_strlen($sku) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
             }
         } elseif (is_null($sku)) {
             $error .= "; missing sku";
@@ -78,8 +78,7 @@ class Validator
             $product->storeViewCode = $storeViewCode = trim($storeViewCode);
             if ($storeViewCode === "") {
                 $error .= "; missing store view code";
-            }
-            if (!array_key_exists($storeViewCode, $this->metaData->storeViewMap)) {
+            } elseif (!array_key_exists($storeViewCode, $this->metaData->storeViewMap)) {
                 $error .= "; unknown store view code: " . $storeViewCode;
             }
         } elseif (is_null($storeViewCode)) {
@@ -158,7 +157,7 @@ class Validator
                         break;
                     case MetaData::TYPE_DECIMAL:
                         if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
-                            $error .= "; " . $eavAttribute . " is not a decimal number (" . $value . ")";
+                            $error .= "; " . $eavAttribute . " is not a positive decimal number with dot (" . $value . ")";
                         }
                         break;
                     case MetaData::TYPE_DATETIME:

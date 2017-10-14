@@ -14,10 +14,10 @@ use PDO;
 class Magento2DbConnection
 {
     /** @var ResourceConnection $connection */
-    private $connection;
+    protected $connection;
 
     /** @var  PDO */
-    private $pdo;
+    protected $pdo;
 
     /** @var  string Current time, in %Y-%m-%d %H:%M:%S */
     public $time;

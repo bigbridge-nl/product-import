@@ -14,22 +14,22 @@ use BigBridge\ProductImport\Model\Resource\Validator;
 class Importer
 {
     /** @var SimpleProduct[] */
-    private $simpleProducts = [];
+    protected $simpleProducts = [];
 
     /** @var ConfigurableProduct[] */
-    private $configurableProducts = [];
+    protected $configurableProducts = [];
 
     /** @var  ImportConfig */
-    private $config;
+    protected $config;
 
     /** @var  SimpleStorage */
-    private $simpleStorage;
+    protected $simpleStorage;
 
     /** @var  ConfigurableStorage */
-    private $configurableStorage;
+    protected $configurableStorage;
 
     /** @var  Validator */
-    private $validator;
+    protected $validator;
 
     public function __construct(ImportConfig $config, SimpleStorage $simpleStorage, ConfigurableStorage $configurableStorage, Validator $validator)
     {

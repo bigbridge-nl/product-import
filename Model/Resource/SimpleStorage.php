@@ -12,13 +12,13 @@ use BigBridge\ProductImport\Model\ImportConfig;
 class SimpleStorage
 {
     /** @var  Magento2DbConnection */
-    private $db;
+    protected $db;
 
     /** @var  MetaData */
-    private $metaData;
+    protected $metaData;
 
     /** @var  ImportConfig */
-    private $config;
+    protected $config;
 
     public function __construct(Magento2DbConnection $db, MetaData $metaData)
     {
@@ -67,7 +67,7 @@ class SimpleStorage
      * @param array $skus
      * @return array
      */
-    private function getExistingSkus(array $skus)
+    protected function getExistingSkus(array $skus)
     {
         if (count($skus) == 0) {
             return [];
@@ -80,7 +80,7 @@ class SimpleStorage
     /**
      * @param SimpleProduct[] $products
      */
-    private function insertProducts(array $products, $eavAttributes)
+    protected function insertProducts(array $products, $eavAttributes)
     {
         if (count($products) == 0) {
             return;
@@ -93,7 +93,7 @@ class SimpleStorage
     /**
      * @param SimpleProduct[] $products
      */
-    private function updateProducts(array $products, $eavAttributes)
+    protected function updateProducts(array $products, $eavAttributes)
     {
         if (count($products) == 0) {
             return;
@@ -103,7 +103,7 @@ class SimpleStorage
         $this->insertEavAttributes($products, $eavAttributes);
     }
 
-    private function insertMainTable(array $products)
+    protected function insertMainTable(array $products)
     {
 #todo has_options, required_options
 
@@ -131,7 +131,7 @@ class SimpleStorage
         }
     }
 
-    private function updateMainTable(array $products)
+    protected function updateMainTable(array $products)
     {
 #todo has_options, required_options
 
@@ -158,7 +158,7 @@ class SimpleStorage
      * @param SimpleProduct[] $products
      * @param string[] $eavAttributes
      */
-    private function insertEavAttributes(array $products, array $eavAttributes)
+    protected function insertEavAttributes(array $products, array $eavAttributes)
     {
         // $eavAttributes de attributen die hier gebruikt worden
 
