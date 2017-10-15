@@ -47,7 +47,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $success = $success && $product->ok;
         };
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $nameConverter = self::$factory->createNameConverter($config);
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
@@ -62,18 +64,18 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = $data[0];
             $product->sku = $data[1];
-            $product->attribute_set_name = $data[2];
+            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', $data[2]);
             $product->price = $data[3];
-            $product->store_view_code = $data[4];
+            $product->store_view_id = $nameConverter->convertNameToId('store_view_id', $data[4]);
             $product->category_ids = $data[5];
 
-            $importer->process($product);
+            $importer->importSimpleProduct($product);
         }
 
         $importer->flush();
 
         $product1 = self::$repository->get($sku1);
-        $this->assertTrue($product1->getAttributeSetId() > 0);
+        $this->assertEquals(4,$product1->getAttributeSetId());
         $this->assertEquals($products[0][0], $product1->getName());
         $this->assertEquals($products[0][3], $product1->getPrice());
         $this->assertEquals([1], $product1->getCategoryIds());
@@ -98,12 +100,12 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = $data[0];
             $product->sku = $data[1];
-            $product->attribute_set_name = $data[2];
+            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', $data[2]);
             $product->price = $data[3];
-            $product->store_view_code = $data[4];
+            $product->store_view_id = $nameConverter->convertNameToId('store_view_id', $data[4]);
             $product->category_ids = $data[5];
 
-            $importer->process($product);
+            $importer->importSimpleProduct($product);
         }
 
         $importer->flush();
@@ -128,18 +130,20 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'color', 'special_price'];
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $nameConverter = self::$factory->createNameConverter($config);
 
         $sku1 = uniqid("bb");
 
         $product = new SimpleProduct();
         $product->name = "Big Purple Box";
         $product->sku = $sku1;
-        $product->attribute_set_name = "Default";
+        $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
         $product->special_price = null;
         // note: color is missing completely
 
-        $importer->process($product);
+        $importer->importSimpleProduct($product);
 
         $importer->flush();
 
@@ -167,7 +171,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         };
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $nameConverter = self::$factory->createNameConverter($config);
 
         $lines = [
             ['Purple Box', "", "3.95"],
@@ -180,9 +186,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->name = $line[0];
             $product->sku = $line[1];
             $product->price = $line[2];
+            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
             $product->lineNumber = $i + 1;
 
-            $importer->process($product);
+            $importer->importSimpleProduct($product);
         }
 
         $importer->flush();

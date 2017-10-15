@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * @author Patrick van Bergen
@@ -21,18 +22,29 @@ class ImporterFactory
      * @param ImportConfig $config
      * @return Importer[] An array of Importer and error message
      */
-    public function create(ImportConfig $config)
+    public function createImporter(ImportConfig $config)
     {
         $error = $this->validateConfig($config);
 
         if ($error) {
             $importer = null;
         } else {
-            $om = \Magento\Framework\App\ObjectManager::getInstance();
+            $om = ObjectManager::getInstance();
             $importer = $om->create(Importer::class, ['config' => $config]);
         }
 
         return [$importer, $error];
+    }
+
+    /**
+     * @return NameConverter
+     */
+    public function createNameConverter(ImportConfig $config)
+    {
+        $om = ObjectManager::getInstance();
+        $nameConverter = $om->create(NameConverter::class, ['config' => $config]);
+
+        return $nameConverter;
     }
 
     protected function validateConfig(ImportConfig $config)

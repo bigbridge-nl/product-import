@@ -11,7 +11,7 @@ use Magento\Catalog\Model\Product\Visibility;
  *
  * @author Patrick van Bergen
  */
-class Product
+abstract class Product
 {
     // a collection of some commonly used constants
 
@@ -33,10 +33,10 @@ class Product
     public $visibility;
 
     /** @var  string */
-    public $attribute_set_name = 'Default';
+    public $attribute_set_id;
 
     /** @var  string */
-    public $store_view_code = 'admin';
+    public $store_view_id = 0;
 
     /** @var  string 64 character */
     public $sku;

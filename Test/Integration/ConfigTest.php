@@ -28,7 +28,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'price'];
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
 
         $this->assertNotNull($importer);
         $this->assertEquals("", $error);
@@ -38,7 +38,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->eavAttributes = null;
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
 
         $this->assertNull($importer);
         $this->assertEquals("config: eavAttributes is not an array", $error);
@@ -48,7 +48,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'price', 0.1];
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
 
         $this->assertNull($importer);
         $this->assertEquals("config: eavAttributes should be strings", $error);
@@ -58,7 +58,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->eavAttributes = ['name', 'price', 'shrdlu', 'sasquatch'];
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
 
         $this->assertNull($importer);
         $this->assertEquals("config: eavAttributes: not an eav attribute: shrdlu, sasquatch", $error);

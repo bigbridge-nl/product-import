@@ -138,8 +138,7 @@ class SimpleStorage
             $skus[$product->sku] = $product->sku;
 
             $sku = $this->db->quote($product->sku);
-            $attributeSetId = $this->metaData->attributeSetMap[$product->attribute_set_name];
-            $values .= $sep . "({$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
+            $values .= $sep . "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
             $sep = ', ';
         }
 
@@ -166,8 +165,7 @@ class SimpleStorage
         foreach ($products as $product) {
             $skus[] = $product->sku;
             $sku = $this->db->quote($product->sku);
-            $attributeSetId = $this->metaData->attributeSetMap[$product->attribute_set_name];
-            $values .= $sep . "({$product->id},{$attributeSetId}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
+            $values .= $sep . "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
             $sep = ', ';
         }
 
@@ -200,9 +198,8 @@ class SimpleStorage
                 }
 
                 $entityId = $product->id;
-                $storeViewId = $this->metaData->storeViewMap[$product->store_view_code];
                 $value = $this->db->quote($product->$eavAttribute);
-                $values .= $sep . "({$entityId},{$attributeId},{$storeViewId},{$value})";
+                $values .= $sep . "({$entityId},{$attributeId},{$product->store_view_id},{$value})";
                 $sep = ', ';
             }
 

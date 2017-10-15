@@ -58,7 +58,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $beforeMemory = memory_get_usage();
         $beforeTime = microtime(true);
 
-        list($importer, $error) = self::$factory->create($config);
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $nameConverter = self::$factory->createNameConverter($config);
 
         $afterTime = microtime(true);
         $afterMemory = memory_get_usage();
@@ -68,7 +70,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.1, $time);
-        $this->assertLessThan(80, $memory); // cached metadata
+        $this->assertLessThan(92, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -80,14 +82,14 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = uniqid("name");
             $product->sku = $skus[$i];
-            $product->attribute_set_name = "Default";
+            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
             $product->status = Product::STATUS_ENABLED;
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_BOTH;
             $product->special_from_date = "2017-10-14 01:22:03";
             $product->tax_class_id = 2;
 
-            $importer->process($product);
+            $importer->importSimpleProduct($product);
         }
 
         $importer->flush();
@@ -100,7 +102,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.2, $time);
+        $this->assertLessThan(3.3, $time);
         $this->assertLessThan(140, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -115,14 +117,14 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = uniqid("name");
             $product->sku = $skus[$i];
-            $product->attribute_set_name = "Default";
+            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
             $product->status = Product::STATUS_DISABLED;
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
             $product->special_from_date = "2017-10-15 02:11:59";
             $product->tax_class_id = 3;
 
-            $importer->process($product);
+            $importer->importSimpleProduct($product);
         }
 
         $importer->flush();
@@ -135,7 +137,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.7, $time);
+        $this->assertLessThan(3.8, $time);
         $this->assertLessThan(1, $memory);
     }
 }

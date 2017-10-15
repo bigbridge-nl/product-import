@@ -110,15 +110,24 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             // missing
             [['name' => ''], false, "missing name"],
 
-            // attribute set name
+            // attribute set id
 
+            // plain
+            [['attribute_set_id' => 4], true, ""],
             // missing
-            [['attribute_set_name' => ''], false, "missing attribute set name"],
+            [['attribute_set_id' => ''], false, "missing attribute set id"],
+            // corrupt
+            [['attribute_set_id' => 'Lost Boys'], false, "attribute set id is a string, should be an integer"],
 
             // store view code
 
+            // plain
+            [['store_view_id' => 1], true, ""],
+            [['store_view_id' => "0"], true, ""],
             // missing
-            [['store_view_code' => ''], false, "missing store view code"],
+            [['store_view_id' => ''], false, "missing store view id"],
+            // corrupt
+            [['store_view_id' => 'Thunderbirds'], false, "store view id is a string, should be an integer"],
 
             // category_ids
 
@@ -136,6 +145,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $product->sku = "big-blue-box";
             $product->name = "Big Blue Box";
             $product->price = "123.00";
+            $product->attribute_set_id = 4;
 
             foreach ($test[0] as $fieldName => $fieldValue) {
                 $product->$fieldName = $fieldValue;

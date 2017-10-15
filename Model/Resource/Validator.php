@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\ImportConfig;
+use BigBridge\ProductImport\Model\NameConverter;
 
 /**
  * @author Patrick van Bergen
@@ -33,48 +34,67 @@ class Validator
         $error = "";
 
         // sku
-        $sku = $product->sku;
-        if (is_string($sku)) {
-            $product->sku = $sku = trim($product->sku);
-            if ($sku === "") {
+        if (is_string($product->sku)) {
+            $product->sku = trim($product->sku);
+            if ($product->sku === "") {
                 $error .= "; missing sku";
-            } elseif (mb_strlen($sku) > self::SKU_MAX_LENGTH) {
-                $error .= "; sku has " . mb_strlen($sku) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
+            } elseif (mb_strlen($product->sku) > self::SKU_MAX_LENGTH) {
+                $error .= "; sku has " . mb_strlen($product->sku) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
             }
-        } elseif (is_null($sku)) {
+        } elseif (is_null($product->sku)) {
             $error .= "; missing sku";
         } else {
-            $error .= "; sku is a " . gettype($sku) . ", should be a string";
+            $error .= "; sku is a " . gettype($product->sku) . ", should be a string";
         }
 
-        // attribute set name
-        $attributeSetName = $product->attribute_set_name;
-        if (is_string($attributeSetName)) {
-            $product->attribute_set_name = $attributeSetName = trim($product->attribute_set_name);
-            if ($attributeSetName === "") {
-                $error .= "; missing attribute set name";
-            } elseif (!array_key_exists($attributeSetName, $this->metaData->attributeSetMap)) {
-                $error .= "; unknown attribute set name: " . $attributeSetName;
+        // attribute set id
+        if (is_string($product->attribute_set_id)) {
+            if (!in_array($product->attribute_set_id, $this->metaData->attributeSetMap)) {
+                $product->attribute_set_id = trim($product->attribute_set_id);
+                if ($product->attribute_set_id === "") {
+                    $error .= "; missing attribute set id";
+                } elseif ($product->attribute_set_id === NameConverter::NOT_FOUND) {
+                    $error .= "; unknown attribute set name";
+                } elseif (!is_numeric($product->attribute_set_id)) {
+                    $error .= "; attribute set id is a " . gettype($product->attribute_set_id) . ", should be an integer";
+                } else {
+                    $error .= "; attribute set id does not exist: " . $product->attribute_set_id;
+                }
             }
-        } elseif (is_null($attributeSetName)) {
-            $error .= "; missing attribute set name";
+        } elseif (is_integer($product->attribute_set_id)) {
+            $product->attribute_set_id = (string)$product->attribute_set_id;
+            if (!in_array($product->attribute_set_id, $this->metaData->attributeSetMap)) {
+                $error .= "; attribute set id does not exist: " . $product->attribute_set_id;
+            }
+        } elseif (is_null($product->attribute_set_id)) {
+            $error .= "; missing attribute set id";
         } else {
-            $error .= "; attribute set name is a " . gettype($attributeSetName) . ", should be a string";
+            $error .= "; attribute set id is a " . gettype($product->attribute_set_id) . ", should be a string";
         }
 
-        // store view code
-        $storeViewCode = $product->store_view_code;
-        if (is_string($storeViewCode)) {
-            $product->store_view_code = $storeViewCode = trim($storeViewCode);
-            if ($storeViewCode === "") {
-                $error .= "; missing store view code";
-            } elseif (!array_key_exists($storeViewCode, $this->metaData->storeViewMap)) {
-                $error .= "; unknown store view code: " . $storeViewCode;
+        // attribute set id
+        if (is_string($product->store_view_id)) {
+            if (!in_array($product->store_view_id, $this->metaData->storeViewMap)) {
+                $product->store_view_id = trim($product->store_view_id);
+                if ($product->store_view_id === "") {
+                    $error .= "; missing store view id";
+                } elseif ($product->store_view_id === NameConverter::NOT_FOUND) {
+                    $error .= "; unknown store view code";
+                } elseif (!is_numeric($product->store_view_id)) {
+                    $error .= "; store view id is a " . gettype($product->store_view_id) . ", should be an integer";
+                } else {
+                    $error .= "; store view id does not exist: " . $product->store_view_id;
+                }
             }
-        } elseif (is_null($storeViewCode)) {
-            $error .= "; missing store view code";
+        } elseif (is_integer($product->store_view_id)) {
+            $product->store_view_id = (string)$product->store_view_id;
+            if (!in_array($product->store_view_id, $this->metaData->storeViewMap)) {
+                $error .= "; store view id does not exist: " . $product->store_view_id;
+            }
+        } elseif (is_null($product->store_view_id)) {
+            $error .= "; missing store view id";
         } else {
-            $error .= "; store view code is a " . gettype($storeViewCode) . ", should be a string";
+            $error .= "; store view id is a " . gettype($product->store_view_id) . ", should be a string";
         }
 
         // category_ids
