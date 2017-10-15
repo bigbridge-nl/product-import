@@ -35,7 +35,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         /** @var Validator $validator */
         $validator = ObjectManager::getInstance()->get(Validator::class);
-        $validator->setConfig($config);
 
         $tests = [
 
@@ -142,7 +141,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $product->$fieldName = $fieldValue;
             }
 
-            list($ok, $error) = $validator->validate($product);
+            list($ok, $error) = $validator->validate($product, $config);
             $this->assertEquals($test[2], $error);
             $this->assertEquals($test[1], $ok);
         }

@@ -32,9 +32,6 @@ class Importer
         $this->config = $config;
         $this->simpleStorage = $simpleStorage;
         $this->configurableStorage = $configurableStorage;
-
-        $this->simpleStorage->setConfig($config);
-        $this->configurableStorage->setConfig($config);
     }
 
     /**

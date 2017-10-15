@@ -17,9 +17,6 @@ class SimpleStorage
     /** @var  MetaData */
     protected $metaData;
 
-    /** @var  ImportConfig */
-    protected $config;
-
     /** @var Validator  */
     private $validator;
 
@@ -28,12 +25,6 @@ class SimpleStorage
         $this->db = $db;
         $this->metaData = $metaData;
         $this->validator = $validator;
-    }
-
-    public function setConfig(ImportConfig $config)
-    {
-        $this->config = $config;
-        $this->validator->setConfig($config);
     }
 
     /**
@@ -55,7 +46,7 @@ class SimpleStorage
         $updateProducts = [];
         foreach ($simpleProducts as $product) {
 
-            list($ok, $error) = $this->validator->validate($product);
+            list($ok, $error) = $this->validator->validate($product, $config);
 
             $product->ok = $ok;
             $product->error = $error;

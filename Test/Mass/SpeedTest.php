@@ -101,7 +101,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($success);
         $this->assertLessThan(3.2, $time);
-        $this->assertLessThan(75, $memory); // the size of the last $product
+        $this->assertLessThan(140, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 

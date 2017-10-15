@@ -15,17 +15,9 @@ class Validator
     /** @var  MetaData */
     protected $metaData;
 
-    /** @var  ImportConfig */
-    protected $config;
-
     public function __construct(MetaData $metaData)
     {
         $this->metaData = $metaData;
-    }
-
-    public function setConfig(ImportConfig $config)
-    {
-        $this->config = $config;
     }
 
     /**
@@ -34,7 +26,7 @@ class Validator
      * @param Product $product
      * @return array An array with [ok, error]
      */
-    public function validate(Product $product)
+    public function validate(Product $product, ImportConfig $config)
     {
         $attributeInfo = $this->metaData->eavAttributeInfo;
 
@@ -97,7 +89,7 @@ class Validator
             }
         }
 
-        foreach ($this->config->eavAttributes as $eavAttribute) {
+        foreach ($config->eavAttributes as $eavAttribute) {
 
             $info = $attributeInfo[$eavAttribute];
 

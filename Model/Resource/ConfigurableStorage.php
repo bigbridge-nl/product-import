@@ -18,18 +18,10 @@ class ConfigurableStorage
     /** @var  MetaData */
     protected $shared;
 
-    /** @var  ImportConfig */
-    protected $config;
-
     public function __construct(Magento2DbConnection $db, MetaData $metaData)
     {
         $this->db = $db;
         $this->shared = $metaData;
-    }
-
-    public function setConfig(ImportConfig $config)
-    {
-        $this->config = $config;
     }
 
     /**
