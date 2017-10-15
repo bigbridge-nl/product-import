@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Data;
 
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
+use Magento\Catalog\Model\Product\Visibility;
 
 /**
  * Product fields.
@@ -12,14 +13,24 @@ use Magento\Catalog\Model\Product\Attribute\Source\Status;
  */
 class Product
 {
+    // a collection of some commonly used constants
+
     const STATUS_ENABLED = Status::STATUS_ENABLED;
     const STATUS_DISABLED = Status::STATUS_DISABLED;
+
+    const VISIBILITY_NOT_VISIBLE = Visibility::VISIBILITY_NOT_VISIBLE;
+    const VISIBILITY_IN_CATALOG = Visibility::VISIBILITY_IN_CATALOG;
+    const VISIBILITY_IN_SEARCH = Visibility::VISIBILITY_IN_SEARCH;
+    const VISIBILITY_BOTH = Visibility::VISIBILITY_BOTH;
+
 
     /** @var  int */
     public $id;
 
     /** @var  int  */
-    public $status = self::STATUS_ENABLED;
+    public $status;
+
+    public $visibility;
 
     /** @var  string */
     public $attribute_set_name = 'Default';

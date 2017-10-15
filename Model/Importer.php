@@ -40,7 +40,7 @@ class Importer
     /**
      * @param SimpleProduct $product
      */
-    public function insert(SimpleProduct $product)
+    public function process(SimpleProduct $product)
     {
         $this->simpleProducts[] = $product;
         if (count($this->simpleProducts) == $this->config->batchSize) {

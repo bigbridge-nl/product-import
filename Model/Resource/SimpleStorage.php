@@ -239,6 +239,10 @@ class SimpleStorage
 
         if ($values !== "") {
 
+            // IGNORE serves two purposes:
+            // 1. do not fail if the product-category link already existed
+            // 2. do not fail if the category does not exist
+
             $sql = "
                 INSERT IGNORE INTO `{$this->metaData->categoryProductTable}` (`category_id`, `product_id`) 
                 VALUES " . $values;

@@ -67,7 +67,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->store_view_code = $data[4];
             $product->category_ids = $data[5];
 
-            $importer->insert($product);
+            $importer->process($product);
         }
 
         $importer->flush();
@@ -103,7 +103,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->store_view_code = $data[4];
             $product->category_ids = $data[5];
 
-            $importer->insert($product);
+            $importer->process($product);
         }
 
         $importer->flush();
@@ -139,7 +139,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product->special_price = null;
         // note: color is missing completely
 
-        $importer->insert($product);
+        $importer->process($product);
 
         $importer->flush();
 
@@ -182,7 +182,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->price = $line[2];
             $product->lineNumber = $i + 1;
 
-            $importer->insert($product);
+            $importer->process($product);
         }
 
         $importer->flush();
