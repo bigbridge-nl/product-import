@@ -68,7 +68,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.1, $time);
-        $this->assertLessThan(80, $memory);
+        $this->assertLessThan(80, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -97,11 +97,11 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $time = $afterTime - $beforeTime;
         $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Inserts: " . $time . " seconds; " . $memory . " Kb \n";
+        echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
         $this->assertLessThan(3.2, $time);
-        $this->assertLessThan(75, $memory);
+        $this->assertLessThan(75, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
