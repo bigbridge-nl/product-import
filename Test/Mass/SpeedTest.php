@@ -10,10 +10,18 @@ use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\App\ObjectManager;
 
 /**
+ * This test only works on my laptop ;)
+ *
+ * Seriously, this test keeps track of the amount of time a large import takes.
+ * If you are changing the code, do a pre-test with this class.
+ * Then, when you're done, do a post test (or several) to check if the importer has not become intolerably slower.
+ *
  * @author Patrick van Bergen
  */
 class SpeedTest extends \PHPUnit_Framework_TestCase
 {
+    const PRODUCT_COUNT = 5000;
+
     /** @var  ImporterFactory */
     private static $factory;
 
@@ -43,26 +51,31 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         };
 
         $skus = [];
-        for ($i = 0; $i < 5000; $i++) {
+        for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
             $skus[$i] = uniqid("bb");
         }
 
-        $before = microtime(true);
+        $beforeMemory = memory_get_usage();
+        $beforeTime = microtime(true);
 
         list($importer, $error) = self::$factory->create($config);
 
-        $after = microtime(true);
-        $time = $after - $before;
+        $afterTime = microtime(true);
+        $afterMemory = memory_get_usage();
+        $time = $afterTime - $beforeTime;
+        $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Factory: " . $time . " seconds\n";
+        echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.1, $time);
+        $this->assertLessThan(80, $memory);
 
         // ----------------------------------------------------
 
-        $before = microtime(true);
+        $beforeMemory = memory_get_usage();
+        $beforeTime = microtime(true);
 
-        for ($i = 0; $i < 5000; $i++) {
+        for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct();
             $product->name = uniqid("name");
@@ -79,21 +92,25 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $after = microtime(true);
-        $time = $after - $before;
+        $afterTime = microtime(true);
+        $afterMemory = memory_get_usage();
+        $time = $afterTime - $beforeTime;
+        $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Inserts: " . $time . " seconds\n";
+        echo "Inserts: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
         $this->assertLessThan(3.2, $time);
+        $this->assertLessThan(75, $memory);
 
         // ----------------------------------------------------
 
         $success = true;
 
-        $before = microtime(true);
+        $beforeMemory = memory_get_usage();
+        $beforeTime = microtime(true);
 
-        for ($i = 0; $i < 5000; $i++) {
+        for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct();
             $product->name = uniqid("name");
@@ -110,12 +127,15 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $after = microtime(true);
-        $time = $after - $before;
+        $afterTime = microtime(true);
+        $afterMemory = memory_get_usage();
+        $time = $afterTime - $beforeTime;
+        $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Updates: " . $time . " seconds\n";
+        echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.6, $time);
+        $this->assertLessThan(3.7, $time);
+        $this->assertLessThan(1, $memory);
     }
 }

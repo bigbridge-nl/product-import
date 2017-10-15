@@ -88,6 +88,13 @@ class Validator
         // category_ids
         if (!is_array($product->category_ids)) {
             $error .= "; category_ids is string, should be array of integers";
+        } else {
+            foreach ($product->category_ids as $id) {
+                if (!preg_match('/\d+/', $id)) {
+                    $error .= "; category_ids should be an array of integers";
+                    break;
+                }
+            }
         }
 
         foreach ($this->config->eavAttributes as $eavAttribute) {

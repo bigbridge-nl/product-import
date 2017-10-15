@@ -120,10 +120,7 @@ For each product user defined "result callbacks" are called. This allows you to 
 
 ## Thanks to
 
-This project ows a great deal of ideas and code from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)
-
-https://dev.mysql.com/doc/refman/5.6/en/insert-optimization.html
-https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
+This project ows a great deal of ideas and inspiration from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)
 
 ## Coding style
 
@@ -138,6 +135,27 @@ This is Go-style programming. It forces the developer to think about the error t
 ### Getters and setters
 
 I do not use getters and setters in the inner loop (that is, for the code that is used for each product again) because they use a nontrivial amount of time in large amounts.
+
+### Names and ids
+
+For imports and exports it is customary to use human readable names for attributes. "visibility" for example is exported by Magento's exporter as "Catalog, Search". The internal value is 4.
+Somehow the names should be converted into id's. Quickly, easily and robustly, if possible. These types of names exist:
+
+* constants defined in code (STATUS_ENABLED, VISIBILITY_BOTH)
+* names and codes (store view code, attribute set name). These can be changed by the user.
+* option values (these are translatable)
+
+For option values, the admin value is preferred.
+
+I chose for the option to have the developer explicitly call convertNameToId() before adding a value to a product, since the conversion is only done when needed, it is explicit, and can be easily preprocessed by the importer.
+
+### Batch processing
+
+I only used batch processing because it is much faster than individual queries per product. For the developer, it is less comfortable, because the importer's process() function doesn't reply with the import results immediately. The resultCallbacks callback array is the only way the developer can get error feedback. It is not ideal, but I could think of no better method.
+
+### Memory use
+
+I try to keep the memory footprint of the importer small and of constant size. The number of products to be imported should not be limited by the importer. All product and feedback data is released once a batch is processed.
 
 ## Fields
 
