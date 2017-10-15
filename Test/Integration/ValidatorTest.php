@@ -127,6 +127,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             [['category_ids' => [1, 2]], true, ""],
             // corrupt
             [['category_ids' => "1, 2"], false, "category_ids is string, should be array of integers"],
+            [['category_ids' => ["Hardware", "Software"]], false, "category_ids should be an array of integers"],
 
         ];
 
