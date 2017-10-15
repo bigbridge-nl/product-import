@@ -37,7 +37,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $success = true;
 
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'status', 'price', 'visibility', 'special_from_date'];
+        $config->eavAttributes = ['name', 'status', 'price', 'visibility', 'special_from_date', 'tax_class_id'];
         $config->resultCallbacks[] = function (Product $product) use (&$success) {
             $success = $success && $product->ok;
         };
@@ -72,6 +72,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_BOTH;
             $product->special_from_date = "2017-10-14 01:22:03";
+            $product->tax_class_id = 2;
 
             $importer->process($product);
         }
@@ -84,7 +85,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds\n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(2.9, $time);
+        $this->assertLessThan(3.2, $time);
 
         // ----------------------------------------------------
 
@@ -102,6 +103,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
             $product->special_from_date = "2017-10-15 02:11:59";
+            $product->tax_class_id = 3;
 
             $importer->process($product);
         }
@@ -114,6 +116,6 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds\n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.2, $time);
+        $this->assertLessThan(3.6, $time);
     }
 }

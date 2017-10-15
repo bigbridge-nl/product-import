@@ -125,13 +125,19 @@ This project ows a great deal of ideas and code from Magmi / Magento 1 [Magmi](h
 https://dev.mysql.com/doc/refman/5.6/en/insert-optimization.html
 https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
 
-## Funny constructs
+## Coding style
 
-Why I use
+### Multiple return values
+
+I use
 
     list($importer, $error) = $factory->create($config);
 
 This is Go-style programming. It forces the developer to think about the error that may occur.
+
+### Getters and setters
+
+I do not use getters and setters in the inner loop (that is, for the code that is used for each product again) because they use a nontrivial amount of time in large amounts.
 
 ## Fields
 
