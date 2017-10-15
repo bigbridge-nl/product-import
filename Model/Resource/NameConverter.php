@@ -1,8 +1,8 @@
 <?php
 
-namespace BigBridge\ProductImport\Model;
+namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Model\Resource\MetaData;
+use BigBridge\ProductImport\Model\ImportConfig;
 
 /**
  * This class converts human readable attribute value names to their database ids.
@@ -53,6 +53,7 @@ class NameConverter
 
         $map['attribute_set_id'] = $this->metaData->attributeSetMap;
         $map['store_view_id'] = $this->metaData->storeViewMap;
+        $map['tax_class_id'] = $this->metaData->taxClassMap;
 
         return $map;
     }

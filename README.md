@@ -157,6 +157,10 @@ I only used batch processing because it is much faster than individual queries p
 
 I try to keep the memory footprint of the importer small and of constant size. The number of products to be imported should not be limited by the importer. All product and feedback data is released once a batch is processed.
 
+### Nice to know
+
+* When concatenating sets of values "(a, b, c)" "(d, e, f)" etc, implode(", ", $values) is faster than just string concatenation, even though an array of 1000 items needs to be created
+
 ## Fields
 
 sku

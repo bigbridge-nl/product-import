@@ -4,7 +4,6 @@ namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\NameConverter;
 
 /**
  * @author Patrick van Bergen

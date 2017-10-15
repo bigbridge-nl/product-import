@@ -17,6 +17,7 @@ class MetaData
     const ATTRIBUTE_OPTION_TABLE = 'eav_attribute_option';
     const ATTRIBUTE_OPTION_VALUE_TABLE = 'eav_attribute_option_value';
     const STORE_TABLE = 'store';
+    const TAX_CLASS_TABLE = 'tax_class';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -38,6 +39,9 @@ class MetaData
     /** @var array Maps attribute set name to id */
     public $attributeSetMap;
 
+    /** @var array Maps tax class name to id */
+    public $taxClassMap;
+
     /** @var  array Maps store view code to id */
     public $storeViewMap;
 
@@ -58,6 +62,7 @@ class MetaData
         $this->attributeSetMap = $this->getProductAttributeSetMap();
         $this->eavAttributeInfo = $this->getEavAttributeInfo();
         $this->storeViewMap = $this->getStoreViewMap();
+        $this->taxClassMap = $this->getTaxClassMap();
     }
 
     /**
@@ -93,6 +98,18 @@ class MetaData
     {
         $storeTable = $this->db->getFullTableName(self::STORE_TABLE);
         $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$storeTable}");
+        return $map;
+    }
+
+    /**
+     * Returns a code => id map for tax classes.
+     *
+     * @return array
+     */
+    protected function getTaxClassMap()
+    {
+        $taxClassTable = $this->db->getFullTableName(self::TAX_CLASS_TABLE);
+        $map = $this->db->fetchMap("SELECT `class_name`, `class_id` FROM {$taxClassTable}");
         return $map;
     }
 

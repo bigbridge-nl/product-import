@@ -87,7 +87,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_BOTH;
             $product->special_from_date = "2017-10-14 01:22:03";
-            $product->tax_class_id = 2;
+            $product->tax_class_id = $nameConverter->convertNameToId('tax_class_id', 'Taxable Goods');
 
             $importer->importSimpleProduct($product);
         }
@@ -102,7 +102,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.2, $time);
+        $this->assertLessThan(3.3, $time);
         $this->assertLessThan(140, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -122,7 +122,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
             $product->special_from_date = "2017-10-15 02:11:59";
-            $product->tax_class_id = 3;
+            $product->tax_class_id = $nameConverter->convertNameToId('tax_class_id', 'Retail Customer');
 
             $importer->importSimpleProduct($product);
         }
@@ -137,7 +137,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.5, $time);
+        $this->assertLessThan(3.7, $time);
         $this->assertLessThan(1, $memory);
     }
 }

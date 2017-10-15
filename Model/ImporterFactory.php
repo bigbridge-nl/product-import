@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
+use BigBridge\ProductImport\Model\Resource\NameConverter;
 use Magento\Framework\App\ObjectManager;
 
 /**
