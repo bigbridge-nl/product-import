@@ -124,8 +124,7 @@ class SimpleStorage
     {
 #todo has_options, required_options
 
-        $values = '';
-        $sep = '';
+        $values = [];
         $skus = [];
         foreach ($products as $product) {
 
@@ -134,15 +133,15 @@ class SimpleStorage
             if (array_key_exists($product->sku, $skus)) {
                 continue;
             }
-
             $skus[$product->sku] = $product->sku;
 
             $sku = $this->db->quote($product->sku);
-            $values .= $sep . "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
-            $sep = ', ';
+            $values []= "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
         }
 
-        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) VALUES " . $values;
+        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) VALUES " .
+            implode(',', $values);
+
         $this->db->insert($sql);
 
         // store the new ids with the products
@@ -159,21 +158,20 @@ class SimpleStorage
     {
 #todo has_options, required_options
 
-        $values = '';
-        $sep = '';
+        $values = [];
         $skus = [];
         foreach ($products as $product) {
             $skus[] = $product->sku;
             $sku = $this->db->quote($product->sku);
-            $values .= $sep . "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
-            $sep = ', ';
+            $values[] = "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
         }
 
         $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
             " (`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) " .
-            " VALUES " . $values .
+            " VALUES " . implode(', ', $values) .
             " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)," .
             "`updated_at` = '{$this->db->time}'";
+
         $this->db->insert($sql);
     }
 
@@ -189,8 +187,7 @@ class SimpleStorage
             $tableName = $attributeInfo->tableName;
             $attributeId = $attributeInfo->attributeId;
 
-            $values = '';
-            $sep = '';
+            $values = [];
             foreach ($products as $product) {
 
                 if (is_null($product->$eavAttribute)) {
@@ -199,14 +196,13 @@ class SimpleStorage
 
                 $entityId = $product->id;
                 $value = $this->db->quote($product->$eavAttribute);
-                $values .= $sep . "({$entityId},{$attributeId},{$product->store_view_id},{$value})";
-                $sep = ', ';
+                $values[] = "({$entityId},{$attributeId},{$product->store_view_id},{$value})";
             }
 
-            if ($values !== "") {
+            if (!empty($values)) {
 
                 $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
-                    " VALUES " . $values .
+                    " VALUES " . implode(', ', $values) .
                     " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
                 $this->db->insert($sql);

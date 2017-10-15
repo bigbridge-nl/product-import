@@ -51,7 +51,6 @@ class NameConverter
     {
         $map = [];
 
-        // attribute set ids
         $map['attribute_set_id'] = $this->metaData->attributeSetMap;
         $map['store_view_id'] = $this->metaData->storeViewMap;
 

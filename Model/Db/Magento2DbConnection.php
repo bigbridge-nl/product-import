@@ -117,15 +117,13 @@ class Magento2DbConnection
      */
     public function quoteSet(array $set)
     {
-        $esc = "";
-        $sep = "";
+        $esc = [];
 
         foreach ($set as $value) {
-            $esc .= $sep . $this->pdo->quote($value);
-            $sep = ",";
+            $esc[] = $this->pdo->quote($value);
         }
 
-        return $esc;
+        return implode(",", $esc);
     }
 
     /**
