@@ -42,7 +42,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $success = true;
 
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'price'];
+        $config->eavAttributes = ['name', 'price', 'tax_class_id'];
         $config->resultCallbacks[] = function (Product $product) use (&$success) {
             $success = $success && $product->ok;
         };
@@ -55,9 +55,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $sku2 = uniqid("bb");
 
         $products = [
-            ["Big Blue Box", $sku1, 'Default', '3.25', 'admin', [1]],
-            ["Big Yellow Box", $sku2, 'Default', '4.00', 'admin', [1, 2, 999]],
-            ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default', []],
+            ["Big Blue Box", $sku1, 'Default', '3.25', 'admin', [1], 'Taxable Goods'],
+            ["Big Yellow Box", $sku2, 'Default', '4.00', 'admin', [1, 2, 999], 'Taxable Goods'],
+            ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default', [], 'Taxable Goods'],
         ];
 
         foreach ($products as $data) {
@@ -91,9 +91,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([1, 2], $product2a->getCategoryIds());
 
         $products2 = [
-            ["Big Blueish Box", $sku1, 'Default', '3.45', 'admin', [1, 2]],
-            ["Big Yellowish Box", $sku2, 'Default', '3.95', 'admin', []],
-            ["Grote Gelige Doos", $sku2, 'Default', '4.30', 'default', []],
+            ["Big Blueish Box", $sku1, 'Default', '3.45', 'admin', [1, 2], 'Taxable Goods'],
+            ["Big Yellowish Box", $sku2, 'Default', '3.95', 'admin', [], 'Taxable Goods'],
+            ["Grote Gelige Doos", $sku2, 'Default', '4.30', 'default', [], 'Taxable Goods'],
         ];
 
         foreach ($products2 as $data) {
@@ -104,6 +104,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->price = $data[3];
             $product->store_view_id = $nameConverter->convertNameToId('store_view_id', $data[4]);
             $product->category_ids = $data[5];
+            $product->tax_class_id = $nameConverter->convertNameToId('tax_class_id', $data[6]);
 
             $importer->importSimpleProduct($product);
         }
@@ -114,6 +115,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($products2[0][0], $product1->getName());
         $this->assertEquals($products2[0][3], $product1->getPrice());
         $this->assertEquals([1, 2], $product1->getCategoryIds());
+        $this->assertEquals(2, $product1->getTaxClassId());
 
         $product2 = self::$repository->get($sku2, false, 0, true);
         $this->assertEquals($products2[1][0], $product2->getName());
