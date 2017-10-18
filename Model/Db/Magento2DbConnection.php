@@ -19,9 +19,6 @@ class Magento2DbConnection
     /** @var  PDO */
     protected $pdo;
 
-    /** @var  string Current time, in %Y-%m-%d %H:%M:%S */
-    public $time;
-
     public function __construct(ResourceConnection $connection)
     {
         $this->connection = $connection;
@@ -31,8 +28,6 @@ class Magento2DbConnection
 
         /** @var PDO $pdo */
         $this->pdo = $mysql->getConnection();
-
-        $this->time = strftime('%Y-%m-%d %H:%M:%S');
     }
 
     /**

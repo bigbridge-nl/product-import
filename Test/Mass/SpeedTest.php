@@ -141,7 +141,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(4.1, $time);
+        $this->assertLessThan(4.2, $time);
         $this->assertLessThan(1, $memory);
     }
 }

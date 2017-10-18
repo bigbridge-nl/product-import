@@ -136,10 +136,10 @@ class SimpleStorage
             $skus[$product->sku] = $product->sku;
 
             $sku = $this->db->quote($product->sku);
-            $values []= "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
+            $values []= "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
         }
 
-        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) VALUES " .
+        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) VALUES " .
             implode(',', $values);
 
         $this->db->execute($sql);
@@ -163,14 +163,13 @@ class SimpleStorage
         foreach ($products as $product) {
             $skus[] = $product->sku;
             $sku = $this->db->quote($product->sku);
-            $values[] = "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0, '{$this->db->time}', '{$this->db->time}')";
+            $values[] = "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
         }
 
         $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-            " (`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) " .
+            " (`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) " .
             " VALUES " . implode(', ', $values) .
-            " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)," .
-            "`updated_at` = '{$this->db->time}'";
+            " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)";
 
         $this->db->execute($sql);
     }

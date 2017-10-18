@@ -111,8 +111,6 @@ class CategoryImporter
             SET    
                 `attribute_set_id` = {$attributeSetId}, 
                 `parent_id` = {$parentId}, 
-                `created_at` = '{$this->db->time}', 
-                `updated_at` = '{$this->db->time}',
                 `position` = {$nextPosition}, 
                 `level` = {$childLevel}, 
                 `children_count` = 0
