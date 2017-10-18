@@ -22,6 +22,11 @@ For each product user defined "result callbacks" are called. This allows you to 
 
 ## Example
 
+* Simple product
+* Different store view
+* categories
+* by name, by id
+
     // load the import factory (preferably via DI)
     $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
 

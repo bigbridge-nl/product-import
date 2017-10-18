@@ -11,6 +11,7 @@ class MetaData
 {
     const ENTITY_TYPE_TABLE = 'eav_entity_type';
     const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
+    const CATEGORY_ENTITY_TABLE = 'catalog_category_entity';
     const CATEGORY_PRODUCT_TABLE = 'catalog_category_product';
     const ATTRIBUTE_SET_TABLE = 'eav_attribute_set';
     const ATTRIBUTE_TABLE = 'eav_attribute';
@@ -33,11 +34,17 @@ class MetaData
     /** @var  string  */
     public $productEntityTable;
 
+    /** @var string */
+    public $categoryEntityTable;
+
     /** @var  string */
     public $categoryProductTable;
 
+    /** @var  int */
+    public $defaultCategoryAttributeSetId;
+
     /** @var array Maps attribute set name to id */
-    public $attributeSetMap;
+    public $productAttributeSetMap;
 
     /** @var array Maps tax class name to id */
     public $taxClassMap;
@@ -48,21 +55,46 @@ class MetaData
     /** @var int  */
     public $productEntityTypeId;
 
+    /** @var int  */
+    public $categoryEntityTypeId;
+
     /** @var  EavAttributeInfo[] */
-    public $eavAttributeInfo;
+    public $productEavAttributeInfo;
+
+    /** @var array */
+    public $categoryAttributeMap;
 
     public function __construct(Magento2DbConnection $db)
     {
         $this->db = $db;
 
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
+        $this->categoryEntityTable = $db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
         $this->categoryProductTable = $db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
-        $this->attributeSetMap = $this->getProductAttributeSetMap();
-        $this->eavAttributeInfo = $this->getEavAttributeInfo();
+        $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
+
+        $this->defaultCategoryAttributeSetId = $this->getDefaultCategoryAttributeSetId();
+
+        $this->categoryAttributeMap = $this->getCategoryAttributeMap();
+        $this->productAttributeSetMap = $this->getProductAttributeSetMap();
+        $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
+
         $this->storeViewMap = $this->getStoreViewMap();
         $this->taxClassMap = $this->getTaxClassMap();
+    }
+
+    /**
+     * Returns the id of the default category attribute set id.
+     *
+     * @return int
+     */
+    protected function getDefaultCategoryAttributeSetId()
+    {
+        $entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
+        $attributeSetId = $this->db->fetchSingleCell("SELECT `default_attribute_set_id` FROM {$entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
+        return $attributeSetId;
     }
 
     /**
@@ -75,6 +107,18 @@ class MetaData
         $entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $productEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$entityTypeTable} WHERE `entity_type_code` = 'catalog_product'");
         return $productEntityTypeId;
+    }
+
+    /**
+     * Returns the id of the category entity type.
+     *
+     * @return int
+     */
+    protected function getCategoryEntityTypeId()
+    {
+        $entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
+        $categoryEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
+        return $categoryEntityTypeId;
     }
 
     /**
@@ -113,10 +157,23 @@ class MetaData
         return $map;
     }
 
+
+    /**
+     * Returns a name => id map for category attributes.
+     *
+     * @return array
+     */
+    protected function getCategoryAttributeMap()
+    {
+        $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
+        $map = $this->db->fetchMap("SELECT `attribute_code`, `attribute_id` FROM {$attributeTable} WHERE `entity_type_id` = {$this->categoryEntityTypeId}");
+        return $map;
+    }
+    
     /**
      * @return array An attribute code indexed array of AttributeInfo
      */
-    protected function getEavAttributeInfo()
+    protected function getProductEavAttributeInfo()
     {
         $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
         $attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);

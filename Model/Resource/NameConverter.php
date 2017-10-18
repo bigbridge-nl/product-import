@@ -22,12 +22,19 @@ class NameConverter
     /** @var array  */
     protected $map;
 
-    public function __construct(ImportConfig $config, MetaData $metaData)
+    /** @var CategoryImporter */
+    protected $categoryImporter;
+
+    /** @var  array */
+    protected $categoryCache = [];
+
+    public function __construct(ImportConfig $config, MetaData $metaData, CategoryImporter $categoryImporter)
     {
         $this->config = $config;
         $this->metaData = $metaData;
 
         $this->map = $this->loadNameToIdMap();
+        $this->categoryImporter = $categoryImporter;
     }
 
     /**
@@ -47,11 +54,36 @@ class NameConverter
         return self::NOT_FOUND;
     }
 
+    /**
+     * Returns the names of the categories.
+     * Category names may be paths separated with /
+     *
+     * @param array $categoryPaths
+     * @return int[]
+     */
+    public function convertCategoryNamesToIds(array $categoryPaths)
+    {
+        $ids = [];
+
+        foreach ($categoryPaths as $path) {
+            if (array_key_exists($path, $this->categoryCache)) {
+                $id = $this->categoryCache[$path];
+                $ids[] = $id;
+            } else {
+                $id = $this->categoryImporter->importCategoryPath($path);
+                $this->categoryCache[$path] = $id;
+                $ids[] = $id;
+            }
+        }
+
+        return $ids;
+    }
+
     protected function loadNameToIdMap()
     {
         $map = [];
 
-        $map['attribute_set_id'] = $this->metaData->attributeSetMap;
+        $map['attribute_set_id'] = $this->metaData->productAttributeSetMap;
         $map['store_view_id'] = $this->metaData->storeViewMap;
         $map['tax_class_id'] = $this->metaData->taxClassMap;
 

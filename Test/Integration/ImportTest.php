@@ -198,4 +198,43 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals("1: failed! error = missing sku\n2: success! sku = {$lines[1][1]}, id = {$lastId}\n", $log);
     }
+
+    public function testCreateCategories()
+    {
+        $success = true;
+
+        $config = new ImportConfig();
+        $config->eavAttributes = ['name', 'price'];
+        $config->resultCallbacks[] = function(Product $product) use (&$success) {
+            $success = $success && $product->ok;
+        };
+
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $nameConverter = self::$factory->createNameConverter($config);
+
+        $product1 = new SimpleProduct();
+        $product1->name = "Pine trees";
+        $product1->sku = uniqid('bb');
+        $product1->price = '399.95';
+        $product1->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
+        $product1->category_ids = $nameConverter->convertCategoryNamesToIds(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+
+        $importer->importSimpleProduct($product1);
+
+        $product2 = new SimpleProduct();
+        $product2->name = "Oak trees";
+        $product2->sku = uniqid('bb');;
+        $product2->price = '449.95';
+        $product2->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
+        $product2->category_ids = $nameConverter->convertCategoryNamesToIds(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+
+        $importer->importSimpleProduct($product2);
+
+        $importer->flush();
+
+        $this->assertEquals(4, count(array_unique($product1->category_ids)));
+        $this->assertEquals(3, count(array_unique($product2->category_ids)));
+        $this->assertEquals(1, count(array_diff($product1->category_ids, $product2->category_ids)));
+    }
 }

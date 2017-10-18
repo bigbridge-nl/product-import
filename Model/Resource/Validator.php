@@ -28,7 +28,7 @@ class Validator
      */
     public function validate(Product $product, ImportConfig $config)
     {
-        $attributeInfo = $this->metaData->eavAttributeInfo;
+        $attributeInfo = $this->metaData->productEavAttributeInfo;
 
         $error = "";
 
@@ -48,7 +48,7 @@ class Validator
 
         // attribute set id
         if (is_string($product->attribute_set_id)) {
-            if (!in_array($product->attribute_set_id, $this->metaData->attributeSetMap)) {
+            if (!in_array($product->attribute_set_id, $this->metaData->productAttributeSetMap)) {
                 $product->attribute_set_id = trim($product->attribute_set_id);
                 if ($product->attribute_set_id === "") {
                     $error .= "; missing attribute set id";
@@ -62,7 +62,7 @@ class Validator
             }
         } elseif (is_integer($product->attribute_set_id)) {
             $product->attribute_set_id = (string)$product->attribute_set_id;
-            if (!in_array($product->attribute_set_id, $this->metaData->attributeSetMap)) {
+            if (!in_array($product->attribute_set_id, $this->metaData->productAttributeSetMap)) {
                 $error .= "; attribute set id does not exist: " . $product->attribute_set_id;
             }
         } elseif (is_null($product->attribute_set_id)) {

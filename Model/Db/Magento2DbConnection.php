@@ -40,10 +40,18 @@ class Magento2DbConnection
      *
      * @param string $query
      */
-    public function insert(string $query)
+    public function execute(string $query)
     {
 #echo $query."\n";
-        $this->pdo->query($query);
+        $this->pdo->exec($query);
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastInsertId()
+    {
+        return (int)$this->pdo->lastInsertId();
     }
 
     /**
@@ -87,6 +95,15 @@ class Magento2DbConnection
             $map[$row[0]] = $row[1];
         }
         return $map;
+    }
+
+    /**
+     * @param string $query
+     * @return array
+     */
+    public function fetchRow(string $query)
+    {
+        return $this->pdo->query($query)->fetch(PDO::FETCH_ASSOC);
     }
 
     /**

@@ -34,7 +34,7 @@ class SimpleStorage
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config)
     {
         // https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
-        $this->db->insert("SET autocommit = 0");
+        $this->db->execute("SET autocommit = 0");
 
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
@@ -71,7 +71,7 @@ class SimpleStorage
             }
         }
 
-        $this->db->insert("commit");
+        $this->db->execute("commit");
     }
 
     /**
@@ -142,7 +142,7 @@ class SimpleStorage
         $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`, `created_at`, `updated_at`) VALUES " .
             implode(',', $values);
 
-        $this->db->insert($sql);
+        $this->db->execute($sql);
 
         // store the new ids with the products
         $serialized = $this->db->quoteSet($skus);
@@ -172,7 +172,7 @@ class SimpleStorage
             " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)," .
             "`updated_at` = '{$this->db->time}'";
 
-        $this->db->insert($sql);
+        $this->db->execute($sql);
     }
 
     /**
@@ -183,7 +183,7 @@ class SimpleStorage
     {
         foreach ($eavAttributes as $eavAttribute) {
 
-            $attributeInfo = $this->metaData->eavAttributeInfo[$eavAttribute];
+            $attributeInfo = $this->metaData->productEavAttributeInfo[$eavAttribute];
             $tableName = $attributeInfo->tableName;
             $attributeId = $attributeInfo->attributeId;
 
@@ -205,7 +205,7 @@ class SimpleStorage
                     " VALUES " . implode(', ', $values) .
                     " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
-                $this->db->insert($sql);
+                $this->db->execute($sql);
             }
         }
     }
@@ -231,7 +231,7 @@ class SimpleStorage
                 INSERT IGNORE INTO `{$this->metaData->categoryProductTable}` (`category_id`, `product_id`) 
                 VALUES " . $values;
 
-            $this->db->insert($sql);
+            $this->db->execute($sql);
         }
     }
 }

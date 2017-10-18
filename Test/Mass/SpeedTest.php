@@ -55,6 +55,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $skus[$i] = uniqid("bb");
         }
 
+        $categories = [uniqid('cc'), uniqid('cc'), uniqid('cc')];
+
         $beforeMemory = memory_get_usage();
         $beforeTime = microtime(true);
 
@@ -69,8 +71,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
-        $this->assertLessThan(0.1, $time);
-        $this->assertLessThan(100, $memory); // cached metadata
+        $this->assertLessThan(0.5, $time);
+        $this->assertLessThan(3050, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -88,6 +90,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->visibility = Product::VISIBILITY_BOTH;
             $product->special_from_date = "2017-10-14 01:22:03";
             $product->tax_class_id = $nameConverter->convertNameToId('tax_class_id', 'Taxable Goods');
+            $product->category_ids = $nameConverter->convertCategoryNamesToIds([$categories[0], $categories[1]]);
 
             $importer->importSimpleProduct($product);
         }
@@ -102,8 +105,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.3, $time);
-        $this->assertLessThan(140, $memory); // the size of the last $product
+        $this->assertLessThan(4.5, $time);
+        $this->assertLessThan(300, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -123,6 +126,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
             $product->special_from_date = "2017-10-15 02:11:59";
             $product->tax_class_id = $nameConverter->convertNameToId('tax_class_id', 'Retail Customer');
+            $product->category_ids = $nameConverter->convertCategoryNamesToIds([$categories[1], $categories[2]]);
 
             $importer->importSimpleProduct($product);
         }
@@ -137,7 +141,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(3.7, $time);
+        $this->assertLessThan(4.1, $time);
         $this->assertLessThan(1, $memory);
     }
 }

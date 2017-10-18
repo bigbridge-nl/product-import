@@ -70,7 +70,7 @@ class ImporterFactory
                 if (!is_string($eavAttribute)) {
                     $error = "config: eavAttributes should be strings";
                 } else {
-                    if (!array_key_exists($eavAttribute, $this->metaData->eavAttributeInfo)) {
+                    if (!array_key_exists($eavAttribute, $this->metaData->productEavAttributeInfo)) {
                         $notEav[] = $eavAttribute;
                     }
                 }
