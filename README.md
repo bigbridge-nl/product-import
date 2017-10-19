@@ -33,7 +33,6 @@ For each product user defined "result callbacks" are called. This allows you to 
     $log = "";
 
     $config = new ImportConfig();
-    $config->eavAttributes = ['name', 'price'];
     $config->resultCallback[] = function(Product $product) use (&$log) {
 
         if ($product->ok) {

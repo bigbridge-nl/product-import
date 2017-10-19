@@ -15,11 +15,6 @@ class ImportConfig
     public $batchSize = 1000;
 
     /**
-     * @var string[] An array of the attribute codes of eav attributes that need to be imported
-     */
-    public $eavAttributes = ['name'];
-
-    /**
      * @var callable[]
      *
      * These functions will be called with the result of the import.

@@ -42,7 +42,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $success = true;
 
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'price', 'tax_class_id'];
         $config->resultCallbacks[] = function (Product $product) use (&$success) {
             $success = $success && $product->ok;
         };
@@ -130,7 +129,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     public function testEmptyFields()
     {
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'color', 'special_price'];
 
         list($importer, $error) = self::$factory->createImporter($config);
 
@@ -141,18 +139,19 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product = new SimpleProduct();
         $product->name = "Big Purple Box";
         $product->sku = $sku1;
+        $product->price = "1.25";
         $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
         $product->special_price = null;
-        // note: color is missing completely
 
         $importer->importSimpleProduct($product);
 
         $importer->flush();
 
+        $this->assertEquals("", $product->error);
         $this->assertTrue($product->ok);
 
         $product1 = self::$repository->get($sku1);
-        $this->assertEquals(null, $product1->getPrice());
+        $this->assertEquals(null, $product1->getSpecialPrice());
     }
 
     public function testResultCallback()
@@ -161,7 +160,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $lastId = null;
 
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'price'];
         $config->resultCallbacks[] = function(Product $product) use (&$log, &$lastId) {
 
             if ($product->ok) {
@@ -204,7 +202,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $success = true;
 
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'price'];
         $config->resultCallbacks[] = function(Product $product) use (&$success) {
             $success = $success && $product->ok;
         };

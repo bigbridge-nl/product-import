@@ -58,29 +58,6 @@ class ImporterFactory
             $error = "config: batchSize should be 1 or more";
         }
 
-        if (!is_array($config->eavAttributes)) {
-
-            $error = "config: eavAttributes is not an array";
-
-        } else {
-
-            $notEav = [];
-
-            foreach ($config->eavAttributes as $eavAttribute) {
-                if (!is_string($eavAttribute)) {
-                    $error = "config: eavAttributes should be strings";
-                } else {
-                    if (!array_key_exists($eavAttribute, $this->metaData->productEavAttributeInfo)) {
-                        $notEav[] = $eavAttribute;
-                    }
-                }
-            }
-
-            if (!empty($notEav)) {
-                $error = "config: eavAttributes: not an eav attribute: " . implode(', ', $notEav);
-            }
-        }
-
         return $error;
     }
 }

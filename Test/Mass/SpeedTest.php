@@ -45,7 +45,6 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $success = true;
 
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'status', 'price', 'visibility', 'special_from_date', 'tax_class_id'];
         $config->resultCallbacks[] = function (Product $product) use (&$success) {
             $success = $success && $product->ok;
         };
@@ -105,7 +104,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(4.5, $time);
+        $this->assertLessThan(9.0, $time);
         $this->assertLessThan(300, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -141,7 +140,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(4.2, $time);
+        $this->assertLessThan(9.2, $time);
         $this->assertLessThan(1, $memory);
     }
 }

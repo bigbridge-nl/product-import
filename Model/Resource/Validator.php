@@ -108,12 +108,10 @@ class Validator
             }
         }
 
-        foreach ($config->eavAttributes as $eavAttribute) {
-
-            $info = $attributeInfo[$eavAttribute];
+        foreach ($attributeInfo as $eavAttribute => $info) {
 
             if (!property_exists($product, $eavAttribute)) {
-                $product->$eavAttribute = null;
+                continue;
             }
 
             $value = $product->$eavAttribute;

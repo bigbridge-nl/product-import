@@ -42,6 +42,8 @@ class SimpleStorage
         // collect inserts and updates
         $sku2id = $this->getExistingSkus($skus);
 
+        $productsByAttribute = [];
+
         $insertProducts = [];
         $updateProducts = [];
         foreach ($simpleProducts as $product) {
@@ -58,11 +60,31 @@ class SimpleStorage
                 } else {
                     $insertProducts[] = $product;
                 }
+
+                foreach ($product as $key => $value) {
+                    if ($value !== null) {
+                        $productsByAttribute[$key][] = $product;
+                    }
+                }
             }
         }
 
-        $this->insertProducts($insertProducts, $config->eavAttributes);
-        $this->updateProducts($updateProducts, $config->eavAttributes);
+        if (count($insertProducts) > 0) {
+            $this->insertMainTable($insertProducts);
+        }
+        if (count($updateProducts) > 0) {
+            $this->updateMainTable($updateProducts);
+        }
+
+        foreach ($this->metaData->productEavAttributeInfo as $eavAttribute => $info) {
+            if (array_key_exists($eavAttribute, $productsByAttribute)) {
+                $this->insertEavAttribute($productsByAttribute[$eavAttribute], $eavAttribute);
+            }
+        }
+
+        if (array_key_exists('category_ids', $productsByAttribute)) {
+            $this->insertCategoryIds($productsByAttribute['category_ids']);
+        }
 
         // call user defined functions to let them process the results
         foreach ($config->resultCallbacks as $callback) {
@@ -88,36 +110,6 @@ class SimpleStorage
 
         $serialized = $this->db->quoteSet($skus);
         return $this->db->fetchMap("SELECT `sku`, `entity_id` FROM {$this->metaData->productEntityTable} WHERE `sku` in ({$serialized})");
-    }
-
-    /**
-     * @param SimpleProduct[] $products
-     * @param array $eavAttributes
-     */
-    protected function insertProducts(array $products, array $eavAttributes)
-    {
-        if (count($products) == 0) {
-            return;
-        }
-
-        $this->insertMainTable($products);
-        $this->insertEavAttributes($products, $eavAttributes);
-        $this->insertCategoryIds($products);
-    }
-
-    /**
-     * @param SimpleProduct[] $products
-     * @param array $eavAttributes
-     */
-    protected function updateProducts(array $products, array $eavAttributes)
-    {
-        if (count($products) == 0) {
-            return;
-        }
-
-        $this->updateMainTable($products);
-        $this->insertEavAttributes($products, $eavAttributes);
-        $this->insertCategoryIds($products);
     }
 
     protected function insertMainTable(array $products)
@@ -176,51 +168,40 @@ class SimpleStorage
 
     /**
      * @param SimpleProduct[] $products
-     * @param string[] $eavAttributes
+     * @param string $eavAttribute
      */
-    protected function insertEavAttributes(array $products, array $eavAttributes)
+    protected function insertEavAttribute(array $products, string $eavAttribute)
     {
-        foreach ($eavAttributes as $eavAttribute) {
+        $attributeInfo = $this->metaData->productEavAttributeInfo[$eavAttribute];
+        $tableName = $attributeInfo->tableName;
+        $attributeId = $attributeInfo->attributeId;
 
-            $attributeInfo = $this->metaData->productEavAttributeInfo[$eavAttribute];
-            $tableName = $attributeInfo->tableName;
-            $attributeId = $attributeInfo->attributeId;
+        $values = [];
+        foreach ($products as $product) {
 
-            $values = [];
-            foreach ($products as $product) {
-
-                if (is_null($product->$eavAttribute)) {
-                    continue;
-                }
-
-                $entityId = $product->id;
-                $value = $this->db->quote($product->$eavAttribute);
-                $values[] = "({$entityId},{$attributeId},{$product->store_view_id},{$value})";
-            }
-
-            if (!empty($values)) {
-
-                $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
-                    " VALUES " . implode(', ', $values) .
-                    " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
-
-                $this->db->execute($sql);
-            }
+            $entityId = $product->id;
+            $value = $this->db->quote($product->$eavAttribute);
+            $values[] = "({$entityId},{$attributeId},{$product->store_view_id},{$value})";
         }
+
+        $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
+            " VALUES " . implode(', ', $values) .
+            " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+
+        $this->db->execute($sql);
     }
 
     protected function insertCategoryIds(array $products)
     {
-        $values = '';
-        $sep = '';
+        $values = [];
+
         foreach ($products as $product) {
             foreach ($product->category_ids as $categoryId) {
-                $values .= $sep . "({$categoryId}, {$product->id})";
-                $sep = ', ';
+                $values []= "({$categoryId}, {$product->id})";
             }
         }
 
-        if ($values !== "") {
+        if (!empty($values)) {
 
             // IGNORE serves two purposes:
             // 1. do not fail if the product-category link already existed
@@ -228,7 +209,7 @@ class SimpleStorage
 
             $sql = "
                 INSERT IGNORE INTO `{$this->metaData->categoryProductTable}` (`category_id`, `product_id`) 
-                VALUES " . $values;
+                VALUES " . implode(', ', $values);
 
             $this->db->execute($sql);
         }

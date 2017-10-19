@@ -31,7 +31,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
     public function testValidation()
     {
         $config = new ImportConfig();
-        $config->eavAttributes = ['name', 'price', 'status', 'description', 'special_from_date'];
 
         /** @var Validator $validator */
         $validator = ObjectManager::getInstance()->get(Validator::class);
