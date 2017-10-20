@@ -38,7 +38,7 @@ For each product user defined "result callbacks" are called. This allows you to 
         if ($product->ok) {
             $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->sku, $product->id);
         } else {
-            $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, $product->error);
+            $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, implode('; ', $product->errors));
         }
 
     };

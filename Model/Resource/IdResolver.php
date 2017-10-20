@@ -3,8 +3,8 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\Id;
-use BigBridge\ProductImport\Model\Ids;
+use BigBridge\ProductImport\Model\Reference;
+use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\Resource\Id\AttributeSetResolver;
 use BigBridge\ProductImport\Model\Resource\Id\CategoryImporter;
 use BigBridge\ProductImport\Model\Resource\Id\StoreViewResolver;
@@ -41,44 +41,44 @@ class IdResolver
 
     public function resolveIds(Product $product)
     {
-        if ($product->category_ids instanceof Ids) {
+        if ($product->category_ids instanceof References) {
             list($ids, $error) = $this->categoryImporter->importCategoryPaths($product->category_ids->names);
             if ($error !== "") {
                 $product->ok = false;
-                $product->error[]= $error;
+                $product->errors[]= $error;
                 $product->category_ids = null;
             } else {
                 $product->category_ids = $ids;
             }
         }
 
-        if ($product->tax_class_id instanceof Id) {
+        if ($product->tax_class_id instanceof Reference) {
             list($id, $error) = $this->taxClassResolver->resolveName($product->tax_class_id->name);
             if ($error !== "") {
                 $product->ok = false;
-                $product->error[]= $error;
+                $product->errors[]= $error;
                 $product->tax_class_id = null;
             } else {
                 $product->tax_class_id = $id;
             }
         }
 
-        if ($product->store_view_id instanceof Id) {
+        if ($product->store_view_id instanceof Reference) {
             list($id, $error) = $this->storeViewResolver->resolveName($product->store_view_id->name);
             if ($error !== "") {
                 $product->ok = false;
-                $product->error[]= $error;
+                $product->errors[]= $error;
                 $product->store_view_id = null;
             } else {
                 $product->store_view_id = $id;
             }
         }
 
-        if ($product->attribute_set_id instanceof Id) {
+        if ($product->attribute_set_id instanceof Reference) {
             list($id, $error) = $this->attributeSetResolver->resolveName($product->attribute_set_id->name);
             if ($error !== "") {
                 $product->ok = false;
-                $product->error[]= $error;
+                $product->errors[]= $error;
                 $product->attribute_set_id = null;
             } else {
                 $product->attribute_set_id = $id;

@@ -4,8 +4,8 @@ namespace BigBridge\ProductImport\Test\Integration\Mass;
 
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\Id;
-use BigBridge\ProductImport\Model\Ids;
+use BigBridge\ProductImport\Model\Reference;
+use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -71,7 +71,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.5, $time);
-        $this->assertLessThan(3050, $memory); // cached metadata
+        $this->assertLessThan(210, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -83,13 +83,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = uniqid("name");
             $product->sku = $skus[$i];
-            $product->attribute_set_id = new Id( "Default");
+            $product->attribute_set_id = new Reference( "Default");
             $product->status = Product::STATUS_ENABLED;
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_BOTH;
             $product->special_from_date = "2017-10-14 01:22:03";
-            $product->tax_class_id = new Id('Taxable Goods');
-            $product->category_ids = new Ids([$categories[0], $categories[1]]);
+            $product->tax_class_id = new Reference('Taxable Goods');
+            $product->category_ids = new References([$categories[0], $categories[1]]);
 
             $importer->importSimpleProduct($product);
         }
@@ -104,7 +104,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(9.0, $time);
+        $this->assertLessThan(8.8, $time);
         $this->assertLessThan(350, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -119,13 +119,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = uniqid("name");
             $product->sku = $skus[$i];
-            $product->attribute_set_id = new Id( "Default");
+            $product->attribute_set_id = new Reference( "Default");
             $product->status = Product::STATUS_DISABLED;
             $product->price = (string)rand(1, 100);
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
             $product->special_from_date = "2017-10-15 02:11:59";
-            $product->tax_class_id = new Id('Retail Customer');
-            $product->category_ids = new Ids([$categories[1], $categories[2]]);
+            $product->tax_class_id = new Reference('Retail Customer');
+            $product->category_ids = new References([$categories[1], $categories[2]]);
 
             $importer->importSimpleProduct($product);
         }

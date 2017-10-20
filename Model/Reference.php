@@ -7,7 +7,7 @@ namespace BigBridge\ProductImport\Model;
  *
  * @author Patrick van Bergen
  */
-class Id
+class Reference
 {
     public $name;
 

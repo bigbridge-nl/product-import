@@ -5,7 +5,7 @@ namespace BigBridge\ProductImport\Model;
 /**
  * @author Patrick van Bergen
  */
-class Ids
+class References
 {
     public $names;
 

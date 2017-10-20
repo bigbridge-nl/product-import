@@ -60,8 +60,8 @@ abstract class Product
     /** @var bool  */
     public $ok = true;
 
-    /** @var  string */
-    public $error = "";
+    /** @var  array */
+    public $errors = [];
 
     /** @var string  */
     public $lineNumber = "";

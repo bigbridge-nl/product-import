@@ -58,10 +58,7 @@ class SimpleStorage
                 continue;
             }
 
-            list($ok, $error) = $this->validator->validate($product);
-
-            $product->ok = $ok;
-            $product->error = $error;
+            $this->validator->validate($product);
 
             if (!$product->ok) {
                 continue;

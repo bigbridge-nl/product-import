@@ -7,7 +7,6 @@ use IntlChar;
 use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use SimpleXMLElement;
 
@@ -30,8 +29,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
     public function testValidation()
     {
-        $config = new ImportConfig();
-
         /** @var Validator $validator */
         $validator = ObjectManager::getInstance()->get(Validator::class);
 
@@ -150,9 +147,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $product->$fieldName = $fieldValue;
             }
 
-            list($ok, $error) = $validator->validate($product);
-            $this->assertEquals($test[2], $error);
-            $this->assertEquals($test[1], $ok);
+            $validator->validate($product);
+            $this->assertEquals($test[2], implode('; ', $product->errors));
+            $this->assertEquals($test[1], $product->ok);
         }
     }
 }
