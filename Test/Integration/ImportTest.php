@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Model\Id;
+use BigBridge\ProductImport\Model\Ids;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
@@ -48,8 +50,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->createImporter($config);
 
-        $nameConverter = self::$factory->createNameConverter($config);
-
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
 
@@ -63,15 +63,17 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = $data[0];
             $product->sku = $data[1];
-            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', $data[2]);
+            $product->attribute_set_id = new Id($data[2]);
             $product->price = $data[3];
-            $product->store_view_id = $nameConverter->convertNameToId('store_view_id', $data[4]);
+            $product->store_view_id = new Id($data[4]);
             $product->category_ids = $data[5];
 
             $importer->importSimpleProduct($product);
         }
 
         $importer->flush();
+
+        $this->assertTrue($success);
 
         $product1 = self::$repository->get($sku1);
         $this->assertEquals(4,$product1->getAttributeSetId());
@@ -99,16 +101,18 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct();
             $product->name = $data[0];
             $product->sku = $data[1];
-            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', $data[2]);
+            $product->attribute_set_id = new Id($data[2]);
             $product->price = $data[3];
-            $product->store_view_id = $nameConverter->convertNameToId('store_view_id', $data[4]);
+            $product->store_view_id = new Id($data[4]);
             $product->category_ids = $data[5];
-            $product->tax_class_id = $nameConverter->convertNameToId('tax_class_id', $data[6]);
+            $product->tax_class_id = new Id($data[6]);
 
             $importer->importSimpleProduct($product);
         }
 
         $importer->flush();
+
+        $this->assertTrue($success);
 
         $product1 = self::$repository->get($sku1, false, 0, true);
         $this->assertEquals($products2[0][0], $product1->getName());
@@ -132,15 +136,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->createImporter($config);
 
-        $nameConverter = self::$factory->createNameConverter($config);
-
         $sku1 = uniqid("bb");
 
         $product = new SimpleProduct();
         $product->name = "Big Purple Box";
         $product->sku = $sku1;
         $product->price = "1.25";
-        $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
+        $product->attribute_set_id = new Id("Default");
         $product->special_price = null;
 
         $importer->importSimpleProduct($product);
@@ -173,8 +175,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->createImporter($config);
 
-        $nameConverter = self::$factory->createNameConverter($config);
-
         $lines = [
             ['Purple Box', "", "3.95"],
             ['Yellow Box', uniqid('bb'), "2.95"]
@@ -186,7 +186,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->name = $line[0];
             $product->sku = $line[1];
             $product->price = $line[2];
-            $product->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
+            $product->attribute_set_id = new Id("Default");
             $product->lineNumber = $i + 1;
 
             $importer->importSimpleProduct($product);
@@ -208,14 +208,12 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->createImporter($config);
 
-        $nameConverter = self::$factory->createNameConverter($config);
-
         $product1 = new SimpleProduct();
         $product1->name = "Pine trees";
         $product1->sku = uniqid('bb');
         $product1->price = '399.95';
-        $product1->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
-        $product1->category_ids = $nameConverter->convertCategoryNamesToIds(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $product1->attribute_set_id = new Id("Default");
+        $product1->category_ids = new Ids(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
 
         $importer->importSimpleProduct($product1);
 
@@ -223,8 +221,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product2->name = "Oak trees";
         $product2->sku = uniqid('bb');;
         $product2->price = '449.95';
-        $product2->attribute_set_id = $nameConverter->convertNameToId('attribute_set_id', "Default");
-        $product2->category_ids = $nameConverter->convertCategoryNamesToIds(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $product2->attribute_set_id = new Id("Default");
+        $product2->category_ids = new Ids(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
 
         $importer->importSimpleProduct($product2);
 

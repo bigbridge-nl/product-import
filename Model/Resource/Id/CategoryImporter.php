@@ -1,8 +1,9 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Model\Resource\Id;
 
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
  * @author Patrick van Bergen
@@ -12,15 +13,43 @@ class CategoryImporter
     const CATEGORY_PATH_SEPARATOR = '/';
 
     /**  @var Magento2DbConnection */
-    private $db;
+    protected $db;
 
     /** @var MetaData */
-    private $metaData;
+    protected $metaData;
+
+    /** @var array  */
+    protected $categoryCache = [];
 
     public function __construct(Magento2DbConnection $db, MetaData $metaData)
     {
         $this->db = $db;
         $this->metaData = $metaData;
+    }
+
+    /**
+     * Returns the names of the categories.
+     * Category names may be paths separated with /
+     *
+     * @param array $categoryPaths
+     * @return int[]
+     */
+    public function importCategoryPaths(array $categoryPaths)
+    {
+        $ids = [];
+
+        foreach ($categoryPaths as $path) {
+            if (array_key_exists($path, $this->categoryCache)) {
+                $id = $this->categoryCache[$path];
+                $ids[] = $id;
+            } else {
+                $id = $this->importCategoryPath($path);
+                $this->categoryCache[$path] = $id;
+                $ids[] = $id;
+            }
+        }
+
+        return [$ids, ""];
     }
 
     /**
@@ -31,9 +60,6 @@ class CategoryImporter
      */
     public function importCategoryPath(string $namePath): int
     {
-#todo move to batch start
-        $this->db->execute("START TRANSACTION");
-
         $categoryId = \Magento\Catalog\Model\Category::TREE_ROOT_ID;
 
         $idPath = [$categoryId];
@@ -50,8 +76,6 @@ class CategoryImporter
 
             $idPath[] = $categoryId;
         }
-
-        $this->db->execute("COMMIT");
 
         return $categoryId;
     }

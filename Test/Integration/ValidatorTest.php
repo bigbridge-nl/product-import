@@ -150,7 +150,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                 $product->$fieldName = $fieldValue;
             }
 
-            list($ok, $error) = $validator->validate($product, $config);
+            list($ok, $error) = $validator->validate($product);
             $this->assertEquals($test[2], $error);
             $this->assertEquals($test[1], $ok);
         }

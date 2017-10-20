@@ -18,13 +18,17 @@ class SimpleStorage
     protected $metaData;
 
     /** @var Validator  */
-    private $validator;
+    protected $validator;
 
-    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator)
+    /** @var  IdResolver */
+    protected $idResolver;
+
+    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator, IdResolver $idResolver)
     {
         $this->db = $db;
         $this->metaData = $metaData;
         $this->validator = $validator;
+        $this->idResolver = $idResolver;
     }
 
     /**
@@ -48,23 +52,31 @@ class SimpleStorage
         $updateProducts = [];
         foreach ($simpleProducts as $product) {
 
-            list($ok, $error) = $this->validator->validate($product, $config);
+            $this->idResolver->resolveIds($product);
+
+            if (!$product->ok) {
+                continue;
+            }
+
+            list($ok, $error) = $this->validator->validate($product);
 
             $product->ok = $ok;
             $product->error = $error;
 
-            if ($ok) {
-                if (array_key_exists($product->sku, $sku2id)) {
-                    $product->id = $sku2id[$product->sku];
-                    $updateProducts[] = $product;
-                } else {
-                    $insertProducts[] = $product;
-                }
+            if (!$product->ok) {
+                continue;
+            }
 
-                foreach ($product as $key => $value) {
-                    if ($value !== null) {
-                        $productsByAttribute[$key][] = $product;
-                    }
+            if (array_key_exists($product->sku, $sku2id)) {
+                $product->id = $sku2id[$product->sku];
+                $updateProducts[] = $product;
+            } else {
+                $insertProducts[] = $product;
+            }
+
+            foreach ($product as $key => $value) {
+                if ($value !== null) {
+                    $productsByAttribute[$key][] = $product;
                 }
             }
         }

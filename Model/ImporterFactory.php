@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Model;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
-use BigBridge\ProductImport\Model\Resource\NameConverter;
 use Magento\Framework\App\ObjectManager;
 
 /**
@@ -35,17 +34,6 @@ class ImporterFactory
         }
 
         return [$importer, $error];
-    }
-
-    /**
-     * @return NameConverter
-     */
-    public function createNameConverter(ImportConfig $config)
-    {
-        $om = ObjectManager::getInstance();
-        $nameConverter = $om->create(NameConverter::class, ['config' => $config]);
-
-        return $nameConverter;
     }
 
     protected function validateConfig(ImportConfig $config)

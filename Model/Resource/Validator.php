@@ -26,7 +26,7 @@ class Validator
      * @param Product $product
      * @return array An array with [ok, error]
      */
-    public function validate(Product $product, ImportConfig $config)
+    public function validate(Product $product)
     {
         $attributeInfo = $this->metaData->productEavAttributeInfo;
 
@@ -52,8 +52,6 @@ class Validator
                 $product->attribute_set_id = trim($product->attribute_set_id);
                 if ($product->attribute_set_id === "") {
                     $error .= "; missing attribute set id";
-                } elseif ($product->attribute_set_id === NameConverter::NOT_FOUND) {
-                    $error .= "; unknown attribute set name";
                 } elseif (!is_numeric($product->attribute_set_id)) {
                     $error .= "; attribute set id is a " . gettype($product->attribute_set_id) . ", should be an integer";
                 } else {
@@ -77,8 +75,6 @@ class Validator
                 $product->store_view_id = trim($product->store_view_id);
                 if ($product->store_view_id === "") {
                     $error .= "; missing store view id";
-                } elseif ($product->store_view_id === NameConverter::NOT_FOUND) {
-                    $error .= "; unknown store view code";
                 } elseif (!is_numeric($product->store_view_id)) {
                     $error .= "; store view id is a " . gettype($product->store_view_id) . ", should be an integer";
                 } else {

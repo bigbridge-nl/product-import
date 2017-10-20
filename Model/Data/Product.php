@@ -58,7 +58,7 @@ abstract class Product
     // =========================================
 
     /** @var bool  */
-    public $ok = false;
+    public $ok = true;
 
     /** @var  string */
     public $error = "";
