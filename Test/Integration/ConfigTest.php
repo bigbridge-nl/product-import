@@ -32,5 +32,35 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertNotNull($importer);
         $this->assertEquals("", $error);
 
+        // ---
+
+        $config = new ImportConfig();
+        $config->batchSize = 0;
+
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $this->assertNull($importer);
+        $this->assertEquals("config: batchSize should be 1 or more", $error);
+
+        // ---
+
+        $config = new ImportConfig();
+        $config->batchSize = "1000";
+
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $this->assertNull($importer);
+        $this->assertEquals("config: batchSize is not an integer", $error);
+
+
+        // ---
+
+        $config = new ImportConfig();
+        $config->resultCallbacks = function() {};
+
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $this->assertNull($importer);
+        $this->assertEquals("config: resultCallbacks should be an array of functions", $error);
     }
 }

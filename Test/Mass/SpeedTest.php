@@ -58,6 +58,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $categories = [uniqid('cc'), uniqid('cc'), uniqid('cc')];
 
+        $beforePeakMemory = memory_get_peak_usage();
+
         $beforeMemory = memory_get_usage();
         $beforeTime = microtime(true);
 
@@ -142,5 +144,11 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($success);
         $this->assertLessThan(4.8, $time);
         $this->assertLessThan(1, $memory);
+
+        $afterPeakMemory = memory_get_peak_usage();
+
+        // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
+        $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
+        $this->assertLessThan(4000, $peakMemory);
     }
 }

@@ -44,6 +44,8 @@ class ImporterFactory
             $error = "config: batchSize is not an integer";
         } else if ($config->batchSize <= 0) {
             $error = "config: batchSize should be 1 or more";
+        } elseif (!is_array($config->resultCallbacks)) {
+            $error = "config: resultCallbacks should be an array of functions";
         }
 
         return $error;
