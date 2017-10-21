@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Data\Product;
+use BigBridge\ProductImport\Model\Reference;
 use IntlChar;
 use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
@@ -130,8 +131,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             // plain
             [['category_ids' => [1, 2]], true, ""],
             // corrupt
-            [['category_ids' => "1, 2"], false, "category_ids is string, should be array of integers"],
+            [['category_ids' => "1, 2"], false, "category_ids is a string, should be a References object or an array of integers"],
             [['category_ids' => ["Hardware", "Software"]], false, "category_ids should be an array of integers"],
+            [['category_ids' => new Reference("Hardware")], false, "category_ids is a Reference, should be a References(!) object"],
 
         ];
 

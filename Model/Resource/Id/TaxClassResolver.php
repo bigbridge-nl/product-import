@@ -23,7 +23,7 @@ class TaxClassResolver
         $id = null;
 
         if (!array_key_exists($name, $this->metaData->taxClassMap)) {
-            $error = "Tax class not found: " . $name;
+            $error = "tax class not found: " . $name;
         } else {
             $id = $this->metaData->taxClassMap[$name];
         }

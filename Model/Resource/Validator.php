@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\Product;
+use BigBridge\ProductImport\Model\Reference;
 
 /**
  * @author Patrick van Bergen
@@ -92,7 +93,12 @@ class Validator
 
         // category_ids
         if (!is_array($product->category_ids)) {
-            $errors[] = "category_ids is string, should be array of integers";
+            if ($product->category_ids instanceof Reference) {
+                $errors[] = "category_ids is a Reference, should be a References(!) object";
+            } else {
+                $errors[] = "category_ids is a " . gettype($product->category_ids) . ", should be a References object or an array of integers";
+            }
+
         } else {
             foreach ($product->category_ids as $id) {
                 if (!preg_match('/\d+/', $id)) {

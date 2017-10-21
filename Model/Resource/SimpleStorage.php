@@ -54,10 +54,6 @@ class SimpleStorage
 
             $this->idResolver->resolveIds($product);
 
-            if (!$product->ok) {
-                continue;
-            }
-
             $this->validator->validate($product);
 
             if (!$product->ok) {

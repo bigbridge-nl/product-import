@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Model\Data;
 
+use BigBridge\ProductImport\Model\Reference;
+use BigBridge\ProductImport\Model\References;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 
@@ -32,10 +34,10 @@ abstract class Product
 
     public $visibility;
 
-    /** @var  string */
+    /** @var  string|Reference */
     public $attribute_set_id;
 
-    /** @var  string */
+    /** @var  string|Reference */
     public $store_view_id = 0;
 
     /** @var  string 64 character */
@@ -47,10 +49,10 @@ abstract class Product
     /** @var  string A 12.4 decimal field */
     public $price;
 
-    /** @var  int */
+    /** @var  int|Reference */
     public $tax_class_id;
 
-    /** @var int[] */
+    /** @var int[]|References */
     public $category_ids = [];
 
     // =========================================

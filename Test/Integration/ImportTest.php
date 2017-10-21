@@ -156,6 +156,33 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $product1->getSpecialPrice());
     }
 
+    public function testErrors()
+    {
+        $config = new ImportConfig();
+
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $sku1 = uniqid("bb");
+
+        $product = new SimpleProduct();
+        $product->attribute_set_id = new Reference("Checkers");
+
+        $importer->importSimpleProduct($product);
+
+        $importer->flush();
+
+        $expectedErrors = [
+            "attribute set not found: Checkers",
+            "missing sku",
+            "missing attribute set id",
+            "missing name",
+            "missing price",
+        ];
+
+        $this->assertEquals($expectedErrors, $product->errors);
+        $this->assertFalse($product->ok);
+    }
+
     public function testResultCallback()
     {
         $log = "";
