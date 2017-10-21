@@ -22,7 +22,7 @@ use Magento\Framework\App\ObjectManager;
  */
 class SpeedTest extends \PHPUnit_Framework_TestCase
 {
-    const PRODUCT_COUNT = 5000;
+    const PRODUCT_COUNT = 2500;
 
     /** @var  ImporterFactory */
     private static $factory;
@@ -70,7 +70,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
-        $this->assertLessThan(0.5, $time);
+        $this->assertLessThan(0.01, $time);
         $this->assertLessThan(210, $memory); // cached metadata
 
         // ----------------------------------------------------
@@ -104,7 +104,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(8.8, $time);
+        $this->assertLessThan(4.9, $time);
         $this->assertLessThan(350, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -140,7 +140,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(9.2, $time);
-        $this->assertLessThan(70, $memory);
+        $this->assertLessThan(4.8, $time);
+        $this->assertLessThan(1, $memory);
     }
 }
