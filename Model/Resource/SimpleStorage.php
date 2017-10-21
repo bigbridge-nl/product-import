@@ -43,7 +43,7 @@ class SimpleStorage
 
         try {
 
-            $this->doTransaction($simpleProducts);
+            $this->doTransaction($simpleProducts, $config);
 
             $this->db->execute("COMMIT");
 
@@ -75,7 +75,7 @@ class SimpleStorage
         }
     }
 
-    protected function doTransaction(array $simpleProducts)
+    protected function doTransaction(array $simpleProducts, ImportConfig $config)
     {
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
@@ -111,6 +111,11 @@ class SimpleStorage
                     $productsByAttribute[$key][] = $product;
                 }
             }
+        }
+
+        // in a "dry run" no actual imports to the database are done
+        if ($config->dryRun) {
+            return;
         }
 
         if (count($insertProducts) > 0) {

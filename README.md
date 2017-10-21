@@ -70,6 +70,7 @@ For each product user defined "result callbacks" are called. This allows you to 
 * input validation
 * import at global and store view level
 * category ids
+* dry run (no writes to the database)
 
 ## Features
 
@@ -80,17 +81,14 @@ For each product user defined "result callbacks" are called. This allows you to 
 ## To be supported
 
 * import text entries per row
-* dry run
 * all types of products
 * categories
 * product-category links (by id, by name)
 * auto create category (from name)
 * stock
-* store view name
 * auto add attribute option
 * csv import
 * rest request
-* error reporting of failed imports
 * import images using files, urls
 * trim: none, all except text fields
 

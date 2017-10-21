@@ -108,24 +108,21 @@ class Validator
             }
         }
 
-        foreach ($attributeInfo as $eavAttribute => $info) {
+        foreach ($product as $eavAttribute => $value) {
 
-            if (!property_exists($product, $eavAttribute)) {
+            if (!array_key_exists($eavAttribute, $attributeInfo)) {
                 continue;
             }
 
-            $value = $product->$eavAttribute;
+            $info = $attributeInfo[$eavAttribute];
 
             if (is_null($value)) {
 
                 if ($info->isRequired) {
                     $errors[] = "missing " . $eavAttribute;
-                    continue;
                 }
 
             } else {
-
-                // convert all to trimmed string
 
                 if (is_string($value)) {
 
@@ -143,11 +140,15 @@ class Validator
                     $product->$eavAttribute = (string)$value;
 
                 } elseif (is_object($value)) {
+
                     $errors[] = $eavAttribute . " is an object (" . get_class($value) . "), should be a string";
                     continue;
+
                 } else {
+
                     $errors[] = $eavAttribute . " is a " . gettype($value) . ", should be a string";
                     continue;
+
                 }
 
                 // empty values

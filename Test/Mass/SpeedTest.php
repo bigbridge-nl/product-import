@@ -111,7 +111,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($success);
         $this->assertSame([], $lastErrors);
-        $this->assertLessThan(3.2, $time);
+        $this->assertLessThan(2.0, $time);
         $this->assertLessThan(400, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -148,7 +148,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($success);
         $this->assertSame([], $lastErrors);
-        $this->assertLessThan(2.9, $time);
+        $this->assertLessThan(2.3, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
