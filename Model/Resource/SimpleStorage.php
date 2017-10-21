@@ -5,6 +5,8 @@ namespace BigBridge\ProductImport\Model\Resource;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
+use Exception;
+use PDOException;
 
 /**
  * @author Patrick van Bergen
@@ -37,9 +39,42 @@ class SimpleStorage
      */
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config)
     {
-        // https://dev.mysql.com/doc/refman/5.6/en/optimizing-innodb-bulk-data-loading.html
-        $this->db->execute("SET autocommit = 0");
+        $this->db->execute("START TRANSACTION");
 
+        try {
+
+            $this->doTransaction($simpleProducts);
+
+            $this->db->execute("COMMIT");
+
+        } catch (PDOException $e) {
+
+            $this->db->execute("ROLLBACK");
+
+            foreach ($simpleProducts as $product) {
+                $product->errors[] = $e->getMessage();
+            }
+
+        } catch (Exception $e) {
+
+            $this->db->execute("ROLLBACK");
+
+            foreach ($simpleProducts as $product) {
+                $product->errors[] = $e->getTraceAsString();
+            }
+
+        }
+
+        // call user defined functions to let them process the results
+        foreach ($config->resultCallbacks as $callback) {
+            foreach ($simpleProducts as $product) {
+                call_user_func($callback, $product);
+            }
+        }
+    }
+
+    protected function doTransaction(array $simpleProducts)
+    {
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
 
@@ -52,8 +87,10 @@ class SimpleStorage
         $updateProducts = [];
         foreach ($simpleProducts as $product) {
 
+            // replace Reference(s) with ids, changes $product->ok and $product->errors
             $this->idResolver->resolveIds($product);
 
+            // checks all attributes, changes $product->ok and $product->errors
             $this->validator->validate($product);
 
             if (!$product->ok) {
@@ -90,15 +127,6 @@ class SimpleStorage
         if (array_key_exists('category_ids', $productsByAttribute)) {
             $this->insertCategoryIds($productsByAttribute['category_ids']);
         }
-
-        // call user defined functions to let them process the results
-        foreach ($config->resultCallbacks as $callback) {
-            foreach ($simpleProducts as $product) {
-                call_user_func($callback, $product);
-            }
-        }
-
-        $this->db->execute("commit");
     }
 
     /**

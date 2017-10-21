@@ -28,6 +28,8 @@ class Magento2DbConnection
 
         /** @var PDO $pdo */
         $this->pdo = $mysql->getConnection();
+
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     /**

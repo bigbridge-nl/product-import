@@ -45,10 +45,14 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
     public function testInsertSpeed()
     {
         $success = true;
+        $lastErrors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$success) {
+        $config->resultCallbacks[] = function (Product $product) use (&$success, &$lastErrors) {
             $success = $success && $product->ok;
+            if ($product->errors) {
+                $lastErrors = $product->errors;
+            }
         };
 
         $skus = [];
@@ -73,7 +77,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.01, $time);
-        $this->assertLessThan(210, $memory); // cached metadata
+        $this->assertLessThan(220, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -106,8 +110,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(4.9, $time);
-        $this->assertLessThan(350, $memory); // the size of the last $product
+        $this->assertSame([], $lastErrors);
+        $this->assertLessThan(4.5, $time);
+        $this->assertLessThan(500, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -142,7 +147,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
         $this->assertTrue($success);
-        $this->assertLessThan(4.8, $time);
+        $this->assertSame([], $lastErrors);
+        $this->assertLessThan(4.6, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
