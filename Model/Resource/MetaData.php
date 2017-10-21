@@ -12,7 +12,9 @@ class MetaData
     const ENTITY_TYPE_TABLE = 'eav_entity_type';
     const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
     const CATEGORY_ENTITY_TABLE = 'catalog_category_entity';
+    const URL_REWRITE_TABLE = 'url_rewrite';
     const CATEGORY_PRODUCT_TABLE = 'catalog_category_product';
+    const CONFIG_DATA_TABLE = 'core_config_data';
     const ATTRIBUTE_SET_TABLE = 'eav_attribute_set';
     const ATTRIBUTE_TABLE = 'eav_attribute';
     const ATTRIBUTE_OPTION_TABLE = 'eav_attribute_option';
@@ -37,8 +39,14 @@ class MetaData
     /** @var string */
     public $categoryEntityTable;
 
+    /** @var string */
+    public $urlRewriteTable;
+
     /** @var  string */
     public $categoryProductTable;
+
+    /** @var  string */
+    public $configDataTable;
 
     /** @var  int */
     public $defaultCategoryAttributeSetId;
@@ -64,13 +72,18 @@ class MetaData
     /** @var array */
     public $categoryAttributeMap;
 
+    /** @var  array */
+    public $categoryUrlSuffix;
+
     public function __construct(Magento2DbConnection $db)
     {
         $this->db = $db;
 
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
         $this->categoryEntityTable = $db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
+        $this->urlRewriteTable = $db->getFullTableName(self::URL_REWRITE_TABLE);
         $this->categoryProductTable = $db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
+        $this->configDataTable = $db->getFullTableName(self::CONFIG_DATA_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
@@ -83,6 +96,8 @@ class MetaData
 
         $this->storeViewMap = $this->getStoreViewMap();
         $this->taxClassMap = $this->getTaxClassMap();
+
+        $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
     }
 
     /**
@@ -213,5 +228,19 @@ class MetaData
         }
 
         return $info;
+    }
+
+    public function getCategoryUrlSuffix()
+    {
+        $value = $this->db->fetchSingleCell("
+            SELECT `value`
+            FROM `{$this->configDataTable}`
+            WHERE
+                `scope` = 'default' AND
+                `scope_id` = 0 AND
+                `path` = 'catalog/seo/category_url_suffix'
+        ");
+
+        return is_null($value) ? ".html" : $value;
     }
 }

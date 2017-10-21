@@ -6,6 +6,7 @@ use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
+use BigBridge\ProductImport\Model\Resource\Id\NameToUrlKeyConverter;
 use BigBridge\ProductImport\Model\Resource\IdResolver;
 use Magento\Framework\App\ObjectManager;
 
@@ -77,5 +78,15 @@ class IdResolverTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($test[1], $product->ok);
 
         }
+    }
+
+    public function testNameToUrlKeyConverter()
+    {
+        $converter = new NameToUrlKeyConverter();
+
+        $this->assertSame("computers", $converter->createUrlKeyFromName("Computers"));
+        $this->assertSame("computers-software", $converter->createUrlKeyFromName("Computers & Software"));
+        $this->assertSame("un-velocipede", $converter->createUrlKeyFromName("Un vélocipède"));
+        $this->assertSame("500", $converter->createUrlKeyFromName("€ 500"));
     }
 }

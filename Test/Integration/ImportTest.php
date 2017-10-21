@@ -48,7 +48,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $success = $success && $product->ok;
         };
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        list($importer, ) = self::$factory->createImporter($config);
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
@@ -162,8 +162,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->createImporter($config);
 
-        $sku1 = uniqid("bb");
-
         $product = new SimpleProduct();
         $product->attribute_set_id = new Reference("Checkers");
 
@@ -200,7 +198,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         };
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        list($importer, ) = self::$factory->createImporter($config);
 
         $lines = [
             ['Purple Box', "", "3.95"],
@@ -233,7 +231,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $success = $success && $product->ok;
         };
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        list($importer, ) = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct();
         $product1->name = "Pine trees";
