@@ -53,6 +53,7 @@ class SimpleStorage
 
             foreach ($simpleProducts as $product) {
                 $product->errors[] = $e->getMessage();
+                $product->ok = false;
             }
 
         } catch (Exception $e) {
@@ -61,6 +62,7 @@ class SimpleStorage
 
             foreach ($simpleProducts as $product) {
                 $product->errors[] = $e->getTraceAsString();
+                $product->ok = false;
             }
 
         }

@@ -60,7 +60,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $skus[$i] = uniqid("bb");
         }
 
-        $categories = [uniqid('cc'), uniqid('cc'), uniqid('cc')];
+        $categories = ['Test category 1', 'Test category 2', 'Test category 3'];
 
         $beforePeakMemory = memory_get_peak_usage();
 
@@ -111,8 +111,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($success);
         $this->assertSame([], $lastErrors);
-        $this->assertLessThan(4.5, $time);
-        $this->assertLessThan(500, $memory); // the size of the last $product
+        $this->assertLessThan(3.2, $time);
+        $this->assertLessThan(400, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -148,7 +148,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($success);
         $this->assertSame([], $lastErrors);
-        $this->assertLessThan(4.6, $time);
+        $this->assertLessThan(2.9, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
