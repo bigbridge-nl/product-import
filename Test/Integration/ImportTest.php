@@ -257,4 +257,36 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3, count(array_unique($product2->category_ids)));
         $this->assertEquals(1, count(array_diff($product1->category_ids, $product2->category_ids)));
     }
+
+    public function testMissingCategories()
+    {
+        $success = true;
+
+        $config = new ImportConfig();
+
+        // the essence of this test
+        $config->autoCreateCategories = false;
+
+        $config->resultCallbacks[] = function(Product $product) use (&$success) {
+            $success = $success && $product->ok;
+        };
+
+        list($importer, ) = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct();
+        $product1->name = "Gummybears";
+        $product1->sku = "gummybears";
+        $product1->price = '1.99';
+        $product1->attribute_set_id = new Reference("Default");
+        $product1->category_ids = new References(['Gummybears', 'Other Candy', 'German Candy']);
+
+        $importer->importSimpleProduct($product1);
+
+        $importer->flush();
+
+        $this->assertEquals(0, count($product1->category_ids));
+        $this->assertEquals(["category not found: Gummybears"], $product1->errors);
+        $this->assertEquals(false, $product1->ok);
+        $this->assertEquals(false, $success);
+    }
 }

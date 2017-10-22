@@ -90,7 +90,7 @@ class SimpleStorage
         foreach ($simpleProducts as $product) {
 
             // replace Reference(s) with ids, changes $product->ok and $product->errors
-            $this->referenceResolver->resolveIds($product);
+            $this->referenceResolver->resolveIds($product, $config);
 
             // checks all attributes, changes $product->ok and $product->errors
             $this->validator->validate($product);

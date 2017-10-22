@@ -36,35 +36,45 @@ class CategoryImporter
      * Category names may be paths separated with /
      *
      * @param array $categoryPaths
-     * @return int[]
+     * @param bool $autoCreateCategories
+     * @return array
      */
-    public function importCategoryPaths(array $categoryPaths)
+    public function importCategoryPaths(array $categoryPaths, bool $autoCreateCategories)
     {
         $ids = [];
+        $error = "";
 
         foreach ($categoryPaths as $path) {
             if (array_key_exists($path, $this->categoryCache)) {
                 $id = $this->categoryCache[$path];
                 $ids[] = $id;
             } else {
-                $id = $this->importCategoryPath($path);
+                list($id, $error) = $this->importCategoryPath($path, $autoCreateCategories);
+
+                if ($error !== "") {
+                    $ids = [];
+                    break;
+                }
+
                 $this->categoryCache[$path] = $id;
                 $ids[] = $id;
             }
         }
 
-        return [$ids, ""];
+        return [$ids, $error];
     }
 
     /**
      * Creates a path of categories, if necessary, and returns the new id.
      *
      * @param string $namePath A / separated path of category names.
-     * @return int
+     * @param bool $autoCreateCategories
+     * @return array
      */
-    public function importCategoryPath(string $namePath): int
+    public function importCategoryPath(string $namePath, bool $autoCreateCategories): array
     {
         $categoryId = \Magento\Catalog\Model\Category::TREE_ROOT_ID;
+        $error = "";
 
         $idPath = [$categoryId];
 
@@ -74,6 +84,13 @@ class CategoryImporter
 
             $categoryId = $this->getChildCategoryId($categoryId, $categoryName);
 
+            if (is_null($categoryId)) {
+                if (!$autoCreateCategories) {
+                    $error = "category not found: " . $categoryName;
+                    break;
+                }
+            }
+
             if ($categoryId === null) {
                 $categoryId = $this->importChildCategory($idPath, $categoryName);
             }
@@ -81,7 +98,7 @@ class CategoryImporter
             $idPath[] = $categoryId;
         }
 
-        return $categoryId;
+        return [$categoryId, $error];
     }
 
     /**

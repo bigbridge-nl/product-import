@@ -31,4 +31,14 @@ class ImportConfig
      * function(BigBridge\ProductImport\Model\Data\Product $product, $ok, $error);
      */
     public $resultCallbacks = [];
+
+    /**
+     * Create categories that are passed as References, if they do not exist.
+     *
+     * true: creates categories
+     * false: does not create categories, adds an error to the product
+     *
+     * @var bool
+     */
+    public $autoCreateCategories = true;
 }

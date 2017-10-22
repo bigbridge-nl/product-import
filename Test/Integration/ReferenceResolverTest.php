@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
+use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
@@ -27,8 +28,10 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
     }
 
-    public function testIdResolver()
+    public function testReferenceResolver()
     {
+        $config = new ImportConfig();
+
         /** @var ReferenceResolver $resolver */
         $resolver = ObjectManager::getInstance()->get(ReferenceResolver::class);
 
@@ -73,7 +76,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
                 $product->$fieldName = $fieldValue;
             }
 
-            $resolver->resolveIds($product);
+            $resolver->resolveIds($product, $config);
             $this->assertEquals($test[2], implode('; ', $product->errors));
             $this->assertEquals($test[1], $product->ok);
 
