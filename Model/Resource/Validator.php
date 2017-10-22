@@ -196,8 +196,8 @@ class Validator
                         }
                         break;
                     case MetaData::TYPE_DATETIME:
-                        if (!preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $value)) {
-                            $errors[] = $eavAttribute . " is not a MySQL date time (" . $value . ")";
+                        if (!preg_match('/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/', $value)) {
+                            $errors[] = $eavAttribute . " is not a MySQL date or date time (" . $value . ")";
                         }
                         break;
                     case MetaData::TYPE_INTEGER:

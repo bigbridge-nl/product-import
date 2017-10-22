@@ -88,12 +88,17 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct();
             $product->name = uniqid("name");
+            $product->description = "A wunderful product that will enhance the quality of your live";
+            $product->short_description = "A wunderful product";
+            $product->weight = "6";
             $product->sku = $skus[$i];
             $product->attribute_set_id = new Reference( "Default");
             $product->status = Product::STATUS_ENABLED;
-            $product->price = (string)rand(1, 100);
+            $product->price = "1.39";
+            $product->special_price = "1.25";
+            $product->special_price_from_date = "2017-10-22";
+            $product->special_price_to_date = "2017-10-28";
             $product->visibility = Product::VISIBILITY_BOTH;
-            $product->special_from_date = "2017-10-14 01:22:03";
             $product->tax_class_id = new Reference('Taxable Goods');
             $product->category_ids = new References([$categories[0], $categories[1]]);
             $product->website_ids = new References(['base']);
@@ -112,7 +117,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(2.0, $time);
+        $this->assertLessThan(2.6, $time);
         $this->assertLessThan(420, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -126,12 +131,17 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct();
             $product->name = uniqid("name");
+            $product->description = "A wonderful product that will enhance the quality of your life";
+            $product->short_description = "A wonderful product";
+            $product->weight = "5.80";
             $product->sku = $skus[$i];
             $product->attribute_set_id = new Reference( "Default");
             $product->status = Product::STATUS_DISABLED;
-            $product->price = (string)rand(1, 100);
+            $product->price = "1.39";
+            $product->special_price = "1.15";
+            $product->special_price_from_date = "2017-12-10";
+            $product->special_price_to_date = "2017-12-20";
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
-            $product->special_from_date = "2017-10-15 02:11:59";
             $product->tax_class_id = new Reference('Retail Customer');
             $product->category_ids = new References([$categories[1], $categories[2]]);
             $product->website_ids = new References(['base']);
@@ -150,13 +160,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(2.3, $time);
+        $this->assertLessThan(2.9, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
-        $this->assertLessThan(4400, $peakMemory);
+        $this->assertLessThan(5200, $peakMemory);
     }
 }

@@ -170,7 +170,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $importer->flush();
 
         $expectedErrors = [
-            "attribute set not found: Checkers",
+            "attribute set name not found: Checkers",
             "missing sku",
             "missing attribute set id",
             "missing name",

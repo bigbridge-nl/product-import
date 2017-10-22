@@ -63,8 +63,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // plain
             [['special_from_date' => '2017-10-14 01:34:18'], true, ""],
+            [['special_from_date' => '2017-10-14'], true, ""],
             // corrupt
-            [['special_from_date' => '2017-10-14'], false, "special_from_date is not a MySQL date time (2017-10-14)"],
+            [['special_from_date' => 'October 4, 2017'], false, "special_from_date is not a MySQL date or date time (October 4, 2017)"],
             [['special_from_date' => new SimpleXMLElement("<xml></xml>")], false, "special_from_date is an object (SimpleXMLElement), should be a string"],
 
             // int
