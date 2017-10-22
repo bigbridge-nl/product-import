@@ -6,10 +6,10 @@ use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
-use BigBridge\ProductImport\Model\Resource\Id\AttributeSetResolver;
-use BigBridge\ProductImport\Model\Resource\Id\CategoryImporter;
-use BigBridge\ProductImport\Model\Resource\Id\StoreViewResolver;
-use BigBridge\ProductImport\Model\Resource\Id\TaxClassResolver;
+use BigBridge\ProductImport\Model\Resource\Reference\AttributeSetResolver;
+use BigBridge\ProductImport\Model\Resource\Reference\CategoryImporter;
+use BigBridge\ProductImport\Model\Resource\Reference\StoreViewResolver;
+use BigBridge\ProductImport\Model\Resource\Reference\TaxClassResolver;
 
 /**
  * Replaces all Reference(s) values of a product with database ids.

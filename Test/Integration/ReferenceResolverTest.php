@@ -7,7 +7,7 @@ use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
-use BigBridge\ProductImport\Model\Resource\Id\NameToUrlKeyConverter;
+use BigBridge\ProductImport\Model\Resource\Reference\NameToUrlKeyConverter;
 use BigBridge\ProductImport\Model\Resource\ReferenceResolver;
 use Magento\Framework\App\ObjectManager;
 
