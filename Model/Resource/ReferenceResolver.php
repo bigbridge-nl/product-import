@@ -10,6 +10,7 @@ use BigBridge\ProductImport\Model\Resource\Reference\AttributeSetResolver;
 use BigBridge\ProductImport\Model\Resource\Reference\CategoryImporter;
 use BigBridge\ProductImport\Model\Resource\Reference\StoreViewResolver;
 use BigBridge\ProductImport\Model\Resource\Reference\TaxClassResolver;
+use BigBridge\ProductImport\Model\Resource\Reference\WebsiteResolver;
 
 /**
  * Replaces all Reference(s) values of a product with database ids.
@@ -30,16 +31,21 @@ class ReferenceResolver
     /**@var StoreViewResolver */
     protected $storeViewResolver;
 
+    /**@var WebsiteResolver */
+    protected $websiteResolver;
+
     public function __construct(
         CategoryImporter $categoryImporter,
         TaxClassResolver $taxClassResolver,
         AttributeSetResolver $attributeSetResolver,
-        StoreViewResolver $storeViewResolver)
+        StoreViewResolver $storeViewResolver,
+        WebsiteResolver $websiteResolver)
     {
         $this->categoryImporter = $categoryImporter;
         $this->taxClassResolver = $taxClassResolver;
         $this->attributeSetResolver = $attributeSetResolver;
         $this->storeViewResolver = $storeViewResolver;
+        $this->websiteResolver = $websiteResolver;
     }
 
     public function resolveIds(Product $product, ImportConfig $config)
@@ -49,7 +55,7 @@ class ReferenceResolver
             $product->category_ids = $ids;
             if ($error !== "") {
                 $product->ok = false;
-                $product->errors[]= $error;
+                $product->errors[] = $error;
             }
         }
 
@@ -58,8 +64,7 @@ class ReferenceResolver
             $product->tax_class_id = $id;
             if ($error !== "") {
                 $product->ok = false;
-                $product->errors[]= $error;
-                $product->tax_class_id = null;
+                $product->errors[] = $error;
             }
         }
 
@@ -68,8 +73,7 @@ class ReferenceResolver
             $product->store_view_id = $id;
             if ($error !== "") {
                 $product->ok = false;
-                $product->errors[]= $error;
-                $product->store_view_id = null;
+                $product->errors[] = $error;
             }
         }
 
@@ -78,8 +82,16 @@ class ReferenceResolver
             $product->attribute_set_id = $id;
             if ($error !== "") {
                 $product->ok = false;
-                $product->errors[]= $error;
-                $product->attribute_set_id = null;
+                $product->errors[] = $error;
+            }
+        }
+
+        if ($product->website_ids instanceof References) {
+            list($ids, $error) = $this->websiteResolver->resolveNames($product->website_ids->names);
+            $product->website_ids = $ids;
+            if ($error !== "") {
+                $product->ok = false;
+                $product->errors[] = $error;
             }
         }
     }

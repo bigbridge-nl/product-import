@@ -20,6 +20,7 @@ class MetaData
     const ATTRIBUTE_OPTION_TABLE = 'eav_attribute_option';
     const ATTRIBUTE_OPTION_VALUE_TABLE = 'eav_attribute_option_value';
     const STORE_TABLE = 'store';
+    const WEBSITE_TABLE = 'store_website';
     const TAX_CLASS_TABLE = 'tax_class';
 
     const TYPE_DATETIME = 'datetime';
@@ -60,6 +61,9 @@ class MetaData
     /** @var  array Maps store view code to id */
     public $storeViewMap;
 
+    /** @var  array Maps website code to id */
+    public $websiteMap;
+
     /** @var int  */
     public $productEntityTypeId;
 
@@ -95,6 +99,7 @@ class MetaData
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
 
         $this->storeViewMap = $this->getStoreViewMap();
+        $this->websiteMap = $this->getWebsiteMap();
         $this->taxClassMap = $this->getTaxClassMap();
 
         $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
@@ -157,6 +162,18 @@ class MetaData
     {
         $storeTable = $this->db->getFullTableName(self::STORE_TABLE);
         $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$storeTable}");
+        return $map;
+    }
+
+    /**
+     * Returns a code => id map for websites.
+     *
+     * @return array
+     */
+    protected function getWebsiteMap()
+    {
+        $websiteTable = $this->db->getFullTableName(self::WEBSITE_TABLE);
+        $map = $this->db->fetchMap("SELECT `code`, `website_id` FROM {$websiteTable}");
         return $map;
     }
 

@@ -23,7 +23,7 @@ class StoreViewResolver
         $id = null;
 
         if (!array_key_exists($name, $this->metaData->storeViewMap)) {
-            $error = "store view not found: " . $name;
+            $error = "store view code not found: " . $name;
         } else {
             $id = $this->metaData->storeViewMap[$name];
         }

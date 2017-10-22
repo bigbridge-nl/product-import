@@ -47,21 +47,28 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             // plain
             [['attribute_set_id' => new Reference("Default")], true, ""],
             // corrupt
-            [['attribute_set_id' => new Reference("Winograd")], false, "attribute set not found: Winograd"],
+            [['attribute_set_id' => new Reference("Winograd")], false, "attribute set name not found: Winograd"],
 
             // store_view_id
 
             // plain
             [['store_view_id' => new Reference("admin")], true, ""],
             // corrupt
-            [['store_view_id' => new Reference("Mueller")], false, "store view not found: Mueller"],
+            [['store_view_id' => new Reference("Mueller")], false, "store view code not found: Mueller"],
 
             // tax_class_id
 
             // plain
             [['tax_class_id' => new Reference("Taxable Goods")], true, ""],
             // corrupt
-            [['tax_class_id' => new Reference("Codd")], false, "tax class not found: Codd"],
+            [['tax_class_id' => new Reference("Codd")], false, "tax class name not found: Codd"],
+
+            // web site ids
+
+            // plain
+            [['website_ids' => new References(["base"])], true, ""],
+            // corrupt
+            [['website_ids' => new References(["Shopaholic"])], false, "website code not found: Shopaholic"],
         ];
 
         foreach ($tests as $test) {

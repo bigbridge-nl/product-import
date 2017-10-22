@@ -98,11 +98,26 @@ class Validator
             } else {
                 $errors[] = "category_ids is a " . gettype($product->category_ids) . ", should be a References object or an array of integers";
             }
-
         } else {
             foreach ($product->category_ids as $id) {
                 if (!preg_match('/\d+/', $id)) {
-                    $errors[] = "category_ids should be an array of integers";
+                    $errors[] = "category_ids should be a References object or an array of integers";
+                    break;
+                }
+            }
+        }
+
+        // website_ids
+        if (!is_array($product->website_ids)) {
+            if ($product->website_ids instanceof Reference) {
+                $errors[] = "website_ids is a Reference, should be a References(!) object";
+            } else {
+                $errors[] = "website_ids is a " . gettype($product->website_ids) . ", should be a References object or an array of integers";
+            }
+        } else {
+            foreach ($product->website_ids as $id) {
+                if (!preg_match('/\d+/', $id)) {
+                    $errors[] = "website_ids should be a References object or an array of integers";
                     break;
                 }
             }

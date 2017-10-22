@@ -42,7 +42,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
     }
 
-    public function testInsertSpeed()
+    public function testImportSpeed()
     {
         $success = true;
         $lastErrors = [];
@@ -96,6 +96,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->special_from_date = "2017-10-14 01:22:03";
             $product->tax_class_id = new Reference('Taxable Goods');
             $product->category_ids = new References([$categories[0], $categories[1]]);
+            $product->website_ids = new References(['base']);
 
             $importer->importSimpleProduct($product);
         }
@@ -109,10 +110,10 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
 
-        $this->assertTrue($success);
         $this->assertSame([], $lastErrors);
+        $this->assertTrue($success);
         $this->assertLessThan(2.0, $time);
-        $this->assertLessThan(400, $memory); // the size of the last $product
+        $this->assertLessThan(420, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -133,6 +134,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->special_from_date = "2017-10-15 02:11:59";
             $product->tax_class_id = new Reference('Retail Customer');
             $product->category_ids = new References([$categories[1], $categories[2]]);
+            $product->website_ids = new References(['base']);
 
             $importer->importSimpleProduct($product);
         }
@@ -146,8 +148,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
 
-        $this->assertTrue($success);
         $this->assertSame([], $lastErrors);
+        $this->assertTrue($success);
         $this->assertLessThan(2.3, $time);
         $this->assertLessThan(1, $memory);
 
@@ -155,6 +157,6 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
-        $this->assertLessThan(4000, $peakMemory);
+        $this->assertLessThan(4400, $peakMemory);
     }
 }

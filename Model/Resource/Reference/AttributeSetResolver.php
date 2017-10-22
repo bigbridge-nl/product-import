@@ -23,7 +23,7 @@ class AttributeSetResolver
         $id = null;
 
         if (!array_key_exists($name, $this->metaData->productAttributeSetMap)) {
-            $error = "attribute set not found: " . $name;
+            $error = "attribute set name not found: " . $name;
         } else {
             $id = $this->metaData->productAttributeSetMap[$name];
         }

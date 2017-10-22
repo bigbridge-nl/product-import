@@ -132,9 +132,17 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             [['category_ids' => [1, 2]], true, ""],
             // corrupt
             [['category_ids' => "1, 2"], false, "category_ids is a string, should be a References object or an array of integers"],
-            [['category_ids' => ["Hardware", "Software"]], false, "category_ids should be an array of integers"],
+            [['category_ids' => ["Hardware", "Software"]], false, "category_ids should be a References object or an array of integers"],
             [['category_ids' => new Reference("Hardware")], false, "category_ids is a Reference, should be a References(!) object"],
 
+            // website_ids
+
+            // plain
+            [['website_ids' => [1]], true, ""],
+            // corrupt
+            [['website_ids' => 1], false, "website_ids is a integer, should be a References object or an array of integers"],
+            [['website_ids' => ["Shopaholic", "Wannabuy"]], false, "website_ids should be a References object or an array of integers"],
+            [['website_ids' => new Reference("Shoparound")], false, "website_ids is a Reference, should be a References(!) object"],
         ];
 
         foreach ($tests as $test) {

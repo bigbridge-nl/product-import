@@ -55,6 +55,9 @@ abstract class Product
     /** @var int[]|References */
     public $category_ids = [];
 
+    /** @var int[]|References */
+    public $website_ids = [];
+
     // =========================================
     // importer data
     // =========================================
