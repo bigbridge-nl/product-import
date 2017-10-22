@@ -7,13 +7,13 @@ use BigBridge\ProductImport\Model\ImporterFactory;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\Resource\Id\NameToUrlKeyConverter;
-use BigBridge\ProductImport\Model\Resource\IdResolver;
+use BigBridge\ProductImport\Model\Resource\ReferenceResolver;
 use Magento\Framework\App\ObjectManager;
 
 /**
  * @author Patrick van Bergen
  */
-class IdResolverTest extends \PHPUnit_Framework_TestCase
+class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
 {
     /** @var  ImporterFactory */
     private static $factory;
@@ -29,8 +29,8 @@ class IdResolverTest extends \PHPUnit_Framework_TestCase
 
     public function testIdResolver()
     {
-        /** @var IdResolver $resolver */
-        $resolver = ObjectManager::getInstance()->get(IdResolver::class);
+        /** @var ReferenceResolver $resolver */
+        $resolver = ObjectManager::getInstance()->get(ReferenceResolver::class);
 
         $tests = [
 

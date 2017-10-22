@@ -22,15 +22,15 @@ class SimpleStorage
     /** @var Validator  */
     protected $validator;
 
-    /** @var  IdResolver */
-    protected $idResolver;
+    /** @var  ReferenceResolver */
+    protected $referenceResolver;
 
-    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator, IdResolver $idResolver)
+    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator, ReferenceResolver $referenceResolver)
     {
         $this->db = $db;
         $this->metaData = $metaData;
         $this->validator = $validator;
-        $this->idResolver = $idResolver;
+        $this->referenceResolver = $referenceResolver;
     }
 
     /**
@@ -90,7 +90,7 @@ class SimpleStorage
         foreach ($simpleProducts as $product) {
 
             // replace Reference(s) with ids, changes $product->ok and $product->errors
-            $this->idResolver->resolveIds($product);
+            $this->referenceResolver->resolveIds($product);
 
             // checks all attributes, changes $product->ok and $product->errors
             $this->validator->validate($product);

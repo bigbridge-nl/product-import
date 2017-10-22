@@ -13,7 +13,7 @@ use BigBridge\ProductImport\Model\Resource\Id\TaxClassResolver;
 /**
  * @author Patrick van Bergen
  */
-class IdResolver
+class ReferenceResolver
 {
     /** @var CategoryImporter */
     protected $categoryImporter;

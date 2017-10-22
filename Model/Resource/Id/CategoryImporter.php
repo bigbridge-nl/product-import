@@ -164,6 +164,8 @@ class CategoryImporter
         $requestPath = $urlPath . $this->metaData->categoryUrlSuffix;
         $targetPath = "catalog/category/view/id/" . $categoryId;
 
+#todo $requestPath moet uniek zijn, evenals url_key
+
         // url_rewrite
         $this->db->execute("
             INSERT INTO `{$urlRewriteTable}`
