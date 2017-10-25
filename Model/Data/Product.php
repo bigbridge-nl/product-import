@@ -52,6 +52,9 @@ abstract class Product
     /** @var  int|Reference */
     public $tax_class_id;
 
+    /** @var  string */
+    public $url_key;
+
     /** @var int[]|References */
     public $category_ids = [];
 

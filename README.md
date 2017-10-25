@@ -94,10 +94,12 @@ For each product user defined "result callbacks" are called. This allows you to 
 
 ## Goals
 
-* fast
-* easy to use
-* robust
-* complete
+The library aims to be
+
+* fast (a thousand products per second)
+* easy to use (the api should be simple to use, and well documented, it should be easy to do common things, and uncommon things should be possible)
+* robust (by default the library should take the safe side when a decision is to be made, also it should not halt on a single product failing)
+* complete (if at all possible, all product import features should be present)
 
 ## Assumptions
 
@@ -114,9 +116,23 @@ For each product user defined "result callbacks" are called. This allows you to 
 * Updates: do not use default value for attribute_set_code, because it may unintentionally overwrite an existing one
 * attribute_set_id can currently not be updated. Reason: if one would forget it as a field, it would default to something, and this could produce an unsolicited change.
 
+## url_keys, url_paths, and url rewrites
+
+* new category =>
+    * url_key
+    * url_path
+    * url_rewrite
+
+* category update
+    * url_key
+    * url_path
+    * url_rewrite
+    * url_rewrite 301 (moved permanently) (save_rewrites_history)
+
+
+
 ## On empty values
 
-* An unassigned property will not be stored at all
 * A value of null will not be stored at all
 * A value of "" will be stored as an empty string for varchar and text attributes, otherwise will not be stored at all
 
@@ -137,6 +153,12 @@ This is Go-style programming. It forces the developer to think about the error t
 ### Getters and setters
 
 I do not use getters and setters in the inner loop (that is, for the code that is used for each product again) because they use a nontrivial amount of time in large amounts.
+
+### Quote input
+
+The reason for not quoting all input is speed.
+
+I quote input only when necessary, that is, for input of string content. All other content is checked by the validator and cannot corrupt the database.
 
 ### Names and ids
 

@@ -107,9 +107,18 @@ class Magento2DbConnection
      * @param string $query
      * @return array
      */
-    public function fetchAll(string $query)
+    public function fetchAllAssoc(string $query)
     {
-        return $this->pdo->query($query)->fetchAll();
+        return $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * @param string $query
+     * @return array
+     */
+    public function fetchAllNumber(string $query)
+    {
+        return $this->pdo->query($query)->fetchAll(PDO::FETCH_NUM);
     }
 
     /**

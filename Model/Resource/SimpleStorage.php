@@ -49,7 +49,7 @@ class SimpleStorage
 
         } catch (PDOException $e) {
 
-            $this->db->execute("ROLLBACK");
+            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
 
             foreach ($simpleProducts as $product) {
                 $product->errors[] = $e->getMessage();
@@ -58,10 +58,11 @@ class SimpleStorage
 
         } catch (Exception $e) {
 
-            $this->db->execute("ROLLBACK");
+            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
 
             foreach ($simpleProducts as $product) {
-                $product->errors[] = $e->getTraceAsString();
+                $message = $e->getMessage();
+                $product->errors[] = $message;
                 $product->ok = false;
             }
 
@@ -75,6 +76,10 @@ class SimpleStorage
         }
     }
 
+    /**
+     * @param SimpleProduct[] $simpleProducts
+     * @param ImportConfig $config
+     */
     protected function doTransaction(array $simpleProducts, ImportConfig $config)
     {
         // collect skus
@@ -120,6 +125,7 @@ class SimpleStorage
 
         if (count($insertProducts) > 0) {
             $this->insertMainTable($insertProducts);
+            $this->insertRewrites($insertProducts);
         }
         if (count($updateProducts) > 0) {
             $this->updateMainTable($updateProducts);
@@ -152,6 +158,9 @@ class SimpleStorage
         return $this->db->fetchMap("SELECT `sku`, `entity_id` FROM {$this->metaData->productEntityTable} WHERE `sku` in ({$serialized})");
     }
 
+    /**
+     * @param SimpleProduct[] $products
+     */
     protected function insertMainTable(array $products)
     {
 #todo has_options, required_options
@@ -186,6 +195,9 @@ class SimpleStorage
         }
     }
 
+    /**
+     * @param SimpleProduct[] $products
+     */
     protected function updateMainTable(array $products)
     {
 #todo has_options, required_options
@@ -204,6 +216,84 @@ class SimpleStorage
             " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)";
 
         $this->db->execute($sql);
+    }
+
+    /**
+     * @param SimpleProduct[] $products
+     */
+    protected function insertRewrites(array $products)
+    {
+        $values = [];
+
+        foreach ($products as $product) {
+
+            if (!$product->url_key) {
+                continue;
+            }
+
+            $shortUrl = $product->url_key . $this->metaData->productUrlSuffix;
+
+            // store ids
+            if ($product->store_view_id == 0) {
+                $storeIds = $this->metaData->storeViewMap;
+                // remove store id 0
+                $storeIds = array_diff($storeIds, ['0']);
+            } else {
+                $storeIds = [$product->store_view_id];
+            }
+
+            foreach ($storeIds as $storeId) {
+
+                // url keys without categories
+                $requestPath = $this->db->quote($shortUrl);
+                $targetPath = $this->db->quote('catalog/product/view/id/' . $product->id);
+                $values[] = "('product', {$product->id},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, null)";
+
+                // url keys with categories
+                foreach ($product->category_ids as $directCategoryId) {
+
+                    // here we check if the category id supplied actually exists
+                    if (!array_key_exists($directCategoryId, $this->metaData->allCategoryInfo)) {
+                        continue;
+                    }
+
+                    $path = "";
+                    foreach ($this->metaData->allCategoryInfo[$directCategoryId]->path as $i => $parentCategoryId) {
+
+                        // the root category is not used for the url path
+                        if ($i === 0) {
+                            continue;
+                        }
+
+                        $categoryInfo = $this->metaData->allCategoryInfo[$parentCategoryId];
+
+                        // take the url_key from the store view, or default to the global url_key
+                        $urlKey = array_key_exists($storeId, $categoryInfo->urlKeys) ? $categoryInfo->urlKeys[$storeId] : $categoryInfo->urlKeys[0];
+
+                        $path .= $urlKey . "/";
+
+                        $requestPath = $this->db->quote($path . $shortUrl);
+                        $targetPath = $this->db->quote('catalog/product/view/id/' . $product->id . '/category/' . $parentCategoryId);
+                        $metadata = $this->db->quote(serialize(['category_id' => (string)$parentCategoryId]));
+                        $values[] = "('product', {$product->id},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, {$metadata})";
+                    }
+                }
+            }
+        }
+
+        if (!empty($values)) {
+
+            // IGNORE works on the key request_path, store_id
+            // when this combination already exists, it is ignored
+            // this may happen if a main product is followed by one of its store views
+            $sql = "
+            INSERT IGNORE INTO `{$this->metaData->urlRewriteTable}`
+            (`entity_type`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `store_id`, `is_autogenerated`, `metadata`)
+            VALUES " . implode(', ', $values) . "
+        ";
+
+            $this->db->execute($sql);
+        }
     }
 
     /**

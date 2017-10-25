@@ -175,9 +175,13 @@ class CategoryImporter
         ");
 
         // url
-        $parentUrlPath = $this->getParentUrlPath($parentId);
         $urlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($categoryName);
-        $urlPath = $parentUrlPath . '/' . $urlKey;
+        if (count($idPath) == 1) {
+            $urlPath = $urlKey;
+        } else {
+            $parentUrlPath = $this->getParentUrlPath($parentId);
+            $urlPath = $parentUrlPath . '/' . $urlKey;
+        }
         $requestPath = $urlPath . $this->metaData->categoryUrlSuffix;
         $targetPath = "catalog/category/view/id/" . $categoryId;
 
@@ -200,7 +204,7 @@ class CategoryImporter
 
         $this->importEavAttribute($categoryId, 'name', $categoryName, MetaData::TYPE_VARCHAR, 0);
         $this->importEavAttribute($categoryId, 'display_mode', "PRODUCTS", MetaData::TYPE_VARCHAR, 0);
-#todo
+#todo make url key unique
         $this->importEavAttribute($categoryId, 'url_key', $urlKey, MetaData::TYPE_VARCHAR, 0);
         $this->importEavAttribute($categoryId, 'url_path', $urlPath, MetaData::TYPE_VARCHAR, 0);
 
@@ -209,6 +213,11 @@ class CategoryImporter
         $this->importEavAttribute($categoryId, 'include_in_menu', 1, MetaData::TYPE_INTEGER, 0);
         $this->importEavAttribute($categoryId, 'custom_use_parent_settings', 0, MetaData::TYPE_INTEGER, 0);
         $this->importEavAttribute($categoryId, 'custom_apply_to_products', 0, MetaData::TYPE_INTEGER, 0);
+
+        // !important: add this new category to the metadata collected
+        $newIdPath = $idPath;
+        $newIdPath[] = $categoryId;
+        $this->metaData->addCategoryInfo($categoryId, $newIdPath, [0 => $urlKey]);
 
         return $categoryId;
     }
@@ -228,7 +237,6 @@ class CategoryImporter
 
         return $urlPath;
     }
-
 
     protected function importEavAttribute(int $categoryId, string $attributeCode, $value, string $dataType, int $storeId)
     {

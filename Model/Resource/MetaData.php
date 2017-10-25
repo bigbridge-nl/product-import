@@ -5,6 +5,8 @@ namespace BigBridge\ProductImport\Model\Resource;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 
 /**
+ * Pre-loads all meta data needed for the core processes once.
+ *
  * @author Patrick van Bergen
  */
 class MetaData
@@ -76,8 +78,14 @@ class MetaData
     /** @var array */
     public $categoryAttributeMap;
 
-    /** @var  array */
+    /** @var  string */
+    public $productUrlSuffix;
+
+    /** @var  string */
     public $categoryUrlSuffix;
+
+    /** @var CategoryInfo[] */
+    public $allCategoryInfo;
 
     public function __construct(Magento2DbConnection $db)
     {
@@ -102,7 +110,10 @@ class MetaData
         $this->websiteMap = $this->getWebsiteMap();
         $this->taxClassMap = $this->getTaxClassMap();
 
+        $this->productUrlSuffix = $this->getProductUrlSuffix();
         $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
+
+        $this->allCategoryInfo = $this->getAllCategoryInfo();
     }
 
     /**
@@ -189,7 +200,6 @@ class MetaData
         return $map;
     }
 
-
     /**
      * Returns a name => id map for category attributes.
      *
@@ -211,7 +221,7 @@ class MetaData
         $attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);
         $attributeOptionValueTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_VALUE_TABLE);
 
-        $optionValueRows = $this->db->fetchAll("
+        $optionValueRows = $this->db->fetchAllAssoc("
             SELECT A.`attribute_code`, O.`option_id`, V.`value`
             FROM {$attributeTable} A
             INNER JOIN {$attributeOptionTable} O ON O.attribute_id = A.attribute_id
@@ -224,7 +234,7 @@ class MetaData
             $allOptionValues[$row['attribute_code']][$row['value']] = $row['option_id'];
         }
 
-        $rows = $this->db->fetchAll("
+        $rows = $this->db->fetchAllAssoc("
             SELECT `attribute_id`, `attribute_code`, `is_required`, `backend_type`, `frontend_input` 
             FROM {$attributeTable} 
             WHERE `entity_type_id` = {$this->productEntityTypeId} AND backend_type != 'static'");
@@ -259,5 +269,69 @@ class MetaData
         ");
 
         return is_null($value) ? ".html" : $value;
+    }
+
+    public function getProductUrlSuffix()
+    {
+        $value = $this->db->fetchSingleCell("
+            SELECT `value`
+            FROM `{$this->configDataTable}`
+            WHERE
+                `scope` = 'default' AND
+                `scope_id` = 0 AND
+                `path` = 'catalog/seo/product_url_suffix'
+        ");
+
+        return is_null($value) ? ".html" : $value;
+    }
+
+    /**
+     * @return CategoryInfo[]
+     */
+    public function getAllCategoryInfo()
+    {
+        $urlKeyAttributeId = $this->categoryAttributeMap['url_key'];
+
+        $categoryData = $this->db->fetchAllAssoc("
+            SELECT E.`entity_id`, E.`path`, URL_KEY.`value` as url_key, URL_KEY.`store_id`
+            FROM `{$this->categoryEntityTable}` E
+            LEFT JOIN `{$this->categoryEntityTable}_varchar` URL_KEY ON URL_KEY.`entity_id` = E.`entity_id` 
+                AND URL_KEY.`attribute_id` = {$urlKeyAttributeId} 
+        ");
+
+        /** @var CategoryInfo[] $categories */
+        $categories = [];
+
+        foreach ($categoryData as $categoryDatum) {
+
+            $categoryId = $categoryDatum['entity_id'];
+            $storeId = (int)$categoryDatum['store_id'];
+            $urlKey = (string)$categoryDatum['url_key'];
+
+            if (array_key_exists($categoryId, $categories)) {
+
+                $categories[$categoryId]->urlKeys[$storeId] = $urlKey;
+
+            } else {
+
+                $categories[$categoryId] = new CategoryInfo(
+                    explode('/', $categoryDatum['path']),
+                    [$storeId => $urlKey]
+                );
+
+            }
+        }
+
+        return $categories;
+    }
+
+    /**
+     * @param int $categoryId
+     * @param int[] $idPath The ids of the parent categories, including $categoryId
+     * @param array $urlKeys A store-id => url_key array
+     */
+    public function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
+    {
+        $this->allCategoryInfo[$categoryId] = new CategoryInfo($idPath, $urlKeys);
     }
 }

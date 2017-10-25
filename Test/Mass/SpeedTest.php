@@ -156,7 +156,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $time = $afterTime - $beforeTime;
         $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Updates: " . $time . " seconds; " . $memory . " Kb \n";
+        echo "Updates: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
