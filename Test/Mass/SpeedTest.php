@@ -117,7 +117,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(2.6, $time);
+        $this->assertLessThan(2.7, $time);
         $this->assertLessThan(420, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -160,13 +160,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(2.9, $time);
+        $this->assertLessThan(3.0, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
-        $this->assertLessThan(5200, $peakMemory);
+        $this->assertLessThan(5230, $peakMemory);
     }
 }

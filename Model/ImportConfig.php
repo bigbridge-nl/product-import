@@ -8,7 +8,7 @@ namespace BigBridge\ProductImport\Model;
 class ImportConfig
 {
     /**
-     * When set to true, no database queries are performed
+     * When set to true, no database changes are done
      *
      * @var bool
      */
@@ -41,4 +41,29 @@ class ImportConfig
      * @var bool
      */
     public $autoCreateCategories = true;
+
+    /**
+     * Create url keys based on name or sku?
+     *
+     * @var string
+     */
+    public $urlKeyScheme = self::URL_KEY_SCHEME_FROM_NAME;
+
+    const URL_KEY_SCHEME_FROM_NAME = 'from-name';
+    const URL_KEY_SCHEME_FROM_SKU = 'from-sku';
+
+    /**
+     * If a url key is generated, what should happen if that url key is already used by another product?
+     *
+     * - create an error
+     * - add the sku to the url_key: 'white-dwarf-with-mask' becomes 'white-dwarf-with-mask-white-dwarf-11'
+     * - add increasing serial number: 'white-dwarf-with-mask' becomes 'white-dwarf-with-mask-1'
+     *
+     * @var string
+     */
+    public $duplicateUrlKeyStrategy = self::DUPLICATE_KEY_STRATEGY_ERROR;
+
+    const DUPLICATE_KEY_STRATEGY_ERROR = 'error';
+    const DUPLICATE_KEY_STRATEGY_ADD_SKU = 'add-sku';
+    const DUPLICATE_KEY_STRATEGY_ADD_SERIAL = 'add-serial';
 }

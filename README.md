@@ -63,6 +63,25 @@ For each product user defined "result callbacks" are called. This allows you to 
 
     $importer->flush();
 
+## Example: url_keys
+
+URL keys need to be imported on the store view level.
+
+First create the product on the global level
+
+    $product = new SimpleProduct('nervous-dinosaur', 0);
+    $product->name = 'Nervous Dinosaur';
+    $product->price = '9.95';
+
+    $import->import($product);
+
+then recreate the product on the store view level
+
+    $product = new SimpleProduct('nervous-dinosaur', new Reference('store_de'));
+        $product->url_key = new GeneratedUrlKey(UrlKey::URL_KEY_SCHEME_FROM_NAME, DUPLICATE_KEY_STRATEGY_ADD_HASHED_SKU);
+
+    $import->import($product);
+
 ## Supported
 
 * inserts
@@ -101,9 +120,21 @@ The library aims to be
 * robust (by default the library should take the safe side when a decision is to be made, also it should not halt on a single product failing)
 * complete (if at all possible, all product import features should be present)
 
+## Design principle
+
+This library follows the following principle
+
+    it does exactly what it says on the tin
+
+That means: it just does what you tell it to do. Nothing less, and nothing more.
+
+You cannot expect it do enable a product by default, or to create url_rewrites. You need to specify what to create, and at what store view level.
+This makes it a reliable and efficient system. Yes, you need to know what you're doing. But then, you always did when importing stuff.
+
 ## Assumptions
 
-* Input in UTF-8
+* Input in UTF-8 (Magento standard)
+* Database query length is at least 1 MB (this has been a MySQL default for long)
 
 ## Notes
 
@@ -126,10 +157,54 @@ The library aims to be
 * category update
     * url_key
     * url_path
+    * url_rewrite (TODO: update category url_rewrites and product url_rewrites)
+    * url_rewrite 301 (moved permanently) (save_rewrites_history; TODO)
+
+* new product
+    * url_key
+    * url_path (not implemented in Magento 2)
     * url_rewrite
-    * url_rewrite 301 (moved permanently) (save_rewrites_history)
+    * catalog_url_rewrite_product_category (TODO)
 
+* product update
+    * url_key
+    * url_path (not implemented in Magento 2)
+    * url_rewrite (TODO update product url_rewrites)
+    * catalog_url_rewrite_product_category (TODO)
 
+## url_keys: why not just add id?
+
+A url key must be unique. It is also commonly based on the name of the product, which is often not unique. This problem is often solved by adding the product id to
+the second and further duplicate occurrences of the url_key. For example
+
+    synthetisch-kinderdekbed-4-seizoenen-18521.html
+
+I chose not to add the id because:
+
+* the generated url keys cannot be moved to another database, because it will have different product ids.
+* in order to check the url_key, I need the product id, so I need to create an catalog_product_entity row. If the provided or generated url_key check fails this row must be removed. This is messy.
+* a dry run (import without actual database changes) is not possible, because inserts are needed to generate ids
+
+I thought about an alternative to the id and I came up with the following:
+
+    the first 5 characters of the md5 hash of the sku
+
+This takes away the problems mentioned above and it modifies the desired url_key in just about the same way as an id would.
+
+An example of a url modified with the hash:
+
+    synthetisch-kinderdekbed-4-seizoenen-5hdl9.html
+
+The library provides these possibilities for url_keys:
+
+* based on name (on conflict, add a 5-character sku hash). This is the default option.
+* based on name (on conflict, add the sku converted to url).
+* based on name
+* based on sku (useful when you have descriptive sku's like 'satin-glove-10-inches')
+* based on sku (optionally adding a 5-character sku hash to prevent duplicates).
+* provide your own url_key (it's up to you to make it unique, uniqueness is checked)
+
+No solution to the duplicate key problem is perfect. There may still be duplicate key errors. These are reported and a human will have to solve them manually.
 
 ## On empty values
 

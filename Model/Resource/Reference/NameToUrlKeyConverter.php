@@ -7,9 +7,9 @@ namespace BigBridge\ProductImport\Model\Resource\Reference;
  */
 class NameToUrlKeyConverter
 {
-    public function createUrlKeyFromName(string $categoryName)
+    public function createUrlKeyFromName(string $name)
     {
-        $key = $categoryName;
+        $key = $name;
         $key = strtolower($key);
         $key = iconv('UTF-8', 'ASCII//TRANSLIT', $key);
         $key = preg_replace("/[^a-z0-9]/", "-", $key);

@@ -68,7 +68,7 @@ class Validator
             $errors[] = "attribute set id is a " . gettype($product->attribute_set_id) . ", should be a string";
         }
 
-        // attribute set id
+        // store view id
         if (is_string($product->store_view_id)) {
             if (!in_array($product->store_view_id, $this->metaData->storeViewMap)) {
                 $product->store_view_id = trim($product->store_view_id);

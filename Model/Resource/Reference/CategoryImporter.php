@@ -228,7 +228,7 @@ class CategoryImporter
 
         $urlPath = $this->db->fetchSingleCell("
             SELECT `value`
-            FROM `catalog_category_entity_varchar`
+            FROM `{$this->metaData->categoryEntityTable}_varchar`
             WHERE 
                 `entity_id` = $parentId AND
                 `attribute_id` = $attributeId AND

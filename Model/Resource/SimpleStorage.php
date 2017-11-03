@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Model\Resource;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
+use BigBridge\ProductImport\Model\Resource\Reference\UrlKeyGenerator;
 use Exception;
 use PDOException;
 
@@ -25,12 +26,16 @@ class SimpleStorage
     /** @var  ReferenceResolver */
     protected $referenceResolver;
 
-    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator, ReferenceResolver $referenceResolver)
+    /** @var UrlKeyGenerator */
+    protected $urlKeyGenerator;
+
+    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator, ReferenceResolver $referenceResolver, UrlKeyGenerator $urlKeyGenerator)
     {
         $this->db = $db;
         $this->metaData = $metaData;
         $this->validator = $validator;
         $this->referenceResolver = $referenceResolver;
+        $this->urlKeyGenerator = $urlKeyGenerator;
     }
 
     /**
@@ -39,59 +44,32 @@ class SimpleStorage
      */
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config)
     {
-        $this->db->execute("START TRANSACTION");
-
-        try {
-
-            $this->doTransaction($simpleProducts, $config);
-
-            $this->db->execute("COMMIT");
-
-        } catch (PDOException $e) {
-
-            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
-
-            foreach ($simpleProducts as $product) {
-                $product->errors[] = $e->getMessage();
-                $product->ok = false;
-            }
-
-        } catch (Exception $e) {
-
-            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
-
-            foreach ($simpleProducts as $product) {
-                $message = $e->getMessage();
-                $product->errors[] = $message;
-                $product->ok = false;
-            }
-
-        }
-
-        // call user defined functions to let them process the results
-        foreach ($config->resultCallbacks as $callback) {
-            foreach ($simpleProducts as $product) {
-                call_user_func($callback, $product);
-            }
-        }
-    }
-
-    /**
-     * @param SimpleProduct[] $simpleProducts
-     * @param ImportConfig $config
-     */
-    protected function doTransaction(array $simpleProducts, ImportConfig $config)
-    {
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
 
         // collect inserts and updates
         $sku2id = $this->getExistingSkus($skus);
 
-        $productsByAttribute = [];
+        $insertProducts = $updateProducts = [];
 
-        $insertProducts = [];
-        $updateProducts = [];
+        // separate new products from existing products and assign id
+        foreach ($simpleProducts as $product) {
+            if (array_key_exists($product->sku, $sku2id)) {
+                $product->id = $sku2id[$product->sku];
+                $updateProducts[] = $product;
+            } else {
+                $insertProducts[] = $product;
+            }
+        }
+
+        // create url keys based on name and id
+        // changes $product->ok and $product->errors
+        $this->urlKeyGenerator->createUrlKeysForNewProducts($insertProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
+
+        $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
+
+        $validProducts = [];
+
         foreach ($simpleProducts as $product) {
 
             // replace Reference(s) with ids, changes $product->ok and $product->errors
@@ -104,13 +82,39 @@ class SimpleStorage
                 continue;
             }
 
-            if (array_key_exists($product->sku, $sku2id)) {
-                $product->id = $sku2id[$product->sku];
-                $updateProducts[] = $product;
+            // collect valid products
+            $validProducts[] = $product;
+        }
+
+        // in a "dry run" no actual imports to the database are done
+        if (!$config->dryRun) {
+
+            $this->saveProducts($validProducts);
+        }
+
+        // call user defined functions to let them process the results
+        foreach ($config->resultCallbacks as $callback) {
+            foreach ($simpleProducts as $product) {
+                call_user_func($callback, $product);
+            }
+        }
+    }
+
+    protected function saveProducts(array $validProducts)
+    {
+        $validUpdateProducts = $validInsertProducts = [];
+        $productsByAttribute = [];
+
+        foreach ($validProducts as $product) {
+
+            // collect valid new and existing products
+            if ($product->id !== null) {
+                $validUpdateProducts[] = $product;
             } else {
-                $insertProducts[] = $product;
+                $validInsertProducts[] = $product;
             }
 
+            // collect products by attribute
             foreach ($product as $key => $value) {
                 if ($value !== null) {
                     $productsByAttribute[$key][] = $product;
@@ -118,27 +122,46 @@ class SimpleStorage
             }
         }
 
-        // in a "dry run" no actual imports to the database are done
-        if ($config->dryRun) {
-            return;
-        }
+        $this->db->execute("START TRANSACTION");
 
-        if (count($insertProducts) > 0) {
-            $this->insertMainTable($insertProducts);
-            $this->insertRewrites($insertProducts);
-        }
-        if (count($updateProducts) > 0) {
-            $this->updateMainTable($updateProducts);
-        }
+        try {
+            $this->insertMainTable($validInsertProducts);
+            $this->updateMainTable($validUpdateProducts);
 
-        foreach ($this->metaData->productEavAttributeInfo as $eavAttribute => $info) {
-            if (array_key_exists($eavAttribute, $productsByAttribute)) {
-                $this->insertEavAttribute($productsByAttribute[$eavAttribute], $eavAttribute);
+            $this->insertRewrites($validInsertProducts);
+            $this->updateRewrites($validUpdateProducts);
+
+            foreach ($this->metaData->productEavAttributeInfo as $eavAttribute => $info) {
+                if (array_key_exists($eavAttribute, $productsByAttribute)) {
+                    $this->insertEavAttribute($productsByAttribute[$eavAttribute], $eavAttribute);
+                }
             }
-        }
 
-        if (array_key_exists('category_ids', $productsByAttribute)) {
-            $this->insertCategoryIds($productsByAttribute['category_ids']);
+            if (array_key_exists('category_ids', $productsByAttribute)) {
+                $this->insertCategoryIds($productsByAttribute['category_ids']);
+            }
+
+            $this->db->execute("COMMIT");
+
+        } catch (PDOException $e) {
+
+            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
+
+            foreach ($validProducts as $product) {
+                $product->errors[] = $e->getMessage();
+                $product->ok = false;
+            }
+
+        } catch (Exception $e) {
+
+            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
+
+            foreach ($validProducts as $product) {
+                $message = $e->getMessage();
+                $product->errors[] = $message;
+                $product->ok = false;
+            }
+
         }
     }
 
@@ -177,21 +200,24 @@ class SimpleStorage
             $skus[$product->sku] = $product->sku;
 
             $sku = $this->db->quote($product->sku);
-            $values []= "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
+            $values[] = "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
         }
 
-        $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) VALUES " .
-            implode(',', $values);
+        if (count($values) > 0) {
 
-        $this->db->execute($sql);
+            $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) VALUES " .
+                implode(',', $values);
 
-        // store the new ids with the products
-        $serialized = $this->db->quoteSet($skus);
-        $sql = "SELECT `sku`, `entity_id` FROM `{$this->metaData->productEntityTable}` WHERE `sku` IN ({$serialized})";
-        $sku2id = $this->db->fetchMap($sql);
+            $this->db->execute($sql);
 
-        foreach ($products as $product) {
-            $product->id = $sku2id[$product->sku];
+            // store the new ids with the products
+            $serialized = $this->db->quoteSet($skus);
+            $sql = "SELECT `sku`, `entity_id` FROM `{$this->metaData->productEntityTable}` WHERE `sku` IN ({$serialized})";
+            $sku2id = $this->db->fetchMap($sql);
+
+            foreach ($products as $product) {
+                $product->id = $sku2id[$product->sku];
+            }
         }
     }
 
@@ -200,6 +226,7 @@ class SimpleStorage
      */
     protected function updateMainTable(array $products)
     {
+
 #todo has_options, required_options
 
         $values = [];
@@ -210,12 +237,15 @@ class SimpleStorage
             $values[] = "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
         }
 
-        $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-            " (`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) " .
-            " VALUES " . implode(', ', $values) .
-            " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)";
+        if (count($values) > 0) {
 
-        $this->db->execute($sql);
+            $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
+                " (`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) " .
+                " VALUES " . implode(', ', $values) .
+                " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)";
+
+            $this->db->execute($sql);
+        }
     }
 
     /**
@@ -281,7 +311,7 @@ class SimpleStorage
             }
         }
 
-        if (!empty($values)) {
+        if (count($values) > 0) {
 
             // IGNORE works on the key request_path, store_id
             // when this combination already exists, it is ignored
@@ -294,6 +324,11 @@ class SimpleStorage
 
             $this->db->execute($sql);
         }
+    }
+
+    protected function updateRewrites(array $products)
+    {
+
     }
 
     /**
@@ -327,11 +362,11 @@ class SimpleStorage
 
         foreach ($products as $product) {
             foreach ($product->category_ids as $categoryId) {
-                $values []= "({$categoryId}, {$product->id})";
+                $values[] = "({$categoryId}, {$product->id})";
             }
         }
 
-        if (!empty($values)) {
+        if (count($values) > 0) {
 
             // IGNORE serves two purposes:
             // 1. do not fail if the product-category link already existed

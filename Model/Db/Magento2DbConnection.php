@@ -109,6 +109,7 @@ class Magento2DbConnection
      */
     public function fetchAllAssoc(string $query)
     {
+#echo $query . "\n";
         return $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
 
