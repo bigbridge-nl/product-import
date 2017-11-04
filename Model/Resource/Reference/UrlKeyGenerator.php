@@ -44,7 +44,7 @@ class UrlKeyGenerator
         }
 
         // collect the ids of a bunch of url keys that will be generated
-        $urlKey2Id = $this->collectExistingUrlKeys($newProducts, $duplicateUrlKeyStrategy);
+        $urlKey2Id = $this->collectExistingUrlKeys($newProducts, $urlKeyScheme, $duplicateUrlKeyStrategy);
 
         foreach ($newProducts as $product) {
 
@@ -85,7 +85,7 @@ class UrlKeyGenerator
         }
 
         // collect the ids of a bunch of url keys that will be generated
-        $urlKey2Id = $this->collectExistingUrlKeys($existingProducts, $duplicateUrlKeyStrategy);
+        $urlKey2Id = $this->collectExistingUrlKeys($existingProducts, $urlKeyScheme, $duplicateUrlKeyStrategy);
 
         foreach ($existingProducts as $product) {
 
@@ -199,14 +199,14 @@ class UrlKeyGenerator
      * @param string $duplicateUrlKeyStrategy
      * @return array
      */
-    protected function collectExistingUrlKeys(array $products, string $duplicateUrlKeyStrategy)
+    protected function collectExistingUrlKeys(array $products, string $urlKeyScheme, string $duplicateUrlKeyStrategy)
     {
         $suggestedUrlKeys = [];
 
         // prepare the lookup of keys to be checked
         foreach ($products as $product) {
 
-            $suggestedUrlKey = $this->getStandardUrlKey($product, $duplicateUrlKeyStrategy);
+            $suggestedUrlKey = $this->getStandardUrlKey($product, $urlKeyScheme);
 
             $suggestedUrlKeys[] = $suggestedUrlKey;
             $suggestedUrlKeys[] = $this->getAlternativeUrlKeyProductionRule($product, $suggestedUrlKey, $duplicateUrlKeyStrategy);

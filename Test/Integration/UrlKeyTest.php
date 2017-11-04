@@ -185,6 +185,54 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('autumn-flowers-2', $product3->url_key);
     }
 
+    public function testSkuSchemeDuplicateUrlKeyOnAddSerialStrategy()
+    {
+        $config = new ImportConfig();
+        $config->urlKeyScheme = ImportConfig::URL_KEY_SCHEME_FROM_SKU;
+        $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
+
+        list($importer,) = self::$factory->createImporter($config);
+
+        // original
+        $product1 = $this->createProduct(1);
+        $product1->name = "Sunshine Every Day";
+        $product1->url_key = new GeneratedUrlKey();
+        $product1->sku = 'product-import-5#a';
+        $importer->importSimpleProduct($product1);
+
+        // conflicting key
+        $product2 = $this->createProduct(1);
+        $product2->name = "Moonlight Every Day";
+        $product2->url_key = new GeneratedUrlKey();
+        $product2->sku = 'product-import-5@a';
+        $importer->importSimpleProduct($product2);
+
+        $importer->flush();
+
+        $this->assertEquals([], $product2->errors);
+        $this->assertEquals("product-import-5-a-1", $product2->url_key);
+
+        // conflicting key - different batch
+        $product3 = $this->createProduct(1);
+        $product3->name = "Starlight Every Day";
+        $product3->url_key = new GeneratedUrlKey();
+        $product3->sku = 'product-import-5#a';
+        $importer->importSimpleProduct($product3);
+
+        $product4 = $this->createProduct(1);
+        $product4->name = "Planet Light Every Day";
+        $product4->url_key = new GeneratedUrlKey();
+        $product4->sku = 'product-import-5*a';
+        $importer->importSimpleProduct($product4);
+
+        $importer->flush();
+
+        $this->assertEquals([], $product3->errors);
+        $this->assertEquals([], $product4->errors);
+        $this->assertEquals('product-import-5-a', $product3->url_key);
+        $this->assertEquals('product-import-5-a-2', $product4->url_key);
+    }
+
     public function testDifferentStoreViews()
     {
         $config = new ImportConfig();
