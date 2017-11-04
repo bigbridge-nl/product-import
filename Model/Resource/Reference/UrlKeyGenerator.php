@@ -57,6 +57,9 @@ class UrlKeyGenerator
                     $product->ok = false;
                 }
 
+                // add the new key to the local map
+                $urlKey2Id[$product->store_view_id][$product->url_key] = $product->id;
+
             } elseif ($product->url_key instanceof GeneratedUrlKey) {
 
                 // no url_key was specified
@@ -208,8 +211,10 @@ class UrlKeyGenerator
 
             $suggestedUrlKey = $this->getStandardUrlKey($product, $urlKeyScheme);
 
-            $suggestedUrlKeys[] = $suggestedUrlKey;
-            $suggestedUrlKeys[] = $this->getAlternativeUrlKeyProductionRule($product, $suggestedUrlKey, $duplicateUrlKeyStrategy);
+            if ($suggestedUrlKey !== "") {
+                $suggestedUrlKeys[] = $suggestedUrlKey;
+                $suggestedUrlKeys[] = $this->getAlternativeUrlKeyProductionRule($product, $suggestedUrlKey, $duplicateUrlKeyStrategy);
+            }
         }
 
         $urlKey2Id = $this->getUrlKey2Id($suggestedUrlKeys, $duplicateUrlKeyStrategy);
@@ -221,6 +226,8 @@ class UrlKeyGenerator
     {
         if (($product->sku === null) || ($product->name === null)) {
             $suggestedUrlKey = "";
+        } elseif (is_string($product->url_key)) {
+            $suggestedUrlKey = $product->url_key;
         } elseif ($urlKeyScheme == ImportConfig::URL_KEY_SCHEME_FROM_SKU) {
             $suggestedUrlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($product->sku);
         } else {

@@ -101,6 +101,39 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(["Generated url key already exists: summer-flora"], $product3->errors);
     }
 
+    public function testDuplicateExplicitUrlKeyCreateError()
+    {
+        $config = new ImportConfig();
+
+        list($importer, ) = self::$factory->createImporter($config);
+
+        $product1 = $this->createProduct(1);
+        $product1->sku = 'product-import-6#a';
+        $product1->name = "Flowers All Year";
+        $product1->url_key = 'product-import-6';
+        $importer->importSimpleProduct($product1);
+
+        $product2 = $this->createProduct(1);
+        $product2->sku = 'product-import-6#b';
+        $product2->name = "Flowers All Year";
+        $product2->url_key = 'product-import-6';
+        $importer->importSimpleProduct($product2);
+
+        $importer->flush();
+
+        $this->assertEquals(["Url key already exists: product-import-6"], $product2->errors);
+
+        $product3 = $this->createProduct(1);
+        $product3->sku = 'product-import-6#c';
+        $product3->name = "Flowers All Year";
+        $product3->url_key = 'product-import-6';
+        $importer->importSimpleProduct($product3);
+
+        $importer->flush();
+
+        $this->assertEquals(["Url key already exists: product-import-6"], $product3->errors);
+    }
+
     public function testDuplicateUrlKeyOnAddSkuStrategy()
     {
         $config = new ImportConfig();
