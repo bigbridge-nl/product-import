@@ -77,7 +77,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.01, $time);
-        $this->assertLessThan(220, $memory); // cached metadata
+        $this->assertLessThan(240, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -160,13 +160,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(3.0, $time);
+        $this->assertLessThan(3.2, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
-        $this->assertLessThan(5230, $peakMemory);
+        $this->assertLessThan(5240, $peakMemory);
     }
 }
