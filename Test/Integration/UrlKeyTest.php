@@ -81,7 +81,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $importer->importSimpleProduct($product1);
 
         $product2 = $this->createProduct(1);
-        $product1->sku = 'product-import-1#b';
+        $product2->sku = 'product-import-1#b';
         $product2->name = "Summer Flora";
         $product2->url_key = new GeneratedUrlKey();
         $importer->importSimpleProduct($product2);

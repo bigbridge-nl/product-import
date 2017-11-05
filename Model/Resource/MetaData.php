@@ -15,6 +15,7 @@ class MetaData
     const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
     const CATEGORY_ENTITY_TABLE = 'catalog_category_entity';
     const URL_REWRITE_TABLE = 'url_rewrite';
+    const URL_REWRITE_PRODUCT_CATEGORY_TABLE = 'catalog_url_rewrite_product_category';
     const CATEGORY_PRODUCT_TABLE = 'catalog_category_product';
     const CONFIG_DATA_TABLE = 'core_config_data';
     const ATTRIBUTE_SET_TABLE = 'eav_attribute_set';
@@ -44,6 +45,9 @@ class MetaData
 
     /** @var string */
     public $urlRewriteTable;
+
+    /** @var string */
+    public $urlRewriteProductCategoryTable;
 
     /** @var  string */
     public $categoryProductTable;
@@ -94,6 +98,7 @@ class MetaData
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
         $this->categoryEntityTable = $db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
         $this->urlRewriteTable = $db->getFullTableName(self::URL_REWRITE_TABLE);
+        $this->urlRewriteProductCategoryTable = $db->getFullTableName(self::URL_REWRITE_PRODUCT_CATEGORY_TABLE);
         $this->categoryProductTable = $db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
         $this->configDataTable = $db->getFullTableName(self::CONFIG_DATA_TABLE);
 

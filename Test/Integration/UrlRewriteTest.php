@@ -115,6 +115,19 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         ");
         $this->assertEquals($expectedRows, $actualRows);
 
-#todo check catalog_url_rewrite_product_category
+        $categoryId = $product1->category_ids[0];
+
+        $expectedRows = [
+            [$categoryId, $product1->id],
+            [$categoryId, $product3->id],
+        ];
+
+        $actualRows = self::$db->fetchAllNumber("
+            SELECT `category_id`, `product_id` FROM `" . self::$metadata->urlRewriteProductCategoryTable . "`
+            WHERE `product_id` IN ({$productIds})
+            ORDER BY `url_rewrite_id`
+        ");
+        $this->assertEquals($expectedRows, $actualRows);
+
     }
 }
