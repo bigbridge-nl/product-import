@@ -128,9 +128,6 @@ class SimpleStorage
             $this->insertMainTable($validInsertProducts);
             $this->updateMainTable($validUpdateProducts);
 
-            $this->insertRewrites($validInsertProducts);
-            $this->updateRewrites($validUpdateProducts);
-
             foreach ($this->metaData->productEavAttributeInfo as $eavAttribute => $info) {
                 if (array_key_exists($eavAttribute, $productsByAttribute)) {
                     $this->insertEavAttribute($productsByAttribute[$eavAttribute], $eavAttribute);
@@ -140,6 +137,10 @@ class SimpleStorage
             if (array_key_exists('category_ids', $productsByAttribute)) {
                 $this->insertCategoryIds($productsByAttribute['category_ids']);
             }
+
+            // url_rewrite (must be done after url_key and category_id)
+            $this->insertRewrites($validInsertProducts);
+            $this->updateRewrites($validUpdateProducts);
 
             $this->db->execute("COMMIT");
 
@@ -253,34 +254,69 @@ class SimpleStorage
      */
     protected function insertRewrites(array $products)
     {
-        $values = [];
+        if (empty($products)) {
+            return;
+        }
 
-        foreach ($products as $product) {
+        // all store view ids, without 0
+        $allStoreIds = array_diff($this->metaData->storeViewMap, ['0']);
 
-            if (!$product->url_key) {
-                continue;
-            }
+        $productIds = array_column($products, 'id');
+        $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
 
-            $shortUrl = $product->url_key . $this->metaData->productUrlSuffix;
+        $results = $this->db->fetchAllAssoc("
+            SELECT `entity_id`, `store_id`, `value` AS `url_key`
+            FROM `{$this->metaData->productEntityTable}_varchar`
+            WHERE
+                `attribute_id` = {$attributeId} AND
+                `entity_id` IN (" . $this->db->quoteSet($productIds) . ")
+        ");
 
-            // store ids
-            if ($product->store_view_id == 0) {
-                $storeIds = $this->metaData->storeViewMap;
-                // remove store id 0
-                $storeIds = array_diff($storeIds, ['0']);
+        $urlKeys = [];
+        foreach ($results as $result) {
+            $productId = $result['entity_id'];
+            $storeId = $result['store_id'];
+            $urlKey = $result['url_key'];
+
+            if ($storeId == 0) {
+                // insert url key to all store views
+                foreach ($allStoreIds as $aStoreId) {
+                    // but do not overwrite explicit assignments
+                    if (!array_key_exists($productId, $urlKeys) || !array_key_exists($urlKeys[$productId], $aStoreId)) {
+                        $urlKeys[$productId][$aStoreId] = $urlKey;
+                    }
+                }
             } else {
-                $storeIds = [$product->store_view_id];
+                $urlKeys[$productId][$storeId] = $urlKey;
             }
+        }
 
-            foreach ($storeIds as $storeId) {
+        // category ids per product
+        $categoryIds = [];
+        $results = $this->db->fetchAllAssoc("
+            SELECT `product_id`, `category_id`
+            FROM `{$this->metaData->categoryProductTable}`
+            WHERE
+                `product_id` IN (" . $this->db->quoteSet($productIds) .")
+        ");
+
+        $values = [];
+        foreach ($results as $result) {
+            $categoryIds[$result['product_id']][$result['category_id']] = $result['category_id'];
+        }
+
+        foreach ($urlKeys as $productId => $urlKeyData) {
+            foreach ($urlKeyData as $storeId => $urlKey) {
+
+                $shortUrl = $urlKey . $this->metaData->productUrlSuffix;
 
                 // url keys without categories
                 $requestPath = $this->db->quote($shortUrl);
-                $targetPath = $this->db->quote('catalog/product/view/id/' . $product->id);
-                $values[] = "('product', {$product->id},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, null)";
+                $targetPath = $this->db->quote('catalog/product/view/id/' . $productId);
+                $values[] = "('product', {$productId},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, null)";
 
                 // url keys with categories
-                foreach ($product->category_ids as $directCategoryId) {
+                foreach ($categoryIds[$productId] as $directCategoryId) {
 
                     // here we check if the category id supplied actually exists
                     if (!array_key_exists($directCategoryId, $this->metaData->allCategoryInfo)) {
@@ -303,9 +339,9 @@ class SimpleStorage
                         $path .= $urlKey . "/";
 
                         $requestPath = $this->db->quote($path . $shortUrl);
-                        $targetPath = $this->db->quote('catalog/product/view/id/' . $product->id . '/category/' . $parentCategoryId);
+                        $targetPath = $this->db->quote('catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId);
                         $metadata = $this->db->quote(serialize(['category_id' => (string)$parentCategoryId]));
-                        $values[] = "('product', {$product->id},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, {$metadata})";
+                        $values[] = "('product', {$productId},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, {$metadata})";
                     }
                 }
             }

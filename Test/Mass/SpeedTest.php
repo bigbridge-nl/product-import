@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Test\Integration\Mass;
 
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
+use BigBridge\ProductImport\Model\GeneratedUrlKey;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\ImportConfig;
@@ -102,6 +103,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->tax_class_id = new Reference('Taxable Goods');
             $product->category_ids = new References([$categories[0], $categories[1]]);
             $product->website_ids = new References(['base']);
+            $product->url_key = new GeneratedUrlKey();
 
             $importer->importSimpleProduct($product);
         }
@@ -117,7 +119,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(2.7, $time);
+        $this->assertLessThan(3.7, $time);
         $this->assertLessThan(420, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -145,6 +147,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->tax_class_id = new Reference('Retail Customer');
             $product->category_ids = new References([$categories[1], $categories[2]]);
             $product->website_ids = new References(['base']);
+            $product->url_key = new GeneratedUrlKey();
 
             $importer->importSimpleProduct($product);
         }
@@ -160,13 +163,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(3.2, $time);
+        $this->assertLessThan(4.2, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
-        $this->assertLessThan(5240, $peakMemory);
+        $this->assertLessThan(8000, $peakMemory);
     }
 }
