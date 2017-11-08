@@ -137,16 +137,17 @@ class UrlRewriteStorage
 
         $this->db->execute($sql);
 
+        // the last insert id is guaranteed to be the first id generated
+        $insertId = $this->db->getLastInsertId();
+
         // the SUBSTRING_INDEX extracts the category id from the target_path
         $sql = "
                 INSERT INTO `{$this->metaData->urlRewriteProductCategoryTable}` (`url_rewrite_id`, `category_id`, `product_id`)
                 SELECT `url_rewrite_id`, SUBSTRING_INDEX(`target_path`, '/', -1), `entity_id`
                 FROM `{$this->metaData->urlRewriteTable}`
                 WHERE 
-                    `entity_type` = 'product' AND 
-                    `entity_id` IN (" . $this->db->quoteSet($productIds) . ") AND 
-                    `target_path` LIKE '%/category/%' AND 
-                    `redirect_type` = 0 
+                    `url_rewrite_id` >= {$insertId} AND
+                    `target_path` LIKE '%/category/%' 
             ";
 
         $this->db->execute($sql);
