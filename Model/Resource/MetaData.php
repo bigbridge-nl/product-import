@@ -88,6 +88,9 @@ class MetaData
     /** @var  string */
     public $categoryUrlSuffix;
 
+    /** @var bool Create 301 rewrite for older url_rewrite entries */
+    public $saveRewritesHistory;
+
     /** @var CategoryInfo[] */
     public $allCategoryInfo;
 
@@ -117,6 +120,7 @@ class MetaData
 
         $this->productUrlSuffix = $this->getProductUrlSuffix();
         $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
+        $this->saveRewritesHistory  = $this->getSaveRewritesHistory();
 
         $this->allCategoryInfo = $this->getAllCategoryInfo();
     }
@@ -274,6 +278,20 @@ class MetaData
         ");
 
         return is_null($value) ? ".html" : $value;
+    }
+
+    public function getSaveRewritesHistory()
+    {
+        $value = $this->db->fetchSingleCell("
+            SELECT `value`
+            FROM `{$this->configDataTable}`
+            WHERE
+                `scope` = 'default' AND
+                `scope_id` = 0 AND
+                `path` = 'catalog/seo/save_rewrites_history'
+        ");
+
+        return is_null($value) ? true : (bool)$value;
     }
 
     public function getProductUrlSuffix()

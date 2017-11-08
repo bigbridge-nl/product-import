@@ -20,7 +20,7 @@ class SimpleStorage
     /** @var  MetaData */
     protected $metaData;
 
-    /** @var Validator  */
+    /** @var Validator */
     protected $validator;
 
     /** @var  ReferenceResolver */
@@ -29,13 +29,23 @@ class SimpleStorage
     /** @var UrlKeyGenerator */
     protected $urlKeyGenerator;
 
-    public function __construct(Magento2DbConnection $db, MetaData $metaData, Validator $validator, ReferenceResolver $referenceResolver, UrlKeyGenerator $urlKeyGenerator)
+    /** @var UrlRewriteStorage */
+    protected $urlRewriteStorage;
+
+    public function __construct(
+        Magento2DbConnection $db,
+        MetaData $metaData,
+        Validator $validator,
+        ReferenceResolver $referenceResolver,
+        UrlKeyGenerator $urlKeyGenerator,
+        UrlRewriteStorage $urlRewriteStorage)
     {
         $this->db = $db;
         $this->metaData = $metaData;
         $this->validator = $validator;
         $this->referenceResolver = $referenceResolver;
         $this->urlKeyGenerator = $urlKeyGenerator;
+        $this->urlRewriteStorage = $urlRewriteStorage;
     }
 
     /**
@@ -139,14 +149,17 @@ class SimpleStorage
             }
 
             // url_rewrite (must be done after url_key and category_id)
-            $this->insertRewrites($validInsertProducts);
-            $this->updateRewrites($validUpdateProducts);
+            $this->urlRewriteStorage->insertRewrites($validInsertProducts);
+            $this->urlRewriteStorage->updateRewrites($validUpdateProducts);
 
             $this->db->execute("COMMIT");
 
         } catch (PDOException $e) {
 
-            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
+            try {
+                $this->db->execute("ROLLBACK");
+            } catch (Exception $f) {
+            }
 
             foreach ($validProducts as $product) {
                 $product->errors[] = $e->getMessage();
@@ -155,7 +168,10 @@ class SimpleStorage
 
         } catch (Exception $e) {
 
-            try { $this->db->execute("ROLLBACK"); } catch(Exception $f) {}
+            try {
+                $this->db->execute("ROLLBACK");
+            } catch (Exception $f) {
+            }
 
             foreach ($validProducts as $product) {
                 $message = $e->getMessage();
@@ -247,141 +263,6 @@ class SimpleStorage
 
             $this->db->execute($sql);
         }
-    }
-
-    /**
-     * @param SimpleProduct[] $products
-     */
-    protected function insertRewrites(array $products)
-    {
-        if (empty($products)) {
-            return;
-        }
-
-        // all store view ids, without 0
-        $allStoreIds = array_diff($this->metaData->storeViewMap, ['0']);
-
-        $productIds = array_column($products, 'id');
-        $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
-
-        $results = $this->db->fetchAllAssoc("
-            SELECT `entity_id`, `store_id`, `value` AS `url_key`
-            FROM `{$this->metaData->productEntityTable}_varchar`
-            WHERE
-                `attribute_id` = {$attributeId} AND
-                `entity_id` IN (" . $this->db->quoteSet($productIds) . ")
-        ");
-
-        $urlKeys = [];
-        foreach ($results as $result) {
-            $productId = $result['entity_id'];
-            $storeId = $result['store_id'];
-            $urlKey = $result['url_key'];
-
-            if ($storeId == 0) {
-                // insert url key to all store views
-                foreach ($allStoreIds as $aStoreId) {
-                    // but do not overwrite explicit assignments
-                    if (!array_key_exists($productId, $urlKeys) || !array_key_exists($aStoreId, $urlKeys[$productId])) {
-                        $urlKeys[$productId][$aStoreId] = $urlKey;
-                    }
-                }
-            } else {
-                $urlKeys[$productId][$storeId] = $urlKey;
-            }
-        }
-
-        // category ids per product
-        $categoryIds = [];
-        $results = $this->db->fetchAllAssoc("
-            SELECT `product_id`, `category_id`
-            FROM `{$this->metaData->categoryProductTable}`
-            WHERE
-                `product_id` IN (" . $this->db->quoteSet($productIds) .")
-        ");
-
-        $rewriteValues = [];
-        foreach ($results as $result) {
-            $categoryIds[$result['product_id']][$result['category_id']] = $result['category_id'];
-        }
-
-        foreach ($urlKeys as $productId => $urlKeyData) {
-            foreach ($urlKeyData as $storeId => $urlKey) {
-
-                $shortUrl = $urlKey . $this->metaData->productUrlSuffix;
-
-                // url keys without categories
-                $requestPath = $this->db->quote($shortUrl);
-                $targetPath = $this->db->quote('catalog/product/view/id/' . $productId);
-                $rewriteValues[] = "('product', {$productId},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, null)";
-
-                if (!array_key_exists($productId, $categoryIds)) {
-                    continue;
-                }
-
-                // url keys with categories
-                foreach ($categoryIds[$productId] as $directCategoryId) {
-
-                    // here we check if the category id supplied actually exists
-                    if (!array_key_exists($directCategoryId, $this->metaData->allCategoryInfo)) {
-                        continue;
-                    }
-
-                    $path = "";
-                    foreach ($this->metaData->allCategoryInfo[$directCategoryId]->path as $i => $parentCategoryId) {
-
-                        // the root category is not used for the url path
-                        if ($i === 0) {
-                            continue;
-                        }
-
-                        $categoryInfo = $this->metaData->allCategoryInfo[$parentCategoryId];
-
-                        // take the url_key from the store view, or default to the global url_key
-                        $urlKey = array_key_exists($storeId, $categoryInfo->urlKeys) ? $categoryInfo->urlKeys[$storeId] : $categoryInfo->urlKeys[0];
-
-                        $path .= $urlKey . "/";
-
-                        $requestPath = $this->db->quote($path . $shortUrl);
-                        $targetPath = $this->db->quote('catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId);
-                        $metadata = $this->db->quote(serialize(['category_id' => (string)$parentCategoryId]));
-                        $rewriteValues[] = "('product', {$productId},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, {$metadata})";
-                    }
-                }
-            }
-        }
-
-        if (count($rewriteValues) > 0) {
-
-            // IGNORE works on the key request_path, store_id
-            // when this combination already exists, it is ignored
-            // this may happen if a main product is followed by one of its store views
-            $sql = "
-                INSERT IGNORE INTO `{$this->metaData->urlRewriteTable}`
-                (`entity_type`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `store_id`, `is_autogenerated`, `metadata`)
-                VALUES " . implode(', ', $rewriteValues) . "
-            ";
-
-            $this->db->execute($sql);
-
-            // the SUBSTRING_INDEX extracts the category id from the target_path
-            $sql = "
-                INSERT INTO `{$this->metaData->urlRewriteProductCategoryTable}` (`url_rewrite_id`, `category_id`, `product_id`)
-                SELECT `url_rewrite_id`, SUBSTRING_INDEX(`target_path`, '/', -1), `entity_id`
-                FROM `{$this->metaData->urlRewriteTable}`
-                WHERE 
-                    `entity_type` = 'product' 
-                    AND `entity_id` IN (" . $this->db->quoteSet($productIds) . ")
-                    AND `target_path` LIKE '%/category/%' 
-            ";
-
-            $this->db->execute($sql);
-        }
-    }
-
-    protected function updateRewrites(array $products)
-    {
-
     }
 
     /**
