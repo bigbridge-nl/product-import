@@ -31,9 +31,7 @@ class UrlRewriteStorage
     {
         $newRewriteValues = $this->getNewRewriteValues($products);
 
-        $productIds = array_column($products, 'id');
-
-        $this->writeNewRewrites($newRewriteValues, $productIds);
+        $this->writeNewRewrites($newRewriteValues);
     }
 
     public function updateRewrites(array $products)
@@ -110,10 +108,10 @@ class UrlRewriteStorage
             $this->db->execute($sql);
         }
 
-        $this->writeNewRewrites($insertRewriteValues, $productIds);
+        $this->writeNewRewrites($insertRewriteValues);
     }
 
-    protected function writeNewRewrites(array $tabbedRewriteValues, array $productIds)
+    protected function writeNewRewrites(array $tabbedRewriteValues)
     {
         if (empty($tabbedRewriteValues)) {
             return;
@@ -122,7 +120,10 @@ class UrlRewriteStorage
         $newRewriteValues = [];
         foreach ($tabbedRewriteValues as $tabbedUpdate) {
             list($productId, $requestPath, $targetPath, $storeId, $metadata) = explode("\t", $tabbedUpdate);
-            $newRewriteValues[] = "('product', {$productId},{$requestPath}, {$targetPath}, 0, {$storeId}, 1, {$metadata})";
+            $metadata = $metadata === "" ? "null" : $this->db->quote($metadata);
+            $requestPath = $this->db->quote($requestPath);
+            $targetPath = $this->db->quote($targetPath);
+            $newRewriteValues[] = "('product', {$productId}, {$requestPath}, {$targetPath}, 0, {$storeId}, 1, {$metadata})";
         }
 
         // add new values
@@ -140,8 +141,10 @@ class UrlRewriteStorage
         // the last insert id is guaranteed to be the first id generated
         $insertId = $this->db->getLastInsertId();
 
-        // the SUBSTRING_INDEX extracts the category id from the target_path
-        $sql = "
+        if ($insertId != 0) {
+
+            // the SUBSTRING_INDEX extracts the category id from the target_path
+            $sql = "
                 INSERT INTO `{$this->metaData->urlRewriteProductCategoryTable}` (`url_rewrite_id`, `category_id`, `product_id`)
                 SELECT `url_rewrite_id`, SUBSTRING_INDEX(`target_path`, '/', -1), `entity_id`
                 FROM `{$this->metaData->urlRewriteTable}`
@@ -150,7 +153,8 @@ class UrlRewriteStorage
                     `target_path` LIKE '%/category/%' 
             ";
 
-        $this->db->execute($sql);
+            $this->db->execute($sql);
+        }
     }
 
     protected function getNewRewriteValues(array $products): array
@@ -212,9 +216,9 @@ class UrlRewriteStorage
                 $shortUrl = $urlKey . $this->metaData->productUrlSuffix;
 
                 // url keys without categories
-                $requestPath = $this->db->quote($shortUrl);
-                $targetPath = $this->db->quote('catalog/product/view/id/' . $productId);
-                $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t {$storeId}\tnull";
+                $requestPath = $shortUrl;
+                $targetPath = 'catalog/product/view/id/' . $productId;
+                $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t{$storeId}\t";
 
                 if (!array_key_exists($productId, $categoryIds)) {
                     continue;
@@ -243,9 +247,9 @@ class UrlRewriteStorage
 
                         $path .= $urlKey . "/";
 
-                        $requestPath = $this->db->quote($path . $shortUrl);
-                        $targetPath = $this->db->quote('catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId);
-                        $metadata = $this->db->quote(serialize(['category_id' => (string)$parentCategoryId]));
+                        $requestPath = $path . $shortUrl;
+                        $targetPath = 'catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId;
+                        $metadata = serialize(['category_id' => (string)$parentCategoryId]);
                         $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t{$storeId}\t{$metadata}";
                     }
                 }

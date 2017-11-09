@@ -134,7 +134,7 @@ class SimpleStorage
 
         $this->db->execute("START TRANSACTION");
 
-        try {
+//        try {
             $this->insertMainTable($validInsertProducts);
             $this->updateMainTable($validUpdateProducts);
 
@@ -154,32 +154,32 @@ class SimpleStorage
 
             $this->db->execute("COMMIT");
 
-        } catch (PDOException $e) {
-
-            try {
-                $this->db->execute("ROLLBACK");
-            } catch (Exception $f) {
-            }
-
-            foreach ($validProducts as $product) {
-                $product->errors[] = $e->getMessage();
-                $product->ok = false;
-            }
-
-        } catch (Exception $e) {
-
-            try {
-                $this->db->execute("ROLLBACK");
-            } catch (Exception $f) {
-            }
-
-            foreach ($validProducts as $product) {
-                $message = $e->getMessage();
-                $product->errors[] = $message;
-                $product->ok = false;
-            }
-
-        }
+//        } catch (PDOException $e) {
+//
+//            try {
+//                $this->db->execute("ROLLBACK");
+//            } catch (Exception $f) {
+//            }
+//
+//            foreach ($validProducts as $product) {
+//                $product->errors[] = $e->getMessage();
+//                $product->ok = false;
+//            }
+//
+//        } catch (Exception $e) {
+//
+//            try {
+//                $this->db->execute("ROLLBACK");
+//            } catch (Exception $f) {
+//            }
+//
+//            foreach ($validProducts as $product) {
+//                $message = $e->getMessage();
+//                $product->errors[] = $message;
+//                $product->ok = false;
+//            }
+//
+//        }
     }
 
     /**
