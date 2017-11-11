@@ -32,22 +32,22 @@ class UrlRewriteStorage
     {
         $newRewriteValues = $this->getNewRewriteValues($products);
 
-        $this->writeNewRewrites($newRewriteValues);
+        $this->writeRewrites($newRewriteValues, true);
     }
 
     public function updateRewrites(array $products, array $existingValues)
     {
-        $changedProducts = $this->getChangedProductUrlRewrites($products, $existingValues);
+        $changedProducts = $this->getChangedProducts($products, $existingValues);
 
         $newRewriteValues = $this->getNewRewriteValues($changedProducts);
 
-        $this->writeRewrites($newRewriteValues);
+        $this->updateExistingRewrites($newRewriteValues);
     }
 
     /**
      * @param Product[] $products
      */
-    protected function getChangedProductUrlRewrites(array $products, array $existingValues)
+    protected function getChangedProducts(array $products, array $existingValues)
     {
         if (empty($products)) {
             return [];
@@ -70,83 +70,73 @@ class UrlRewriteStorage
         return $changedProducts;
     }
 
-    protected function writeRewrites(array $insertRewriteValues)
+    protected function updateExistingRewrites(array $insertRewriteValues)
     {
         if (empty($insertRewriteValues)) {
             return;
         }
 
+        $updatedRewrites = [];
+        $oldRewriteIds = [];
+
         foreach ($insertRewriteValues as $tabbedUpdate) {
 
-            list($productId, $requestPath, $targetPath, $storeId, $metadata) = explode("\t", $tabbedUpdate);
-            $quotedMetadata = $metadata === "" ? "is null" : " = '$metadata'";
+            // distinct store_id, product_id, metadata
 
-            // fetch old rewrites
-            $oldUrlRewriteIds = $this->db->fetchMap("
-                SELECT `url_rewrite_id`, `redirect_type`
+            list($productId, $requestPath, $targetPath, $redirectType, $storeId, $metadata) = explode("\t", $tabbedUpdate);
+
+            $quotedMetadata = ($metadata == "") ? "IS NULL" : "= '{$metadata}'";
+
+            // fetch old rewrites for the combination store_id, product_id, metadata
+
+            $oldUrlRewrites = $this->db->fetchAllAssoc("
+                SELECT `url_rewrite_id`, `request_path`, `target_path`, `redirect_type`, `metadata`
                 FROM `{$this->metaData->urlRewriteTable}`
                 WHERE 
                     `store_id` = {$storeId} AND `entity_id` = {$productId} AND
-                    `entity_type` = 'product' AND
-                    `metadata` {$quotedMetadata}
+                    `entity_type` = 'product' AND `metadata` {$quotedMetadata}
             ");
 
-            foreach ($oldUrlRewriteIds as $urlRewriteId => $redirectType) {
+            // multiple old rewrites with matching store_id, product_id, metadata
 
-                if ($redirectType == '0') {
+            foreach ($oldUrlRewrites as $oldRewrite) {
 
-                    if ($this->metaData->getSaveRewritesHistory()) {
+                $oldRewriteId = $oldRewrite['url_rewrite_id'];
+                $oldRequestPath = $oldRewrite['request_path'];
+                $oldRedirectType = $oldRewrite['redirect_type'];
 
-                        // remove only the index value
-                        $sql = "
-                            DELETE FROM `{$this->metaData->urlRewriteProductCategoryTable}`
-                            WHERE `url_rewrite_id` = {$urlRewriteId}
-                        ";
+                $oldRewriteIds[] = $oldRewriteId;
 
-                        $this->db->execute($sql);
+                $updatedRedirectType = '301';
 
-                        // update current values to redirect values
-                        $this->db->execute("
-                            UPDATE `{$this->metaData->urlRewriteTable}`
-                            SET
-                                target_path = '{$requestPath}',
-                                redirect_type = '301'
-                            WHERE `url_rewrite_id` = {$urlRewriteId}
-                        ");
+                if ($oldRedirectType == '0') {
 
-                        $this->db->execute($sql);
-
-                    } else {
-
-                        // remove currently active rewrite
-                        $sql = "
-                            DELETE FROM `{$this->metaData->urlRewriteTable}`
-                            WHERE `url_rewrite_id` = {$urlRewriteId}
-                        ";
-
-                        $this->db->execute($sql);
+                    if (!$this->metaData->saveRewritesHistory) {
+                        // no history: ignore the existing entry
+                        continue;
                     }
-
-                } else {
-
-                    // update existing rewrites
-
-                    $this->db->execute("
-                        UPDATE `{$this->metaData->urlRewriteTable}`
-                        SET
-                            target_path = '{$requestPath}'
-                        WHERE `url_rewrite_id` = {$urlRewriteId}
-                    ");
-
                 }
-            }
 
+                $updatedTargetPath = $requestPath;
+
+                $updatedRewrites[] = "{$productId}\t{$oldRequestPath}\t{$updatedTargetPath}\t{$updatedRedirectType}\t{$storeId}\t{$metadata}";
+            }
         }
 
-        $this->writeNewRewrites($insertRewriteValues);
+        // delete old rewrites
+        $sql = "
+            DELETE FROM `{$this->metaData->urlRewriteTable}`
+            WHERE `url_rewrite_id` IN (" . implode(',', $oldRewriteIds) . ")
+        ";
+
+        $this->db->execute($sql);
+
+        $this->writeRewrites($insertRewriteValues, true);
+
+        $this->writeRewrites($updatedRewrites, false);
     }
 
-    protected function writeNewRewrites(array $tabbedRewriteValues)
+    protected function writeRewrites(array $tabbedRewriteValues, $buildIndex)
     {
         if (empty($tabbedRewriteValues)) {
             return;
@@ -154,11 +144,11 @@ class UrlRewriteStorage
 
         $newRewriteValues = [];
         foreach ($tabbedRewriteValues as $tabbedUpdate) {
-            list($productId, $requestPath, $targetPath, $storeId, $metadata) = explode("\t", $tabbedUpdate);
+            list($productId, $requestPath, $targetPath, $redirectType, $storeId, $metadata) = explode("\t", $tabbedUpdate);
             $metadata = $metadata === "" ? "null" : $this->db->quote($metadata);
             $requestPath = $this->db->quote($requestPath);
             $targetPath = $this->db->quote($targetPath);
-            $newRewriteValues[] = "('product', {$productId}, {$requestPath}, {$targetPath}, 0, {$storeId}, 1, {$metadata})";
+            $newRewriteValues[] = "('product', {$productId}, {$requestPath}, {$targetPath}, {$redirectType}, {$storeId}, 1, {$metadata})";
         }
 
         // add new values
@@ -166,29 +156,32 @@ class UrlRewriteStorage
         // when this combination already exists, it is ignored
         // this may happen if a main product is followed by one of its store views
         $sql = "
-                INSERT IGNORE INTO `{$this->metaData->urlRewriteTable}`
-                (`entity_type`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `store_id`, `is_autogenerated`, `metadata`)
-                VALUES " . implode(', ', $newRewriteValues) . "
-            ";
+            INSERT IGNORE INTO `{$this->metaData->urlRewriteTable}`
+            (`entity_type`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `store_id`, `is_autogenerated`, `metadata`)
+            VALUES " . implode(', ', $newRewriteValues) . "
+        ";
 
         $this->db->execute($sql);
 
-        // the last insert id is guaranteed to be the first id generated
-        $insertId = $this->db->getLastInsertId();
+        if ($buildIndex) {
 
-        if ($insertId != 0) {
+            // the last insert id is guaranteed to be the first id generated
+            $insertId = $this->db->getLastInsertId();
 
-            // the SUBSTRING_INDEX extracts the category id from the target_path
-            $sql = "
-                INSERT INTO `{$this->metaData->urlRewriteProductCategoryTable}` (`url_rewrite_id`, `category_id`, `product_id`)
-                SELECT `url_rewrite_id`, SUBSTRING_INDEX(`target_path`, '/', -1), `entity_id`
-                FROM `{$this->metaData->urlRewriteTable}`
-                WHERE 
-                    `url_rewrite_id` >= {$insertId} AND
-                    `target_path` LIKE '%/category/%' 
-            ";
+            if ($insertId != 0) {
 
-            $this->db->execute($sql);
+                // the SUBSTRING_INDEX extracts the category id from the target_path
+                $sql = "
+                    INSERT INTO `{$this->metaData->urlRewriteProductCategoryTable}` (`url_rewrite_id`, `category_id`, `product_id`)
+                    SELECT `url_rewrite_id`, SUBSTRING_INDEX(`target_path`, '/', -1), `entity_id`
+                    FROM `{$this->metaData->urlRewriteTable}`
+                    WHERE 
+                        `url_rewrite_id` >= {$insertId} AND
+                        `target_path` LIKE '%/category/%' 
+                ";
+
+                $this->db->execute($sql);
+            }
         }
     }
 
@@ -253,7 +246,7 @@ class UrlRewriteStorage
                 // url keys without categories
                 $requestPath = $shortUrl;
                 $targetPath = 'catalog/product/view/id/' . $productId;
-                $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t{$storeId}\t";
+                $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t0\t{$storeId}\t";
 
                 if (!array_key_exists($productId, $categoryIds)) {
                     continue;
@@ -285,7 +278,7 @@ class UrlRewriteStorage
                         $requestPath = $path . $shortUrl;
                         $targetPath = 'catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId;
                         $metadata = serialize(['category_id' => (string)$parentCategoryId]);
-                        $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t{$storeId}\t{$metadata}";
+                        $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t0\t{$storeId}\t{$metadata}";
                     }
                 }
             }

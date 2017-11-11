@@ -13,11 +13,15 @@ use PDO;
  */
 class Magento2DbConnection
 {
+    const SLOW = 0.1;
+
     /** @var ResourceConnection $connection */
     protected $connection;
 
     /** @var  PDO */
     protected $pdo;
+
+    protected $logSlowQueries = false;
 
     public function __construct(ResourceConnection $connection)
     {
@@ -39,12 +43,17 @@ class Magento2DbConnection
      */
     public function execute(string $query)
     {
-//$a = microtime(true);
+        $a = microtime(true);
+
+#echo $query . "\n";
         $this->pdo->exec($query);
-//$b = microtime(true);
-//if ($b - $a > 0.1) {
-//    echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-//}
+
+        if ($this->logSlowQueries) {
+            $b = microtime(true);
+            if ($b - $a > self::SLOW) {
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+            }
+        }
     }
 
     /**
@@ -63,7 +72,17 @@ class Magento2DbConnection
      */
     public function fetchSingleCell(string $query)
     {
+        $a = microtime(true);
+
         $column = $this->pdo->query($query)->fetchColumn(0);
+
+        if ($this->logSlowQueries) {
+            $b = microtime(true);
+            if ($b - $a > self::SLOW) {
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+            }
+        }
+
         return $column === false ? null : $column;
     }
 
@@ -75,10 +94,20 @@ class Magento2DbConnection
      */
     public function fetchSingleColumn(string $query)
     {
+        $a = microtime(true);
+
         $map = [];
         foreach ($this->pdo->query($query)->fetchAll() as $row) {
             $map[] = $row[0];
         }
+
+        if ($this->logSlowQueries) {
+            $b = microtime(true);
+            if ($b - $a > self::SLOW) {
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+            }
+        }
+
         return $map;
     }
 
@@ -90,11 +119,20 @@ class Magento2DbConnection
      */
     public function fetchMap(string $query)
     {
-#echo $query."\n";
+        $a = microtime(true);
+
         $map = [];
         foreach ($this->pdo->query($query)->fetchAll() as $row) {
             $map[$row[0]] = $row[1];
         }
+
+        if ($this->logSlowQueries) {
+            $b = microtime(true);
+            if ($b - $a > self::SLOW) {
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+            }
+        }
+
         return $map;
     }
 
@@ -104,7 +142,18 @@ class Magento2DbConnection
      */
     public function fetchRow(string $query)
     {
-        return $this->pdo->query($query)->fetch(PDO::FETCH_ASSOC);
+        $a = microtime(true);
+
+        $row = $this->pdo->query($query)->fetch(PDO::FETCH_ASSOC);
+
+        if ($this->logSlowQueries) {
+            $b = microtime(true);
+            if ($b - $a > self::SLOW) {
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+            }
+        }
+
+        return $row;
     }
 
     /**
@@ -113,13 +162,17 @@ class Magento2DbConnection
      */
     public function fetchAllAssoc(string $query)
     {
-#echo $query . "\n";
-#$a = microtime(true);
+        $a = microtime(true);
+
         $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
-#$b = microtime(true);
-#if ($b - $a > 0.1) {
-#    echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-#}
+
+        if ($this->logSlowQueries) {
+            $b = microtime(true);
+            if ($b - $a > self::SLOW) {
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+            }
+        }
+
         return $result;
     }
 
@@ -129,7 +182,18 @@ class Magento2DbConnection
      */
     public function fetchAllNumber(string $query)
     {
-        return $this->pdo->query($query)->fetchAll(PDO::FETCH_NUM);
+        $a = microtime(true);
+
+        $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_NUM);
+
+        if ($this->logSlowQueries) {
+            $b = microtime(true);
+            if ($b - $a > self::SLOW) {
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+            }
+        }
+
+        return $result;
     }
 
     /**

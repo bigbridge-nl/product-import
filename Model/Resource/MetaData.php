@@ -266,7 +266,7 @@ class MetaData
         return $info;
     }
 
-    public function getCategoryUrlSuffix()
+    protected function getCategoryUrlSuffix()
     {
         $value = $this->db->fetchSingleCell("
             SELECT `value`
@@ -280,7 +280,7 @@ class MetaData
         return is_null($value) ? ".html" : $value;
     }
 
-    public function getSaveRewritesHistory()
+    protected function getSaveRewritesHistory()
     {
         $value = $this->db->fetchSingleCell("
             SELECT `value`
@@ -294,7 +294,7 @@ class MetaData
         return is_null($value) ? true : (bool)$value;
     }
 
-    public function getProductUrlSuffix()
+    protected function getProductUrlSuffix()
     {
         $value = $this->db->fetchSingleCell("
             SELECT `value`
@@ -311,7 +311,7 @@ class MetaData
     /**
      * @return CategoryInfo[]
      */
-    public function getAllCategoryInfo()
+    protected function getAllCategoryInfo()
     {
         $urlKeyAttributeId = $this->categoryAttributeMap['url_key'];
 
@@ -353,7 +353,7 @@ class MetaData
      * @param int[] $idPath The ids of the parent categories, including $categoryId
      * @param array $urlKeys A store-id => url_key array
      */
-    public function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
+    protected function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
     {
         $this->allCategoryInfo[$categoryId] = new CategoryInfo($idPath, $urlKeys);
     }

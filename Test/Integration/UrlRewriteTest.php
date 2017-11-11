@@ -103,9 +103,12 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $expectedRewrites = [
 #todo "dozen"
             ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1", serialize(['category_id' => (string)$categoryId])],
+            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+
             ["product", "big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1", serialize(['category_id' => (string)$categoryId])],
+            ["product", "boxes/big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
         ];
 
         $expectedIndexes = [
@@ -129,20 +132,32 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         $product3->url_key = "a-" . $product3->url_key;
 
+        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product2);
+        $importer->importSimpleProduct($product3);
+
+        $importer->flush();
+
         $expectedRewrites = [
 #todo "dozen"
             ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
             ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", null],
-            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
-
             ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
             ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
+
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", null],
+            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
         ];
+
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+
+        // change categories
+
+        $product3->category_ids = new References(["Containers"]);
 
         $importer->importSimpleProduct($product1);
         $importer->importSimpleProduct($product2);
@@ -150,8 +165,32 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+        $newCategoryId = $product3->category_ids[0];
 
+        $expectedRewrites = [
+#todo "dozen"
+            ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+
+            ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+            ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+            ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$newCategoryId])],
+
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", null],
+            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+        ];
+
+        $expectedIndexes = [
+            [$categoryId, $product1->id],
+            [$categoryId, $product3->id],
+            [$newCategoryId, $product3->id],
+        ];
+
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
     }
 
     private function doAsserts(array $expectedRewrites, array $expectedIndexes, Product $product1, Product $product2, Product $product3)
