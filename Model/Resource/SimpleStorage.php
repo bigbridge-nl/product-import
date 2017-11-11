@@ -134,6 +134,8 @@ class SimpleStorage
 
         $this->db->execute("START TRANSACTION");
 
+            $existingValues = $this->getExistingProductValues($validUpdateProducts);
+
 //        try {
             $this->insertMainTable($validInsertProducts);
             $this->updateMainTable($validUpdateProducts);
@@ -150,7 +152,7 @@ class SimpleStorage
 
             // url_rewrite (must be done after url_key and category_id)
             $this->urlRewriteStorage->insertRewrites($validInsertProducts);
-            $this->urlRewriteStorage->updateRewrites($validUpdateProducts);
+            $this->urlRewriteStorage->updateRewrites($validUpdateProducts, $existingValues);
 
             $this->db->execute("COMMIT");
 
@@ -180,6 +182,38 @@ class SimpleStorage
 //            }
 //
 //        }
+    }
+
+    protected function getExistingProductValues(array $products)
+    {
+        if (empty($products)) {
+            return [];
+        }
+
+        $productIds = array_column($products, 'id');
+
+        $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
+
+        $existingData = $this->db->fetchAllAssoc("
+            SELECT URL_KEY.`entity_id` as product_id, URL_KEY.`value` AS url_key, GROUP_CONCAT(PG.`category_id` SEPARATOR ',') as category_ids, URL_KEY.`store_id`
+            FROM `{$this->metaData->productEntityTable}_varchar` URL_KEY
+            LEFT JOIN `{$this->metaData->urlRewriteProductCategoryTable}` PG ON PG.`product_id` = URL_KEY.`entity_id`
+            WHERE 
+                URL_KEY.`attribute_id` = $attributeId AND
+                URL_KEY.`entity_id` IN (" . implode(', ', $productIds) . ")
+            GROUP BY URL_KEY.`entity_id`, URL_KEY.`store_id` 
+        ");
+
+        $data = [];
+        foreach ($existingData as $existingDatum) {
+            $productId = $existingDatum['product_id'];
+            $storeId = $existingDatum['store_id'];
+            $categoryIds = is_null($existingDatum['category_ids']) ? [] : explode(',', $existingDatum['category_ids']);
+            $urlKey = $existingDatum['url_key'];
+            $data[$storeId][$productId] = ['url_key' => $urlKey, 'category_ids' => $categoryIds];
+        }
+
+        return $data;
     }
 
     /**

@@ -39,8 +39,12 @@ class Magento2DbConnection
      */
     public function execute(string $query)
     {
-#echo $query."\n";
+//$a = microtime(true);
         $this->pdo->exec($query);
+//$b = microtime(true);
+//if ($b - $a > 0.1) {
+//    echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+//}
     }
 
     /**
@@ -110,7 +114,13 @@ class Magento2DbConnection
     public function fetchAllAssoc(string $query)
     {
 #echo $query . "\n";
-        return $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
+#$a = microtime(true);
+        $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
+#$b = microtime(true);
+#if ($b - $a > 0.1) {
+#    echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+#}
+        return $result;
     }
 
     /**

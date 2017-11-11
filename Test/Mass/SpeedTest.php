@@ -78,7 +78,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.02, $time);
-        $this->assertLessThan(270, $memory); // cached metadata
+        $this->assertLessThan(340, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -119,7 +119,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(4.2, $time);
+        $this->assertLessThan(4.5, $time);
         $this->assertLessThan(420, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -130,6 +130,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $beforeTime = microtime(true);
 
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
+
+            // 1 in 10 product changes category
+//            if ($i % 10 == 0) {
+  //              $categoryIds = new References([$categories[1], $categories[2]]);
+    //        } else {
+                $categoryIds = new References([$categories[0], $categories[1]]);
+      //      }
 
             $product = new SimpleProduct();
             $product->name = uniqid("name");
@@ -145,7 +152,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->special_price_to_date = "2017-12-20";
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
             $product->tax_class_id = new Reference('Retail Customer');
-            $product->category_ids = new References([$categories[1], $categories[2]]);
+            $product->category_ids = $categoryIds;
             $product->website_ids = new References(['base']);
             $product->url_key = new GeneratedUrlKey();
 

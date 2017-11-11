@@ -75,7 +75,8 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $product2->name = "Grote Turquoise Doos product-import";
         $product2->store_view_id = 1;
         $product2->sku = '1-product-import';
-#todo remove next 2
+#todo remove next 3
+        $product2->category_ids = new References(["Boxes"]);
         $product2->price = "2.75";
         $product2->attribute_set_id = new Reference("Default");
         $product2->url_key = new GeneratedUrlKey();
@@ -123,6 +124,34 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $importer->flush();
 
         $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+
+        // change url_key
+
+        $product3->url_key = "a-" . $product3->url_key;
+
+        $expectedRewrites = [
+#todo "dozen"
+            ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", null],
+            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+
+            ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+            ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+        ];
+
+        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product2);
+        $importer->importSimpleProduct($product3);
+
+        $importer->flush();
+
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+
     }
 
     private function doAsserts(array $expectedRewrites, array $expectedIndexes, Product $product1, Product $product2, Product $product3)
