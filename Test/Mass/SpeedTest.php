@@ -78,7 +78,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.02, $time);
-        $this->assertLessThan(340, $memory); // cached metadata
+        $this->assertLessThan(400, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -131,13 +131,6 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
-            // 1 in 10 product changes category
-//            if ($i % 10 == 0) {
-  //              $categoryIds = new References([$categories[1], $categories[2]]);
-    //        } else {
-                $categoryIds = new References([$categories[0], $categories[1]]);
-      //      }
-
             $product = new SimpleProduct();
             $product->name = uniqid("name");
             $product->description = "A wonderful product that will enhance the quality of your life";
@@ -152,7 +145,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->special_price_to_date = "2017-12-20";
             $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
             $product->tax_class_id = new Reference('Retail Customer');
-            $product->category_ids = $categoryIds;
+            $product->category_ids = new References([$categories[1], $categories[2]]);
             $product->website_ids = new References(['base']);
             $product->url_key = new GeneratedUrlKey();
 
@@ -170,13 +163,13 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(4.1, $time);
+        $this->assertLessThan(6.7, $time);
         $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
-        $this->assertLessThan(8000, $peakMemory);
+        $this->assertLessThan(13000, $peakMemory);
     }
 }

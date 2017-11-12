@@ -260,6 +260,13 @@ I try to keep the memory footprint of the importer small and of constant size. T
 
 * When concatenating sets of values "(a, b, c)" "(d, e, f)" etc, implode(", ", $values) is faster than just string concatenation, even though an array of 1000 items needs to be created
 
+### The slowness of the unique url_key constraint
+
+https://sourceforge.net/p/magmi/patches/23/
+
+alter table catalog_product_entity_varchar add index abc (attribute_id, value);
+
+
 ## Fields
 
 sku
