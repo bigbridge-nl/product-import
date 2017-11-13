@@ -66,4 +66,12 @@ class ImportConfig
     const DUPLICATE_KEY_STRATEGY_ERROR = 'error';
     const DUPLICATE_KEY_STRATEGY_ADD_SKU = 'add-sku';
     const DUPLICATE_KEY_STRATEGY_ADD_SERIAL = 'add-serial';
+
+    /**
+     * The importer will use this version whether to use serialization or JSON for url_rewrite metadata.
+     * If left null, it will be auto-detected.
+     *
+     * @var null
+     */
+    public $magentoVersion = null;
 }

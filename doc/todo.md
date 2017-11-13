@@ -7,6 +7,11 @@ Many things, some of which are:
 * write [] serialized
 * Magento 2.2: json
 
+## Testing
+
+- remove created test-records
+- test with 500.000 records in the database
+
 ## The product model
 
 - Integrate global and store view Product data in single object

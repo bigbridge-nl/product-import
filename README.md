@@ -18,7 +18,7 @@ After an import has completed, the product and category indexers need to be run.
 * dry run (no writes to the database)
 * trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
 * input is validated on data type, requiredness,  and length restrictions
-* result callback, a function that is called with the results of the import (id, error)
+* result callback, a function that is called with the results of each imported product (id, error)
 
 ## Example
 

@@ -3,8 +3,8 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 
 /**
  * @author Patrick van Bergen
@@ -25,23 +25,20 @@ class UrlRewriteStorage
         $this->metaData = $metaData;
     }
 
-    /**
-     * @param SimpleProduct[] $products
-     */
-    public function insertRewrites(array $products)
+    public function insertRewrites(array $products, ValueSerializer $valueSerializer)
     {
-        $newRewriteValues = $this->getNewRewriteValues($products);
+        $newRewriteValues = $this->getNewRewriteValues($products, $valueSerializer);
 
-        $this->writeRewrites($newRewriteValues, true);
+        $this->writeRewrites($newRewriteValues, true, $valueSerializer);
     }
 
-    public function updateRewrites(array $products, array $existingValues)
+    public function updateRewrites(array $products, array $existingValues, ValueSerializer $valueSerializer)
     {
         $changedProducts = $this->getChangedProducts($products, $existingValues);
 
-        $newRewriteValues = $this->getNewRewriteValues($changedProducts);
+        $newRewriteValues = $this->getNewRewriteValues($changedProducts, $valueSerializer);
 
-        $this->updateExistingRewrites($newRewriteValues);
+        $this->updateExistingRewrites($newRewriteValues, $valueSerializer);
     }
 
     /**
@@ -70,7 +67,7 @@ class UrlRewriteStorage
         return $changedProducts;
     }
 
-    protected function updateExistingRewrites(array $insertRewriteValues)
+    protected function updateExistingRewrites(array $insertRewriteValues, ValueSerializer $valueSerializer)
     {
         if (empty($insertRewriteValues)) {
             return;
@@ -85,23 +82,20 @@ class UrlRewriteStorage
 
         $data = [];
         foreach ($productIds as $storeId => $ids) {
+
             $oldUrlRewrites = $this->db->fetchAllAssoc("
                 SELECT `url_rewrite_id`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `metadata`
                 FROM `{$this->metaData->urlRewriteTable}`
                 WHERE
                     store_id = $storeId AND `entity_id` IN (" . implode(',', $ids) . ")
             ");
+
             foreach ($oldUrlRewrites as $oldUrlRewrite) {
-                $categoryId = $oldUrlRewrite['metadata'];
-                if (!is_null($categoryId)) {
-                    $categoryId = unserialize($categoryId);
-                    if (!empty($categoryId)) {
-                        $categoryId = $categoryId['category_id'];
-                    } else {
-                        $categoryId = '';
-                    }
-                }
-                $data[$storeId][$oldUrlRewrite['entity_id'] . '/' . $categoryId][] = $oldUrlRewrite;
+
+                $categoryId = $valueSerializer->extract($oldUrlRewrite['metadata'], 'category_id');
+                $key = $oldUrlRewrite['entity_id'] . '/' . $categoryId;
+
+                $data[$storeId][$key][] = $oldUrlRewrite;
             }
         }
 
@@ -113,21 +107,14 @@ class UrlRewriteStorage
 
             list($productId, $requestPath, $targetPath, $redirectType, $storeId, $metadata) = explode("\t", $tabbedUpdate);
 
-            $categoryId = $metadata;
-            if ($categoryId !== "") {
-                $categoryId = unserialize($categoryId);
-                if (!empty($categoryId)) {
-                    $categoryId = $categoryId['category_id'];
-                } else {
-                    $categoryId = '';
-                }
-            }
+            $categoryId = $valueSerializer->extract($metadata, 'category_id');
+            $key = $productId . '/' . $categoryId;
 
-            if (!array_key_exists($storeId, $data) || ! array_key_exists($productId.'/'.$categoryId, $data[$storeId])) {
+            if (!array_key_exists($storeId, $data) || ! array_key_exists($key, $data[$storeId])) {
                 continue;
             }
 
-            $oldUrlRewrites = $data[$storeId][$productId.'/'.$categoryId];
+            $oldUrlRewrites = $data[$storeId][$key];
 
             // multiple old rewrites with matching store_id, product_id, metadata
 
@@ -165,12 +152,12 @@ class UrlRewriteStorage
             $this->db->execute($sql);
         }
 
-        $this->writeRewrites($insertRewriteValues, true);
+        $this->writeRewrites($insertRewriteValues, true, $valueSerializer);
 
-        $this->writeRewrites($updatedRewrites, false);
+        $this->writeRewrites($updatedRewrites, false, $valueSerializer);
     }
 
-    protected function writeRewrites(array $tabbedRewriteValues, $buildIndex)
+    protected function writeRewrites(array $tabbedRewriteValues, $buildIndex, ValueSerializer $valueSerializer)
     {
         if (empty($tabbedRewriteValues)) {
             return;
@@ -219,7 +206,7 @@ class UrlRewriteStorage
         }
     }
 
-    protected function getNewRewriteValues(array $products): array
+    protected function getNewRewriteValues(array $products, ValueSerializer $valueSerializer): array
     {
         if (empty($products)) {
             return [];
@@ -311,7 +298,7 @@ class UrlRewriteStorage
 
                         $requestPath = $path . $shortUrl;
                         $targetPath = 'catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId;
-                        $metadata = serialize(['category_id' => (string)$parentCategoryId]);
+                        $metadata = $valueSerializer->serialize(['category_id' => (string)$parentCategoryId]);
                         $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t0\t{$storeId}\t{$metadata}";
                     }
                 }

@@ -3,9 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\GeneratedUrlKey;
 use BigBridge\ProductImport\Model\Reference;
-use BigBridge\ProductImport\Model\Resource\Reference\UrlKeyGenerator;
 use IntlChar;
 use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;

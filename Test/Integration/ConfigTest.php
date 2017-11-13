@@ -62,5 +62,22 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
         $this->assertNull($importer);
         $this->assertEquals("config: resultCallbacks should be an array of functions", $error);
+
+        // ---
+
+        $config = new ImportConfig();
+
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $this->assertTrue(strpos($config->magentoVersion, '2.') !== false);
+
+        // ---
+
+        $config = new ImportConfig();
+        $config->magentoVersion = '2';
+
+        list($importer, $error) = self::$factory->createImporter($config);
+
+        $this->assertEquals("config: invalid Magento version number", $error);
     }
 }

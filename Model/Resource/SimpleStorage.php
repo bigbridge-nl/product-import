@@ -6,6 +6,7 @@ use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Reference\UrlKeyGenerator;
+use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use Exception;
 use PDOException;
 
@@ -52,7 +53,7 @@ class SimpleStorage
      * @param SimpleProduct[] $simpleProducts
      * @param ImportConfig $config
      */
-    public function storeSimpleProducts(array $simpleProducts, ImportConfig $config)
+    public function storeSimpleProducts(array $simpleProducts, ImportConfig $config, ValueSerializer $valueSerializer)
     {
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
@@ -99,7 +100,7 @@ class SimpleStorage
         // in a "dry run" no actual imports to the database are done
         if (!$config->dryRun) {
 
-            $this->saveProducts($validProducts);
+            $this->saveProducts($validProducts, $valueSerializer);
         }
 
         // call user defined functions to let them process the results
@@ -110,7 +111,7 @@ class SimpleStorage
         }
     }
 
-    protected function saveProducts(array $validProducts)
+    protected function saveProducts(array $validProducts, ValueSerializer $valueSerializer)
     {
         $validUpdateProducts = $validInsertProducts = [];
         $productsByAttribute = [];
@@ -136,7 +137,8 @@ class SimpleStorage
 
             $existingValues = $this->getExistingProductValues($validUpdateProducts);
 
-//        try {
+        try {
+
             $this->insertMainTable($validInsertProducts);
             $this->updateMainTable($validUpdateProducts);
 
@@ -151,37 +153,19 @@ class SimpleStorage
             }
 
             // url_rewrite (must be done after url_key and category_id)
-            $this->urlRewriteStorage->insertRewrites($validInsertProducts);
-            $this->urlRewriteStorage->updateRewrites($validUpdateProducts, $existingValues);
+            $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);
+            $this->urlRewriteStorage->updateRewrites($validUpdateProducts, $existingValues, $valueSerializer);
 
             $this->db->execute("COMMIT");
 
-//        } catch (PDOException $e) {
-//
-//            try {
-//                $this->db->execute("ROLLBACK");
-//            } catch (Exception $f) {
-//            }
-//
-//            foreach ($validProducts as $product) {
-//                $product->errors[] = $e->getMessage();
-//                $product->ok = false;
-//            }
-//
-//        } catch (Exception $e) {
-//
-//            try {
-//                $this->db->execute("ROLLBACK");
-//            } catch (Exception $f) {
-//            }
-//
-//            foreach ($validProducts as $product) {
-//                $message = $e->getMessage();
-//                $product->errors[] = $message;
-//                $product->ok = false;
-//            }
-//
-//        }
+        } catch (Exception $e) {
+
+            // rollback the transaction
+            try { $this->db->execute("ROLLBACK"); } catch (Exception $f) {}
+
+            // let the application handle the exception
+            throw $e;
+        }
     }
 
     protected function getExistingProductValues(array $products)

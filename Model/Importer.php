@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Model;
 use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
+use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;
 
 /**
@@ -21,15 +22,23 @@ class Importer
     /** @var  ImportConfig */
     protected $config;
 
+    /** @var  ValueSerializer */
+    protected $valueSerializer;
+
     /** @var  SimpleStorage */
     protected $simpleStorage;
 
     /** @var  ConfigurableStorage */
     protected $configurableStorage;
 
-    public function __construct(ImportConfig $config, SimpleStorage $simpleStorage, ConfigurableStorage $configurableStorage)
+    public function __construct(
+        ImportConfig $config,
+        ValueSerializer $valueSerializer,
+        SimpleStorage $simpleStorage,
+        ConfigurableStorage $configurableStorage)
     {
         $this->config = $config;
+        $this->valueSerializer = $valueSerializer;
         $this->simpleStorage = $simpleStorage;
         $this->configurableStorage = $configurableStorage;
     }
@@ -69,7 +78,7 @@ class Importer
 
     private function flushSimpleProducts()
     {
-        $this->simpleStorage->storeSimpleProducts($this->simpleProducts, $this->config);
+        $this->simpleStorage->storeSimpleProducts($this->simpleProducts, $this->config, $this->valueSerializer);
         $this->simpleProducts = [];
     }
 
