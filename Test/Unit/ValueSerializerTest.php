@@ -18,7 +18,6 @@ class ValueSerializerTest extends \PHPUnit_Framework_TestCase
 
     public function testSerializeValueSerializer()
     {
-
         $ser = new SerializeValueSerializer();
 
         $this->assertEquals(null, $ser->serialize(null));
@@ -32,8 +31,6 @@ class ValueSerializerTest extends \PHPUnit_Framework_TestCase
 
     public function testJsonValueSerializer()
     {
-        require_once __DIR__ . '/../../../../../app/autoload.php';
-
         $ser = new JsonValueSerializer();
 
         $this->assertEquals(null, $ser->serialize(null));

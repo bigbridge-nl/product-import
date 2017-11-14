@@ -29,7 +29,7 @@ class UrlRewriteStorage
     {
         $newRewriteValues = $this->getNewRewriteValues($products, $valueSerializer);
 
-        $this->writeRewrites($newRewriteValues, true, $valueSerializer);
+        $this->writeNewRewrites($newRewriteValues, $valueSerializer, true);
     }
 
     public function updateRewrites(array $products, array $existingValues, ValueSerializer $valueSerializer)
@@ -38,11 +38,13 @@ class UrlRewriteStorage
 
         $newRewriteValues = $this->getNewRewriteValues($changedProducts, $valueSerializer);
 
-        $this->updateExistingRewrites($newRewriteValues, $valueSerializer);
+        $this->rewriteExistingRewrites($newRewriteValues, $valueSerializer);
     }
 
     /**
      * @param Product[] $products
+     * @param array $existingValues
+     * @return array
      */
     protected function getChangedProducts(array $products, array $existingValues)
     {
@@ -53,12 +55,15 @@ class UrlRewriteStorage
         $changedProducts = [];
         foreach ($products as $product) {
             if (array_key_exists($product->store_view_id, $existingValues) && array_key_exists($product->id, $existingValues[$product->store_view_id])) {
+
                 $existingDatum = $existingValues[$product->store_view_id][$product->id];
+
                 if ($product->url_key != $existingDatum['url_key']) {
                     $changedProducts[] = $product;
                 } elseif (array_diff($product->category_ids, $existingDatum['category_ids']) || array_diff($existingDatum['category_ids'], $product->category_ids)) {
                     $changedProducts[] = $product;
                 }
+
             } else {
                 $changedProducts[] = $product;
             }
@@ -67,17 +72,16 @@ class UrlRewriteStorage
         return $changedProducts;
     }
 
-    protected function updateExistingRewrites(array $insertRewriteValues, ValueSerializer $valueSerializer)
+    /**
+     * @param UrlRewriteInfo[] $urlRewrites
+     * @return array
+     */
+    protected function getExistingUrlRewriteData(array $urlRewrites, ValueSerializer $valueSerializer)
     {
-        if (empty($insertRewriteValues)) {
-            return;
-        }
-
         // prepare information of existing rewrites
         $productIds = [];
-        foreach ($insertRewriteValues as $tabbedUpdate) {
-            list($productId, $requestPath, $targetPath, $redirectType, $storeId, $metadata) = explode("\t", $tabbedUpdate);
-            $productIds[$storeId][$productId] = $productId;
+        foreach ($urlRewrites as $urlRewriteInfo) {
+            $productIds[$urlRewriteInfo->storeId][$urlRewriteInfo->productId] = $urlRewriteInfo->productId;
         }
 
         $data = [];
@@ -99,77 +103,26 @@ class UrlRewriteStorage
             }
         }
 
-        $updatedRewrites = [];
-        $oldRewriteIds = [];
-        foreach ($insertRewriteValues as $tabbedUpdate) {
-
-            // distinct store_id, product_id, metadata
-
-            list($productId, $requestPath, $targetPath, $redirectType, $storeId, $metadata) = explode("\t", $tabbedUpdate);
-
-            $categoryId = $valueSerializer->extract($metadata, 'category_id');
-            $key = $productId . '/' . $categoryId;
-
-            if (!array_key_exists($storeId, $data) || ! array_key_exists($key, $data[$storeId])) {
-                continue;
-            }
-
-            $oldUrlRewrites = $data[$storeId][$key];
-
-            // multiple old rewrites with matching store_id, product_id, metadata
-
-            foreach ($oldUrlRewrites as $oldRewrite) {
-
-                $oldRewriteId = $oldRewrite['url_rewrite_id'];
-                $oldRequestPath = $oldRewrite['request_path'];
-                $oldRedirectType = $oldRewrite['redirect_type'];
-
-                $oldRewriteIds[] = $oldRewriteId;
-
-                $updatedRedirectType = '301';
-
-                if ($oldRedirectType == '0') {
-
-                    if (!$this->metaData->saveRewritesHistory) {
-                        // no history: ignore the existing entry
-                        continue;
-                    }
-                }
-
-                $updatedTargetPath = $requestPath;
-
-                $updatedRewrites[] = "{$productId}\t{$oldRequestPath}\t{$updatedTargetPath}\t{$updatedRedirectType}\t{$storeId}\t{$metadata}";
-            }
-        }
-
-        if (!empty($oldRewriteIds)) {
-            // delete old rewrites
-            $sql = "
-                DELETE FROM `{$this->metaData->urlRewriteTable}`
-                WHERE `url_rewrite_id` IN (" . implode(',', $oldRewriteIds) . ")
-            ";
-
-            $this->db->execute($sql);
-        }
-
-        $this->writeRewrites($insertRewriteValues, true, $valueSerializer);
-
-        $this->writeRewrites($updatedRewrites, false, $valueSerializer);
+        return $data;
     }
 
-    protected function writeRewrites(array $tabbedRewriteValues, $buildIndex, ValueSerializer $valueSerializer)
+    /**
+     * @param UrlRewriteInfo[] $urlRewrites
+     * @param ValueSerializer $valueSerializer
+     * @param $buildIndex
+     */
+    protected function writeNewRewrites(array $urlRewrites, ValueSerializer $valueSerializer, $buildIndex)
     {
-        if (empty($tabbedRewriteValues)) {
+        if (empty($urlRewrites)) {
             return;
         }
 
         $newRewriteValues = [];
-        foreach ($tabbedRewriteValues as $tabbedUpdate) {
-            list($productId, $requestPath, $targetPath, $redirectType, $storeId, $metadata) = explode("\t", $tabbedUpdate);
-            $metadata = $metadata === "" ? "null" : $this->db->quote($metadata);
-            $requestPath = $this->db->quote($requestPath);
-            $targetPath = $this->db->quote($targetPath);
-            $newRewriteValues[] = "('product', {$productId}, {$requestPath}, {$targetPath}, {$redirectType}, {$storeId}, 1, {$metadata})";
+        foreach ($urlRewrites as $urlRewrite) {
+            $metadata = $urlRewrite->metadata === null ? "null" : $this->db->quote($valueSerializer->serialize($urlRewrite->metadata));
+            $requestPath = $this->db->quote($urlRewrite->requestPath);
+            $targetPath = $this->db->quote($urlRewrite->targetPath);
+            $newRewriteValues[] = "('product', {$urlRewrite->productId}, {$requestPath}, {$targetPath}, {$urlRewrite->redirectType}, {$urlRewrite->storeId}, 1, {$metadata})";
         }
 
         // add new values
@@ -267,7 +220,7 @@ class UrlRewriteStorage
                 // url keys without categories
                 $requestPath = $shortUrl;
                 $targetPath = 'catalog/product/view/id/' . $productId;
-                $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t0\t{$storeId}\t";
+                $rewriteValues[] = new UrlRewriteInfo($productId, $requestPath, $targetPath, 0, $storeId, null);
 
                 if (!array_key_exists($productId, $categoryIds)) {
                     continue;
@@ -298,8 +251,8 @@ class UrlRewriteStorage
 
                         $requestPath = $path . $shortUrl;
                         $targetPath = 'catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId;
-                        $metadata = $valueSerializer->serialize(['category_id' => (string)$parentCategoryId]);
-                        $rewriteValues[] = "{$productId}\t{$requestPath}\t{$targetPath}\t0\t{$storeId}\t{$metadata}";
+                        $metadata = ['category_id' => (string)$parentCategoryId];
+                        $rewriteValues[] = new UrlRewriteInfo($productId, $requestPath, $targetPath, 0, $storeId, $metadata);
                     }
                 }
             }
@@ -307,4 +260,75 @@ class UrlRewriteStorage
 
         return $rewriteValues;
     }
+
+
+    /**
+     * @param UrlRewriteInfo[] $urlRewrites
+     * @param ValueSerializer $valueSerializer
+     */
+    protected function rewriteExistingRewrites(array $urlRewrites, ValueSerializer $valueSerializer)
+    {
+        if (empty($urlRewrites)) {
+            return;
+        }
+
+        $existingUrlRewriteData = $this->getExistingUrlRewriteData($urlRewrites, $valueSerializer);
+
+        $updatedRewrites = [];
+        $oldRewriteIds = [];
+        foreach ($urlRewrites as $urlRewriteInfo) {
+
+            // distinct store_id, product_id, metadata
+
+            $categoryId = empty($urlRewriteInfo->metadata) ? null : $urlRewriteInfo->metadata['category_id'];
+            $key = $urlRewriteInfo->productId . '/' . $categoryId;
+
+            if (!array_key_exists($urlRewriteInfo->storeId, $existingUrlRewriteData) || ! array_key_exists($key, $existingUrlRewriteData[$urlRewriteInfo->storeId])) {
+                continue;
+            }
+
+            $oldUrlRewrites = $existingUrlRewriteData[$urlRewriteInfo->storeId][$key];
+
+            // multiple old rewrites with matching store_id, product_id, metadata
+
+            foreach ($oldUrlRewrites as $oldRewrite) {
+
+                $oldRewriteId = $oldRewrite['url_rewrite_id'];
+                $oldRequestPath = $oldRewrite['request_path'];
+                $oldRedirectType = $oldRewrite['redirect_type'];
+
+                $oldRewriteIds[] = $oldRewriteId;
+
+                $updatedRedirectType = '301';
+
+                if ($oldRedirectType == '0') {
+
+                    if (!$this->metaData->saveRewritesHistory) {
+                        // no history: ignore the existing entry
+                        continue;
+                    }
+                }
+
+                $updatedTargetPath = $urlRewriteInfo->requestPath;
+
+                $updatedRewrites[] =
+                    new UrlRewriteInfo($urlRewriteInfo->productId, $oldRequestPath, $updatedTargetPath, $updatedRedirectType, $urlRewriteInfo->storeId, $urlRewriteInfo->metadata);
+            }
+        }
+
+        if (!empty($oldRewriteIds)) {
+            // delete old rewrites
+            $sql = "
+                DELETE FROM `{$this->metaData->urlRewriteTable}`
+                WHERE `url_rewrite_id` IN (" . implode(',', $oldRewriteIds) . ")
+            ";
+
+            $this->db->execute($sql);
+        }
+
+        $this->writeNewRewrites($urlRewrites, $valueSerializer, true);
+
+        $this->writeNewRewrites($updatedRewrites, $valueSerializer, false);
+    }
 }
+

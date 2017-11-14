@@ -7,7 +7,7 @@ use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use Magento\Framework\App\ObjectManager;
-use Magento\Framework\App\ProductMetadataInterface;
+use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -17,14 +17,9 @@ class ImporterFactory
     /** @var  MetaData */
     protected $metaData;
 
-    /** @var ProductMetadataInterface */
-    private $magentoData;
-
-    public function __construct(MetaData $metaData, ProductMetadataInterface $magentoData)
+    public function __construct(MetaData $metaData)
     {
         $this->metaData = $metaData;
-
-        $this->magentoData = $magentoData;
     }
 
     /**
@@ -53,7 +48,20 @@ class ImporterFactory
     protected function fillInDefaults(ImportConfig $config)
     {
         if (is_null($config->magentoVersion)) {
-            $config->magentoVersion = $this->magentoData->getVersion();
+
+            // Note: this is the official version to determine the Magento version:
+            //
+            // $productMetadata = new \Magento\Framework\App\ProductMetadata();
+            // $version = $productMetadata->getVersion();
+            //
+            // But is takes 0.2 seconds to execute, this is too long
+            // See also https://magento.stackexchange.com/questions/96858/how-to-get-magento-version-in-magento2-equivalent-of-magegetversion
+
+            if (preg_match('/"version": "([^\"]+)"/', file_get_contents(BP . '/vendor/magento/magento2-base/composer.json'), $matches)) {
+                $config->magentoVersion = $matches[1];
+            } else {
+                throw new Exception("Magento version could not be detected.");
+            }
         }
     }
 
