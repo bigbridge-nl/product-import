@@ -149,7 +149,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
             ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", null],
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", serialize([])],
             ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
         ];
@@ -180,7 +180,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
             ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$newCategoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", null],
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "1", serialize([])],
             ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
         ];
