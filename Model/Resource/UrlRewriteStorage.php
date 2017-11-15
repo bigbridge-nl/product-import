@@ -58,6 +58,7 @@ class UrlRewriteStorage
 
                 $existingDatum = $existingValues[$product->store_view_id][$product->id];
 
+                // a product has changed if its url_key or its categories change
                 if ($product->url_key != $existingDatum['url_key']) {
                     $changedProducts[] = $product;
                 } elseif (array_diff($product->category_ids, $existingDatum['category_ids']) || array_diff($existingDatum['category_ids'], $product->category_ids)) {
@@ -255,6 +256,12 @@ class UrlRewriteStorage
                         // no history: ignore the existing entry
                         continue;
                     }
+
+                }
+
+                if ($oldRequestPath === $urlRewriteInfo->requestPath) {
+                    // a redirect should not redirect to itself
+                    continue;
                 }
 
                 $updatedTargetPath = $urlRewriteInfo->requestPath;
