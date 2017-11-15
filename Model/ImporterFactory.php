@@ -26,8 +26,11 @@ class ImporterFactory
      * @param ImportConfig $config
      * @return Importer[] An array of Importer and error message
      */
-    public function createImporter(ImportConfig $config)
+    public function createImporter(ImportConfig $originalConfig)
     {
+        // disallow changing the config after import creation; it could cause all kinds of trouble
+        $config = clone $originalConfig;
+
         $this->fillInDefaults($config);
 
         $error = $this->validateConfig($config);
