@@ -69,7 +69,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->createImporter($config);
 
-        $this->assertTrue(strpos($config->magentoVersion, '2.') !== false);
+        // $config has copied, the original is unchanged
+        $this->assertEquals(null, $config->magentoVersion);
 
         // ---
 

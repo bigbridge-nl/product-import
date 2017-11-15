@@ -23,6 +23,10 @@ class ImporterFactory
     }
 
     /**
+     * Creates an importer based on a given configuration.
+     *
+     * Note: the config object is copied; making changes to it later does not affect the importer.
+     *
      * @param ImportConfig $config
      * @return Importer[] An array of Importer and error message
      */
@@ -81,7 +85,7 @@ class ImporterFactory
     {
         $error = "";
 
-        if (!preg_match('/2\..+/', $config->magentoVersion)) {
+        if (!preg_match('/^2\.\d/', $config->magentoVersion)) {
             $error = "config: invalid Magento version number";
         }
 
