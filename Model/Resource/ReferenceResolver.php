@@ -59,24 +59,6 @@ class ReferenceResolver
             }
         }
 
-        if ($product->tax_class_id instanceof Reference) {
-            list($id, $error) = $this->taxClassResolver->resolveName($product->tax_class_id->name);
-            $product->tax_class_id = $id;
-            if ($error !== "") {
-                $product->ok = false;
-                $product->errors[] = $error;
-            }
-        }
-
-        if ($product->store_view_id instanceof Reference) {
-            list($id, $error) = $this->storeViewResolver->resolveName($product->store_view_id->name);
-            $product->store_view_id = $id;
-            if ($error !== "") {
-                $product->ok = false;
-                $product->errors[] = $error;
-            }
-        }
-
         if ($product->attribute_set_id instanceof Reference) {
             list($id, $error) = $this->attributeSetResolver->resolveName($product->attribute_set_id->name);
             $product->attribute_set_id = $id;
@@ -86,12 +68,31 @@ class ReferenceResolver
             }
         }
 
-        if ($product->website_ids instanceof References) {
-            list($ids, $error) = $this->websiteResolver->resolveNames($product->website_ids->names);
-            $product->website_ids = $ids;
+        foreach ($product->getStoreViews() as $storeView) {
+
+            list($id, $error) = $this->storeViewResolver->resolveName($storeView->storeViewCode);
+            $storeView->store_view_id = $id;
             if ($error !== "") {
                 $product->ok = false;
                 $product->errors[] = $error;
+            }
+
+            if ($storeView->tax_class_id instanceof Reference) {
+                list($id, $error) = $this->taxClassResolver->resolveName($storeView->tax_class_id->name);
+                $storeView->tax_class_id = $id;
+                if ($error !== "") {
+                    $product->ok = false;
+                    $product->errors[] = $error;
+                }
+            }
+
+            if ($storeView->website_ids instanceof References) {
+                list($ids, $error) = $this->websiteResolver->resolveNames($storeView->website_ids->names);
+                $storeView->website_ids = $ids;
+                if ($error !== "") {
+                    $product->ok = false;
+                    $product->errors[] = $error;
+                }
             }
         }
     }

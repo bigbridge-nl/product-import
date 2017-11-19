@@ -88,22 +88,24 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct();
-            $product->name = uniqid("name");
-            $product->description = "A wunderful product that will enhance the quality of your live";
-            $product->short_description = "A wunderful product";
-            $product->weight = "6";
             $product->sku = $skus[$i];
             $product->attribute_set_id = new Reference( "Default");
-            $product->status = Product::STATUS_ENABLED;
-            $product->price = "1.39";
-            $product->special_price = "1.25";
-            $product->special_price_from_date = "2017-10-22";
-            $product->special_price_to_date = "2017-10-28";
-            $product->visibility = Product::VISIBILITY_BOTH;
-            $product->tax_class_id = new Reference('Taxable Goods');
             $product->category_ids = new References([$categories[0], $categories[1]]);
-            $product->website_ids = new References(['base']);
-            $product->url_key = new GeneratedUrlKey();
+
+            $global = $product->global();
+            $global->name = uniqid("name");
+            $global->description = "A wunderful product that will enhance the quality of your live";
+            $global->short_description = "A wunderful product";
+            $global->weight = "6";
+            $global->status = Product::STATUS_ENABLED;
+            $global->price = "1.39";
+            $global->special_price = "1.25";
+            $global->special_price_from_date = "2017-10-22";
+            $global->special_price_to_date = "2017-10-28";
+            $global->visibility = Product::VISIBILITY_BOTH;
+            $global->tax_class_id = new Reference('Taxable Goods');
+            $global->url_key = new GeneratedUrlKey();
+            $global->website_ids = new References(['base']);
 
             $importer->importSimpleProduct($product);
         }
@@ -132,22 +134,24 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct();
-            $product->name = uniqid("name");
-            $product->description = "A wonderful product that will enhance the quality of your life";
-            $product->short_description = "A wonderful product";
-            $product->weight = "5.80";
             $product->sku = $skus[$i];
             $product->attribute_set_id = new Reference( "Default");
-            $product->status = Product::STATUS_DISABLED;
-            $product->price = "1.39";
-            $product->special_price = "1.15";
-            $product->special_price_from_date = "2017-12-10";
-            $product->special_price_to_date = "2017-12-20";
-            $product->visibility = Product::VISIBILITY_NOT_VISIBLE;
-            $product->tax_class_id = new Reference('Retail Customer');
             $product->category_ids = new References([$categories[1], $categories[2]]);
-            $product->website_ids = new References(['base']);
-            $product->url_key = new GeneratedUrlKey();
+
+            $global = $product->global();
+            $global->name = uniqid("name");
+            $global->description = "A wonderful product that will enhance the quality of your life";
+            $global->short_description = "A wonderful product";
+            $global->weight = "5.80";
+            $global->status = Product::STATUS_DISABLED;
+            $global->price = "1.39";
+            $global->special_price = "1.15";
+            $global->special_price_from_date = "2017-12-10";
+            $global->special_price_to_date = "2017-12-20";
+            $global->visibility = Product::VISIBILITY_NOT_VISIBLE;
+            $global->tax_class_id = new Reference('Retail Customer');
+            $global->website_ids = new References(['base']);
+            $global->url_key = new GeneratedUrlKey();
 
             $importer->importSimpleProduct($product);
         }

@@ -8,7 +8,6 @@ use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Reference\UrlKeyGenerator;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use Exception;
-use PDOException;
 
 /**
  * @author Patrick van Bergen
@@ -65,6 +64,10 @@ class SimpleStorage
 
         // separate new products from existing products and assign id
         foreach ($simpleProducts as $product) {
+
+            // replace Reference(s) with ids, changes $product->ok and $product->errors
+            $this->referenceResolver->resolveIds($product, $config);
+
             if (array_key_exists($product->sku, $sku2id)) {
                 $product->id = $sku2id[$product->sku];
                 $updateProducts[] = $product;
@@ -82,9 +85,6 @@ class SimpleStorage
         $validProducts = [];
 
         foreach ($simpleProducts as $product) {
-
-            // replace Reference(s) with ids, changes $product->ok and $product->errors
-            $this->referenceResolver->resolveIds($product, $config);
 
             // checks all attributes, changes $product->ok and $product->errors
             $this->validator->validate($product);
@@ -115,6 +115,7 @@ class SimpleStorage
     {
         $validUpdateProducts = $validInsertProducts = [];
         $productsByAttribute = [];
+        $productsWithCategories = [];
 
         foreach ($validProducts as $product) {
 
@@ -125,17 +126,22 @@ class SimpleStorage
                 $validInsertProducts[] = $product;
             }
 
-            // collect products by attribute
-            foreach ($product as $key => $value) {
-                if ($value !== null) {
-                    $productsByAttribute[$key][] = $product;
+            if ($product->category_ids !== null) {
+                $productsWithCategories[] = $product;
+            }
+
+            foreach ($product->getStoreViews() as $storeView) {
+                foreach ($storeView as $key => $value) {
+                    if ($value !== null) {
+                        $productsByAttribute[$key][] = $storeView;
+                    }
                 }
             }
         }
 
         $this->db->execute("START TRANSACTION");
 
-            $existingValues = $this->getExistingProductValues($validUpdateProducts);
+        $existingValues = $this->getExistingProductValues($validUpdateProducts);
 
         try {
 
@@ -148,9 +154,7 @@ class SimpleStorage
                 }
             }
 
-            if (array_key_exists('category_ids', $productsByAttribute)) {
-                $this->insertCategoryIds($productsByAttribute['category_ids']);
-            }
+            $this->insertCategoryIds($productsWithCategories);
 
             // url_rewrite (must be done after url_key and category_id)
             $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);
@@ -284,21 +288,21 @@ class SimpleStorage
     }
 
     /**
-     * @param SimpleProduct[] $products
+     * @param SimpleProduct[] $storeViews
      * @param string $eavAttribute
      */
-    protected function insertEavAttribute(array $products, string $eavAttribute)
+    protected function insertEavAttribute(array $storeViews, string $eavAttribute)
     {
         $attributeInfo = $this->metaData->productEavAttributeInfo[$eavAttribute];
         $tableName = $attributeInfo->tableName;
         $attributeId = $attributeInfo->attributeId;
 
         $values = [];
-        foreach ($products as $product) {
+        foreach ($storeViews as $storeView) {
 
-            $entityId = $product->id;
-            $value = $this->db->quote($product->$eavAttribute);
-            $values[] = "({$entityId},{$attributeId},{$product->store_view_id},{$value})";
+            $entityId = $storeView->parent->id;
+            $value = $this->db->quote($storeView->$eavAttribute);
+            $values[] = "({$entityId},{$attributeId},{$storeView->store_view_id},{$value})";
         }
 
         $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .

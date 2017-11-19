@@ -119,13 +119,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // store view code
 
-            // plain
-            [['store_view_id' => 1], true, ""],
-            [['store_view_id' => "0"], true, ""],
-            // missing
-            [['store_view_id' => ''], false, "missing store view id"],
-            // corrupt
-            [['store_view_id' => 'Thunderbirds'], false, "store view id is a string, should be an integer"],
+//            // plain
+//            [['store_view_id' => 1], true, ""],
+//            [['store_view_id' => "0"], true, ""],
+//            // missing
+//            [['store_view_id' => ''], false, "missing store view id"],
+//            // corrupt
+//            [['store_view_id' => 'Thunderbirds'], false, "store view id is a string, should be an integer"],
 
             // category_ids
 
@@ -150,12 +150,18 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct();
             $product->sku = "big-blue-box";
-            $product->name = "Big Blue Box";
-            $product->price = "123.00";
             $product->attribute_set_id = 4;
 
+            $global = $product->global();
+            $global->name = "Big Blue Box";
+            $global->price = "123.00";
+
             foreach ($test[0] as $fieldName => $fieldValue) {
-                $product->$fieldName = $fieldValue;
+                if (in_array($fieldName, ['sku', 'category_ids', 'attribute_set_id'])) {
+                    $product->$fieldName = $fieldValue;
+                } else {
+                    $global->$fieldName = $fieldValue;
+                }
             }
 
             $validator->validate($product);

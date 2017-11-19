@@ -15,6 +15,8 @@ use Magento\Catalog\Model\Product\Visibility;
  */
 abstract class Product
 {
+    const GLOBAL_STORE_VIEW_CODE = 'admin';
+
     // a collection of some commonly used constants
 
     const STATUS_ENABLED = Status::STATUS_ENABLED;
@@ -29,37 +31,14 @@ abstract class Product
     /** @var  int */
     public $id;
 
-    /** @var  int  */
-    public $status;
-
-    public $visibility;
-
     /** @var  string|Reference */
     public $attribute_set_id;
-
-    /** @var  string|Reference */
-    public $store_view_id = 0;
 
     /** @var  string 64 character */
     public $sku;
 
-    /** @var  string */
-    public $name;
-
-    /** @var  string A 12.4 decimal field */
-    public $price;
-
-    /** @var  int|Reference */
-    public $tax_class_id;
-
-    /** @var  string */
-    public $url_key;
-
     /** @var int[]|References */
     public $category_ids = [];
-
-    /** @var int[]|References */
-    public $website_ids = [];
 
     // =========================================
     // importer data
@@ -73,4 +52,26 @@ abstract class Product
 
     /** @var string  */
     public $lineNumber = "";
+
+    /** @var ProductStoreView[] */
+    protected $storeViews = [];
+
+    public function storeView(string $storeViewCode) {
+        if (!array_key_exists($storeViewCode, $this->storeViews)) {
+            $this->storeViews[$storeViewCode] = new ProductStoreView($this, $storeViewCode);
+        }
+        return $this->storeViews[$storeViewCode];
+    }
+
+    public function global() {
+        if (!array_key_exists(self::GLOBAL_STORE_VIEW_CODE, $this->storeViews)) {
+            $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView($this, self::GLOBAL_STORE_VIEW_CODE);
+        }
+        return $this->storeViews[self::GLOBAL_STORE_VIEW_CODE];
+    }
+
+    public function getStoreViews()
+    {
+        return $this->storeViews;
+    }
 }

@@ -54,19 +54,21 @@ class UrlRewriteStorage
 
         $changedProducts = [];
         foreach ($products as $product) {
-            if (array_key_exists($product->store_view_id, $existingValues) && array_key_exists($product->id, $existingValues[$product->store_view_id])) {
+            foreach ($product->getStoreViews() as $storeView) {
+                if (array_key_exists($storeView->store_view_id, $existingValues) && array_key_exists($product->id, $existingValues[$storeView->store_view_id])) {
 
-                $existingDatum = $existingValues[$product->store_view_id][$product->id];
+                    $existingDatum = $existingValues[$storeView->store_view_id][$product->id];
 
-                // a product has changed if its url_key or its categories change
-                if ($product->url_key != $existingDatum['url_key']) {
-                    $changedProducts[] = $product;
-                } elseif (array_diff($product->category_ids, $existingDatum['category_ids']) || array_diff($existingDatum['category_ids'], $product->category_ids)) {
+                    // a product has changed if its url_key or its categories change
+                    if ($storeView->url_key != $existingDatum['url_key']) {
+                        $changedProducts[] = $product;
+                    } elseif (array_diff($product->category_ids, $existingDatum['category_ids']) || array_diff($existingDatum['category_ids'], $product->category_ids)) {
+                        $changedProducts[] = $product;
+                    }
+
+                } else {
                     $changedProducts[] = $product;
                 }
-
-            } else {
-                $changedProducts[] = $product;
             }
         }
 

@@ -49,13 +49,6 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             // corrupt
             [['attribute_set_id' => new Reference("Winograd")], false, "attribute set name not found: Winograd"],
 
-            // store_view_id
-
-            // plain
-            [['store_view_id' => new Reference("admin")], true, ""],
-            // corrupt
-            [['store_view_id' => new Reference("Mueller")], false, "store view code not found: Mueller"],
-
             // tax_class_id
 
             // plain
@@ -75,13 +68,54 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct();
             $product->sku = "big-blue-box";
-            $product->name = "Big Blue Box";
-            $product->price = "123.00";
             $product->attribute_set_id = 4;
 
+            $global = $product->global();
+            $global->name = "Big Blue Box";
+            $global->price = "123.00";
+
             foreach ($test[0] as $fieldName => $fieldValue) {
-                $product->$fieldName = $fieldValue;
+
+                if (in_array($fieldName, ['tax_class_id', 'website_ids'])) {
+                    $product->global()->$fieldName = $fieldValue;
+                } else {
+                    $product->$fieldName = $fieldValue;
+                }
             }
+
+            $resolver->resolveIds($product, $config);
+            $this->assertEquals($test[2], implode('; ', $product->errors));
+            $this->assertEquals($test[1], $product->ok);
+
+        }
+    }
+
+    public function testStoreViewResolver()
+    {
+        $config = new ImportConfig();
+
+        /** @var ReferenceResolver $resolver */
+        $resolver = ObjectManager::getInstance()->get(ReferenceResolver::class);
+
+        $tests = [
+
+            // plain
+            ["admin", true, ""],
+            // corrupt
+            ["Mueller", false, "store view code not found: Mueller"],
+        ];
+
+        foreach ($tests as $test) {
+
+            $product = new SimpleProduct();
+            $product->sku = "big-blue-box";
+            $product->attribute_set_id = 4;
+
+            $global = $product->global();
+            $global->name = "Big Blue Box";
+            $global->price = "123.00";
+
+            $product->storeView($test[0]);
 
             $resolver->resolveIds($product, $config);
             $this->assertEquals($test[2], implode('; ', $product->errors));

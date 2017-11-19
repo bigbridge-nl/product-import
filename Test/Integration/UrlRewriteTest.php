@@ -62,36 +62,29 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // product
         $product1 = new SimpleProduct();
-        $product1->name = "Big Turquoise Box product-import";
         $product1->sku = '1-product-import';
-        $product1->price = "2.75";
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(["Boxes"]);
-        $product1->url_key = new GeneratedUrlKey();
+        $product1->global()->name = "Big Turquoise Box product-import";
+        $product1->global()->price = "2.75";
+        $product1->global()->url_key = new GeneratedUrlKey();
+
+        // same sku, different store view
+        $default = $product1->storeView('default');
+        $default->name = "Grote Turquoise Doos product-import";
+        $default->sku = '1-product-import';
+        $default->url_key = new GeneratedUrlKey();
 
         $importer->importSimpleProduct($product1);
 
-        // same sku, different store view
-        $product2 = new SimpleProduct();
-        $product2->name = "Grote Turquoise Doos product-import";
-        $product2->store_view_id = 1;
-        $product2->sku = '1-product-import';
-#todo remove next 3
-        $product2->category_ids = new References(["Boxes"]);
-        $product2->price = "2.75";
-        $product2->attribute_set_id = new Reference("Default");
-        $product2->url_key = new GeneratedUrlKey();
-
-        $importer->importSimpleProduct($product2);
-
         // another product
         $product3 = new SimpleProduct();
-        $product3->name = "Big Grass Green Box product-import";
         $product3->sku = '2-product-import';
-        $product3->price = "2.65";
         $product3->attribute_set_id = new Reference("Default");
         $product3->category_ids = new References(["Boxes"]);
-        $product3->url_key = new GeneratedUrlKey();
+        $product3->global()->name = "Big Grass Green Box product-import";
+        $product3->global()->price = "2.65";
+        $product3->global()->url_key = new GeneratedUrlKey();
 
         $importer->importSimpleProduct($product3);
 
@@ -117,24 +110,22 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
             [$categoryId, $product3->id],
         ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
 
         // store again, with no changes
 
         $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product2);
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
 
         // change url_key
 
-        $product3->url_key = "a-" . $product3->url_key;
+        $product3->global()->url_key = "a-" . $product3->global()->url_key;
 
         $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product2);
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
@@ -154,14 +145,13 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
                 serialize(['category_id' => (string)$categoryId])],
         ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
 
         // change categories
 
         $product3->category_ids = new References(["Containers"]);
 
         $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product2);
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
@@ -191,7 +181,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
             [$newCategoryId, $product3->id],
         ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
     }
 
     public function testUrlRewritesWithJson()
@@ -203,36 +193,28 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // product
         $product1 = new SimpleProduct();
-        $product1->name = "Big Red Box product-import";
         $product1->sku = '3-product-import';
-        $product1->price = "2.75";
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(["Boxes"]);
-        $product1->url_key = new GeneratedUrlKey();
+        $product1->global()->name = "Big Red Box product-import";
+        $product1->global()->price = "2.75";
+        $product1->global()->url_key = new GeneratedUrlKey();
+
+        $default = $product1->storeView('default');
+        $default->name = "Grote Rode Doos product-import";
+        $default->sku = '3-product-import';
+        $default->url_key = new GeneratedUrlKey();
 
         $importer->importSimpleProduct($product1);
 
-        // same sku, different store view
-        $product2 = new SimpleProduct();
-        $product2->name = "Grote Rode Doos product-import";
-        $product2->store_view_id = 1;
-        $product2->sku = '3-product-import';
-#todo remove next 3
-        $product2->category_ids = new References(["Boxes"]);
-        $product2->price = "2.75";
-        $product2->attribute_set_id = new Reference("Default");
-        $product2->url_key = new GeneratedUrlKey();
-
-        $importer->importSimpleProduct($product2);
-
         // another product
         $product3 = new SimpleProduct();
-        $product3->name = "Big Grass Yellow Box product-import";
         $product3->sku = '4-product-import';
-        $product3->price = "2.65";
         $product3->attribute_set_id = new Reference("Default");
         $product3->category_ids = new References(["Boxes"]);
-        $product3->url_key = new GeneratedUrlKey();
+        $product3->global()->name = "Big Grass Yellow Box product-import";
+        $product3->global()->price = "2.65";
+        $product3->global()->url_key = new GeneratedUrlKey();
 
         $importer->importSimpleProduct($product3);
 
@@ -242,10 +224,9 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // change url_key
 
-        $product3->url_key = "a-" . $product3->url_key;
+        $product3->global()->url_key = "a-" . $product3->global()->url_key;
 
         $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product2);
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
@@ -255,7 +236,6 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $product3->category_ids = new References(["Containers"]);
 
         $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product2);
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
@@ -285,16 +265,16 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
             [$newCategoryId, $product3->id],
         ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2, $product3);
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
     }
 
-    private function doAsserts(array $expectedRewrites, array $expectedIndexes, Product $product1, Product $product2, Product $product3)
+    private function doAsserts(array $expectedRewrites, array $expectedIndexes, Product $product1, Product $product3)
     {
-        $productIds = "{$product1->id}, {$product2->id}, {$product3->id}";
+        $productIds = "{$product1->id}, {$product3->id}";
 
-        $actualErrors = [$product1->errors, $product2->errors, $product3->errors];
+        $actualErrors = [$product1->errors, $product3->errors];
 
-        $this->assertEquals([[], [], []], $actualErrors);
+        $this->assertEquals([[], []], $actualErrors);
 
         $actualRewrites = self::$db->fetchAllNumber("
             SELECT `entity_type`, `request_path`, `target_path`, `redirect_type`, `store_id`, `is_autogenerated`, `metadata` FROM `" . self::$metadata->urlRewriteTable . "`
