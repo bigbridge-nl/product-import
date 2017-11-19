@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Test\Integration\Mass;
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\GeneratedUrlKey;
+use BigBridge\ProductImport\Model\Importer;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\ImportConfig;
@@ -85,11 +86,64 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $beforeMemory = memory_get_usage();
         $beforeTime = microtime(true);
 
+        $this->insertProducts($skus, $categories, $importer);
+
+        $afterTime = microtime(true);
+        $afterMemory = memory_get_usage();
+        $time = $afterTime - $beforeTime;
+        $memory = (int)(($afterMemory - $beforeMemory) / 1000);
+
+        echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
+
+        $this->assertSame([], $lastErrors);
+        $this->assertTrue($success);
+        $this->assertLessThan(4.5, $time);
+        $this->assertLessThan(420, $memory); // the size of the last $product
+
+        // ----------------------------------------------------
+
+        $success = true;
+
+        $beforeMemory = memory_get_usage();
+        $beforeTime = microtime(true);
+
+        $this->updateProducts($skus, $categories, $importer);
+
+        $afterTime = microtime(true);
+        $afterMemory = memory_get_usage();
+        $time = $afterTime - $beforeTime;
+        $memory = (int)(($afterMemory - $beforeMemory) / 1000);
+
+        echo "Updates: " . $time . " seconds; " . $memory . " kB \n";
+
+        $this->assertSame([], $lastErrors);
+        $this->assertTrue($success);
+        $this->assertLessThan(6.8, $time);
+        // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
+        // try running updateProducts twice, the memory consumed does not accumulate
+        $this->assertLessThan(66, $memory);
+
+        $afterPeakMemory = memory_get_peak_usage();
+
+        // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
+        $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000000);
+        $this->assertLessThan(16, $peakMemory);
+
+        echo "Peak mem: " . $peakMemory . " MB \n";
+    }
+
+    /**
+     * @param $skus
+     * @param $categories
+     * @param $importer
+     */
+    public function insertProducts($skus, $categories, Importer $importer)
+    {
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct();
             $product->sku = $skus[$i];
-            $product->attribute_set_id = new Reference( "Default");
+            $product->attribute_set_id = new Reference("Default");
             $product->category_ids = new References([$categories[0], $categories[1]]);
 
             $global = $product->global();
@@ -111,31 +165,20 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         }
 
         $importer->flush();
+    }
 
-        $afterTime = microtime(true);
-        $afterMemory = memory_get_usage();
-        $time = $afterTime - $beforeTime;
-        $memory = (int)(($afterMemory - $beforeMemory) / 1000);
-
-        echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
-
-        $this->assertSame([], $lastErrors);
-        $this->assertTrue($success);
-        $this->assertLessThan(4.5, $time);
-        $this->assertLessThan(420, $memory); // the size of the last $product
-
-        // ----------------------------------------------------
-
-        $success = true;
-
-        $beforeMemory = memory_get_usage();
-        $beforeTime = microtime(true);
-
+    /**
+     * @param $skus
+     * @param $categories
+     * @param $importer
+     */
+    public function updateProducts($skus, $categories, Importer $importer)
+    {
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct();
             $product->sku = $skus[$i];
-            $product->attribute_set_id = new Reference( "Default");
+            $product->attribute_set_id = new Reference("Default");
             $product->category_ids = new References([$categories[1], $categories[2]]);
 
             $global = $product->global();
@@ -157,23 +200,5 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         }
 
         $importer->flush();
-
-        $afterTime = microtime(true);
-        $afterMemory = memory_get_usage();
-        $time = $afterTime - $beforeTime;
-        $memory = (int)(($afterMemory - $beforeMemory) / 1000);
-
-        echo "Updates: " . $time . " seconds; " . $memory . " kB \n";
-
-        $this->assertSame([], $lastErrors);
-        $this->assertTrue($success);
-        $this->assertLessThan(6.7, $time);
-        $this->assertLessThan(1, $memory);
-
-        $afterPeakMemory = memory_get_peak_usage();
-
-        // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
-        $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000);
-        $this->assertLessThan(13000, $peakMemory);
     }
 }

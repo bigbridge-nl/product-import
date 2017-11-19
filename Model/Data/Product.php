@@ -58,14 +58,14 @@ abstract class Product
 
     public function storeView(string $storeViewCode) {
         if (!array_key_exists($storeViewCode, $this->storeViews)) {
-            $this->storeViews[$storeViewCode] = new ProductStoreView($this, $storeViewCode);
+            $this->storeViews[$storeViewCode] = new ProductStoreView($storeViewCode);
         }
         return $this->storeViews[$storeViewCode];
     }
 
     public function global() {
         if (!array_key_exists(self::GLOBAL_STORE_VIEW_CODE, $this->storeViews)) {
-            $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView($this, self::GLOBAL_STORE_VIEW_CODE);
+            $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView(self::GLOBAL_STORE_VIEW_CODE);
         }
         return $this->storeViews[self::GLOBAL_STORE_VIEW_CODE];
     }

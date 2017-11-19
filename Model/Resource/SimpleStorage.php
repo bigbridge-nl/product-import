@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
+use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
@@ -54,6 +55,9 @@ class SimpleStorage
      */
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config, ValueSerializer $valueSerializer)
     {
+        // connect store view to product
+        $this->setupStoreViewWiring($simpleProducts);
+
         // collect skus
         $skus = array_column($simpleProducts, 'sku');
 
@@ -107,6 +111,37 @@ class SimpleStorage
         foreach ($config->resultCallbacks as $callback) {
             foreach ($simpleProducts as $product) {
                 call_user_func($callback, $product);
+            }
+        }
+
+        // disconnect store view to product
+        $this->tearDownStoreViewWiring($simpleProducts);
+    }
+
+    /**
+     * Connect product to store view
+     *
+     * @param Product[] $simpleProducts
+     */
+    protected function setupStoreViewWiring(array $simpleProducts)
+    {
+        foreach ($simpleProducts as $product) {
+            foreach ($product->getStoreViews() as $storeView) {
+                $storeView->parent = $product;
+            }
+        }
+    }
+
+    /**
+     * Help the garbage collector by removing cyclic dependencies
+     *
+     * @param Product[] $simpleProducts
+     */
+    protected function tearDownStoreViewWiring(array $simpleProducts)
+    {
+        foreach ($simpleProducts as $product) {
+            foreach ($product->getStoreViews() as $storeView) {
+                $storeView->parent = null;
             }
         }
     }

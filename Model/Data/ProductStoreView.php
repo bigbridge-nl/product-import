@@ -9,7 +9,10 @@ use BigBridge\ProductImport\Model\Reference;
  */
 class ProductStoreView
 {
-    /** @var  Product */
+    /**
+     * For internal use only; not for application use
+     * @var  Product
+     */
     public $parent;
 
     /** @var  int */
@@ -34,9 +37,8 @@ class ProductStoreView
     /** @var  string */
     public $url_key;
 
-    public function __construct(Product $parent, string $storeViewCode)
+    public function __construct(string $storeViewCode)
     {
-        $this->parent = $parent;
         $this->storeViewCode = $storeViewCode;
     }
 }
