@@ -40,17 +40,11 @@ class Validator
         }
 
         // sku
-        if (is_string($product->sku)) {
-            $product->sku = trim($product->sku);
-            if ($product->sku === "") {
-                $errors[] = "missing sku";
-            } elseif (mb_strlen($product->sku) > self::SKU_MAX_LENGTH) {
-                $errors[] = "sku has " . mb_strlen($product->sku) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
-            }
-        } elseif (is_null($product->sku)) {
+        $product->sku = trim($product->sku);
+        if ($product->sku === "") {
             $errors[] = "missing sku";
-        } else {
-            $errors[] = "sku is a " . gettype($product->sku) . ", should be a string";
+        } elseif (mb_strlen($product->sku) > self::SKU_MAX_LENGTH) {
+            $errors[] = "sku has " . mb_strlen($product->sku) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
         }
 
         // attribute set id
@@ -75,29 +69,6 @@ class Validator
         } else {
             $errors[] = "attribute set id is a " . gettype($product->attribute_set_id) . ", should be a string";
         }
-
-//        // store view id
-//        if (is_string($product->store_view_id)) {
-//            if (!in_array($product->store_view_id, $this->metaData->storeViewMap)) {
-//                $product->store_view_id = trim($product->store_view_id);
-//                if ($product->store_view_id === "") {
-//                    $errors[] = "missing store view id";
-//                } elseif (!is_numeric($product->store_view_id)) {
-//                    $errors[] = "store view id is a " . gettype($product->store_view_id) . ", should be an integer";
-//                } else {
-//                    $errors[] = "store view id does not exist: " . $product->store_view_id;
-//                }
-//            }
-//        } elseif (is_integer($product->store_view_id)) {
-//            $product->store_view_id = (string)$product->store_view_id;
-//            if (!in_array($product->store_view_id, $this->metaData->storeViewMap)) {
-//                $errors[] = "store view id does not exist: " . $product->store_view_id;
-//            }
-//        } elseif (is_null($product->store_view_id)) {
-//            $errors[] = "missing store view id";
-//        } else {
-//            $errors[] = "store view id is a " . gettype($product->store_view_id) . ", should be a string";
-//        }
 
         // category_ids
         if (!is_array($product->category_ids)) {

@@ -56,6 +56,11 @@ abstract class Product
     /** @var ProductStoreView[] */
     protected $storeViews = [];
 
+    public function __construct(string $sku)
+    {
+        $this->sku = $sku;
+    }
+
     public function storeView(string $storeViewCode) {
         if (!array_key_exists($storeViewCode, $this->storeViews)) {
             $this->storeViews[$storeViewCode] = new ProductStoreView($storeViewCode);

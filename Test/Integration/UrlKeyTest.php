@@ -56,10 +56,9 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE 'product-import-%'");
     }
 
-    public function createProduct()
+    public function createProduct($sku)
     {
-        $product1 = new SimpleProduct();
-        $product1->sku = uniqid('bb');
+        $product1 = new SimpleProduct($sku);
         $product1->attribute_set_id = new Reference("Default");
 
         $product1->global()->name = "Big Turquoise Box";
@@ -74,14 +73,12 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         list($importer, ) = self::$factory->createImporter($config);
 
-        $product1 = $this->createProduct();
-        $product1->sku = 'product-import-1#a';
+        $product1 = $this->createProduct('product-import-1#a');
         $product1->storeView('default')->name = "Summer Flora";
         $product1->storeView('default')->url_key = new GeneratedUrlKey();
         $importer->importSimpleProduct($product1);
 
-        $product2 = $this->createProduct();
-        $product2->sku = 'product-import-1#b';
+        $product2 = $this->createProduct('product-import-1#b');
         $product2->storeView('default')->name = "Summer Flora";
         $product2->storeView('default')->url_key = new GeneratedUrlKey();
         $importer->importSimpleProduct($product2);
@@ -90,8 +87,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(["Generated url key already exists: summer-flora"], $product2->errors);
 
-        $product3 = $this->createProduct();
-        $product3->sku = 'product-import-1#c';
+        $product3 = $this->createProduct('product-import-1#c');
         $product3->storeView('default')->name = "Summer Flora";
         $product3->storeView('default')->url_key = new GeneratedUrlKey();
         $importer->importSimpleProduct($product3);
@@ -107,14 +103,12 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         list($importer, ) = self::$factory->createImporter($config);
 
-        $product1 = $this->createProduct();
-        $product1->sku = 'product-import-6#a';
+        $product1 = $this->createProduct('product-import-6#a');
         $product1->storeView('default')->name = "Flowers All Year";
         $product1->storeView('default')->url_key = 'product-import-6';
         $importer->importSimpleProduct($product1);
 
-        $product2 = $this->createProduct();
-        $product2->sku = 'product-import-6#b';
+        $product2 = $this->createProduct('product-import-6#b');
         $product2->storeView('default')->name = "Flowers All Year";
         $product2->storeView('default')->url_key = 'product-import-6';
         $importer->importSimpleProduct($product2);
@@ -123,8 +117,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(["Url key already exists: product-import-6"], $product2->errors);
 
-        $product3 = $this->createProduct();
-        $product3->sku = 'product-import-6#c';
+        $product3 = $this->createProduct('product-import-6#c');
         $product3->storeView('default')->name = "Flowers All Year";
         $product3->storeView('default')->url_key = 'product-import-6';
         $importer->importSimpleProduct($product3);
@@ -141,16 +134,14 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         list($importer, ) = self::$factory->createImporter($config);
 
-        $product1 = $this->createProduct();
+        $product1 = $this->createProduct('product-import-2#a');
         $product1->storeView('default')->name = "Winter Woozling";
         $product1->storeView('default')->url_key = new GeneratedUrlKey();
-        $product1->sku = 'product-import-2#a';
         $importer->importSimpleProduct($product1);
 
-        $product2 = $this->createProduct();
+        $product2 = $this->createProduct('product-import-2#b');
         $product2->storeView('default')->name = "Winter Woozling";
         $product2->storeView('default')->url_key = new GeneratedUrlKey();
-        $product2->sku = 'product-import-2#b';
         $importer->importSimpleProduct($product2);
 
         $importer->flush();
@@ -158,10 +149,9 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([], $product2->errors);
         $this->assertEquals("winter-woozling-product-import-2-b", $product2->url_key);
 
-        $product3 = $this->createProduct();
+        $product3 = $this->createProduct('product-import-2#c');
         $product3->storeView('default')->name = "Winter Woozling";
         $product3->storeView('default')->url_key = new GeneratedUrlKey();
-        $product3->sku = 'product-import-2#c';
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
@@ -187,17 +177,15 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         list($importer,) = self::$factory->createImporter($config);
 
         // original
-        $product1 = $this->createProduct();
+        $product1 = $this->createProduct('product-import-3#a');
         $product1->storeView('default')->name = "Autumn Flowers";
         $product1->storeView('default')->url_key = new GeneratedUrlKey();
-        $product1->sku = 'product-import-3#a';
         $importer->importSimpleProduct($product1);
 
         // conflicting key
-        $product2 = $this->createProduct();
+        $product2 = $this->createProduct('product-import-3#b');
         $product2->storeView('default')->name = "Autumn Flowers";
         $product2->storeView('default')->url_key = new GeneratedUrlKey();
-        $product2->sku = 'product-import-3#b';
         $importer->importSimpleProduct($product2);
 
         $importer->flush();
@@ -206,10 +194,9 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("autumn-flowers-1", $product2->url_key);
 
         // conflicting key - different batch
-        $product3 = $this->createProduct();
+        $product3 = $this->createProduct('product-import-3#c');
         $product3->storeView('default')->name = "Autumn Flowers";
         $product3->storeView('default')->url_key = new GeneratedUrlKey();
-        $product3->sku = 'product-import-3#c';
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
@@ -227,17 +214,15 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         list($importer,) = self::$factory->createImporter($config);
 
         // original
-        $product1 = $this->createProduct();
+        $product1 = $this->createProduct('product-import-5#a');
         $product1->storeView('default')->name = "Sunshine Every Day";
         $product1->storeView('default')->url_key = new GeneratedUrlKey();
-        $product1->sku = 'product-import-5#a';
         $importer->importSimpleProduct($product1);
 
         // conflicting key
-        $product2 = $this->createProduct();
+        $product2 = $this->createProduct('product-import-5@a');
         $product2->storeView('default')->name = "Moonlight Every Day";
         $product2->storeView('default')->url_key = new GeneratedUrlKey();
-        $product2->sku = 'product-import-5@a';
         $importer->importSimpleProduct($product2);
 
         $importer->flush();
@@ -246,16 +231,14 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("product-import-5-a-1", $product2->url_key);
 
         // conflicting key - different batch
-        $product3 = $this->createProduct();
+        $product3 = $this->createProduct('product-import-5#a');
         $product3->storeView('default')->name = "Starlight Every Day";
         $product3->storeView('default')->url_key = new GeneratedUrlKey();
-        $product3->sku = 'product-import-5#a';
         $importer->importSimpleProduct($product3);
 
-        $product4 = $this->createProduct();
+        $product4 = $this->createProduct('product-import-5*a');
         $product4->storeView('default')->name = "Planet Light Every Day";
         $product4->storeView('default')->url_key = new GeneratedUrlKey();
-        $product4->sku = 'product-import-5*a';
         $importer->importSimpleProduct($product4);
 
         $importer->flush();
@@ -274,16 +257,14 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         list($importer, ) = self::$factory->createImporter($config);
 
         // original
-        $product1 = $this->createProduct();
+        $product1 = $this->createProduct('product-import-4#a');
         $product1->global()->name = "Spring Leaves";
         $product1->global()->url_key = new GeneratedUrlKey();
-        $product1->sku = 'product-import-4#a';
 
         // conflicting key
-        $product2 = $this->createProduct();
+        $product2 = $this->createProduct('product-import-4#b');
         $product2->global()->name = "Spring Leaves";
         $product2->global()->url_key = new GeneratedUrlKey();
-        $product2->sku = 'product-import-4#b';
 
         $product1s1 = $product1->storeView('default');
         $product1s1->name = "Spring Leaves";

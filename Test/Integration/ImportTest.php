@@ -64,8 +64,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default', [], 'Taxable Goods'],
         ];
 
-        $product = new SimpleProduct();
-        $product->sku = $sku1;
+        $product = new SimpleProduct($sku1);
         $product->attribute_set_id = new Reference("Default");
         $product->category_ids = [1];
 
@@ -75,9 +74,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer->importSimpleProduct($product);
 
-        $product = new SimpleProduct();
+        $product = new SimpleProduct($sku2);
 
-        $product->sku = $sku2;
         $product->attribute_set_id = new Reference("Default");
         $product->category_ids = [1, 2, 999];
 
@@ -120,8 +118,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ["Grote Gelige Doos", $sku2, 'Default', '4.30', 'default', [], 'Taxable Goods'],
         ];
 
-        $product = new SimpleProduct();
-        $product->sku = $sku1;
+        $product = new SimpleProduct($sku1);
+
         $product->attribute_set_id = new Reference("Default");
         $product->category_ids = [1, 2];
 
@@ -132,9 +130,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer->importSimpleProduct($product);
 
-        $product = new SimpleProduct();
+        $product = new SimpleProduct($sku2);
 
-        $product->sku = $sku2;
         $product->attribute_set_id = new Reference("Default");
         $product->category_ids = [];
 
@@ -192,8 +189,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $sku1 = uniqid("bb");
         $urlKey = 'u' . $sku1;
 
-        $product = new SimpleProduct();
-        $product->sku = $sku1;
+        $product = new SimpleProduct($sku1);
+
         $product->attribute_set_id = new Reference("Default");
         $product->category_ids = new References(["Boxes", "Colored Things/Containers/Large"]);
 
@@ -231,7 +228,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, $error) = self::$factory->createImporter($config);
 
-        $product = new SimpleProduct();
+        $product = new SimpleProduct("tiny-blue-dot");
         $product->attribute_set_id = new Reference("Checkers");
 
         $importer->importSimpleProduct($product);
@@ -241,7 +238,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $expectedErrors = [
             "attribute set name not found: Checkers",
             "Product has no global values. Please specify global()",
-            "missing sku",
             "missing attribute set id",
         ];
 
@@ -275,8 +271,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         foreach ($lines as $i => $line) {
 
-            $product = new SimpleProduct();
-            $product->sku = $line[1];
+            $product = new SimpleProduct($line[1]);
+
             $product->attribute_set_id = new Reference("Default");
             $product->lineNumber = $i + 1;
 
@@ -303,22 +299,20 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, ) = self::$factory->createImporter($config);
 
-        $product1 = new SimpleProduct();
-        $product1->name = "Pine trees";
+        $product1 = new SimpleProduct(uniqid('bb'));
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product1->global();
-        $global->sku = uniqid('bb');
+        $global->name = "Pine trees";
         $global->price = '399.95';
 
         $importer->importSimpleProduct($product1);
 
-        $product2 = new SimpleProduct();
-        $product2->name = "Oak trees";
+        $product2 = new SimpleProduct(uniqid('bb'));
         $product2->attribute_set_id = new Reference("Default");
         $product2->category_ids = new References(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product2->global();
-        $global->sku = uniqid('bb');;
+        $global->name = "Oak trees";
         $global->price = '449.95';
 
         $importer->importSimpleProduct($product2);
@@ -345,8 +339,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         list($importer, ) = self::$factory->createImporter($config);
 
-        $product1 = new SimpleProduct();
-        $product1->sku = "gummybears";
+        $product1 = new SimpleProduct("gummybears");
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(['Gummybears', 'Other Candy', 'German Candy']);
         $global = $product1->global();

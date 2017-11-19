@@ -61,8 +61,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         list($importer, ) = self::$factory->createImporter($config);
 
         // product
-        $product1 = new SimpleProduct();
-        $product1->sku = '1-product-import';
+        $product1 = new SimpleProduct('1-product-import');
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(["Boxes"]);
         $product1->global()->name = "Big Turquoise Box product-import";
@@ -78,8 +77,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $importer->importSimpleProduct($product1);
 
         // another product
-        $product3 = new SimpleProduct();
-        $product3->sku = '2-product-import';
+        $product3 = new SimpleProduct('2-product-import');
         $product3->attribute_set_id = new Reference("Default");
         $product3->category_ids = new References(["Boxes"]);
         $product3->global()->name = "Big Grass Green Box product-import";
@@ -192,8 +190,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         list($importer, ) = self::$factory->createImporter($config);
 
         // product
-        $product1 = new SimpleProduct();
-        $product1->sku = '3-product-import';
+        $product1 = new SimpleProduct('3-product-import');
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(["Boxes"]);
         $product1->global()->name = "Big Red Box product-import";
@@ -208,8 +205,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $importer->importSimpleProduct($product1);
 
         // another product
-        $product3 = new SimpleProduct();
-        $product3->sku = '4-product-import';
+        $product3 = new SimpleProduct('4-product-import');
         $product3->attribute_set_id = new Reference("Default");
         $product3->category_ids = new References(["Boxes"]);
         $product3->global()->name = "Big Grass Yellow Box product-import";

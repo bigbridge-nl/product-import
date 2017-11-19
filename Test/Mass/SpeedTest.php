@@ -141,8 +141,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
     {
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
-            $product = new SimpleProduct();
-            $product->sku = $skus[$i];
+            $product = new SimpleProduct($skus[$i]);
             $product->attribute_set_id = new Reference("Default");
             $product->category_ids = new References([$categories[0], $categories[1]]);
 
@@ -176,8 +175,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
     {
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
-            $product = new SimpleProduct();
-            $product->sku = $skus[$i];
+            $product = new SimpleProduct($skus[$i]);
             $product->attribute_set_id = new Reference("Default");
             $product->category_ids = new References([$categories[1], $categories[2]]);
 

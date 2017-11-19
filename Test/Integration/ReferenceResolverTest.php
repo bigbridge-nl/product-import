@@ -66,8 +66,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
 
         foreach ($tests as $test) {
 
-            $product = new SimpleProduct();
-            $product->sku = "big-blue-box";
+            $product = new SimpleProduct("big-blue-box");
             $product->attribute_set_id = 4;
 
             $global = $product->global();
@@ -107,8 +106,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
 
         foreach ($tests as $test) {
 
-            $product = new SimpleProduct();
-            $product->sku = "big-blue-box";
+            $product = new SimpleProduct("big-blue-box");
             $product->attribute_set_id = 4;
 
             $global = $product->global();

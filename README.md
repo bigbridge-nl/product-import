@@ -20,27 +20,26 @@ After an import has completed, the product and category indexers need to be run.
 * input is validated on data type, requiredness,  and length restrictions
 * result callback, a function that is called with the results of each imported product (id, error)
 
-## Example
+## Example Code
 
-* Simple product
-* Different store view
-* categories
-* by name, by id
+The following example shows you a simple case of importing a simple product
 
     // load the import factory (preferably via DI)
     $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
 
+    // your own log functionality
     $log = "";
 
     $config = new ImportConfig();
+
+    // the callback function to postprocess imported products
     $config->resultCallback[] = function(Product $product) use (&$log) {
 
-        if ($product->ok) {
-            $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->sku, $product->id);
-        } else {
+        if ($product->errors) {
             $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, implode('; ', $product->errors));
+        } else {
+            $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->sku, $product->id);
         }
-
     };
 
     list($importer, $error) = $factory->create($config);
@@ -52,11 +51,13 @@ After an import has completed, the product and category indexers need to be run.
 
     foreach ($lines as $i => $line) {
 
-        $product = new SimpleProduct();
-        $product->name = $line[0];
-        $product->sku = $line[1];
-        $product->price = $line[2];
+        $product = new SimpleProduct($line[1]);
         $product->lineNumber = $i + 1;
+
+        // global eav attributes
+        $global = $product->global();
+        $global->name = $line[0];
+        $global->price = $line[2];
 
         $importer->insert($product);
     }
