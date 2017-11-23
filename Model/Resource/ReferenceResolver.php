@@ -68,11 +68,11 @@ class ReferenceResolver
             }
         }
 
-        foreach ($product->getStoreViews() as $storeView) {
+        foreach ($product->getStoreViews() as $storeViewCode => $storeView) {
 
             $attributes = $storeView->getAttributes();
 
-            list($id, $error) = $this->storeViewResolver->resolveName($storeView->storeViewCode);
+            list($id, $error) = $this->storeViewResolver->resolveName($storeViewCode);
             if ($error === "") {
                 $storeView->store_view_id = $id;
             } else {

@@ -31,19 +31,11 @@ class ProductStoreView
     /** @var  int */
     public $store_view_id;
 
-    /** @var string  */
-    public $storeViewCode;
-
     /** @var array  */
     public $website_ids = [];
 
     /** @var array  */
     protected $attributes = [];
-
-    public function __construct(string $storeViewCode)
-    {
-        $this->storeViewCode = $storeViewCode;
-    }
 
     public function setName(string $name)
     {
