@@ -70,17 +70,21 @@ class ReferenceResolver
 
         foreach ($product->getStoreViews() as $storeView) {
 
+            $attributes = $storeView->getAttributes();
+
             list($id, $error) = $this->storeViewResolver->resolveName($storeView->storeViewCode);
-            $storeView->store_view_id = $id;
-            if ($error !== "") {
+            if ($error === "") {
+                $storeView->store_view_id = $id;
+            } else {
                 $product->ok = false;
                 $product->errors[] = $error;
             }
 
-            if ($storeView->tax_class_id instanceof Reference) {
-                list($id, $error) = $this->taxClassResolver->resolveName($storeView->tax_class_id->name);
-                $storeView->tax_class_id = $id;
-                if ($error !== "") {
+            if (array_key_exists('tax_class_id', $attributes) && $attributes['tax_class_id'] instanceof Reference) {
+                list($id, $error) = $this->taxClassResolver->resolveName($attributes['tax_class_id']->name);
+                if ($error === "") {
+                    $storeView->setTaxClassId($id);
+                } else {
                     $product->ok = false;
                     $product->errors[] = $error;
                 }
@@ -88,8 +92,9 @@ class ReferenceResolver
 
             if ($storeView->website_ids instanceof References) {
                 list($ids, $error) = $this->websiteResolver->resolveNames($storeView->website_ids->names);
-                $storeView->website_ids = $ids;
-                if ($error !== "") {
+                if ($error === "") {
+                    $storeView->website_ids = $ids;
+                } else {
                     $product->ok = false;
                     $product->errors[] = $error;
                 }

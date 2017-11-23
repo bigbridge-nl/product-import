@@ -38,6 +38,7 @@ For inserts, not updates
 * rest request
 * import images using files, urls
 * trim: none, all except text fields
+* check attribute value uniqueness
 
 ## Notes
 

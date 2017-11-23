@@ -80,8 +80,7 @@ The library aims to be
 
 ## On empty values
 
-* A value of null will not be stored at all
-* A value of "" will be stored as an empty string for varchar and text attributes, otherwise will not be stored at all
+* A value of "" will be ignored, it is not imported. The reason is that in imports, an empty value often means unknown, or unimportant, but rarely: to be deleted.
 
 ## Thanks to
 

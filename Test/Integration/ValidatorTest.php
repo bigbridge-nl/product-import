@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Data\Product;
+use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Reference;
 use IntlChar;
 use BigBridge\ProductImport\Model\Resource\Validator;
@@ -41,8 +42,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // plain
             [['name' => 'Big Blue Box'], true, ""],
-            // corrupt
-            [['name' => new SimpleXMLElement("<xml></xml>")], false, "name is an object (SimpleXMLElement), should be a string"],
             // full
             [['name' => str_repeat('-', 255)], true, ""],
             // overflow
@@ -52,8 +51,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // plain
             [['description' => 'A nice box for lots of things'], true, ""],
-            // corrupt
-            [['description' => new SimpleXMLElement("<xml></xml>")], false, "description is an object (SimpleXMLElement), should be a string"],
             // full
             [['description' => str_repeat('-', 65536)], true, ""],
             // overflow
@@ -66,16 +63,12 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             [['special_from_date' => '2017-10-14'], true, ""],
             // corrupt
             [['special_from_date' => 'October 4, 2017'], false, "special_from_date is not a MySQL date or date time (October 4, 2017)"],
-            [['special_from_date' => new SimpleXMLElement("<xml></xml>")], false, "special_from_date is an object (SimpleXMLElement), should be a string"],
 
             // int
 
             // plain
-            [['status' => Product::STATUS_ENABLED], true, ""],
-            [['status' => "2"], true, ""],
-            // corrupt
-            [['status' => 'Enabled'], false, "status is not an integer (Enabled)"],
-            [['status' => new SimpleXMLElement("<xml></xml>")], false, "status is an object (SimpleXMLElement), should be a string"],
+            [['status' => ProductStoreView::STATUS_ENABLED], true, ""],
+            [['status' => 2], true, ""],
 
             // decimal
 
@@ -84,8 +77,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             [['price' => '-123.95'], false, "price is not a positive decimal number with dot (-123.95)"],
             // corrupt
             [['price' => '123,95'], false, "price is not a positive decimal number with dot (123,95)"],
-            [['price' => 123.,95], false, "price is a double, should be a string"],
-            [['price' => new SimpleXMLElement("<xml></xml>")], false, "price is an object (SimpleXMLElement), should be a string"],
 
             /* non-eav fields */
 
@@ -100,8 +91,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             [['sku' => '<' . str_repeat(IntlChar::chr(0x010F), 62) . '>'], true, ""],
             // overflow
             [['sku' => str_repeat('x', 65)], false, "sku has 65 characters (max 64)"],
-            // corrupt
-            [['sku' => array()], false, "sku is a array, should be a string"],
 
             // name
 
@@ -142,12 +131,24 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $product->attribute_set_id = 4;
 
             $global = $product->global();
-            $global->name = "Big Blue Box";
-            $global->price = "123.00";
+            $global->setName("Big Blue Box");
+            $global->setPrice("123.00");
 
             foreach ($test[0] as $fieldName => $fieldValue) {
                 if (in_array($fieldName, ['sku', 'category_ids', 'attribute_set_id'])) {
                     $product->$fieldName = $fieldValue;
+                } elseif ($fieldName == 'name') {
+                    $global->setName($fieldValue);
+                } elseif ($fieldName == 'price') {
+                    $global->setPrice($fieldValue);
+                } elseif ($fieldName == 'description') {
+                    $global->setDescription($fieldValue);
+                } elseif ($fieldName == 'status') {
+                    $global->setStatus($fieldValue);
+                } elseif ($fieldName == 'special_from_date') {
+                    $global->setSpecialFromDate($fieldValue);
+                } elseif ($fieldName == 'special_to_date') {
+                    $global->setSpecialToDate($fieldValue);
                 } else {
                     $global->$fieldName = $fieldValue;
                 }

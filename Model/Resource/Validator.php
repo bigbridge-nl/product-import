@@ -30,18 +30,10 @@ class Validator
         $attributeInfo = $this->metaData->productEavAttributeInfo;
 
         $errors = [];
-
         $storeViews = $product->getStoreViews();
 
-        if (!array_key_exists(Product::GLOBAL_STORE_VIEW_CODE, $storeViews)) {
-            if ($product->id === null) {
-                $errors[] = "Product has no global values. Please specify global()";
-            }
-        }
-
         // sku
-        $product->sku = trim($product->sku);
-        if ($product->sku === "") {
+        if ($product->sku == "") {
             $errors[] = "missing sku";
         } elseif (mb_strlen($product->sku) > self::SKU_MAX_LENGTH) {
             $errors[] = "sku has " . mb_strlen($product->sku) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
@@ -107,97 +99,83 @@ class Validator
 
         foreach ($storeViews as $storeViewCode => $storeView) {
 
-            foreach ($storeView as $eavAttribute => $value) {
+            foreach ($storeView->getAttributes() as $eavAttribute => $value) {
 
                 if (!array_key_exists($eavAttribute, $attributeInfo)) {
+                    $errors[] = "attribute does not exist: " . $eavAttribute;
                     continue;
                 }
 
                 $info = $attributeInfo[$eavAttribute];
 
-                if (is_null($value)) {
+                // remove empty values
 
-                    if ($info->isRequired) {
-                        if ($storeViewCode == Product::GLOBAL_STORE_VIEW_CODE) {
-                            $errors[] = "missing " . $eavAttribute;
+                if ($value === "") {
+                    $storeView->removeAttribute($eavAttribute);
+                    continue;
+                }
+
+                // validate value
+
+                switch ($info->backendType) {
+                    case MetaData::TYPE_VARCHAR:
+                        if (mb_strlen($value) > 255) {
+                            $errors[] = $eavAttribute . " has " . mb_strlen($value) . " characters (max 255)";
                         }
-                    }
-
-                } else {
-
-                    if (is_string($value)) {
-
-                        $value = trim($value);
-
-                        $product->$eavAttribute = $value;
-
-                    } elseif (is_integer($value)) {
-
-                        if ($info->backendType != MetaData::TYPE_INTEGER) {
-                            $errors[] = $eavAttribute . " is an integer (" . $value . "), should be a string";
-                            continue;
+                        break;
+                    case MetaData::TYPE_TEXT:
+                        if (strlen($value) > 65536) {
+                            $errors[] = $eavAttribute . " has " . strlen($value) . " bytes (max 65536)";
                         }
-
-                        $product->$eavAttribute = (string)$value;
-
-                    } elseif (is_object($value)) {
-
-                        $errors[] = $eavAttribute . " is an object (" . get_class($value) . "), should be a string";
-                        continue;
-
-                    } else {
-
-                        $errors[] = $eavAttribute . " is a " . gettype($value) . ", should be a string";
-                        continue;
-
-                    }
-
-                    // empty values
-
-                    if ($value === "") {
-                        if ($info->isRequired) {
-                            $errors[] = "missing " . $eavAttribute;
-                        } elseif (!in_array($info->backendType, [MetaData::TYPE_VARCHAR, MetaData::TYPE_TEXT])) {
-                            $product->$eavAttribute = null;
+                        break;
+                    case MetaData::TYPE_DECIMAL:
+                        if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
+                            $errors[] = $eavAttribute . " is not a positive decimal number with dot (" . $value . ")";
                         }
-                        continue;
-                    }
-
-                    // validate value
-
-                    switch ($info->backendType) {
-                        case MetaData::TYPE_VARCHAR:
-                            if (mb_strlen($value) > 255) {
-                                $errors[] = $eavAttribute . " has " . mb_strlen($value) . " characters (max 255)";
-                            }
-                            break;
-                        case MetaData::TYPE_TEXT:
-                            if (strlen($value) > 65536) {
-                                $errors[] = $eavAttribute . " has " . strlen($value) . " bytes (max 65536)";
-                            }
-                            break;
-                        case MetaData::TYPE_DECIMAL:
-                            if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
-                                $errors[] = $eavAttribute . " is not a positive decimal number with dot (" . $value . ")";
-                            }
-                            break;
-                        case MetaData::TYPE_DATETIME:
-                            if (!preg_match('/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/', $value)) {
-                                $errors[] = $eavAttribute . " is not a MySQL date or date time (" . $value . ")";
-                            }
-                            break;
-                        case MetaData::TYPE_INTEGER:
-                            if (!preg_match('/^-?\d+$/', $value)) {
-                                $errors[] = $eavAttribute . " is not an integer (" . $value . ")";
-                            } else {
-                                // validate possible options
-                                if ($info->frontendInput === MetaData::FRONTEND_SELECT) {
-                                    if (!array_key_exists($value, $info->optionValues)) {
-                                        //                                      $errors[] = "illegal value for " . $eavAttribute . " status: (" . $value  . "), 3 (allowed = " . implode(", ", $info->optionValues) . ")";
-                                    }
+                        break;
+                    case MetaData::TYPE_DATETIME:
+                        if (!preg_match('/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/', $value)) {
+                            $errors[] = $eavAttribute . " is not a MySQL date or date time (" . $value . ")";
+                        }
+                        break;
+                    case MetaData::TYPE_INTEGER:
+                        if (!preg_match('/^-?\d+$/', $value)) {
+                            $errors[] = $eavAttribute . " is not an integer (" . $value . ")";
+                        } else {
+                            // validate possible options
+                            if ($info->frontendInput === MetaData::FRONTEND_SELECT) {
+                                if (!array_key_exists($value, $info->optionValues)) {
+                                    //                                      $errors[] = "illegal value for " . $eavAttribute . " status: (" . $value  . "), 3 (allowed = " . implode(", ", $info->optionValues) . ")";
                                 }
                             }
-                            break;
+                        }
+                        break;
+//                    }
+                }
+            }
+        }
+
+        // required values
+
+        if ($product->id === null) {
+
+            // new product
+
+            if (!array_key_exists(Product::GLOBAL_STORE_VIEW_CODE, $storeViews)) {
+                $errors[] = "product has no global values. Please specify global() for name and price";
+            } else {
+
+                // check required values
+
+// todo: depends on product type
+// for example: https://magento.stackexchange.com/questions/147349/the-value-of-attribute-price-view-must-be-set-in-magento-2
+
+                $globalAttributes = $storeViews[Product::GLOBAL_STORE_VIEW_CODE]->getAttributes();
+
+                $requiredValues = ['name', 'price'];
+                foreach ($requiredValues as $attributeCode) {
+                    if (!array_key_exists($attributeCode, $globalAttributes)) {
+                        $errors[] = "missing " . $attributeCode;
                     }
                 }
             }

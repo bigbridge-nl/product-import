@@ -64,15 +64,14 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $product1 = new SimpleProduct('1-product-import');
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(["Boxes"]);
-        $product1->global()->name = "Big Turquoise Box product-import";
-        $product1->global()->price = "2.75";
-        $product1->global()->url_key = new GeneratedUrlKey();
+        $product1->global()->setName("Big Turquoise Box product-import");
+        $product1->global()->setPrice("2.75");
+        $product1->global()->generateUrlKey();
 
         // same sku, different store view
         $default = $product1->storeView('default');
-        $default->name = "Grote Turquoise Doos product-import";
-        $default->sku = '1-product-import';
-        $default->url_key = new GeneratedUrlKey();
+        $default->setName("Grote Turquoise Doos product-import");
+        $default->generateUrlKey();
 
         $importer->importSimpleProduct($product1);
 
@@ -80,9 +79,9 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $product3 = new SimpleProduct('2-product-import');
         $product3->attribute_set_id = new Reference("Default");
         $product3->category_ids = new References(["Boxes"]);
-        $product3->global()->name = "Big Grass Green Box product-import";
-        $product3->global()->price = "2.65";
-        $product3->global()->url_key = new GeneratedUrlKey();
+        $product3->global()->setName("Big Grass Green Box product-import");
+        $product3->global()->setPrice("2.65");
+        $product3->global()->generateUrlKey();
 
         $importer->importSimpleProduct($product3);
 
@@ -121,7 +120,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // change url_key
 
-        $product3->global()->url_key = "a-" . $product3->global()->url_key;
+        $product3->global()->setUrlKey("a-" . $product3->global()->getUrlKey());
 
         $importer->importSimpleProduct($product1);
         $importer->importSimpleProduct($product3);
@@ -193,14 +192,13 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $product1 = new SimpleProduct('3-product-import');
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(["Boxes"]);
-        $product1->global()->name = "Big Red Box product-import";
-        $product1->global()->price = "2.75";
-        $product1->global()->url_key = new GeneratedUrlKey();
+        $product1->global()->setName("Big Red Box product-import");
+        $product1->global()->setPrice("2.75");
+        $product1->global()->generateUrlKey();
 
         $default = $product1->storeView('default');
-        $default->name = "Grote Rode Doos product-import";
-        $default->sku = '3-product-import';
-        $default->url_key = new GeneratedUrlKey();
+        $default->setName("Grote Rode Doos product-import");
+        $default->generateUrlKey();
 
         $importer->importSimpleProduct($product1);
 
@@ -208,9 +206,9 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $product3 = new SimpleProduct('4-product-import');
         $product3->attribute_set_id = new Reference("Default");
         $product3->category_ids = new References(["Boxes"]);
-        $product3->global()->name = "Big Grass Yellow Box product-import";
-        $product3->global()->price = "2.65";
-        $product3->global()->url_key = new GeneratedUrlKey();
+        $product3->global()->setName("Big Grass Yellow Box product-import");
+        $product3->global()->setPrice("2.65");
+        $product3->global()->generateUrlKey();
 
         $importer->importSimpleProduct($product3);
 
@@ -220,7 +218,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // change url_key
 
-        $product3->global()->url_key = "a-" . $product3->global()->url_key;
+        $product3->global()->setUrlKey("a-" . $product3->global()->getUrlKey());
 
         $importer->importSimpleProduct($product1);
         $importer->importSimpleProduct($product3);

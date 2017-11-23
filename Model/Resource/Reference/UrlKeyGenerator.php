@@ -50,28 +50,33 @@ class UrlKeyGenerator
 
             foreach ($product->getStoreViews() as $storeView) {
 
-                if (is_string($storeView->url_key)) {
+                $urlKey = $storeView->getUrlKey();
+
+                if (is_string($urlKey)) {
 
                     // a url_key was specified, check if it exists
 
-                    if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($storeView->url_key, $urlKey2Id[$storeView->store_view_id])) {
-                        $product->errors[] = "Url key already exists: " . $storeView->url_key;
+                    if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($urlKey, $urlKey2Id[$storeView->store_view_id])) {
+                        $product->errors[] = "Url key already exists: " . $urlKey;
                         $product->ok = false;
                     }
 
                     // add the new key to the local map
-                    $urlKey2Id[$storeView->store_view_id][$storeView->url_key] = $storeView->parent->id;
+                    $urlKey2Id[$storeView->store_view_id][$urlKey] = $storeView->parent->id;
 
-                } elseif ($storeView->url_key instanceof GeneratedUrlKey) {
+                } elseif ($urlKey instanceof GeneratedUrlKey) {
 
                     // no url_key was specified
                     // generate a key. this may cause product to error
 
-                    $storeView->url_key = $this->generateUrlKey($storeView, $urlKey2Id, $urlKeyScheme, $duplicateUrlKeyStrategy);
+                    $urlKey = $this->generateUrlKey($storeView, $urlKey2Id, $urlKeyScheme, $duplicateUrlKeyStrategy);
 
                     // add the new key to the local map
-                    if ($storeView->url_key !== null) {
-                        $urlKey2Id[$storeView->store_view_id][$storeView->url_key] = $storeView->parent->id;
+                    if ($urlKey !== null) {
+                        $storeView->setUrlKey($urlKey);
+                        $urlKey2Id[$storeView->store_view_id][$urlKey] = $storeView->parent->id;
+                    } else {
+                        $storeView->removeAttribute('url_key');
                     }
                 }
             }
@@ -96,23 +101,25 @@ class UrlKeyGenerator
             
             foreach ($product->getStoreViews() as $storeView) {
 
-                if (is_string($storeView->url_key)) {
+                $urlKey = $storeView->getUrlKey();
+
+                if (is_string($urlKey)) {
 
                     // a url_key was specified, check if it exists
 
-                    if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($storeView->url_key, $urlKey2Id[$storeView->store_view_id])) {
+                    if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($urlKey, $urlKey2Id[$storeView->store_view_id])) {
 
                         // if so, does it belong to this product?
 
-                        if ($urlKey2Id[$storeView->store_view_id][$storeView->url_key] != $storeView->parent->id) {
+                        if ($urlKey2Id[$storeView->store_view_id][$urlKey] != $storeView->parent->id) {
 
-                            $product->errors[] = "Url key already exists: " . $storeView->url_key;
+                            $product->errors[] = "Url key already exists: " . $urlKey;
                             $product->ok = false;
                         }
 
                     }
 
-                } elseif ($storeView->url_key instanceof GeneratedUrlKey) {
+                } elseif ($urlKey instanceof GeneratedUrlKey) {
 
                     // no url_key was specified
 
@@ -120,18 +127,21 @@ class UrlKeyGenerator
                     $existingUrlKey = $this->checkExistingUrlKey($storeView, $urlKey2Id, $urlKeyScheme, $duplicateUrlKeyStrategy);
                     if ($existingUrlKey !== false) {
 
-                        $storeView->url_key = $existingUrlKey;
-                        $urlKey2Id[$storeView->store_view_id][$storeView->url_key] = $storeView->parent->id;
+                        $storeView->setUrlKey($existingUrlKey);
+                        $urlKey2Id[$storeView->store_view_id][$existingUrlKey] = $storeView->parent->id;
 
                     } else {
 
                         // generate a key. this may cause product to error
 
-                        $storeView->url_key = $this->generateUrlKey($storeView, $urlKey2Id, $urlKeyScheme, $duplicateUrlKeyStrategy);
+                        $urlKey = $this->generateUrlKey($storeView, $urlKey2Id, $urlKeyScheme, $duplicateUrlKeyStrategy);
 
                         // add the new key to the local map
-                        if ($storeView->url_key !== null) {
-                            $urlKey2Id[$storeView->store_view_id][$storeView->url_key] = $storeView->parent->id;
+                        if ($urlKey !== null) {
+                            $storeView->setUrlKey($urlKey);
+                            $urlKey2Id[$storeView->store_view_id][$urlKey] = $storeView->parent->id;
+                        } else {
+                            $storeView->removeAttribute('url_key');
                         }
                     }
                 }
@@ -239,14 +249,14 @@ class UrlKeyGenerator
 
     protected function getStandardUrlKey(ProductStoreView $storeView, string $urlKeyScheme): string
     {
-        if (($storeView->parent->sku === null) || ($storeView->name === null)) {
+        if (($storeView->parent->sku === null) || ($storeView->getName() === null)) {
             $suggestedUrlKey = "";
-        } elseif (is_string($storeView->url_key)) {
-            $suggestedUrlKey = $storeView->url_key;
+        } elseif (is_string($storeView->getUrlKey())) {
+            $suggestedUrlKey = $storeView->getUrlKey();
         } elseif ($urlKeyScheme == ImportConfig::URL_KEY_SCHEME_FROM_SKU) {
             $suggestedUrlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->sku);
         } else {
-            $suggestedUrlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->name);
+            $suggestedUrlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->getName());
         }
 
         return $suggestedUrlKey;

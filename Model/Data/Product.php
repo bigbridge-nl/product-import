@@ -4,8 +4,6 @@ namespace BigBridge\ProductImport\Model\Data;
 
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
-use Magento\Catalog\Model\Product\Attribute\Source\Status;
-use Magento\Catalog\Model\Product\Visibility;
 
 /**
  * Product fields.
@@ -16,17 +14,6 @@ use Magento\Catalog\Model\Product\Visibility;
 abstract class Product
 {
     const GLOBAL_STORE_VIEW_CODE = 'admin';
-
-    // a collection of some commonly used constants
-
-    const STATUS_ENABLED = Status::STATUS_ENABLED;
-    const STATUS_DISABLED = Status::STATUS_DISABLED;
-
-    const VISIBILITY_NOT_VISIBLE = Visibility::VISIBILITY_NOT_VISIBLE;
-    const VISIBILITY_IN_CATALOG = Visibility::VISIBILITY_IN_CATALOG;
-    const VISIBILITY_IN_SEARCH = Visibility::VISIBILITY_IN_SEARCH;
-    const VISIBILITY_BOTH = Visibility::VISIBILITY_BOTH;
-
 
     /** @var  int */
     public $id;
@@ -62,6 +49,7 @@ abstract class Product
     }
 
     public function storeView(string $storeViewCode) {
+        $storeViewCode = trim($storeViewCode);
         if (!array_key_exists($storeViewCode, $this->storeViews)) {
             $this->storeViews[$storeViewCode] = new ProductStoreView($storeViewCode);
         }

@@ -52,9 +52,9 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             // tax_class_id
 
             // plain
-            [['tax_class_id' => new Reference("Taxable Goods")], true, ""],
+            [['tax_class_id' => "Taxable Goods"], true, ""],
             // corrupt
-            [['tax_class_id' => new Reference("Codd")], false, "tax class name not found: Codd"],
+            [['tax_class_id' => "Codd"], false, "tax class name not found: Codd"],
 
             // web site ids
 
@@ -75,7 +75,9 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
 
             foreach ($test[0] as $fieldName => $fieldValue) {
 
-                if (in_array($fieldName, ['tax_class_id', 'website_ids'])) {
+                if ($fieldName == 'tax_class_id') {
+                    $product->global()->setTaxClassName($fieldValue);
+                } elseif ($fieldName == 'website_ids') {
                     $product->global()->$fieldName = $fieldValue;
                 } else {
                     $product->$fieldName = $fieldValue;

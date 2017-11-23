@@ -146,6 +146,11 @@ class SimpleStorage
         }
     }
 
+    /**
+     * @param Product[] $validProducts
+     * @param ValueSerializer $valueSerializer
+     * @throws Exception
+     */
     protected function saveProducts(array $validProducts, ValueSerializer $valueSerializer)
     {
         $validUpdateProducts = $validInsertProducts = [];
@@ -166,10 +171,10 @@ class SimpleStorage
             }
 
             foreach ($product->getStoreViews() as $storeView) {
-                foreach ($storeView as $key => $value) {
-                    if ($value !== null) {
+                foreach ($storeView->getAttributes() as $key => $value) {
+                    //if ($value !== null) {
                         $productsByAttribute[$key][] = $storeView;
-                    }
+                    //}
                 }
             }
         }
@@ -183,11 +188,14 @@ class SimpleStorage
             $this->insertMainTable($validInsertProducts);
             $this->updateMainTable($validUpdateProducts);
 
-            foreach ($this->metaData->productEavAttributeInfo as $eavAttribute => $info) {
-                if (array_key_exists($eavAttribute, $productsByAttribute)) {
-                    $this->insertEavAttribute($productsByAttribute[$eavAttribute], $eavAttribute);
-                }
+//            foreach ($this->metaData->productEavAttributeInfo as $eavAttribute => $info) {
+//                if (array_key_exists($eavAttribute, $productsByAttribute)) {
+            foreach ($productsByAttribute as $eavAttribute => $products) {
+                $this->insertEavAttribute($products, $eavAttribute);
             }
+
+//                }
+//            }
 
             $this->insertCategoryIds($productsWithCategories);
 
@@ -336,7 +344,7 @@ class SimpleStorage
         foreach ($storeViews as $storeView) {
 
             $entityId = $storeView->parent->id;
-            $value = $this->db->quote($storeView->$eavAttribute);
+            $value = $this->db->quote($storeView->getAttribute($eavAttribute));
             $values[] = "({$entityId},{$attributeId},{$storeView->store_view_id},{$value})";
         }
 

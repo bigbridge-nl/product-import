@@ -60,7 +60,7 @@ class UrlRewriteStorage
                     $existingDatum = $existingValues[$storeView->store_view_id][$product->id];
 
                     // a product has changed if its url_key or its categories change
-                    if ($storeView->url_key != $existingDatum['url_key']) {
+                    if ($storeView->getUrlKey() != $existingDatum['url_key']) {
                         $changedProducts[] = $product;
                     } elseif (array_diff($product->category_ids, $existingDatum['category_ids']) || array_diff($existingDatum['category_ids'], $product->category_ids)) {
                         $changedProducts[] = $product;

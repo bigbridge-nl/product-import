@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration\Mass;
 
 use BigBridge\ProductImport\Model\Data\Product;
+use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\GeneratedUrlKey;
 use BigBridge\ProductImport\Model\Importer;
@@ -98,7 +99,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
         $this->assertLessThan(4.5, $time);
-        $this->assertLessThan(420, $memory); // the size of the last $product
+        $this->assertLessThan(433, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -118,7 +119,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(6.8, $time);
+        $this->assertLessThan(7.0, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);
@@ -146,18 +147,18 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->category_ids = new References([$categories[0], $categories[1]]);
 
             $global = $product->global();
-            $global->name = uniqid("name");
-            $global->description = "A wunderful product that will enhance the quality of your live";
-            $global->short_description = "A wunderful product";
-            $global->weight = "6";
-            $global->status = Product::STATUS_ENABLED;
-            $global->price = "1.39";
-            $global->special_price = "1.25";
-            $global->special_price_from_date = "2017-10-22";
-            $global->special_price_to_date = "2017-10-28";
-            $global->visibility = Product::VISIBILITY_BOTH;
-            $global->tax_class_id = new Reference('Taxable Goods');
-            $global->url_key = new GeneratedUrlKey();
+            $global->setName(uniqid("name"));
+            $global->setDescription("A wunderful product that will enhance the quality of your live");
+            $global->setShortDescription("A wunderful product");
+            $global->setWeight("6");
+            $global->setStatus(ProductStoreView::STATUS_ENABLED);
+            $global->setPrice("1.39");
+            $global->setSpecialPrice("1.25");
+//            $global->setSpecialPriceFromDate("2017-10-22");
+//            $global->setSpecialPriceToDate("2017-10-28");
+            $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
+            $global->setTaxClassName('Taxable Goods');
+            $global->generateUrlKey();
             $global->website_ids = new References(['base']);
 
             $importer->importSimpleProduct($product);
@@ -180,19 +181,19 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product->category_ids = new References([$categories[1], $categories[2]]);
 
             $global = $product->global();
-            $global->name = uniqid("name");
-            $global->description = "A wonderful product that will enhance the quality of your life";
-            $global->short_description = "A wonderful product";
-            $global->weight = "5.80";
-            $global->status = Product::STATUS_DISABLED;
-            $global->price = "1.39";
-            $global->special_price = "1.15";
-            $global->special_price_from_date = "2017-12-10";
-            $global->special_price_to_date = "2017-12-20";
-            $global->visibility = Product::VISIBILITY_NOT_VISIBLE;
-            $global->tax_class_id = new Reference('Retail Customer');
+            $global->setName(uniqid("name"));
+            $global->setDescription("A wonderful product that will enhance the quality of your life");
+            $global->setShortDescription("A wonderful product");
+            $global->setWeight("5.80");
+            $global->setStatus(ProductStoreView::STATUS_DISABLED);
+            $global->setPrice("1.39");
+            $global->setSpecialPrice("1.15");
+//            $global->special_price_from_date = "2017-12-10";
+//            $global->special_price_to_date = "2017-12-20";
+            $global->setVisibility(ProductStoreView::VISIBILITY_NOT_VISIBLE);
+            $global->setTaxClassName('Retail Customer');
             $global->website_ids = new References(['base']);
-            $global->url_key = new GeneratedUrlKey();
+            $global->generateUrlKey();
 
             $importer->importSimpleProduct($product);
         }

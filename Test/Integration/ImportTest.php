@@ -69,8 +69,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product->category_ids = [1];
 
         $global = $product->global();
-        $global->name = "Big Blue Box";
-        $global->price = '3.25';
+        $global->setName("Big Blue Box");
+        $global->setPrice('3.25');
 
         $importer->importSimpleProduct($product);
 
@@ -80,12 +80,12 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product->category_ids = [1, 2, 999];
 
         $global = $product->global();
-        $global->name = "Big Yellow Box";
-        $global->price = '4.00';
+        $global->setName("Big Yellow Box");
+        $global->setPrice('4.00');
 
         $default = $product->storeView('default');
-        $default->name = "Grote Gele Doos";
-        $default->price = '4.25';
+        $default->setName("Grote Gele Doos");
+        $default->setPrice('4.25');
 
         $importer->importSimpleProduct($product);
 
@@ -124,9 +124,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product->category_ids = [1, 2];
 
         $global = $product->global();
-        $global->name = "Big Blueish Box";
-        $global->price = '3.45';
-        $global->tax_class_id = new Reference('Taxable Goods');
+        $global->setName("Big Blueish Box");
+        $global->setPrice('3.45');
+        $global->setTaxClassName('Taxable Goods');
 
         $importer->importSimpleProduct($product);
 
@@ -136,14 +136,14 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product->category_ids = [];
 
         $global = $product->global();
-        $global->name = "Big Yellowish Box";
-        $global->price = '3.95';
-        $global->tax_class_id = new Reference('Taxable Goods');
+        $global->setName("Big Yellowish Box");
+        $global->setPrice('3.95');
+        $global->setTaxClassName('Taxable Goods');
 
         $default = $product->storeView('default');
-        $default->name = "Grote Gelige Doos";
-        $default->price = '4.30';
-        $default->tax_class_id = new Reference('Taxable Goods');
+        $default->setName("Grote Gelige Doos");
+        $default->setPrice('4.30');
+        $default->setTaxClassName('Taxable Goods');
 
         $importer->importSimpleProduct($product);
 
@@ -195,9 +195,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product->category_ids = new References(["Boxes", "Colored Things/Containers/Large"]);
 
         $global = $product->global();
-        $global->name = "Big Purple Box";
-        $global->price = "1.25";
-        $global->url_key = $urlKey;
+        $global->setName("Big Purple Box");
+        $global->setPrice("1.25");
+        $global->setUrlKey($urlKey);
 
         $importer->importSimpleProduct($product);
 
@@ -237,8 +237,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $expectedErrors = [
             "attribute set name not found: Checkers",
-            "Product has no global values. Please specify global()",
             "missing attribute set id",
+            "product has no global values. Please specify global() for name and price",
         ];
 
         $this->assertEquals($expectedErrors, $product->errors);
@@ -277,8 +277,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $product->lineNumber = $i + 1;
 
             $global = $product->global();
-            $global->name = $line[0];
-            $global->price = $line[2];
+            $global->setName($line[0]);
+            $global->setPrice($line[2]);
 
             $importer->importSimpleProduct($product);
         }
@@ -303,8 +303,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product1->global();
-        $global->name = "Pine trees";
-        $global->price = '399.95';
+        $global->setName("Pine trees");
+        $global->setPrice('399.95');
 
         $importer->importSimpleProduct($product1);
 
@@ -312,8 +312,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product2->attribute_set_id = new Reference("Default");
         $product2->category_ids = new References(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product2->global();
-        $global->name = "Oak trees";
-        $global->price = '449.95';
+        $global->setName("Oak trees");
+        $global->setPrice('449.95');
 
         $importer->importSimpleProduct($product2);
 
@@ -343,8 +343,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product1->attribute_set_id = new Reference("Default");
         $product1->category_ids = new References(['Gummybears', 'Other Candy', 'German Candy']);
         $global = $product1->global();
-        $global->name = "Gummybears";
-        $global->price = '1.99';
+        $global->setName("Gummybears");
+        $global->setPrice('1.99');
 
         $importer->importSimpleProduct($product1);
 
