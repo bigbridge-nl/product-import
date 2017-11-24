@@ -66,7 +66,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product = new SimpleProduct($sku1);
         $product->attribute_set_id = new Reference("Default");
-        $product->category_ids = [1];
+        $product->setCategoryIds([1]);
 
         $global = $product->global();
         $global->setName("Big Blue Box");
@@ -77,7 +77,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product = new SimpleProduct($sku2);
 
         $product->attribute_set_id = new Reference("Default");
-        $product->category_ids = [1, 2, 999];
+        $product->setCategoryIds([1, 2, 999]);
 
         $global = $product->global();
         $global->setName("Big Yellow Box");
@@ -121,7 +121,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product = new SimpleProduct($sku1);
 
         $product->attribute_set_id = new Reference("Default");
-        $product->category_ids = [1, 2];
+        $product->setCategoryIds([1, 2]);
 
         $global = $product->global();
         $global->setName("Big Blueish Box");
@@ -133,7 +133,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product = new SimpleProduct($sku2);
 
         $product->attribute_set_id = new Reference("Default");
-        $product->category_ids = [];
+        $product->setCategoryIds([]);
 
         $global = $product->global();
         $global->setName("Big Yellowish Box");
@@ -192,7 +192,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product = new SimpleProduct($sku1);
 
         $product->attribute_set_id = new Reference("Default");
-        $product->category_ids = new References(["Boxes", "Colored Things/Containers/Large"]);
+        $product->setCategoriesByGlobalName(["Boxes", "Colored Things/Containers/Large"]);
 
         $global = $product->global();
         $global->setName("Big Purple Box");
@@ -301,7 +301,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product1 = new SimpleProduct(uniqid('bb'));
         $product1->attribute_set_id = new Reference("Default");
-        $product1->category_ids = new References(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $product1->setCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product1->global();
         $global->setName("Pine trees");
         $global->setPrice('399.95');
@@ -310,7 +310,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product2 = new SimpleProduct(uniqid('bb'));
         $product2->attribute_set_id = new Reference("Default");
-        $product2->category_ids = new References(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $product2->setCategoriesByGlobalName(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product2->global();
         $global->setName("Oak trees");
         $global->setPrice('449.95');
@@ -319,9 +319,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals(4, count(array_unique($product1->category_ids)));
-        $this->assertEquals(3, count(array_unique($product2->category_ids)));
-        $this->assertEquals(1, count(array_diff($product1->category_ids, $product2->category_ids)));
+        $this->assertEquals(4, count(array_unique($product1->getCategoryIds())));
+        $this->assertEquals(3, count(array_unique($product2->getCategoryIds())));
+        $this->assertEquals(1, count(array_diff($product1->getCategoryIds(), $product2->getCategoryIds())));
     }
 
     public function testMissingCategories()
@@ -341,7 +341,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product1 = new SimpleProduct("gummybears");
         $product1->attribute_set_id = new Reference("Default");
-        $product1->category_ids = new References(['Gummybears', 'Other Candy', 'German Candy']);
+        $product1->setCategoriesByGlobalName(['Gummybears', 'Other Candy', 'German Candy']);
         $global = $product1->global();
         $global->setName("Gummybears");
         $global->setPrice('1.99');
@@ -350,7 +350,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals(0, count($product1->category_ids));
+        $this->assertEquals(0, count($product1->getCategoryIds()));
         $this->assertEquals(["category not found: Gummybears"], $product1->errors);
         $this->assertEquals(false, $product1->ok);
         $this->assertEquals(false, $success);

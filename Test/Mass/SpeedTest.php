@@ -5,7 +5,6 @@ namespace BigBridge\ProductImport\Test\Integration\Mass;
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\GeneratedUrlKey;
 use BigBridge\ProductImport\Model\Importer;
 use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
@@ -98,7 +97,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(4.4, $time);
+        $this->assertLessThan(4.6, $time);
         $this->assertLessThan(433, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -119,7 +118,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(7.8, $time);
+        $this->assertLessThan(8.0, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);
@@ -144,7 +143,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct($skus[$i]);
             $product->attribute_set_id = new Reference("Default");
-            $product->category_ids = new References([$categories[0], $categories[1]]);
+            $product->setCategoriesByGlobalName([$categories[0], $categories[1]]);
 
             $global = $product->global();
             $global->setName(uniqid("name"));
@@ -178,7 +177,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct($skus[$i]);
             $product->attribute_set_id = new Reference("Default");
-            $product->category_ids = new References([$categories[1], $categories[2]]);
+            $product->setCategoriesByGlobalName([$categories[1], $categories[2]]);
 
             $global = $product->global();
             $global->setName(uniqid("name"));

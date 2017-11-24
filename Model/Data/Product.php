@@ -25,7 +25,7 @@ abstract class Product
     protected $sku;
 
     /** @var int[]|References */
-    public $category_ids = [];
+    protected $category_ids = [];
 
     // =========================================
     // importer data
@@ -71,5 +71,26 @@ abstract class Product
     public function getStoreViews()
     {
         return $this->storeViews;
+    }
+
+    public function setCategoryIds(array $categoryIds)
+    {
+        $this->category_ids = $categoryIds;
+    }
+
+    /**
+     * @return References|int[]
+     */
+    public function getCategoryIds()
+    {
+        return $this->category_ids;
+    }
+
+    /**
+     * @param array $categoryNames An array of category name paths (i.e. ['Books/Novels', 'Books/Sci-Fi/Foreign'].
+     */
+    public function setCategoriesByGlobalName(array $categoryNames)
+    {
+        $this->category_ids = new References($categoryNames);
     }
 }

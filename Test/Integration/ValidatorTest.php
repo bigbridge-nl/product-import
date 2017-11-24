@@ -110,10 +110,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // plain
             [['category_ids' => [1, 2]], true, ""],
+            [['category_names' => ["Hardware", "Software"]], true, ""],
             // corrupt
-            [['category_ids' => "1, 2"], false, "category_ids is a string, should be a References object or an array of integers"],
-            [['category_ids' => ["Hardware", "Software"]], false, "category_ids should be a References object or an array of integers"],
-            [['category_ids' => new Reference("Hardware")], false, "category_ids is a Reference, should be a References(!) object"],
+            [['category_ids' => ["1, 2"]], false, "category_ids should be an array of integers"],
 
             // website_ids
 
@@ -137,8 +136,12 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $global->setPrice("123.00");
 
             foreach ($test[0] as $fieldName => $fieldValue) {
-                if (in_array($fieldName, ['category_ids', 'attribute_set_id'])) {
+                if (in_array($fieldName, ['attribute_set_id'])) {
                     $product->$fieldName = $fieldValue;
+                } elseif ($fieldName == 'category_ids') {
+                    $product->setCategoryIds($fieldValue);
+                } elseif ($fieldName == 'category_names') {
+                    $product->setCategoriesByGlobalName($fieldValue);
                 } elseif ($fieldName == 'name') {
                     $global->setName($fieldValue);
                 } elseif ($fieldName == 'price') {

@@ -169,7 +169,7 @@ class SimpleStorage
                 $validInsertProducts[] = $product;
             }
 
-            if ($product->category_ids !== null) {
+            if ($product->getCategoryIds() !== []) {
                 $productsWithCategories[] = $product;
             }
 
@@ -351,12 +351,15 @@ class SimpleStorage
         $this->db->execute($sql);
     }
 
+    /**
+     * @param Procudt[] $products
+     */
     protected function insertCategoryIds(array $products)
     {
         $values = [];
 
         foreach ($products as $product) {
-            foreach ($product->category_ids as $categoryId) {
+            foreach ($product->getCategoryIds() as $categoryId) {
                 $values[] = "({$categoryId}, {$product->id})";
             }
         }

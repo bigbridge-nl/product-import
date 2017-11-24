@@ -40,7 +40,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             // category_ids
 
             // plain
-            [['category_ids' => new References(["T-shirts", "Printed Clothing"])], true, ""],
+            [['category_ids' => ["T-shirts", "Printed Clothing"]], true, ""],
 
             // attribute_set_id
 
@@ -77,6 +77,8 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
 
                 if ($fieldName == 'tax_class_id') {
                     $product->global()->setTaxClassName($fieldValue);
+                } elseif ($fieldName == 'category_ids') {
+                    $product->setCategoriesByGlobalName($fieldValue);
                 } elseif ($fieldName == 'website_ids') {
                     $product->global()->$fieldName = $fieldValue;
                 } else {

@@ -63,7 +63,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         // product
         $product1 = new SimpleProduct('1-product-import');
         $product1->attribute_set_id = new Reference("Default");
-        $product1->category_ids = new References(["Boxes"]);
+        $product1->setCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Turquoise Box product-import");
         $product1->global()->setPrice("2.75");
         $product1->global()->generateUrlKey();
@@ -78,7 +78,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         // another product
         $product3 = new SimpleProduct('2-product-import');
         $product3->attribute_set_id = new Reference("Default");
-        $product3->category_ids = new References(["Boxes"]);
+        $product3->setCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Green Box product-import");
         $product3->global()->setPrice("2.65");
         $product3->global()->generateUrlKey();
@@ -87,7 +87,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $categoryId = $product1->category_ids[0];
+        $categoryId = $product1->getCategoryIds()[0];
 
         // insert
 
@@ -146,14 +146,14 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // change categories
 
-        $product3->category_ids = new References(["Containers"]);
+        $product3->setCategoriesByGlobalName(["Containers"]);
 
         $importer->importSimpleProduct($product1);
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
 
-        $newCategoryId = $product3->category_ids[0];
+        $newCategoryId = $product3->getCategoryIds()[0];
 
         $expectedRewrites = [
 #todo "dozen"
@@ -191,7 +191,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         // product
         $product1 = new SimpleProduct('3-product-import');
         $product1->attribute_set_id = new Reference("Default");
-        $product1->category_ids = new References(["Boxes"]);
+        $product1->setCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Red Box product-import");
         $product1->global()->setPrice("2.75");
         $product1->global()->generateUrlKey();
@@ -205,7 +205,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         // another product
         $product3 = new SimpleProduct('4-product-import');
         $product3->attribute_set_id = new Reference("Default");
-        $product3->category_ids = new References(["Boxes"]);
+        $product3->setCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Yellow Box product-import");
         $product3->global()->setPrice("2.65");
         $product3->global()->generateUrlKey();
@@ -214,7 +214,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $categoryId = $product1->category_ids[0];
+        $categoryId = $product1->getCategoryIds()[0];
 
         // change url_key
 
@@ -227,14 +227,14 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // change categories
 
-        $product3->category_ids = new References(["Containers"]);
+        $product3->setCategoriesByGlobalName(["Containers"]);
 
         $importer->importSimpleProduct($product1);
         $importer->importSimpleProduct($product3);
 
         $importer->flush();
 
-        $newCategoryId = $product3->category_ids[0];
+        $newCategoryId = $product3->getCategoryIds()[0];
 
         $expectedRewrites = [
 #todo "dozen"
