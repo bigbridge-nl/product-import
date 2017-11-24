@@ -127,7 +127,9 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
         foreach ($tests as $test) {
 
-            $product = new SimpleProduct("big-blue-box");
+            $sku = (isset($test[0]['sku']) ? $test[0]['sku'] : "big-blue-box");
+
+            $product = new SimpleProduct($sku);
             $product->attribute_set_id = 4;
 
             $global = $product->global();
@@ -135,7 +137,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $global->setPrice("123.00");
 
             foreach ($test[0] as $fieldName => $fieldValue) {
-                if (in_array($fieldName, ['sku', 'category_ids', 'attribute_set_id'])) {
+                if (in_array($fieldName, ['category_ids', 'attribute_set_id'])) {
                     $product->$fieldName = $fieldValue;
                 } elseif ($fieldName == 'name') {
                     $global->setName($fieldValue);

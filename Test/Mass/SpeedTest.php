@@ -98,7 +98,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(4.5, $time);
+        $this->assertLessThan(4.4, $time);
         $this->assertLessThan(433, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -119,7 +119,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(7.0, $time);
+        $this->assertLessThan(7.8, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);
@@ -154,8 +154,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setStatus(ProductStoreView::STATUS_ENABLED);
             $global->setPrice("1.39");
             $global->setSpecialPrice("1.25");
-//            $global->setSpecialPriceFromDate("2017-10-22");
-//            $global->setSpecialPriceToDate("2017-10-28");
+            $global->setSpecialFromDate("2017-10-22");
+            $global->setSpecialToDate("2017-10-28");
             $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
             $global->setTaxClassName('Taxable Goods');
             $global->generateUrlKey();
@@ -188,8 +188,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setStatus(ProductStoreView::STATUS_DISABLED);
             $global->setPrice("1.39");
             $global->setSpecialPrice("1.15");
-//            $global->special_price_from_date = "2017-12-10";
-//            $global->special_price_to_date = "2017-12-20";
+            $global->setSpecialFromDate("2017-12-10");
+            $global->setSpecialToDate("2017-12-20");
             $global->setVisibility(ProductStoreView::VISIBILITY_NOT_VISIBLE);
             $global->setTaxClassName('Retail Customer');
             $global->website_ids = new References(['base']);

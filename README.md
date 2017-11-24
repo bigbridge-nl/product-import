@@ -38,7 +38,7 @@ The following example shows you a simple case of importing a simple product
         if ($product->errors) {
             $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, implode('; ', $product->errors));
         } else {
-            $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->sku, $product->id);
+            $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->getSku(), $product->id);
         }
     };
 

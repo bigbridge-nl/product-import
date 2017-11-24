@@ -22,7 +22,7 @@ abstract class Product
     public $attribute_set_id;
 
     /** @var  string 64 character */
-    public $sku;
+    protected $sku;
 
     /** @var int[]|References */
     public $category_ids = [];
@@ -46,6 +46,11 @@ abstract class Product
     public function __construct(string $sku)
     {
         $this->sku = $sku;
+    }
+
+    public function getSku()
+    {
+        return $this->sku;
     }
 
     public function storeView(string $storeViewCode) {

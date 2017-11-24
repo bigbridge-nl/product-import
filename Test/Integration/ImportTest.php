@@ -254,7 +254,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $config->resultCallbacks[] = function(Product $product) use (&$log, &$lastId) {
 
             if ($product->ok) {
-                $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->sku, $product->id);
+                $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->getSku(), $product->id);
                 $lastId = $product->id;
             } else {
                 $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, implode('; ', $product->errors));

@@ -33,10 +33,10 @@ class Validator
         $storeViews = $product->getStoreViews();
 
         // sku
-        if ($product->sku == "") {
+        if ($product->getSku() === "") {
             $errors[] = "missing sku";
-        } elseif (mb_strlen($product->sku) > self::SKU_MAX_LENGTH) {
-            $errors[] = "sku has " . mb_strlen($product->sku) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
+        } elseif (mb_strlen($product->getSku()) > self::SKU_MAX_LENGTH) {
+            $errors[] = "sku has " . mb_strlen($product->getSku()) . ' characters (max ' . self::SKU_MAX_LENGTH . ")";
         }
 
         // attribute set id

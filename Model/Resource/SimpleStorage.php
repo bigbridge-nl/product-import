@@ -59,7 +59,10 @@ class SimpleStorage
         $this->setupStoreViewWiring($simpleProducts);
 
         // collect skus
-        $skus = array_column($simpleProducts, 'sku');
+        $skus = [];
+        foreach ($simpleProducts as $product) {
+            $skus[] = $product->getSku();
+        }
 
         // collect inserts and updates
         $sku2id = $this->getExistingSkus($skus);
@@ -72,8 +75,8 @@ class SimpleStorage
             // replace Reference(s) with ids, changes $product->ok and $product->errors
             $this->referenceResolver->resolveIds($product, $config);
 
-            if (array_key_exists($product->sku, $sku2id)) {
-                $product->id = $sku2id[$product->sku];
+            if (array_key_exists($product->getSku(), $sku2id)) {
+                $product->id = $sku2id[$product->getSku()];
                 $updateProducts[] = $product;
             } else {
                 $insertProducts[] = $product;
@@ -269,12 +272,12 @@ class SimpleStorage
 
             // index with sku to prevent creation of multiple products with the same sku
             // (this happens when products with different store views are inserted at once)
-            if (array_key_exists($product->sku, $skus)) {
+            if (array_key_exists($product->getSku(), $skus)) {
                 continue;
             }
-            $skus[$product->sku] = $product->sku;
+            $skus[$product->getSku()] = $product->getSku();
 
-            $sku = $this->db->quote($product->sku);
+            $sku = $this->db->quote($product->getSku());
             $values[] = "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
         }
 
@@ -291,7 +294,7 @@ class SimpleStorage
             $sku2id = $this->db->fetchMap($sql);
 
             foreach ($products as $product) {
-                $product->id = $sku2id[$product->sku];
+                $product->id = $sku2id[$product->getSku()];
             }
         }
     }
@@ -307,8 +310,8 @@ class SimpleStorage
         $values = [];
         $skus = [];
         foreach ($products as $product) {
-            $skus[] = $product->sku;
-            $sku = $this->db->quote($product->sku);
+            $skus[] = $product->getSku();
+            $sku = $this->db->quote($product->getSku());
             $values[] = "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
         }
 

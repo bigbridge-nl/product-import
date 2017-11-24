@@ -173,7 +173,7 @@ class UrlKeyGenerator
         if ($duplicateUrlKeyStrategy === ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU) {
             if ($existingUrlKey === $suggestedUrlKey) {
                 return $existingUrlKey;
-            } elseif ($existingUrlKey === ($suggestedUrlKey . '-' . $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->sku))) {
+            } elseif ($existingUrlKey === ($suggestedUrlKey . '-' . $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->getSku()))) {
                 return $existingUrlKey;
             };
         } elseif ($duplicateUrlKeyStrategy === ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL) {
@@ -249,12 +249,12 @@ class UrlKeyGenerator
 
     protected function getStandardUrlKey(ProductStoreView $storeView, string $urlKeyScheme): string
     {
-        if (($storeView->parent->sku === null) || ($storeView->getName() === null)) {
+        if (($storeView->parent->getSku() === null) || ($storeView->getName() === null)) {
             $suggestedUrlKey = "";
         } elseif (is_string($storeView->getUrlKey())) {
             $suggestedUrlKey = $storeView->getUrlKey();
         } elseif ($urlKeyScheme == ImportConfig::URL_KEY_SCHEME_FROM_SKU) {
-            $suggestedUrlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->sku);
+            $suggestedUrlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->getSku());
         } else {
             $suggestedUrlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->getName());
         }
@@ -269,7 +269,7 @@ class UrlKeyGenerator
         }
 
         if ($duplicateUrlKeyStrategy == ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU) {
-            $suggestedUrlKey = $suggestedUrlKey . '-' . $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->sku);
+            $suggestedUrlKey = $suggestedUrlKey . '-' . $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->getSku());
         } elseif ($duplicateUrlKeyStrategy == ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL) {
             $suggestedUrlKey = $suggestedUrlKey . '-' . $this->getNextSerial($suggestedUrlKey, $storeView->store_view_id);
         }
@@ -287,7 +287,7 @@ class UrlKeyGenerator
         }
 
         if ($duplicateUrlKeyStrategy == ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU) {
-            $suggestedUrlKey = $suggestedUrlKey . '-' . $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->sku);
+            $suggestedUrlKey = $suggestedUrlKey . '-' . $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->getSku());
         } elseif ($duplicateUrlKeyStrategy == ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL) {
             $suggestedUrlKey = $suggestedUrlKey . '-%';
         }
