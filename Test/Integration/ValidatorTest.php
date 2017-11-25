@@ -160,8 +160,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             }
 
             $validator->validate($product);
-            $this->assertEquals($test[2], implode('; ', $product->errors));
-            $this->assertEquals($test[1], $product->ok);
+            $this->assertEquals($test[2], implode('; ', $product->getErrors()));
+            $this->assertEquals($test[1], $product->isOk());
         }
     }
 }

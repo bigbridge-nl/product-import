@@ -31,11 +31,8 @@ abstract class Product
     // importer data
     // =========================================
 
-    /** @var bool  */
-    public $ok = true;
-
     /** @var  array */
-    public $errors = [];
+    protected $errors = [];
 
     /** @var string  */
     public $lineNumber = "";
@@ -46,6 +43,21 @@ abstract class Product
     public function __construct(string $sku)
     {
         $this->sku = $sku;
+    }
+
+    public function isOk()
+    {
+        return empty($this->errors);
+    }
+
+    public function addError(string $error)
+    {
+        $this->errors[] = $error;
+    }
+
+    public function getErrors()
+    {
+        return $this->errors;
     }
 
     public function getSku()

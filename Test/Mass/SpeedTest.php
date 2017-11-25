@@ -51,9 +51,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $config = new ImportConfig();
         $config->resultCallbacks[] = function (Product $product) use (&$success, &$lastErrors) {
-            $success = $success && $product->ok;
-            if ($product->errors) {
-                $lastErrors = $product->errors;
+            $success = $success && $product->isOk();
+            if ($product->getErrors()) {
+                $lastErrors = $product->getErrors();
             }
         };
 

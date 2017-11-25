@@ -54,8 +54,7 @@ class ReferenceResolver
             list($ids, $error) = $this->categoryImporter->importCategoryPaths($product->getCategoryIds()->names, $config->autoCreateCategories);
             $product->setCategoryIds($ids);
             if ($error !== "") {
-                $product->ok = false;
-                $product->errors[] = $error;
+                $product->addError($error);
             }
         }
 
@@ -63,8 +62,7 @@ class ReferenceResolver
             list($id, $error) = $this->attributeSetResolver->resolveName($product->attribute_set_id->name);
             $product->attribute_set_id = $id;
             if ($error !== "") {
-                $product->ok = false;
-                $product->errors[] = $error;
+                $product->addError($error);
             }
         }
 
@@ -76,8 +74,7 @@ class ReferenceResolver
             if ($error === "") {
                 $storeView->store_view_id = $id;
             } else {
-                $product->ok = false;
-                $product->errors[] = $error;
+                $product->addError($error);
             }
 
             if (array_key_exists('tax_class_id', $attributes) && $attributes['tax_class_id'] instanceof Reference) {
@@ -85,8 +82,7 @@ class ReferenceResolver
                 if ($error === "") {
                     $storeView->setTaxClassId($id);
                 } else {
-                    $product->ok = false;
-                    $product->errors[] = $error;
+                    $product->addError($error);
                 }
             }
 
@@ -95,8 +91,7 @@ class ReferenceResolver
                 if ($error === "") {
                     $storeView->website_ids = $ids;
                 } else {
-                    $product->ok = false;
-                    $product->errors[] = $error;
+                    $product->addError($error);
                 }
             }
         }

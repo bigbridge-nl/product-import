@@ -89,7 +89,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Generated url key already exists: summer-flora"], $product2->errors);
+        $this->assertEquals(["Generated url key already exists: summer-flora"], $product2->getErrors());
 
         $product3 = $this->createProduct('product-import-1#c');
         $product3->storeView('default')->setName("Summer Flora");
@@ -98,7 +98,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Generated url key already exists: summer-flora"], $product3->errors);
+        $this->assertEquals(["Generated url key already exists: summer-flora"], $product3->getErrors());
     }
 
     public function testDuplicateExplicitUrlKeyCreateError()
@@ -119,7 +119,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Url key already exists: product-import-6"], $product2->errors);
+        $this->assertEquals(["Url key already exists: product-import-6"], $product2->getErrors());
 
         $product3 = $this->createProduct('product-import-6#c');
         $product3->storeView('default')->setName("Flowers All Year");
@@ -128,7 +128,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Url key already exists: product-import-6"], $product3->errors);
+        $this->assertEquals(["Url key already exists: product-import-6"], $product3->getErrors());
     }
 
     public function testDuplicateUrlKeyOnAddSkuStrategy()
@@ -150,7 +150,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product2->errors);
+        $this->assertEquals([], $product2->getErrors());
         $this->assertEquals("winter-woozling-product-import-2-b", $product2->storeView('default')->getUrlKey());
 
         $product3 = $this->createProduct('product-import-2#c');
@@ -160,7 +160,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product3->errors);
+        $this->assertEquals([], $product3->getErrors());
         $this->assertEquals('winter-woozling-product-import-2-c', $product3->storeView('default')->getUrlKey());
 
         // resave product
@@ -169,7 +169,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product2->errors);
+        $this->assertEquals([], $product2->getErrors());
         $this->assertEquals('winter-woozling-product-import-2-b', $product2->storeView('default')->getUrlKey());
     }
 
@@ -194,7 +194,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product2->errors);
+        $this->assertEquals([], $product2->getErrors());
         $this->assertEquals("autumn-flowers-1", $product2->storeView('default')->getUrlKey());
 
         // conflicting key - different batch
@@ -205,7 +205,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product3->errors);
+        $this->assertEquals([], $product3->getErrors());
         $this->assertEquals('autumn-flowers-2', $product3->storeView('default')->getUrlKey());
     }
 
@@ -231,7 +231,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product2->errors);
+        $this->assertEquals([], $product2->getErrors());
         $this->assertEquals("product-import-5-a-1", $product2->storeView('default')->getUrlKey());
 
         // conflicting key - different batch
@@ -247,8 +247,8 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product3->errors);
-        $this->assertEquals([], $product4->errors);
+        $this->assertEquals([], $product3->getErrors());
+        $this->assertEquals([], $product4->getErrors());
         $this->assertEquals('product-import-5-a', $product3->storeView('default')->getUrlKey());
         $this->assertEquals('product-import-5-a-2', $product4->storeView('default')->getUrlKey());
     }
@@ -310,19 +310,19 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $importer->flush();
 
-        $this->assertEquals([], $product1->errors);
+        $this->assertEquals([], $product1->getErrors());
         $this->assertEquals('spring-leaves', $product1->global()->getUrlKey());
-        $this->assertEquals([], $product2->errors);
+        $this->assertEquals([], $product2->getErrors());
         $this->assertEquals('spring-leaves-1', $product2->global()->getUrlKey());
         $this->assertEquals('spring-leaves', $product1->storeView('default')->getUrlKey());
         $this->assertEquals('spring-leaves-1', $product2->storeView('default')->getUrlKey());
-        $this->assertEquals([], $product1c->errors);
+        $this->assertEquals([], $product1c->getErrors());
         $this->assertEquals('spring-leaves', $product1c->global()->getUrlKey());
-        $this->assertEquals([], $product2c->errors);
+        $this->assertEquals([], $product2c->getErrors());
         $this->assertEquals('spring-leaves-1', $product2c->global()->getUrlKey());
         $this->assertEquals('spring-leaves', $product1c->storeView('default')->getUrlKey());
         $this->assertEquals('spring-leaves-1', $product2c->storeView('default')->getUrlKey());
-        $this->assertEquals([], $productJoker->errors);
+        $this->assertEquals([], $productJoker->getErrors());
         $this->assertEquals('spring-leaves-1', $productJoker->storeView('default')->getUrlKey());
     }
 }

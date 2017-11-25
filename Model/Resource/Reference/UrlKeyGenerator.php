@@ -57,8 +57,7 @@ class UrlKeyGenerator
                     // a url_key was specified, check if it exists
 
                     if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($urlKey, $urlKey2Id[$storeView->store_view_id])) {
-                        $product->errors[] = "Url key already exists: " . $urlKey;
-                        $product->ok = false;
+                        $product->addError("Url key already exists: " . $urlKey);
                     }
 
                     // add the new key to the local map
@@ -113,8 +112,7 @@ class UrlKeyGenerator
 
                         if ($urlKey2Id[$storeView->store_view_id][$urlKey] != $storeView->parent->id) {
 
-                            $product->errors[] = "Url key already exists: " . $urlKey;
-                            $product->ok = false;
+                            $product->addError("Url key already exists: " . $urlKey);
                         }
 
                     }
@@ -206,8 +204,7 @@ class UrlKeyGenerator
                 // check if this generated url key belongs to the product
                 if (is_null($storeView->parent->id) || $urlKey2Id[$storeView->store_view_id][$suggestedUrlKey] != $storeView->parent->id) {
 
-                    $storeView->parent->errors[] = "Generated url key already exists: " . $suggestedUrlKey;
-                    $storeView->parent->ok = false;
+                    $storeView->parent->addError("Generated url key already exists: " . $suggestedUrlKey);
 
                     $suggestedUrlKey = null;
                 }

@@ -266,7 +266,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
     {
         $productIds = "{$product1->id}, {$product3->id}";
 
-        $actualErrors = [$product1->errors, $product3->errors];
+        $actualErrors = [$product1->getErrors(), $product3->getErrors()];
 
         $this->assertEquals([[], []], $actualErrors);
 

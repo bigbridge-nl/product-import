@@ -96,7 +96,7 @@ class SimpleStorage
             // checks all attributes, changes $product->ok and $product->errors
             $this->validator->validate($product);
 
-            if (!$product->ok) {
+            if (!$product->isOk()) {
                 continue;
             }
 
