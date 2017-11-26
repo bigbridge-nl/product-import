@@ -55,9 +55,12 @@ class UrlRewriteStorage
         $changedProducts = [];
         foreach ($products as $product) {
             foreach ($product->getStoreViews() as $storeView) {
-                if (array_key_exists($storeView->store_view_id, $existingValues) && array_key_exists($product->id, $existingValues[$storeView->store_view_id])) {
 
-                    $existingDatum = $existingValues[$storeView->store_view_id][$product->id];
+                $storeViewId = $storeView->getStoreViewId();
+
+                if (array_key_exists($storeViewId, $existingValues) && array_key_exists($product->id, $existingValues[$storeViewId])) {
+
+                    $existingDatum = $existingValues[$storeViewId][$product->id];
 
                     // a product has changed if its url_key or its categories change
                     if ($storeView->getUrlKey() != $existingDatum['url_key']) {

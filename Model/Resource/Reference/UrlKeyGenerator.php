@@ -50,18 +50,19 @@ class UrlKeyGenerator
 
             foreach ($product->getStoreViews() as $storeView) {
 
+                $storeViewId = $storeView->getStoreViewId();
                 $urlKey = $storeView->getUrlKey();
 
                 if (is_string($urlKey)) {
 
                     // a url_key was specified, check if it exists
 
-                    if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($urlKey, $urlKey2Id[$storeView->store_view_id])) {
+                    if (array_key_exists($storeViewId, $urlKey2Id) && array_key_exists($urlKey, $urlKey2Id[$storeViewId])) {
                         $product->addError("Url key already exists: " . $urlKey);
                     }
 
                     // add the new key to the local map
-                    $urlKey2Id[$storeView->store_view_id][$urlKey] = $storeView->parent->id;
+                    $urlKey2Id[$storeViewId][$urlKey] = $storeView->parent->id;
 
                 } elseif ($urlKey instanceof GeneratedUrlKey) {
 
@@ -73,7 +74,7 @@ class UrlKeyGenerator
                     // add the new key to the local map
                     if ($urlKey !== null) {
                         $storeView->setUrlKey($urlKey);
-                        $urlKey2Id[$storeView->store_view_id][$urlKey] = $storeView->parent->id;
+                        $urlKey2Id[$storeViewId][$urlKey] = $storeView->parent->id;
                     } else {
                         $storeView->removeAttribute('url_key');
                     }
@@ -100,17 +101,18 @@ class UrlKeyGenerator
             
             foreach ($product->getStoreViews() as $storeView) {
 
+                $storeViewId = $storeView->getStoreViewId();
                 $urlKey = $storeView->getUrlKey();
 
                 if (is_string($urlKey)) {
 
                     // a url_key was specified, check if it exists
 
-                    if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($urlKey, $urlKey2Id[$storeView->store_view_id])) {
+                    if (array_key_exists($storeViewId, $urlKey2Id) && array_key_exists($urlKey, $urlKey2Id[$storeViewId])) {
 
                         // if so, does it belong to this product?
 
-                        if ($urlKey2Id[$storeView->store_view_id][$urlKey] != $storeView->parent->id) {
+                        if ($urlKey2Id[$storeViewId][$urlKey] != $storeView->parent->id) {
 
                             $product->addError("Url key already exists: " . $urlKey);
                         }
@@ -126,7 +128,7 @@ class UrlKeyGenerator
                     if ($existingUrlKey !== false) {
 
                         $storeView->setUrlKey($existingUrlKey);
-                        $urlKey2Id[$storeView->store_view_id][$existingUrlKey] = $storeView->parent->id;
+                        $urlKey2Id[$storeViewId][$existingUrlKey] = $storeView->parent->id;
 
                     } else {
 
@@ -137,7 +139,7 @@ class UrlKeyGenerator
                         // add the new key to the local map
                         if ($urlKey !== null) {
                             $storeView->setUrlKey($urlKey);
-                            $urlKey2Id[$storeView->store_view_id][$urlKey] = $storeView->parent->id;
+                            $urlKey2Id[$storeViewId][$urlKey] = $storeView->parent->id;
                         } else {
                             $storeView->removeAttribute('url_key');
                         }
@@ -157,11 +159,13 @@ class UrlKeyGenerator
      */
     protected function checkExistingUrlKey(ProductStoreView $storeView, array $urlKey2Id, string $urlKeyScheme, string $duplicateUrlKeyStrategy)
     {
-        if (!array_key_exists($storeView->store_view_id, $urlKey2Id)) {
+        $storeViewId = $storeView->getStoreViewId();
+
+        if (!array_key_exists($storeViewId, $urlKey2Id)) {
             return false;
         }
 
-        $existingUrlKey = array_search($storeView->parent->id, $urlKey2Id[$storeView->store_view_id]);
+        $existingUrlKey = array_search($storeView->parent->id, $urlKey2Id[$storeViewId]);
         if ($existingUrlKey === false) {
             return false;
         }
@@ -192,17 +196,18 @@ class UrlKeyGenerator
      */
     protected function generateUrlKey(ProductStoreView $storeView, array $urlKey2Id, string $urlKeyScheme, string $duplicateUrlKeyStrategy)
     {
+        $storeViewId = $storeView->getStoreViewId();
         $suggestedUrlKey = $this->getStandardUrlKey($storeView, $urlKeyScheme);
 
-        if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($suggestedUrlKey, $urlKey2Id[$storeView->store_view_id])) {
+        if (array_key_exists($storeViewId, $urlKey2Id) && array_key_exists($suggestedUrlKey, $urlKey2Id[$storeViewId])) {
 
             $suggestedUrlKey = $this->getAlternativeUrlKey($storeView, $suggestedUrlKey, $duplicateUrlKeyStrategy);
 
             // we still need to check if that key has not been used before
-            if (array_key_exists($storeView->store_view_id, $urlKey2Id) && array_key_exists($suggestedUrlKey, $urlKey2Id[$storeView->store_view_id])) {
+            if (array_key_exists($storeViewId, $urlKey2Id) && array_key_exists($suggestedUrlKey, $urlKey2Id[$storeViewId])) {
 
                 // check if this generated url key belongs to the product
-                if (is_null($storeView->parent->id) || $urlKey2Id[$storeView->store_view_id][$suggestedUrlKey] != $storeView->parent->id) {
+                if (is_null($storeView->parent->id) || $urlKey2Id[$storeViewId][$suggestedUrlKey] != $storeView->parent->id) {
 
                     $storeView->parent->addError("Generated url key already exists: " . $suggestedUrlKey);
 
@@ -268,7 +273,7 @@ class UrlKeyGenerator
         if ($duplicateUrlKeyStrategy == ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU) {
             $suggestedUrlKey = $suggestedUrlKey . '-' . $this->nameToUrlKeyConverter->createUrlKeyFromName($storeView->parent->getSku());
         } elseif ($duplicateUrlKeyStrategy == ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL) {
-            $suggestedUrlKey = $suggestedUrlKey . '-' . $this->getNextSerial($suggestedUrlKey, $storeView->store_view_id);
+            $suggestedUrlKey = $suggestedUrlKey . '-' . $this->getNextSerial($suggestedUrlKey, $storeView->getStoreViewId());
         }
 
         // the database only allows this length

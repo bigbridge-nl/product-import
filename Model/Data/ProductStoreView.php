@@ -29,7 +29,7 @@ class ProductStoreView
     public $parent;
 
     /** @var  int */
-    public $store_view_id;
+    protected $store_view_id;
 
     /** @var array  */
     public $website_ids = [];
@@ -48,6 +48,21 @@ class ProductStoreView
     public function getName()
     {
         return array_key_exists('name', $this->attributes) ? $this->attributes['name'] : null;
+    }
+
+    public function setStoreViewId(int $storeViewId)
+    {
+        $this->store_view_id = $storeViewId;
+    }
+
+    public function getStoreViewId(): int
+    {
+        return $this->store_view_id;
+    }
+
+    public function removeStoreViewId()
+    {
+        $this->store_view_id = null;
     }
 
     public function setStatus(int $status)

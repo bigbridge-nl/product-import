@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\Product;
+use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImportConfig;
@@ -328,7 +329,7 @@ class SimpleStorage
     }
 
     /**
-     * @param SimpleProduct[] $storeViews
+     * @param ProductStoreView[] $storeViews
      * @param string $eavAttribute
      */
     protected function insertEavAttribute(array $storeViews, string $eavAttribute)
@@ -342,7 +343,8 @@ class SimpleStorage
 
             $entityId = $storeView->parent->id;
             $value = $this->db->quote($storeView->getAttribute($eavAttribute));
-            $values[] = "({$entityId},{$attributeId},{$storeView->store_view_id},{$value})";
+            $storeViewId = $storeView->getStoreViewId();
+            $values[] = "({$entityId},{$attributeId},{$storeViewId},{$value})";
         }
 
         $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .

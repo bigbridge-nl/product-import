@@ -75,10 +75,10 @@ class ReferenceResolver
 
             list($id, $error) = $this->storeViewResolver->resolveName($storeViewCode);
             if ($error === "") {
-                $storeView->store_view_id = $id;
+                $storeView->setStoreViewId($id);
             } else {
                 $product->addError($error);
-                $storeView->store_view_id = null;
+                $storeView->removeStoreViewId();
             }
 
             if (array_key_exists('tax_class_id', $attributes) && $attributes['tax_class_id'] instanceof Reference) {
