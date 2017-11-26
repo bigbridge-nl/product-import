@@ -19,7 +19,7 @@ abstract class Product
     public $id;
 
     /** @var  string|Reference */
-    public $attribute_set_id;
+    protected $attribute_set_id;
 
     /** @var  string 64 character */
     protected $sku;
@@ -42,10 +42,10 @@ abstract class Product
 
     public function __construct(string $sku)
     {
-        $this->sku = $sku;
+        $this->sku = trim($sku);
     }
 
-    public function isOk()
+    public function isOk(): bool
     {
         return empty($this->errors);
     }
@@ -55,16 +55,26 @@ abstract class Product
         $this->errors[] = $error;
     }
 
+    /**
+     * @return string[]
+     */
     public function getErrors()
     {
         return $this->errors;
     }
 
+    /**
+     * @return string
+     */
     public function getSku()
     {
         return $this->sku;
     }
 
+    /**
+     * @param string $storeViewCode
+     * @return ProductStoreView
+     */
     public function storeView(string $storeViewCode) {
         $storeViewCode = trim($storeViewCode);
         if (!array_key_exists($storeViewCode, $this->storeViews)) {
@@ -73,6 +83,9 @@ abstract class Product
         return $this->storeViews[$storeViewCode];
     }
 
+    /**
+     * @return ProductStoreView
+     */
     public function global() {
         if (!array_key_exists(self::GLOBAL_STORE_VIEW_CODE, $this->storeViews)) {
             $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView();
@@ -80,6 +93,9 @@ abstract class Product
         return $this->storeViews[self::GLOBAL_STORE_VIEW_CODE];
     }
 
+    /**
+     * @return ProductStoreView[]
+     */
     public function getStoreViews()
     {
         return $this->storeViews;
@@ -104,5 +120,31 @@ abstract class Product
     public function setCategoriesByGlobalName(array $categoryNames)
     {
         $this->category_ids = new References($categoryNames);
+    }
+
+    public function setAttributeSetId(int $attributeSetId)
+    {
+        $this->attribute_set_id = $attributeSetId;
+    }
+
+    /**
+     * @return Reference|int|null
+     */
+    public function getAttributeSetId()
+    {
+        return $this->attribute_set_id;
+    }
+
+    public function removeAttributeSetId()
+    {
+        $this->attribute_set_id = null;
+    }
+
+    /**
+     * @param array $attributeSetName An attribute set name
+     */
+    public function setAttributeSetByName(string $attributeSetName)
+    {
+        $this->attribute_set_id = new Reference($attributeSetName);
     }
 }

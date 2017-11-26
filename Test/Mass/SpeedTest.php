@@ -6,7 +6,6 @@ use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Importer;
-use BigBridge\ProductImport\Model\Reference;
 use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
@@ -142,7 +141,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct($skus[$i]);
-            $product->attribute_set_id = new Reference("Default");
+            $product->setAttributeSetByName("Default");
             $product->setCategoriesByGlobalName([$categories[0], $categories[1]]);
 
             $global = $product->global();
@@ -176,7 +175,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         for ($i = 0; $i < self::PRODUCT_COUNT; $i++) {
 
             $product = new SimpleProduct($skus[$i]);
-            $product->attribute_set_id = new Reference("Default");
+            $product->setAttributeSetByName("Default");
             $product->setCategoriesByGlobalName([$categories[1], $categories[2]]);
 
             $global = $product->global();

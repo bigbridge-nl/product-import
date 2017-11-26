@@ -4,12 +4,9 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\GeneratedUrlKey;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use Magento\Framework\App\ObjectManager;
-use BigBridge\ProductImport\Model\Reference;
-use BigBridge\ProductImport\Model\References;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImporterFactory;
@@ -62,7 +59,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // product
         $product1 = new SimpleProduct('1-product-import');
-        $product1->attribute_set_id = new Reference("Default");
+        $product1->setAttributeSetByName("Default");
         $product1->setCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Turquoise Box product-import");
         $product1->global()->setPrice("2.75");
@@ -77,7 +74,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // another product
         $product3 = new SimpleProduct('2-product-import');
-        $product3->attribute_set_id = new Reference("Default");
+        $product3->setAttributeSetByName("Default");
         $product3->setCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Green Box product-import");
         $product3->global()->setPrice("2.65");
@@ -190,7 +187,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // product
         $product1 = new SimpleProduct('3-product-import');
-        $product1->attribute_set_id = new Reference("Default");
+        $product1->setAttributeSetByName("Default");
         $product1->setCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Red Box product-import");
         $product1->global()->setPrice("2.75");
@@ -204,7 +201,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
         // another product
         $product3 = new SimpleProduct('4-product-import');
-        $product3->attribute_set_id = new Reference("Default");
+        $product3->setAttributeSetByName("Default");
         $product3->setCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Yellow Box product-import");
         $product3->global()->setPrice("2.65");

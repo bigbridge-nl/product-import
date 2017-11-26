@@ -64,15 +64,14 @@ class SimpleStorage
             $skus[] = $product->getSku();
         }
 
-        // collect inserts and updates
+        // find existing products ids from their skus
         $sku2id = $this->getExistingSkus($skus);
 
-        $insertProducts = $updateProducts = [];
-
         // separate new products from existing products and assign id
+        $insertProducts = $updateProducts = [];
         foreach ($simpleProducts as $product) {
 
-            // replace Reference(s) with ids, changes $product->ok and $product->errors
+            // replace Reference(s) with ids, changes $product->errors
             $this->referenceResolver->resolveIds($product, $config);
 
             if (array_key_exists($product->getSku(), $sku2id)) {
@@ -84,7 +83,7 @@ class SimpleStorage
         }
 
         // create url keys based on name and id
-        // changes $product->ok and $product->errors
+        // changes $product->errors
         $this->urlKeyGenerator->createUrlKeysForNewProducts($insertProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
 
         $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
@@ -93,7 +92,7 @@ class SimpleStorage
 
         foreach ($simpleProducts as $product) {
 
-            // checks all attributes, changes $product->ok and $product->errors
+            // checks all attributes, changes $product->errors
             $this->validator->validate($product);
 
             if (!$product->isOk()) {
@@ -278,7 +277,8 @@ class SimpleStorage
             $skus[$product->getSku()] = $product->getSku();
 
             $sku = $this->db->quote($product->getSku());
-            $values[] = "({$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
+            $attributeSetId = $product->getAttributeSetId();
+            $values[] = "({$attributeSetId}, 'simple', {$sku}, 0, 0)";
         }
 
         if (count($values) > 0) {
@@ -312,7 +312,8 @@ class SimpleStorage
         foreach ($products as $product) {
             $skus[] = $product->getSku();
             $sku = $this->db->quote($product->getSku());
-            $values[] = "({$product->id},{$product->attribute_set_id}, 'simple', {$sku}, 0, 0)";
+            $attributeSetId = $product->getAttributeSetId();
+            $values[] = "({$product->id}, {$attributeSetId}, 'simple', {$sku}, 0, 0)";
         }
 
         if (count($values) > 0) {

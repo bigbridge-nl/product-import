@@ -55,14 +55,17 @@ class ReferenceResolver
             $product->setCategoryIds($ids);
             if ($error !== "") {
                 $product->addError($error);
+                $product->setCategoryIds([]);
             }
         }
 
-        if ($product->attribute_set_id instanceof Reference) {
-            list($id, $error) = $this->attributeSetResolver->resolveName($product->attribute_set_id->name);
-            $product->attribute_set_id = $id;
-            if ($error !== "") {
+        if ($product->getAttributeSetId() instanceof Reference) {
+            list($id, $error) = $this->attributeSetResolver->resolveName($product->getAttributeSetId()->name);
+            if ($error === "") {
+                $product->setAttributeSetId($id);
+            } else {
                 $product->addError($error);
+                $product->removeAttributeSetId();
             }
         }
 
@@ -75,6 +78,7 @@ class ReferenceResolver
                 $storeView->store_view_id = $id;
             } else {
                 $product->addError($error);
+                $storeView->store_view_id = null;
             }
 
             if (array_key_exists('tax_class_id', $attributes) && $attributes['tax_class_id'] instanceof Reference) {
@@ -83,6 +87,7 @@ class ReferenceResolver
                     $storeView->setTaxClassId($id);
                 } else {
                     $product->addError($error);
+                    $storeView->removeAttribute('tax_class_id');
                 }
             }
 
@@ -92,6 +97,7 @@ class ReferenceResolver
                     $storeView->website_ids = $ids;
                 } else {
                     $product->addError($error);
+                    $storeView->removeAttribute('website_ids');
                 }
             }
         }

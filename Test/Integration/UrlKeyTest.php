@@ -3,8 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\GeneratedUrlKey;
-use BigBridge\ProductImport\Model\Reference;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
@@ -63,7 +61,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
     public function createProduct($sku)
     {
         $product1 = new SimpleProduct($sku);
-        $product1->attribute_set_id = new Reference("Default");
+        $product1->setAttributeSetByName("Default");
 
         $product1->global()->setName("Big Turquoise Box");
         $product1->global()->setPrice("2.75");
@@ -164,7 +162,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('winter-woozling-product-import-2-c', $product3->storeView('default')->getUrlKey());
 
         // resave product
-        $product2->url_key = new GeneratedUrlKey();
+//        $product2->global()->generateUrlKey();
         $importer->importSimpleProduct($product2);
 
         $importer->flush();
@@ -305,7 +303,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
 
         $productJoker = clone $product2;
         $productJoker->storeView('default')->name = "Spring Leaves";
-        $productJoker->storeView('default')->url_key = new GeneratedUrlKey();
+        $productJoker->storeView('default')->generateUrlKey();
         $importer->importSimpleProduct($productJoker);
 
         $importer->flush();

@@ -3,8 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Reference;
-use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\Reference\CategoryImporter;
 use Magento\Framework\App\ObjectManager;
@@ -65,7 +63,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         ];
 
         $product = new SimpleProduct($sku1);
-        $product->attribute_set_id = new Reference("Default");
+        $product->setAttributeSetByName("Default");
         $product->setCategoryIds([1]);
 
         $global = $product->global();
@@ -76,7 +74,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product = new SimpleProduct($sku2);
 
-        $product->attribute_set_id = new Reference("Default");
+        $product->setAttributeSetByName("Default");
         $product->setCategoryIds([1, 2, 999]);
 
         $global = $product->global();
@@ -120,7 +118,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product = new SimpleProduct($sku1);
 
-        $product->attribute_set_id = new Reference("Default");
+        $product->setAttributeSetByName("Default");
         $product->setCategoryIds([1, 2]);
 
         $global = $product->global();
@@ -132,7 +130,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product = new SimpleProduct($sku2);
 
-        $product->attribute_set_id = new Reference("Default");
+        $product->setAttributeSetByName("Default");
         $product->setCategoryIds([]);
 
         $global = $product->global();
@@ -191,7 +189,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $product = new SimpleProduct($sku1);
 
-        $product->attribute_set_id = new Reference("Default");
+        $product->setAttributeSetByName("Default");
         $product->setCategoriesByGlobalName(["Boxes", "Colored Things/Containers/Large"]);
 
         $global = $product->global();
@@ -229,7 +227,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         list($importer, $error) = self::$factory->createImporter($config);
 
         $product = new SimpleProduct("tiny-blue-dot");
-        $product->attribute_set_id = new Reference("Checkers");
+        $product->setAttributeSetByName("Checkers");
 
         $importer->importSimpleProduct($product);
 
@@ -273,7 +271,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
             $product = new SimpleProduct($line[1]);
 
-            $product->attribute_set_id = new Reference("Default");
+            $product->setAttributeSetByName("Default");
             $product->lineNumber = $i + 1;
 
             $global = $product->global();
@@ -300,7 +298,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         list($importer, ) = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct(uniqid('bb'));
-        $product1->attribute_set_id = new Reference("Default");
+        $product1->setAttributeSetByName("Default");
         $product1->setCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product1->global();
         $global->setName("Pine trees");
@@ -309,7 +307,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $importer->importSimpleProduct($product1);
 
         $product2 = new SimpleProduct(uniqid('bb'));
-        $product2->attribute_set_id = new Reference("Default");
+        $product2->setAttributeSetByName("Default");
         $product2->setCategoriesByGlobalName(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product2->global();
         $global->setName("Oak trees");
@@ -340,7 +338,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         list($importer, ) = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct("gummybears");
-        $product1->attribute_set_id = new Reference("Default");
+        $product1->setAttributeSetByName("Default");
         $product1->setCategoriesByGlobalName(['Gummybears', 'Other Candy', 'German Candy']);
         $global = $product1->global();
         $global->setName("Gummybears");

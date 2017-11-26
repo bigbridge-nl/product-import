@@ -45,9 +45,9 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             // attribute_set_id
 
             // plain
-            [['attribute_set_id' => new Reference("Default")], true, ""],
+            [['attribute_set_id' => "Default"], true, ""],
             // corrupt
-            [['attribute_set_id' => new Reference("Winograd")], false, "attribute set name not found: Winograd"],
+            [['attribute_set_id' => "Winograd"], false, "attribute set name not found: Winograd"],
 
             // tax_class_id
 
@@ -67,7 +67,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
         foreach ($tests as $test) {
 
             $product = new SimpleProduct("big-blue-box");
-            $product->attribute_set_id = 4;
+            $product->setAttributeSetId(4);
 
             $global = $product->global();
             $global->name = "Big Blue Box";
@@ -79,6 +79,8 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
                     $product->global()->setTaxClassName($fieldValue);
                 } elseif ($fieldName == 'category_ids') {
                     $product->setCategoriesByGlobalName($fieldValue);
+                } elseif ($fieldName == 'attribute_set_id') {
+                    $product->setAttributeSetByName($fieldValue);
                 } elseif ($fieldName == 'website_ids') {
                     $product->global()->$fieldName = $fieldValue;
                 } else {
@@ -111,7 +113,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
         foreach ($tests as $test) {
 
             $product = new SimpleProduct("big-blue-box");
-            $product->attribute_set_id = 4;
+            $product->setAttributeSetId(4);
 
             $global = $product->global();
             $global->name = "Big Blue Box";

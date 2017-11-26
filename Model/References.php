@@ -11,7 +11,7 @@ class References
 
     public function __construct(array $names)
     {
-        $this->names = $names;
+        $this->names = array_map('trim', $names);
     }
 
 }

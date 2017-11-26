@@ -38,37 +38,17 @@ class Validator
             $product->addError("sku has " . mb_strlen($product->getSku()) . ' characters (max ' . self::SKU_MAX_LENGTH . ")");
         }
 
-        // attribute set id
-        if (is_string($product->attribute_set_id)) {
-            if (!in_array($product->attribute_set_id, $this->metaData->productAttributeSetMap)) {
-                $product->attribute_set_id = trim($product->attribute_set_id);
-                if ($product->attribute_set_id === "") {
-                    $product->addError("missing attribute set id");
-                } elseif (!is_numeric($product->attribute_set_id)) {
-                    $product->addError("attribute set id is a " . gettype($product->attribute_set_id) . ", should be an integer");
-                } else {
-                    $product->addError("attribute set id does not exist: " . $product->attribute_set_id);
-                }
-            }
-        } elseif (is_integer($product->attribute_set_id)) {
-            $product->attribute_set_id = (string)$product->attribute_set_id;
-            if (!in_array($product->attribute_set_id, $this->metaData->productAttributeSetMap)) {
-                $product->addError("attribute set id does not exist: " . $product->attribute_set_id);
-            }
-        } elseif (is_null($product->attribute_set_id)) {
+        // attribute_set_id
+        if ($product->getAttributeSetId() === null) {
             $product->addError("missing attribute set id");
-        } else {
-            $product->addError("attribute set id is a " . gettype($product->attribute_set_id) . ", should be a string");
         }
 
         // category_ids
         $categoryIds = $product->getCategoryIds();
-        if (!($categoryIds instanceof References)) {
-            foreach ($product->getCategoryIds() as $id) {
-                if (!is_numeric($id)) {
-                    $product->addError("category_ids should be an array of integers");
-                    break;
-                }
+        foreach ($categoryIds as $id) {
+            if (!is_numeric($id)) {
+                $product->addError("category_ids should be an array of integers");
+                break;
             }
         }
 
@@ -84,7 +64,7 @@ class Validator
             } else {
                 foreach ($storeView->website_ids as $id) {
                     if (!preg_match('/\d+/', $id)) {
-                        $product->addError("website_ids should be a References object or an array of integers");
+                        $product->addError("website_ids should be an array of integers");
                         break;
                     }
                 }

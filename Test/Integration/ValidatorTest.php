@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Reference;
 use IntlChar;
@@ -10,7 +9,6 @@ use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\ImporterFactory;
-use SimpleXMLElement;
 
 /**
  * @author Patrick van Bergen
@@ -101,16 +99,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // plain
             [['attribute_set_id' => 4], true, ""],
-            // missing
-            [['attribute_set_id' => ''], false, "missing attribute set id"],
-            // corrupt
-            [['attribute_set_id' => 'Lost Boys'], false, "attribute set id is a string, should be an integer"],
 
             // category_ids
 
             // plain
             [['category_ids' => [1, 2]], true, ""],
-            [['category_names' => ["Hardware", "Software"]], true, ""],
             // corrupt
             [['category_ids' => ["1, 2"]], false, "category_ids should be an array of integers"],
 
@@ -119,9 +112,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             // plain
             [['website_ids' => [1]], true, ""],
             // corrupt
-            [['website_ids' => 1], false, "website_ids is a integer, should be a References object or an array of integers"],
-            [['website_ids' => ["Shopaholic", "Wannabuy"]], false, "website_ids should be a References object or an array of integers"],
-            [['website_ids' => new Reference("Shoparound")], false, "website_ids is a Reference, should be a References(!) object"],
+            [['website_ids' => [null]], false, "website_ids should be an array of integers"],
         ];
 
         foreach ($tests as $test) {
@@ -129,19 +120,17 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $sku = (isset($test[0]['sku']) ? $test[0]['sku'] : "big-blue-box");
 
             $product = new SimpleProduct($sku);
-            $product->attribute_set_id = 4;
+            $product->setAttributeSetId(4);
 
             $global = $product->global();
             $global->setName("Big Blue Box");
             $global->setPrice("123.00");
 
             foreach ($test[0] as $fieldName => $fieldValue) {
-                if (in_array($fieldName, ['attribute_set_id'])) {
-                    $product->$fieldName = $fieldValue;
+                if ($fieldName == 'attribute_set_id') {
+                    $product->setAttributeSetId($fieldValue);
                 } elseif ($fieldName == 'category_ids') {
                     $product->setCategoryIds($fieldValue);
-                } elseif ($fieldName == 'category_names') {
-                    $product->setCategoriesByGlobalName($fieldValue);
                 } elseif ($fieldName == 'name') {
                     $global->setName($fieldValue);
                 } elseif ($fieldName == 'price') {
