@@ -59,9 +59,9 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             // web site ids
 
             // plain
-            [['website_ids' => new References(["base"])], true, ""],
+            [['website_ids' => ["base"]], true, ""],
             // corrupt
-            [['website_ids' => new References(["Shopaholic"])], false, "website code not found: Shopaholic"],
+            [['website_ids' => ["Shopaholic"]], false, "website code not found: Shopaholic"],
         ];
 
         foreach ($tests as $test) {
@@ -82,9 +82,9 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
                 } elseif ($fieldName == 'attribute_set_id') {
                     $product->setAttributeSetByName($fieldValue);
                 } elseif ($fieldName == 'website_ids') {
-                    $product->global()->$fieldName = $fieldValue;
-                } else {
-                    $product->$fieldName = $fieldValue;
+                    $product->setWebsitesByCode($fieldValue);
+//                } else {
+//                    $product->$fieldName = $fieldValue;
                 }
             }
 

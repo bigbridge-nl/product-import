@@ -59,6 +59,16 @@ class ReferenceResolver
             }
         }
 
+        if ($product->getWebsiteIds() instanceof References) {
+            list($ids, $error) = $this->websiteResolver->resolveNames($product->getWebsiteIds()->names);
+            if ($error === "") {
+                $product->setWebsitesIds($ids);
+            } else {
+                $product->addError($error);
+                $product->removeWebsiteIds();
+            }
+        }
+
         if ($product->getAttributeSetId() instanceof Reference) {
             list($id, $error) = $this->attributeSetResolver->resolveName($product->getAttributeSetId()->name);
             if ($error === "") {
@@ -88,16 +98,6 @@ class ReferenceResolver
                 } else {
                     $product->addError($error);
                     $storeView->removeAttribute('tax_class_id');
-                }
-            }
-
-            if ($storeView->website_ids instanceof References) {
-                list($ids, $error) = $this->websiteResolver->resolveNames($storeView->website_ids->names);
-                if ($error === "") {
-                    $storeView->website_ids = $ids;
-                } else {
-                    $product->addError($error);
-                    $storeView->removeAttribute('website_ids');
                 }
             }
         }

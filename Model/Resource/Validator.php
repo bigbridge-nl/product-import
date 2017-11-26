@@ -52,22 +52,12 @@ class Validator
             }
         }
 
-        foreach ($storeViews as $storeView) {
-
-            // website_ids
-            if (!is_array($storeView->website_ids)) {
-                if ($storeView->website_ids instanceof Reference) {
-                    $product->addError("website_ids is a Reference, should be a References(!) object");
-                } else {
-                    $product->addError("website_ids is a " . gettype($storeView->website_ids) . ", should be a References object or an array of integers");
-                }
-            } else {
-                foreach ($storeView->website_ids as $id) {
-                    if (!preg_match('/\d+/', $id)) {
-                        $product->addError("website_ids should be an array of integers");
-                        break;
-                    }
-                }
+        // website_ids
+        $websiteIds = $product->getWebsiteIds();
+        foreach ($websiteIds as $id) {
+            if (!preg_match('/\d+/', $id)) {
+                $product->addError("website_ids should be an array of integers");
+                break;
             }
         }
 

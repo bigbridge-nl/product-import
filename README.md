@@ -19,6 +19,7 @@ After an import has completed, the product and category indexers need to be run.
 * trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
 * input is validated on data type, requiredness,  and length restrictions
 * result callback, a function that is called with the results of each imported product (id, error)
+* information is only added and overwritten, never removed; the import is not considered to be the only source of information of the shop
 
 ## Example Code
 

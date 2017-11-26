@@ -32,9 +32,6 @@ class ProductStoreView
     protected $store_view_id;
 
     /** @var array  */
-    public $website_ids = [];
-
-    /** @var array  */
     protected $attributes = [];
 
     public function setName(string $name)

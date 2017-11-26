@@ -27,6 +27,9 @@ abstract class Product
     /** @var int[]|References */
     protected $category_ids = [];
 
+    /** @var array  */
+    protected $website_ids = [];
+
     // =========================================
     // importer data
     // =========================================
@@ -146,5 +149,31 @@ abstract class Product
     public function setAttributeSetByName(string $attributeSetName)
     {
         $this->attribute_set_id = new Reference($attributeSetName);
+    }
+
+    public function setWebsitesByCode(array $websiteCodes)
+    {
+        $this->website_ids = new References($websiteCodes);
+    }
+
+    /**
+     * @param int[] $websiteIds
+     */
+    public function setWebsitesIds(array $websiteIds)
+    {
+        $this->website_ids = $websiteIds;
+    }
+
+    /**
+     * @return int[]|References
+     */
+    public function getWebsiteIds()
+    {
+        return $this->website_ids;
+    }
+
+    public function removeWebsiteIds()
+    {
+        $this->website_ids = null;
     }
 }

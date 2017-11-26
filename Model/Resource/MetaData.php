@@ -25,6 +25,7 @@ class MetaData
     const STORE_TABLE = 'store';
     const WEBSITE_TABLE = 'store_website';
     const TAX_CLASS_TABLE = 'tax_class';
+    const PRODUCT_WEBSITE_TABLE = 'catalog_product_website';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -54,6 +55,9 @@ class MetaData
 
     /** @var  string */
     public $configDataTable;
+
+    /** @var  string */
+    public $productWebsiteTable;
 
     /** @var  int */
     public $defaultCategoryAttributeSetId;
@@ -104,6 +108,7 @@ class MetaData
         $this->urlRewriteProductCategoryTable = $db->getFullTableName(self::URL_REWRITE_PRODUCT_CATEGORY_TABLE);
         $this->categoryProductTable = $db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
         $this->configDataTable = $db->getFullTableName(self::CONFIG_DATA_TABLE);
+        $this->productWebsiteTable = $db->getFullTableName(self::PRODUCT_WEBSITE_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();

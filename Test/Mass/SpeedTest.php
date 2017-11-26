@@ -96,7 +96,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(4.6, $time);
+        $this->assertLessThan(5.1, $time);
         $this->assertLessThan(433, $memory); // the size of the last $product
 
         // ----------------------------------------------------
@@ -143,6 +143,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct($skus[$i]);
             $product->setAttributeSetByName("Default");
             $product->setCategoriesByGlobalName([$categories[0], $categories[1]]);
+            $product->setWebsitesByCode(['base']);
 
             $global = $product->global();
             $global->setName(uniqid("name"));
@@ -157,7 +158,6 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
             $global->setTaxClassName('Taxable Goods');
             $global->generateUrlKey();
-            $global->website_ids = new References(['base']);
 
             $importer->importSimpleProduct($product);
         }
@@ -177,6 +177,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $product = new SimpleProduct($skus[$i]);
             $product->setAttributeSetByName("Default");
             $product->setCategoriesByGlobalName([$categories[1], $categories[2]]);
+            $product->setWebsitesByCode(['base']);
 
             $global = $product->global();
             $global->setName(uniqid("name"));
@@ -190,7 +191,6 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setSpecialToDate("2017-12-20");
             $global->setVisibility(ProductStoreView::VISIBILITY_NOT_VISIBLE);
             $global->setTaxClassName('Retail Customer');
-            $global->website_ids = new References(['base']);
             $global->generateUrlKey();
 
             $importer->importSimpleProduct($product);

@@ -159,6 +159,7 @@ class SimpleStorage
         $validUpdateProducts = $validInsertProducts = [];
         $productsByAttribute = [];
         $productsWithCategories = [];
+        $productsWithWebsites = [];
 
         foreach ($validProducts as $product) {
 
@@ -171,6 +172,10 @@ class SimpleStorage
 
             if ($product->getCategoryIds() !== []) {
                 $productsWithCategories[] = $product;
+            }
+
+            if ($product->getWebsiteIds() !== []) {
+                $productsWithWebsites[] = $product;
             }
 
             foreach ($product->getStoreViews() as $storeView) {
@@ -194,6 +199,7 @@ class SimpleStorage
             }
 
             $this->insertCategoryIds($productsWithCategories);
+            $this->insertWebsiteIds($productsWithWebsites);
 
             // url_rewrite (must be done after url_key and category_id)
             $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);
@@ -355,7 +361,7 @@ class SimpleStorage
     }
 
     /**
-     * @param Procudt[] $products
+     * @param Product[] $products
      */
     protected function insertCategoryIds(array $products)
     {
@@ -375,6 +381,33 @@ class SimpleStorage
 
             $sql = "
                 INSERT IGNORE INTO `{$this->metaData->categoryProductTable}` (`category_id`, `product_id`) 
+                VALUES " . implode(', ', $values);
+
+            $this->db->execute($sql);
+        }
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    protected function insertWebsiteIds(array $products)
+    {
+        $values = [];
+
+        foreach ($products as $product) {
+            foreach ($product->getWebsiteIds() as $websiteId) {
+                $values[] = "({$product->id}, {$websiteId})";
+            }
+        }
+
+        if (count($values) > 0) {
+
+            // IGNORE serves two purposes:
+            // 1. do not fail if the product-website link already existed
+            // 2. do not fail if the website does not exist
+
+            $sql = "
+                INSERT IGNORE INTO `{$this->metaData->productWebsiteTable}` (`product_id`, `website_id`) 
                 VALUES " . implode(', ', $values);
 
             $this->db->execute($sql);

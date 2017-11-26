@@ -131,6 +131,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                     $product->setAttributeSetId($fieldValue);
                 } elseif ($fieldName == 'category_ids') {
                     $product->setCategoryIds($fieldValue);
+                } elseif ($fieldName == 'website_ids') {
+                    $product->setWebsitesIds($fieldValue);
                 } elseif ($fieldName == 'name') {
                     $global->setName($fieldValue);
                 } elseif ($fieldName == 'price') {
@@ -143,8 +145,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                     $global->setSpecialFromDate($fieldValue);
                 } elseif ($fieldName == 'special_to_date') {
                     $global->setSpecialToDate($fieldValue);
-                } else {
-                    $global->$fieldName = $fieldValue;
+//                } else {
+//                    $global->$fieldName = $fieldValue;
                 }
             }
 

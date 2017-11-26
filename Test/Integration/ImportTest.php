@@ -28,6 +28,12 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     /** @var ProductRepositoryInterface $repository */
     private static $repository;
 
+    /** @var  Magento2DbConnection */
+    protected static $db;
+
+    /** @var  Metadata */
+    protected static $metadata;
+
     public static function setUpBeforeClass()
     {
         // include Magento
@@ -38,6 +44,11 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         /** @var ProductRepositoryInterface $repository */
         self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
+
+        /** @var Magento2DbConnection $db */
+        self::$db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+
+        self::$metadata = ObjectManager::getInstance()->get(MetaData::class);
     }
 
     public function testInsertAndUpdate()
@@ -320,6 +331,38 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(4, count(array_unique($product1->getCategoryIds())));
         $this->assertEquals(3, count(array_unique($product2->getCategoryIds())));
         $this->assertEquals(1, count(array_diff($product1->getCategoryIds(), $product2->getCategoryIds())));
+    }
+
+    public function testWebsites()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        list($importer, ) = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct(uniqid('bb'));
+        $product1->setAttributeSetByName("Default");
+        $product1->setWebsitesByCode(['base']);
+        $global = $product1->global();
+        $global->setName("Book voucher");
+        $global->setPrice('25.00');
+
+        $importer->importSimpleProduct($product1);
+
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        $websiteIds = self::$db->fetchAllNumber("
+            SELECT `product_id`, `website_id` FROM `" . self::$metadata->productWebsiteTable . "`
+            WHERE `product_id` = {$product1->id}
+        ");
+
+        $this->assertEquals([[$product1->id, 1]], $websiteIds);
     }
 
     public function testMissingCategories()
