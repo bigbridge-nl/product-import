@@ -1,12 +1,12 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource\Reference;
+namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
-use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\ProductStoreView;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\GeneratedUrlKey;
-use BigBridge\ProductImport\Model\ImportConfig;
+use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
+use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**

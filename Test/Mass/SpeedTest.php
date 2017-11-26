@@ -2,14 +2,14 @@
 
 namespace BigBridge\ProductImport\Test\Integration\Mass;
 
-use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\Data\ProductStoreView;
-use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\Importer;
-use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\ImporterFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\App\ObjectManager;
+use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\ProductStoreView;
+use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\Importer;
+use BigBridge\ProductImport\Api\ImportConfig;
+use BigBridge\ProductImport\Api\ImporterFactory;
 
 /**
  * This test only works on my laptop ;)

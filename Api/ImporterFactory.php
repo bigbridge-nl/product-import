@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model;
+namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;

@@ -2,7 +2,8 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Model\Data\Product;
+use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Model\Data\UrlRewriteInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 

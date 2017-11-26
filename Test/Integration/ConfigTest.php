@@ -3,8 +3,8 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use Magento\Framework\App\ObjectManager;
-use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\ImporterFactory;
+use BigBridge\ProductImport\Api\ImportConfig;
+use BigBridge\ProductImport\Api\ImporterFactory;
 
 /**
  * @author Patrick van Bergen

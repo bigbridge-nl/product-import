@@ -1,16 +1,11 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
-use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\Reference;
-use BigBridge\ProductImport\Model\References;
-use BigBridge\ProductImport\Model\Resource\Reference\AttributeSetResolver;
-use BigBridge\ProductImport\Model\Resource\Reference\CategoryImporter;
-use BigBridge\ProductImport\Model\Resource\Reference\StoreViewResolver;
-use BigBridge\ProductImport\Model\Resource\Reference\TaxClassResolver;
-use BigBridge\ProductImport\Model\Resource\Reference\WebsiteResolver;
+use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\ImportConfig;
+use BigBridge\ProductImport\Model\Resource\Reference\Reference;
+use BigBridge\ProductImport\Model\Resource\Reference\References;
 
 /**
  * Replaces all Reference(s) values of a product with database ids.

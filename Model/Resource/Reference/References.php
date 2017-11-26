@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model;
+namespace BigBridge\ProductImport\Model\Resource\Reference;
 
 /**
  * @author Patrick van Bergen

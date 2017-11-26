@@ -1,9 +1,7 @@
 <?php
 
-namespace BigBridge\ProductImport\Model;
+namespace BigBridge\ProductImport\Api;
 
-use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
-use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;

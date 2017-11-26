@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model;
+namespace BigBridge\ProductImport\Model\Resource\Reference;
 
 /**
  * An id placeholder, that contains the name that is to be resolved into an id.

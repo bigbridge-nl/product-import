@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Data;
+namespace BigBridge\ProductImport\Api;
 
 /**
  * @author Patrick van Bergen

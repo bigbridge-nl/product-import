@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource\Reference;
+namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
 

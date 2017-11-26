@@ -2,9 +2,9 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Model\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\ImportConfig;
+use BigBridge\ProductImport\Api\ImportConfig;
 
 /**
  * @author Patrick van Bergen

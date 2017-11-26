@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Model\Data;
 
 /**
  * Data from eav_attribute

@@ -2,15 +2,15 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Resource\MetaData;
-use BigBridge\ProductImport\Model\Resource\Reference\CategoryImporter;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\ImporterFactory;
-use BigBridge\ProductImport\Model\Data\Product;
+use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Resource\MetaData;
+use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
+use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\ImportConfig;
+use BigBridge\ProductImport\Api\ImporterFactory;
+use BigBridge\ProductImport\Api\Product;
 
 /**
  * Integration test. It can only be executed from within a shop that has

@@ -2,11 +2,11 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\ImporterFactory;
-use BigBridge\ProductImport\Model\Resource\Reference\NameToUrlKeyConverter;
-use BigBridge\ProductImport\Model\Resource\ReferenceResolver;
+use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\ImportConfig;
+use BigBridge\ProductImport\Api\ImporterFactory;
+use BigBridge\ProductImport\Model\Resource\Resolver\NameToUrlKeyConverter;
+use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use Magento\Framework\App\ObjectManager;
 
 /**

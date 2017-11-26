@@ -1,9 +1,9 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Data;
+namespace BigBridge\ProductImport\Api;
 
-use BigBridge\ProductImport\Model\GeneratedUrlKey;
-use BigBridge\ProductImport\Model\Reference;
+use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
+use BigBridge\ProductImport\Model\Resource\Reference\Reference;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 

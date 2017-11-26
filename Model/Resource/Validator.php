@@ -2,9 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\Reference;
-use BigBridge\ProductImport\Model\References;
+use BigBridge\ProductImport\Api\Product;
 
 /**
  * @author Patrick van Bergen
@@ -46,7 +44,7 @@ class Validator
         // category_ids
         $categoryIds = $product->getCategoryIds();
         foreach ($categoryIds as $id) {
-            if (!is_numeric($id)) {
+            if (!preg_match('/^\d+$/', $id)) {
                 $product->addError("category_ids should be an array of integers");
                 break;
             }
@@ -55,7 +53,7 @@ class Validator
         // website_ids
         $websiteIds = $product->getWebsiteIds();
         foreach ($websiteIds as $id) {
-            if (!preg_match('/\d+/', $id)) {
+            if (!preg_match('/^\d+$/', $id)) {
                 $product->addError("website_ids should be an array of integers");
                 break;
             }

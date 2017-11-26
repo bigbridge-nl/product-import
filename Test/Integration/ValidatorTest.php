@@ -2,12 +2,12 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use IntlChar;
-use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
-use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\ImporterFactory;
+use BigBridge\ProductImport\Api\ProductStoreView;
+use BigBridge\ProductImport\Model\Resource\Validator;
+use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\ImporterFactory;
 
 /**
  * @author Patrick van Bergen

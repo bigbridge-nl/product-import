@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
+use BigBridge\ProductImport\Model\Data\CategoryInfo;
+use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 
 /**

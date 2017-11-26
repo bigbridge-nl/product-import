@@ -1,9 +1,9 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Data;
+namespace BigBridge\ProductImport\Api;
 
-use BigBridge\ProductImport\Model\Reference;
-use BigBridge\ProductImport\Model\References;
+use BigBridge\ProductImport\Model\Resource\Reference\Reference;
+use BigBridge\ProductImport\Model\Resource\Reference\References;
 
 /**
  * Product fields.

@@ -2,8 +2,8 @@
 
 namespace BigBridge\ProductImport\Test\Unit;
 
-use BigBridge\ProductImport\Model\Reference;
-use BigBridge\ProductImport\Model\References;
+use BigBridge\ProductImport\Model\Resource\Reference\Reference;
+use BigBridge\ProductImport\Model\Resource\Reference\References;
 
 /**
  * @author Patrick van Bergen

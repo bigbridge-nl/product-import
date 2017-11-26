@@ -2,12 +2,13 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Model\Data\Product;
-use BigBridge\ProductImport\Model\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\ProductStoreView;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Data\SimpleProduct;
-use BigBridge\ProductImport\Model\ImportConfig;
-use BigBridge\ProductImport\Model\Resource\Reference\UrlKeyGenerator;
+use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\ImportConfig;
+use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
+use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use Exception;
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource\Reference;
+namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
  * @author Patrick van Bergen
  */
-class TaxClassResolver
+class AttributeSetResolver
 {
     /** @var MetaData */
     protected $metaData;
@@ -22,10 +22,10 @@ class TaxClassResolver
         $error = "";
         $id = null;
 
-        if (!array_key_exists($name, $this->metaData->taxClassMap)) {
-            $error = "tax class name not found: " . $name;
+        if (!array_key_exists($name, $this->metaData->productAttributeSetMap)) {
+            $error = "attribute set name not found: " . $name;
         } else {
-            $id = $this->metaData->taxClassMap[$name];
+            $id = $this->metaData->productAttributeSetMap[$name];
         }
 
         return [$id, $error];
