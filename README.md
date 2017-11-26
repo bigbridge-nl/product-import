@@ -36,34 +36,45 @@ The following example shows you a simple case of importing a simple product
     // the callback function to postprocess imported products
     $config->resultCallback[] = function(Product $product) use (&$log) {
 
-        if ($product->errors) {
-            $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, implode('; ', $product->errors));
-        } else {
+        if ($product->isOk()) {
             $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->getSku(), $product->id);
+        } else {
+            $log .= sprintf("%s: failed! error = %s\n", $product->lineNumber, implode('; ', $product->getErrors()));
         }
     };
 
-    list($importer, $error) = $factory->create($config);
-
     $lines = [
-        ['Purple Box', "purple-box", "3.95"],
-        ['Yellow Box', "yellow-box", "2.95"]
+        ['Purple Box', "purple-box", "3.95", "Lila Box", "3.85"],
+        ['Yellow Box', "yellow-box", "2.95", "Gelbe Box", "2.85"]
     ];
 
-    foreach ($lines as $i => $line) {
+    try {
 
-        $product = new SimpleProduct($line[1]);
-        $product->lineNumber = $i + 1;
+        list($importer, $error) = $factory->create($config);
 
-        // global eav attributes
-        $global = $product->global();
-        $global->name = $line[0];
-        $global->price = $line[2];
+        foreach ($lines as $i => $line) {
 
-        $importer->insert($product);
+            $product = new SimpleProduct($line[1]);
+            $product->lineNumber = $i + 1;
+
+            // global eav attributes
+            $global = $product->global();
+            $global->setName($line[0]);
+            $global->setPrice($line[2]);
+
+            // German eav attributes
+            $german = $product->storeView('de_store');
+            $german->setName($line[3]);
+            $german->setPrice($line[4]);
+
+            $importer->importSimpleProduct($product);
+        }
+
+        $importer->flush();
+
+    } catch (\Exception $e) {
+        $log .= $e->getMessage();
     }
-
-    $importer->flush();
 
 ## Goals
 

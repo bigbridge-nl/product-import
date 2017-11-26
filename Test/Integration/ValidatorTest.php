@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Model\Data\ProductStoreView;
-use BigBridge\ProductImport\Model\Reference;
 use IntlChar;
 use BigBridge\ProductImport\Model\Resource\Validator;
 use Magento\Framework\App\ObjectManager;
@@ -145,8 +144,6 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                     $global->setSpecialFromDate($fieldValue);
                 } elseif ($fieldName == 'special_to_date') {
                     $global->setSpecialToDate($fieldValue);
-//                } else {
-//                    $global->$fieldName = $fieldValue;
                 }
             }
 

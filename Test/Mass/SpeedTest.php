@@ -6,7 +6,6 @@ use BigBridge\ProductImport\Model\Data\Product;
 use BigBridge\ProductImport\Model\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Importer;
-use BigBridge\ProductImport\Model\References;
 use BigBridge\ProductImport\Model\ImportConfig;
 use BigBridge\ProductImport\Model\ImporterFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;

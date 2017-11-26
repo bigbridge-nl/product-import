@@ -358,7 +358,7 @@ class MetaData
      * @param int[] $idPath The ids of the parent categories, including $categoryId
      * @param array $urlKeys A store-id => url_key array
      */
-    protected function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
+    public function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
     {
         $this->allCategoryInfo[$categoryId] = new CategoryInfo($idPath, $urlKeys);
     }
