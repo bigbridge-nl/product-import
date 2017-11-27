@@ -112,6 +112,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             [['website_ids' => [1]], true, ""],
             // corrupt
             [['website_ids' => [null]], false, "website_ids should be an array of integers"],
+
+            // custom attribute
+
+            // corrupt
+            [['number_of_legs' => '11'], false, "attribute does not exist: number_of_legs"],
         ];
 
         foreach ($tests as $test) {
@@ -144,6 +149,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
                     $global->setSpecialFromDate($fieldValue);
                 } elseif ($fieldName == 'special_to_date') {
                     $global->setSpecialToDate($fieldValue);
+                } elseif ($fieldName == 'number_of_legs') {
+                    $global->setCustomAttribute($fieldName, $fieldValue);
                 }
             }
 

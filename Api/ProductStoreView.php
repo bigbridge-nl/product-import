@@ -151,6 +151,17 @@ class ProductStoreView
     }
 
     /**
+     * Set the value of a user defined attribute.
+     *
+     * @param string $name
+     * @param string $value
+     */
+    public function setCustomAttribute(string $name, string $value)
+    {
+        $this->attributes[trim($name)] = trim($value);
+    }
+
+    /**
      * @return array
      */
     public function getAttributes()
