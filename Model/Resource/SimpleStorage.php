@@ -73,15 +73,20 @@ class SimpleStorage
         $insertProducts = $updateProducts = [];
         foreach ($simpleProducts as $product) {
 
-            // replace Reference(s) with ids, changes $product->errors
-            $this->referenceResolver->resolveIds($product, $config);
-
             if (array_key_exists($product->getSku(), $sku2id)) {
                 $product->id = $sku2id[$product->getSku()];
                 $updateProducts[] = $product;
             } else {
                 $insertProducts[] = $product;
             }
+        }
+
+        // set default values for new products
+        $this->setDefaultValues($insertProducts);
+
+        // replace Reference(s) with ids, changes $product->errors
+        foreach ($simpleProducts as $product) {
+            $this->referenceResolver->resolveIds($product, $config);
         }
 
         // create url keys based on name and id
@@ -146,6 +151,36 @@ class SimpleStorage
         foreach ($simpleProducts as $product) {
             foreach ($product->getStoreViews() as $storeView) {
                 $storeView->parent = null;
+            }
+        }
+    }
+
+    /**
+     * @param SimpleProduct[] $insertProducts
+     */
+    protected function setDefaultValues(array $insertProducts)
+    {
+        foreach ($insertProducts as $product) {
+
+            // attribute set: Default
+            if ($product->getAttributeSetId() === null) {
+                $product->setAttributeSetByName("Default");
+            }
+
+            $global = $product->global();
+            $attributes = $global->getAttributes();
+
+            // visibility: both
+            if (!array_key_exists(ProductStoreView::ATTR_VISIBILITY, $attributes)) {
+                $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
+            }
+            // status: disabled
+            if (!array_key_exists(ProductStoreView::ATTR_STATUS, $attributes)) {
+                $global->setStatus(ProductStoreView::STATUS_DISABLED);
+            }
+            // tax class: Taxable Goods
+            if (!array_key_exists(ProductStoreView::ATTR_TAX_CLASS_ID, $attributes)) {
+                $global->setTaxClassName("Taxable Goods");
             }
         }
     }
@@ -313,23 +348,35 @@ class SimpleStorage
     protected function updateMainTable(array $products)
     {
 
-#todo has_options, required_options
+        $dateTime = date('Y-m-d H:i:s');
 
-        $values = [];
-        $skus = [];
+        $attributeSetUpdates = [];
+        $dateOnlyUpdates = [];
         foreach ($products as $product) {
-            $skus[] = $product->getSku();
-            $sku = $this->db->quote($product->getSku());
             $attributeSetId = $product->getAttributeSetId();
-            $values[] = "({$product->id}, {$attributeSetId}, 'simple', {$sku}, 0, 0)";
+            if ($attributeSetId !== null) {
+                $attributeSetUpdates[] = "({$product->id}, {$attributeSetId}, '{$dateTime}')";
+            } else {
+                $dateOnlyUpdates[] = "({$product->id}, '{$dateTime}')";
+            }
         }
 
-        if (count($values) > 0) {
+        if (count($attributeSetUpdates) > 0) {
 
             $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-                " (`entity_id`, `attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) " .
-                " VALUES " . implode(', ', $values) .
-                " ON DUPLICATE KEY UPDATE `attribute_set_id`=VALUES(`attribute_set_id`), `has_options`=VALUES(`has_options`), `required_options`=VALUES(`required_options`)";
+                " (`entity_id`, `attribute_set_id`, `updated_at`) " .
+                " VALUES " . implode(', ', $attributeSetUpdates) .
+                " ON DUPLICATE KEY UPDATE `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)";
+
+            $this->db->execute($sql);
+        }
+
+        if (count($dateOnlyUpdates) > 0) {
+
+            $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
+                " (`entity_id`, `updated_at`) " .
+                " VALUES " . implode(', ', $dateOnlyUpdates) .
+                " ON DUPLICATE KEY UPDATE `updated_at`= VALUES(`updated_at`)";
 
             $this->db->execute($sql);
         }

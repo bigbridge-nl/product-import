@@ -21,6 +21,18 @@ class ProductStoreView
     const VISIBILITY_IN_CATALOG = Visibility::VISIBILITY_IN_CATALOG;
     const VISIBILITY_IN_SEARCH = Visibility::VISIBILITY_IN_SEARCH;
     const VISIBILITY_BOTH = Visibility::VISIBILITY_BOTH;
+    const ATTR_VISIBILITY = 'visibility';
+    const ATTR_URL_KEY = 'url_key';
+    const ATTR_TAX_CLASS_ID = 'tax_class_id';
+    const ATTR_PRICE = 'price';
+    const ATTR_STATUS = 'status';
+    const ATTR_DESCRIPTION = 'description';
+    const ATTR_SHORT_DESCRIPTION = 'short_description';
+    const ATTR_NAME = 'name';
+    const ATTR_WEIGHT = 'weight';
+    const ATTR_SPECIAL_PRICE = 'special_price';
+    const ATTR_SPECIAL_FROM_DATE = 'special_from_date';
+    const ATTR_SPECIAL_TO_DATE = 'special_to_date';
 
     /**
      * For internal use only; not for application use
@@ -36,7 +48,7 @@ class ProductStoreView
 
     public function setName(string $name)
     {
-        $this->attributes['name'] = trim($name);
+        $this->attributes[self::ATTR_NAME] = trim($name);
     }
 
     /**
@@ -44,7 +56,7 @@ class ProductStoreView
      */
     public function getName()
     {
-        return array_key_exists('name', $this->attributes) ? $this->attributes['name'] : null;
+        return array_key_exists(self::ATTR_NAME, $this->attributes) ? $this->attributes[self::ATTR_NAME] : null;
     }
 
     public function setStoreViewId(int $storeViewId)
@@ -64,17 +76,17 @@ class ProductStoreView
 
     public function setStatus(int $status)
     {
-        $this->attributes['status'] = $status;
+        $this->attributes[self::ATTR_STATUS] = $status;
     }
 
     public function setDescription(string $description)
     {
-        $this->attributes['description'] = trim($description);
+        $this->attributes[self::ATTR_DESCRIPTION] = trim($description);
     }
 
     public function setShortDescription(string $shortDescription)
     {
-        $this->attributes['short_description'] = trim($shortDescription);
+        $this->attributes[self::ATTR_SHORT_DESCRIPTION] = trim($shortDescription);
     }
 
     /**
@@ -82,27 +94,27 @@ class ProductStoreView
      */
     public function setPrice(string $price)
     {
-        $this->attributes['price'] = trim($price);
+        $this->attributes[self::ATTR_PRICE] = trim($price);
     }
 
     public function setVisibility(int $visibility)
     {
-        $this->attributes['visibility'] = $visibility;
+        $this->attributes[self::ATTR_VISIBILITY] = $visibility;
     }
 
     public function setTaxClassId(int $taxClassId)
     {
-        $this->attributes['tax_class_id'] = $taxClassId;
+        $this->attributes[self::ATTR_TAX_CLASS_ID] = $taxClassId;
     }
 
     public function setTaxClassName(string $taxClassName)
     {
-        $this->attributes['tax_class_id'] = new Reference(trim($taxClassName));
+        $this->attributes[self::ATTR_TAX_CLASS_ID] = new Reference(trim($taxClassName));
     }
 
     public function setUrlKey(string $urlKey)
     {
-        $this->attributes['url_key'] = trim($urlKey);
+        $this->attributes[self::ATTR_URL_KEY] = trim($urlKey);
     }
 
     /**
@@ -110,12 +122,12 @@ class ProductStoreView
      */
     public function getUrlKey()
     {
-        return array_key_exists('url_key', $this->attributes) ? $this->attributes['url_key'] : null;
+        return array_key_exists(self::ATTR_URL_KEY, $this->attributes) ? $this->attributes[self::ATTR_URL_KEY] : null;
     }
 
     public function generateUrlKey()
     {
-        $this->attributes['url_key'] = new GeneratedUrlKey();
+        $this->attributes[self::ATTR_URL_KEY] = new GeneratedUrlKey();
     }
 
     /**
@@ -123,7 +135,7 @@ class ProductStoreView
      */
     public function setWeight(string $weight)
     {
-        $this->attributes['weight'] = trim($weight);
+        $this->attributes[self::ATTR_WEIGHT] = trim($weight);
     }
 
     /**
@@ -131,7 +143,7 @@ class ProductStoreView
      */
     public function setSpecialPrice(string $specialPrice)
     {
-        $this->attributes['special_price'] = trim($specialPrice);
+        $this->attributes[self::ATTR_SPECIAL_PRICE] = trim($specialPrice);
     }
 
     /**
@@ -139,7 +151,7 @@ class ProductStoreView
      */
     public function setSpecialFromDate(string $specialPriceFromDate)
     {
-        $this->attributes['special_from_date'] = trim($specialPriceFromDate);
+        $this->attributes[self::ATTR_SPECIAL_FROM_DATE] = trim($specialPriceFromDate);
     }
 
     /**
@@ -147,7 +159,7 @@ class ProductStoreView
      */
     public function setSpecialToDate(string $specialPriceToDate)
     {
-        $this->attributes['special_to_date'] = trim($specialPriceToDate);
+        $this->attributes[self::ATTR_SPECIAL_TO_DATE] = trim($specialPriceToDate);
     }
 
     /**
@@ -159,6 +171,15 @@ class ProductStoreView
     public function setCustomAttribute(string $name, string $value)
     {
         $this->attributes[trim($name)] = trim($value);
+    }
+
+    /**
+     * @param $attributeCode
+     * @return mixed|null|
+     */
+    public function getAttribute($attributeCode)
+    {
+        return array_key_exists($attributeCode, $this->attributes) ? $this->attributes[$attributeCode] : null;
     }
 
     /**
@@ -175,13 +196,5 @@ class ProductStoreView
     public function removeAttribute(string $name)
     {
         unset($this->attributes[$name]);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAttribute(string $name)
-    {
-        return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : null;
     }
 }

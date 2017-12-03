@@ -21,6 +21,15 @@ After an import has completed, the product and category indexers need to be run.
 * result callback, a function that is called with the results of each imported product (id, error)
 * information is only added and overwritten, never removed; the import is not considered to be the only source of information of the shop
 
+## Default values
+
+New products will be given the following default values, if they are not specified:
+
+* attribute set: "Default"
+* visibility: Catalog, Search
+* status: Disabled
+* tax class: "Taxable Goods"
+
 ## Example Code
 
 The following example shows you a simple case of importing a simple product
@@ -84,6 +93,10 @@ The library aims to be
 * easy to use (the api should be simple to use, and well documented, it should be easy to do common things, and uncommon things should be possible)
 * robust (by default the library should take the safe side when a decision is to be made, also it should not halt on a single product failing)
 * complete (if at all possible, all product import features should be present)
+
+## Changes to Magento
+
+The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to catalog_product_entity_varchar because it drastically speeds up checking for duplicate url_keys.
 
 ## Assumptions
 

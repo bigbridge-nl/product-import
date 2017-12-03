@@ -96,7 +96,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
         $this->assertLessThan(5.1, $time);
-        $this->assertLessThan(433, $memory); // the size of the last $product
+        $this->assertLessThan(447, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -116,7 +116,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(8.0, $time);
+        $this->assertLessThan(8.1, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);

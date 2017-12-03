@@ -36,9 +36,12 @@ class Validator
             $product->addError("sku has " . mb_strlen($product->getSku()) . ' characters (max ' . self::SKU_MAX_LENGTH . ")");
         }
 
-        // attribute_set_id
-        if ($product->getAttributeSetId() === null) {
-            $product->addError("missing attribute set id");
+        if ($product->id === null) {
+
+            // attribute_set_id
+            if ($product->getAttributeSetId() === null) {
+                $product->addError("missing attribute set id");
+            }
         }
 
         // category_ids

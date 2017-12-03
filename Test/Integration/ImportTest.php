@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\ProductStoreView;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
@@ -11,6 +12,7 @@ use BigBridge\ProductImport\Api\SimpleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Api\Product;
+use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Integration test. It can only be executed from within a shop that has
@@ -49,6 +51,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         self::$db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
 
         self::$metadata = ObjectManager::getInstance()->get(MetaData::class);
+
+        $table = self::$metadata->productEntityTable;
+        self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE '%-product-import'");
     }
 
     public function testInsertAndUpdate()
@@ -161,20 +166,24 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([], $errors);
         $this->assertTrue($success);
 
-        $product1 = self::$repository->get($sku1, false, 0, true);
-        $this->assertEquals($products2[0][0], $product1->getName());
-        $this->assertEquals($products2[0][3], $product1->getPrice());
-        $this->assertEquals([1, 2], $product1->getCategoryIds());
-        $this->assertEquals(2, $product1->getTaxClassId());
+        try {
+            $product1 = self::$repository->get($sku1, false, 0, true);
+            $this->assertEquals($products2[0][0], $product1->getName());
+            $this->assertEquals($products2[0][3], $product1->getPrice());
+            $this->assertEquals([1, 2], $product1->getCategoryIds());
+            $this->assertEquals(2, $product1->getTaxClassId());
 
-        $product2 = self::$repository->get($sku2, false, 0, true);
-        $this->assertEquals($products2[1][0], $product2->getName());
-        $this->assertEquals($products2[1][3], $product2->getPrice());
-        $this->assertEquals([1, 2], $product2->getCategoryIds());
+            $product2 = self::$repository->get($sku2, false, 0, true);
+            $this->assertEquals($products2[1][0], $product2->getName());
+            $this->assertEquals($products2[1][3], $product2->getPrice());
+            $this->assertEquals([1, 2], $product2->getCategoryIds());
 
-        $product2a = self::$repository->get($sku2, false, 1, true);
-        $this->assertEquals($products2[2][0], $product2a->getName());
-        $this->assertEquals($products2[2][3], $product2a->getPrice());
+            $product2a = self::$repository->get($sku2, false, 1, true);
+            $this->assertEquals($products2[2][0], $product2a->getName());
+            $this->assertEquals($products2[2][3], $product2a->getPrice());
+        } catch (NoSuchEntityException $e) {
+            $this->assertTrue(false);
+        }
     }
 
     public function testUrlRewrites()
@@ -395,5 +404,91 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(["category not found: Gummybears"], $product1->getErrors());
         $this->assertEquals(false, $product1->isOk());
         $this->assertEquals(false, $success);
+    }
+
+    public function testDefaults()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+
+        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        list($importer, ) = self::$factory->createImporter($config);
+
+        // new
+
+        $product1 = new SimpleProduct("loafers-product-import");
+        $global = $product1->global();
+        $global->setName("Loafers");
+        $global->setPrice('9.19');
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        $attributeSetId = $product1->getAttributeSetId();
+        $taxClassId = $product1->global()->getAttribute(ProductStoreView::ATTR_TAX_CLASS_ID);
+        $visibility = ProductStoreView::VISIBILITY_BOTH;
+        $status = ProductStoreView::STATUS_DISABLED;
+
+        $this->checkProductValues($attributeSetId, $taxClassId, $visibility, $status);
+
+        // update not changing values
+
+        $product2 = new SimpleProduct("loafers-product-import");
+
+        $importer->importSimpleProduct($product2);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+        $this->checkProductValues($attributeSetId, $taxClassId, $visibility, $status);
+
+        // update changing values
+
+        $newVisibility = ProductStoreView::VISIBILITY_IN_SEARCH;
+        $newStatus = ProductStoreView::STATUS_ENABLED;
+
+        $product3 = new SimpleProduct("loafers-product-import");
+        $product3->setAttributeSetId(5);
+        $product3->global()->setTaxClassName("Retail Customer");
+        $product3->global()->setVisibility($newVisibility);
+        $product3->global()->setStatus($newStatus);
+
+        $importer->importSimpleProduct($product3);
+        $importer->flush();
+
+        $newAttributeSetId = $product3->getAttributeSetId();
+        $newTaxClassId = $product3->global()->getAttribute(ProductStoreView::ATTR_TAX_CLASS_ID);
+
+        $this->assertEquals([], $errors);
+        $this->checkProductValues($newAttributeSetId, $newTaxClassId, $newVisibility, $newStatus);
+
+        // update not changing values (check if defaults were not restored)
+
+        $product3 = new SimpleProduct("loafers-product-import");
+
+        $importer->importSimpleProduct($product3);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+        $this->checkProductValues($newAttributeSetId, $newTaxClassId, $newVisibility, $newStatus);
+    }
+
+    private function checkProductValues($attributeSetId, $taxClassId, $visibility, $status)
+    {
+        try {
+            $productS = self::$repository->get("loafers-product-import", false, 0, true);
+        } catch (NoSuchEntityException $e) {
+            $this->assertTrue(false);
+        }
+
+        $this->assertEquals($attributeSetId, $productS->getAttributeSetId());
+        $this->assertEquals($taxClassId, $productS->getTaxClassId());
+        $this->assertEquals($visibility, $productS->getVisibility());
+        $this->assertEquals($status, $productS->getStatus());
     }
 }

@@ -27,6 +27,10 @@ For inserts, not updates
 - remove created test-records
 - test with 500.000 records in the database
 
+## Todo's in code
+
+* Solve todo's in code
+
 ## Notes
 
 Check ho_import, for compatibility
