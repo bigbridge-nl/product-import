@@ -67,7 +67,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $beforeMemory = memory_get_usage();
         $beforeTime = microtime(true);
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $afterTime = microtime(true);
         $afterMemory = memory_get_usage();

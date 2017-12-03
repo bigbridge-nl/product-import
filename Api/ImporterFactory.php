@@ -28,7 +28,8 @@ class ImporterFactory
      * Note: the config object is copied; making changes to it later does not affect the importer.
      *
      * @param ImportConfig $config
-     * @return Importer[] An array of Importer and error message
+     * @return Importer
+     * @throws Exception
      */
     public function createImporter(ImportConfig $originalConfig)
     {
@@ -37,21 +38,20 @@ class ImporterFactory
 
         $this->fillInDefaults($config);
 
-        $error = $this->validateConfig($config);
+        $this->validateConfig($config);
 
-        if ($error) {
-            $importer = null;
-        } else {
+        $valueSerializer = $this->createValueSerializer($config);
 
-            $valueSerializer = $this->createValueSerializer($config);
+        $om = ObjectManager::getInstance();
+        $importer = $om->create(Importer::class, ['config' => $config, 'valueSerializer' => $valueSerializer]);
 
-            $om = ObjectManager::getInstance();
-            $importer = $om->create(Importer::class, ['config' => $config, 'valueSerializer' => $valueSerializer]);
-        }
-
-        return [$importer, $error];
+        return $importer;
     }
 
+    /**
+     * @param ImportConfig $config
+     * @throws Exception
+     */
     protected function fillInDefaults(ImportConfig $config)
     {
         if (is_null($config->magentoVersion)) {
@@ -81,22 +81,22 @@ class ImporterFactory
         }
     }
 
+    /**
+     * @param ImportConfig $config
+     * @throws Exception
+     */
     protected function validateConfig(ImportConfig $config)
     {
-        $error = "";
-
         if (!preg_match('/^2\.\d/', $config->magentoVersion)) {
-            $error = "config: invalid Magento version number";
+            throw new Exception("config: invalid Magento version number");
         }
 
         if (!is_integer($config->batchSize)) {
-            $error = "config: batchSize is not an integer";
+            throw new Exception("config: batchSize is not an integer");
         } else if ($config->batchSize <= 0) {
-            $error = "config: batchSize should be 1 or more";
+            throw new Exception("config: batchSize should be 1 or more");
         } elseif (!is_array($config->resultCallbacks)) {
-            $error = "config: resultCallbacks should be an array of functions";
+            throw new Exception("config: resultCallbacks should be an array of functions");
         }
-
-        return $error;
     }
 }

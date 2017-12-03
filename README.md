@@ -59,7 +59,7 @@ The following example shows you a simple case of importing a simple product
 
     try {
 
-        list($importer, $error) = $factory->create($config);
+        $importer = $factory->create($config);
 
         foreach ($lines as $i => $line) {
 

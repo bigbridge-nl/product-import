@@ -67,7 +67,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $errors = array_merge($errors, $product->getErrors());
         };
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $sku1 = uniqid("bb");
         $sku2 = uniqid("bb");
@@ -202,7 +202,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->magentoVersion = '2.1.8';
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $sku1 = uniqid("bb");
         $urlKey = 'u' . $sku1;
@@ -244,7 +244,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     {
         $config = new ImportConfig();
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $product = new SimpleProduct("tiny-blue-dot");
         $product->setAttributeSetByName("Checkers");
@@ -256,7 +256,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $expectedErrors = [
             "attribute set name not found: Checkers",
             "missing attribute set id",
-            "product has no global values. Please specify global() for name and price",
+            "missing name",
+            "missing price"
         ];
 
         $this->assertEquals($expectedErrors, $product->getErrors());
@@ -280,7 +281,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         };
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $lines = [
             ['Purple Box', "", "3.95"],
@@ -315,7 +316,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $success = $success && $product->isOk();
         };
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct(uniqid('bb'));
         $product1->setAttributeSetByName("Default");
@@ -351,7 +352,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $errors = array_merge($errors, $product->getErrors());
         };
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct(uniqid('bb'));
         $product1->setAttributeSetByName("Default");
@@ -387,7 +388,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $success = $success && $product->isOk();
         };
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct("gummybears");
         $product1->setAttributeSetByName("Default");
@@ -416,7 +417,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $errors = array_merge($errors, $product->getErrors());
         };
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         // new
 

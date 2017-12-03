@@ -55,7 +55,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->magentoVersion = "2.1.8";
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         // product
         $product1 = new SimpleProduct('1-product-import');
@@ -183,7 +183,7 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->magentoVersion = "2.2.1";
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         // product
         $product1 = new SimpleProduct('3-product-import');

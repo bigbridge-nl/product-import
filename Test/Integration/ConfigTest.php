@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
+use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -27,58 +28,83 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     {
         $config = new ImportConfig();
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        try {
+            $importer = self::$factory->createImporter($config);
+        } catch (Exception $exception) {
+            $this->assertTrue(false);
+        }
 
         $this->assertNotNull($importer);
-        $this->assertEquals("", $error);
 
         // ---
 
+        $importer = null;
         $config = new ImportConfig();
         $config->batchSize = 0;
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        try {
+            $importer = self::$factory->createImporter($config);
+        } catch (Exception $exception) {
+            $this->assertEquals("config: batchSize should be 1 or more", $exception->getMessage());
+        }
 
         $this->assertNull($importer);
-        $this->assertEquals("config: batchSize should be 1 or more", $error);
 
         // ---
 
+        $importer = null;
         $config = new ImportConfig();
         $config->batchSize = "1000";
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        try {
+            $importer = self::$factory->createImporter($config);
+        } catch (Exception $exception) {
+            $this->assertEquals("config: batchSize is not an integer", $exception->getMessage());
+        }
 
         $this->assertNull($importer);
-        $this->assertEquals("config: batchSize is not an integer", $error);
-
 
         // ---
 
+        $importer = null;
         $config = new ImportConfig();
         $config->resultCallbacks = function() {};
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        try {
+            $importer = self::$factory->createImporter($config);
+        } catch (Exception $exception) {
+            $this->assertEquals("config: resultCallbacks should be an array of functions", $exception->getMessage());
+        }
 
         $this->assertNull($importer);
-        $this->assertEquals("config: resultCallbacks should be an array of functions", $error);
 
         // ---
 
         $config = new ImportConfig();
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        try {
+            $importer = self::$factory->createImporter($config);
+        } catch (Exception $exception) {
+            $this->assertTrue(false);
+        }
+
 
         // $config has copied, the original is unchanged
         $this->assertEquals(null, $config->magentoVersion);
 
         // ---
 
+        $importer = null;
         $config = new ImportConfig();
         $config->magentoVersion = '2';
 
-        list($importer, $error) = self::$factory->createImporter($config);
+        try {
+            $importer = self::$factory->createImporter($config);
+        } catch (Exception $exception) {
+            $this->assertEquals("config: invalid Magento version number", $exception->getMessage());
+        }
 
-        $this->assertEquals("config: invalid Magento version number", $error);
+        $this->assertNull($importer);
+
     }
 }

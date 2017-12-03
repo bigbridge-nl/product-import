@@ -73,7 +73,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
     {
         $config = new ImportConfig();
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $product1 = $this->createProduct('product-import-1#a');
         $product1->storeView('default')->setName("Summer Flora");
@@ -103,7 +103,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
     {
         $config = new ImportConfig();
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $product1 = $this->createProduct('product-import-6#a');
         $product1->storeView('default')->setName("Flowers All Year");
@@ -134,7 +134,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU;
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         $product1 = $this->createProduct('product-import-2#a');
         $product1->storeView('default')->setName("Winter Woozling");
@@ -176,7 +176,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
 
-        list($importer,) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         // original
         $product1 = $this->createProduct('product-import-3#a');
@@ -213,7 +213,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $config->urlKeyScheme = ImportConfig::URL_KEY_SCHEME_FROM_SKU;
         $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
 
-        list($importer,) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         // original
         $product1 = $this->createProduct('product-import-5#a');
@@ -256,7 +256,7 @@ class UrlKeyTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
         $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
 
-        list($importer, ) = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
         // original
         $product1 = $this->createProduct('product-import-4#a');

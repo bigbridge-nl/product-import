@@ -45,6 +45,7 @@ abstract class Product
 
     public function __construct(string $sku)
     {
+        $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView();
         $this->sku = trim($sku);
     }
 
@@ -90,9 +91,6 @@ abstract class Product
      * @return ProductStoreView
      */
     public function global() {
-        if (!array_key_exists(self::GLOBAL_STORE_VIEW_CODE, $this->storeViews)) {
-            $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView();
-        }
         return $this->storeViews[self::GLOBAL_STORE_VIEW_CODE];
     }
 

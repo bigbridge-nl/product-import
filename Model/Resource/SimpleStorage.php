@@ -54,6 +54,7 @@ class SimpleStorage
     /**
      * @param SimpleProduct[] $simpleProducts
      * @param ImportConfig $config
+     * @throws Exception
      */
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config, ValueSerializer $valueSerializer)
     {
