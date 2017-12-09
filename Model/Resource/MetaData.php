@@ -28,6 +28,9 @@ class MetaData
     const WEBSITE_TABLE = 'store_website';
     const TAX_CLASS_TABLE = 'tax_class';
     const PRODUCT_WEBSITE_TABLE = 'catalog_product_website';
+    const MEDIA_GALLERY_TABLE = 'catalog_product_entity_media_gallery';
+    const MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE = 'catalog_product_entity_media_gallery_value_to_entity';
+    const MEDIA_GALLERY_VALUE_TABLE = 'catalog_product_entity_media_gallery_value';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -61,6 +64,15 @@ class MetaData
     /** @var  string */
     public $productWebsiteTable;
 
+    /** @var string */
+    public $mediaGalleryTable;
+
+    /** @var string */
+    public $mediaGalleryValueToEntityTable;
+
+    /** @var string */
+    public $mediaGalleryValueTable;
+
     /** @var  int */
     public $defaultCategoryAttributeSetId;
 
@@ -84,6 +96,9 @@ class MetaData
 
     /** @var  EavAttributeInfo[] */
     public $productEavAttributeInfo;
+
+    /** @var int */
+    public $mediaGalleryAttributeId;
 
     /** @var array */
     public $categoryAttributeMap;
@@ -111,6 +126,9 @@ class MetaData
         $this->categoryProductTable = $db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
         $this->configDataTable = $db->getFullTableName(self::CONFIG_DATA_TABLE);
         $this->productWebsiteTable = $db->getFullTableName(self::PRODUCT_WEBSITE_TABLE);
+        $this->mediaGalleryTable = $db->getFullTableName(self::MEDIA_GALLERY_TABLE);
+        $this->mediaGalleryValueToEntityTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE);
+        $this->mediaGalleryValueTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
@@ -120,6 +138,7 @@ class MetaData
         $this->categoryAttributeMap = $this->getCategoryAttributeMap();
         $this->productAttributeSetMap = $this->getProductAttributeSetMap();
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
+        $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
 
         $this->storeViewMap = $this->getStoreViewMap();
         $this->websiteMap = $this->getWebsiteMap();
@@ -271,6 +290,17 @@ class MetaData
         }
 
         return $info;
+    }
+
+    protected function getMediaGalleryAttributeId()
+    {
+        $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
+
+        return $this->db->fetchSingleCell("
+            SELECT `attribute_id` 
+            FROM {$attributeTable} 
+            WHERE `entity_type_id` = {$this->productEntityTypeId} AND attribute_code = 'media_gallery'");
+
     }
 
     protected function getCategoryUrlSuffix()

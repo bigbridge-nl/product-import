@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Api;
 
+use BigBridge\ProductImport\Model\Data\Image;
+use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
 use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
 use BigBridge\ProductImport\Model\Resource\Reference\Reference;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
@@ -34,6 +36,11 @@ class ProductStoreView
     const ATTR_SPECIAL_FROM_DATE = 'special_from_date';
     const ATTR_SPECIAL_TO_DATE = 'special_to_date';
 
+    const SWATCH_IMAGE = 'swatch_image';
+    const SMALL_IMAGE = 'small_image';
+    const BASE_IMAGE = 'image';
+    const THUMBNAIL_IMAGE = 'thumbnail_image';
+
     /**
      * For internal use only; not for application use
      * @var  Product
@@ -42,6 +49,12 @@ class ProductStoreView
 
     /** @var  int */
     protected $store_view_id;
+
+    /** @var ImageGalleryInformation[] */
+    protected $imageGalleryInformation = [];
+
+    /** @var array  */
+    protected $imageRoles = [];
 
     /** @var array  */
     protected $attributes = [];
@@ -196,5 +209,28 @@ class ProductStoreView
     public function removeAttribute(string $name)
     {
         unset($this->attributes[$name]);
+    }
+
+    public function setImageGalleryInformation(Image $image, string $label, int $position, bool $enabled)
+    {
+        $this->imageGalleryInformation[] = new ImageGalleryInformation($image, $label, $position, $enabled);
+    }
+
+    public function getImageGalleryInformation()
+    {
+        return $this->imageGalleryInformation;
+    }
+
+    public function setImageRole(Image $image, string $attributeCode)
+    {
+        $this->imageRoles[$attributeCode] = $image;
+    }
+
+    /**
+     * @return array
+     */
+    public function getImageRoles()
+    {
+        return $this->imageRoles;
     }
 }

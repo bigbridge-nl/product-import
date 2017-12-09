@@ -34,7 +34,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     protected static $db;
 
     /** @var  Metadata */
-    protected static $metadata;
+    protected static $metaData;
 
     public static function setUpBeforeClass()
     {
@@ -50,9 +50,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         /** @var Magento2DbConnection $db */
         self::$db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
 
-        self::$metadata = ObjectManager::getInstance()->get(MetaData::class);
+        self::$metaData = ObjectManager::getInstance()->get(MetaData::class);
 
-        $table = self::$metadata->productEntityTable;
+        $table = self::$metaData->productEntityTable;
         self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE '%-product-import'");
     }
 
@@ -368,7 +368,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([], $errors);
 
         $websiteIds = self::$db->fetchAllNumber("
-            SELECT `product_id`, `website_id` FROM `" . self::$metadata->productWebsiteTable . "`
+            SELECT `product_id`, `website_id` FROM `" . self::$metaData->productWebsiteTable . "`
             WHERE `product_id` = {$product1->id}
         ");
 
@@ -491,5 +491,153 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($taxClassId, $productS->getTaxClassId());
         $this->assertEquals($visibility, $productS->getVisibility());
         $this->assertEquals($status, $productS->getStatus());
+    }
+
+    public function testImages()
+    {
+        @unlink(BP . '/pub/media/catalog/product/d/u/duck1.jpg');
+        @unlink(BP . '/pub/media/catalog/product/d/u/duck2.png');
+        @unlink(BP . '/pub/media/catalog/product/d/u/duck3.png');
+
+        $errors = [];
+
+        $config = new ImportConfig();
+
+        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        // use 2 images for 3 roles
+
+        $product1 = new SimpleProduct("ducky1-product-import");
+        $global = $product1->global();
+        $global->setName("Ducky 1");
+        $global->setPrice('1.00');
+
+        $image = $product1->addImage(__DIR__ . '/../images/duck1.jpg', true);
+        $product1->global()->setImageGalleryInformation($image, "First duck", 1, true);
+        $product1->global()->setImageRole($image, ProductStoreView::THUMBNAIL_IMAGE);
+
+        $image = $product1->addImage(__DIR__ . '/../images/duck2.png', false);
+        $product1->global()->setImageGalleryInformation($image, "Second duck", 2, false);
+        $product1->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
+        $product1->storeView('default')->setImageGalleryInformation($image, "Tweede eendje", 3, false);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $attributeId = self::$metaData->mediaGalleryAttributeId;
+
+        $this->assertEquals([], $errors);
+        $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck1.jpg'));
+        $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck2.png'));
+
+        $media = [
+            [$attributeId, '/d/u/duck1.jpg', 'image', 0],
+            [$attributeId, '/d/u/duck2.png', 'image', 1],
+        ];
+
+        $values = [
+            [0, $product1->id, 'First ducky', 1, 1],
+            [0, $product1->id, 'Second ducky', 2, 0],
+            [1, $product1->id, 'Tweede eendje', 3, 0],
+        ];
+
+        $this->checkImageData($product1, $media, $values);
+
+        $productS = self::$repository->get("ducky1-product-import");
+        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnailImage());
+        $this->assertEquals('/d/u/duck2.png', $productS->getImage());
+
+        // add 2 other/same images for 3 same/other roles
+        // second image already in use
+
+        link(__DIR__ . '/../images/duck3.png', BP . '/pub/media/catalog/product/d/u/duck3.png');
+
+        $product2 = new SimpleProduct("ducky1-product-import");
+        $global = $product2->global();
+        $global->setName("Ducky 1");
+        $global->setPrice('1.00');
+
+        $image = $product2->addImage(__DIR__ . '/../images/duck2.png', false);
+        $product2->global()->setImageGalleryInformation($image, "Second duck", 2, false);
+        $product2->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
+        $product2->storeView('default')->setImageGalleryInformation($image, "Tweede eendje", 3, false);
+
+        $image = $product1->addImage('/../images/duck3.png', false);
+        $product2->global()->setImageGalleryInformation($image, "Second duck", 3, true);
+        $product2->global()->setImageRole($image, ProductStoreView::SMALL_IMAGE);
+        $product2->storeView('default')->setImageGalleryInformation($image, "Derde eendje", 3, false);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $attributeId = self::$metaData->mediaGalleryAttributeId;
+
+        $this->assertEquals([], $errors);
+        $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/ducky3.png'));
+
+        $media = [
+            [$attributeId, '/d/u/duck1.jpg', 'image', 0],
+            [$attributeId, '/d/u/duck2.png', 'image', 1],
+            [$attributeId, '/d/u/duck3_1.png', 'image', 0],
+        ];
+
+        $values = [
+            [0, $product1->id, 'First ducky', 1, 1],
+            [0, $product1->id, 'Second ducky', 2, 0],
+            [1, $product1->id, 'Tweede eendje', 3, 0],
+            [0, $product1->id, 'Third ducky', 2, 0],
+            [1, $product1->id, 'Derde eendje', 3, 0],
+        ];
+
+        $this->checkImageData($product1, $media, $values);
+
+        $productS = self::$repository->get("ducky1-product-import");
+        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnailImage());
+        $this->assertEquals('/d/u/duck2.png', $productS->getImage());
+        $this->assertEquals('/d/u/duck3_1.png', $productS->getSmallImage());
+
+        // update, no changes (important be we now have ducky3_1.png, it should stay that way)
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->checkImageData($product1, $media, $values);
+    }
+
+    private function checkImageData($product, $mediaData, $valueData)
+    {
+        $toEntity = self::$metaData->mediaGalleryValueToEntityTable;
+        $media = self::$metaData->mediaGalleryTable;
+        $value = self::$metaData->mediaGalleryValueTable;
+
+        $valueIds = self::$db->fetchSingleColumn("
+            SELECT value_id 
+            FROM {$toEntity}
+            WHERE `entity_id` = " . $product->id . "
+            ORDER BY value_id
+        ");
+        $this->assertEquals(2, count($valueIds));
+
+        $results = self::$db->fetchAllNumber("
+            SELECT attribute_id, value, media_type, disabled
+            FROM {$media}
+            WHERE value_id IN (" . implode(',', $valueIds) . ")
+            ORDER BY value_id
+        ");
+
+        $this->assertEquals($mediaData, $results);
+
+        $results = self::$db->fetchAllNumber("
+            SELECT store_id, entity_id, label, position, disabled
+            FROM {$value}
+            WHERE value_id IN (" . implode(',', $valueIds) . ")
+            ORDER BY value_id            
+        ");
+
+        $this->assertEquals($valueData, $results);
     }
 }

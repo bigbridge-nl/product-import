@@ -35,13 +35,17 @@ class SimpleStorage
     /** @var UrlRewriteStorage */
     protected $urlRewriteStorage;
 
+    /** @var ImageStorage */
+    protected $imageStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
         Validator $validator,
         ReferenceResolver $referenceResolver,
         UrlKeyGenerator $urlKeyGenerator,
-        UrlRewriteStorage $urlRewriteStorage)
+        UrlRewriteStorage $urlRewriteStorage,
+        ImageStorage $imageStorage)
     {
         $this->db = $db;
         $this->metaData = $metaData;
@@ -49,11 +53,13 @@ class SimpleStorage
         $this->referenceResolver = $referenceResolver;
         $this->urlKeyGenerator = $urlKeyGenerator;
         $this->urlRewriteStorage = $urlRewriteStorage;
+        $this->imageStorage = $imageStorage;
     }
 
     /**
      * @param SimpleProduct[] $simpleProducts
      * @param ImportConfig $config
+     * @param ValueSerializer $valueSerializer
      * @throws Exception
      */
     public function storeSimpleProducts(array $simpleProducts, ImportConfig $config, ValueSerializer $valueSerializer)
@@ -241,6 +247,10 @@ class SimpleStorage
             // url_rewrite (must be done after url_key and category_id)
             $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);
             $this->urlRewriteStorage->updateRewrites($validUpdateProducts, $existingValues, $valueSerializer);
+
+            foreach ($validProducts as $product) {
+                $this->imageStorage->storeImages($product);
+            }
 
             $this->db->execute("COMMIT");
 

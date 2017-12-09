@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Api;
 
+use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Resource\Reference\Reference;
 use BigBridge\ProductImport\Model\Resource\Reference\References;
 
@@ -42,6 +43,9 @@ abstract class Product
 
     /** @var ProductStoreView[] */
     protected $storeViews = [];
+
+    /** @var Image[] */
+    protected $images = [];
 
     public function __construct(string $sku)
     {
@@ -173,5 +177,25 @@ abstract class Product
     public function removeWebsiteIds()
     {
         $this->website_ids = null;
+    }
+
+    /**
+     * @param string $imagePath
+     * @param bool $enabled
+     * @return Image
+     */
+    public function addImage(string $imagePath, bool $enabled)
+    {
+        $image = new Image($imagePath, $enabled);
+        $this->images[] = $image;
+        return $image;
+    }
+
+    /**
+     * @return Image[]
+     */
+    public function getImages()
+    {
+        return $this->images;
     }
 }

@@ -2,14 +2,6 @@
 
 Many things, some of which are:
 
-## Defaults
-
-For inserts, not updates
-
-- weight = 1 (or: has weight?)
-- status = disabled
-- visibility = category, search
-
 ## To be supported
 
 * import text entries per row
