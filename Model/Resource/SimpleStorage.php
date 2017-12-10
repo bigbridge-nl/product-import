@@ -244,13 +244,11 @@ class SimpleStorage
             $this->insertCategoryIds($productsWithCategories);
             $this->insertWebsiteIds($productsWithWebsites);
 
+            $this->imageStorage->storeProductImages($validProducts);
+
             // url_rewrite (must be done after url_key and category_id)
             $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);
             $this->urlRewriteStorage->updateRewrites($validUpdateProducts, $existingValues, $valueSerializer);
-
-            foreach ($validProducts as $product) {
-                $this->imageStorage->storeImages($product);
-            }
 
             $this->db->execute("COMMIT");
 

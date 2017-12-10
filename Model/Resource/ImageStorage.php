@@ -26,14 +26,31 @@ class ImageStorage
         $this->metaData = $metaData;
     }
 
-    public function storeImages(Product $product)
+    /**
+     * @param Product[] $products
+     */
+    public function storeProductImages(array $products)
     {
+        foreach ($products as $product) {
+            $this->storeImages($product);
+        }
+
+        $this->insertImageRoles($products);
+    }
+
+    protected function storeImages(Product $product)
+    {
+        // separates new from existing images
+        // add valueId and actualStoragePath to existing images
         list($existingImages, $newImages) = $this->splitNewAndExistingImages($product);
 
+        // stores images and metadata
+        // add valueId and actualStoragePath to new images
         foreach ($newImages as $image) {
             $this->storeImage($product, $image);
         }
 
+        // updates image metadata
         foreach ($existingImages as $image) {
             $this->updateImage($image);
         }
@@ -69,9 +86,11 @@ class ImageStorage
                 $storagePath = $imageDatum['value'];
                 $simpleStoragePath = preg_replace('/_\d+\./', '.', $storagePath);
 
-                if ($simpleStoragePath === $image->getStoragePath()) {
+                if ($simpleStoragePath === $image->getDefaultStoragePath()) {
                     if ($this->filesAreEqual(self::PRODUCT_IMAGE_PATH . $storagePath, $image->getImagePath())) {
                         $found = true;
+                        $image->valueId = $imageDatum['value_id'];
+                        $image->setActualStoragePath($imageDatum['value']);
                         break;
                     }
                 }
@@ -81,7 +100,6 @@ class ImageStorage
                 $newImages[] = $image;
             } else {
                 $existingImages[] = $image;
-                $image->valueId = $imageDatum['value_id'];
             }
         }
 
@@ -90,32 +108,35 @@ class ImageStorage
 
     public function storeImage(Product $product, Image $image)
     {
-        $storagePath = $image->getStoragePath();
-        $targetPath = self::PRODUCT_IMAGE_PATH . $storagePath;
+        $defaultStoragePath = $image->getDefaultStoragePath();
+        $actualStoragePath = $defaultStoragePath;
 
-        if (file_exists($targetPath)) {
+        if (file_exists(self::PRODUCT_IMAGE_PATH . $actualStoragePath)) {
 
-            preg_match('/^(.*)\.([^.]+)$/', $targetPath, $matches);
+            preg_match('/^(.*)\.([^.]+)$/', $actualStoragePath, $matches);
             $rest = $matches[1];
             $ext = $matches[2];
 
             $i = 0;
             do {
                 $i++;
-                $targetPath = "{$rest}_{$i}.{$ext}";
-            } while (file_exists($targetPath));
+                $actualStoragePath = "{$rest}_{$i}.{$ext}";
+            } while (file_exists(self::PRODUCT_IMAGE_PATH . $actualStoragePath));
         }
 
-        $targetDir = dirname($targetPath);
+        $targetDir = dirname(self::PRODUCT_IMAGE_PATH . $actualStoragePath);
         if (!file_exists($targetDir)) {
-            mkdir($targetDir, 0777);
+            mkdir($targetDir, 0777, true);
         }
 
-        link($image->getImagePath(), $targetPath);
+        // first link the image (important to do this before storing the record)
+        link($image->getImagePath(), self::PRODUCT_IMAGE_PATH . $actualStoragePath);
 
-        $imageValueId = $this->createImageValue($product->id, $storagePath, $image->isEnabled());
+        // then create the database record
+        $imageValueId = $this->createImageValue($product->id, $actualStoragePath, $image->isEnabled());
 
         $image->valueId = $imageValueId;
+        $image->setActualStoragePath($actualStoragePath);
     }
 
     protected function updateImage(Image $image)
@@ -123,7 +144,7 @@ class ImageStorage
         $dbDisabled = $image->isEnabled() ? '0' : '1';
 
         $this->db->execute("
-            UPDATE INTO {$this->metaData->mediaGalleryTable}
+            UPDATE {$this->metaData->mediaGalleryTable}
             SET `disabled` = {$dbDisabled}
             WHERE `value_id` = {$image->valueId} 
         ");
@@ -179,6 +200,37 @@ class ImageStorage
                 INSERT INTO {$this->metaData->mediaGalleryValueTable}
                 SET `value_id` = {$image->valueId}, `store_id` = {$storeViewId}, `entity_id` = {$productId}, `label` = {$dbLabel}, `position` = {$dbPosition}, `disabled` = {$dbDisabled}
             ");
+        }
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    protected function insertImageRoles(array $products)
+    {
+        $attributeInfo = $this->metaData->productEavAttributeInfo['image'];
+        $tableName = $attributeInfo->tableName;
+
+        $values = [];
+        foreach ($products as $product) {
+            foreach ($product->getStoreViews() as $storeView) {
+                foreach ($storeView->getImageRoles() as $attributeCode => $image) {
+
+                    $attributeId = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
+                    $storeViewId = $storeView->getStoreViewId();
+                    $value = $this->db->quote($image->getActualStoragePath());
+                    $values[] = "({$product->id}, {$attributeId}, {$storeViewId}, {$value})";
+                }
+            }
+        }
+
+        if (!empty($values)) {
+
+            $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
+                " VALUES " . implode(', ', $values) .
+                " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+
+            $this->db->execute($sql);
         }
     }
 

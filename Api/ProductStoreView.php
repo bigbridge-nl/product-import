@@ -39,7 +39,7 @@ class ProductStoreView
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
     const BASE_IMAGE = 'image';
-    const THUMBNAIL_IMAGE = 'thumbnail_image';
+    const THUMBNAIL_IMAGE = 'thumbnail';
 
     /**
      * For internal use only; not for application use
@@ -227,7 +227,7 @@ class ProductStoreView
     }
 
     /**
-     * @return array
+     * @return Image[]
      */
     public function getImageRoles()
     {

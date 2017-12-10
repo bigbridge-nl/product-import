@@ -498,6 +498,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         @unlink(BP . '/pub/media/catalog/product/d/u/duck1.jpg');
         @unlink(BP . '/pub/media/catalog/product/d/u/duck2.png');
         @unlink(BP . '/pub/media/catalog/product/d/u/duck3.png');
+        @unlink(BP . '/pub/media/catalog/product/d/u/duck3_1.png');
 
         $errors = [];
 
@@ -509,7 +510,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer = self::$factory->createImporter($config);
 
-        // use 2 images for 3 roles
+        // use 2 images with 2 roles
 
         $product1 = new SimpleProduct("ducky1-product-import");
         $global = $product1->global();
@@ -547,8 +548,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->checkImageData($product1, $media, $values);
 
-        $productS = self::$repository->get("ducky1-product-import");
-        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnailImage());
+        $productS = self::$repository->get("ducky1-product-import", false, 0, true);
+        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());
         $this->assertEquals('/d/u/duck2.png', $productS->getImage());
 
         // add 2 other/same images
@@ -567,46 +568,46 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $product2->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
         $product2->storeView('default')->setImageGalleryInformation($image, "Tweede eendje", 3, false);
 
-        $image = $product1->addImage('/../images/duck3.png', false);
-        $product2->global()->setImageGalleryInformation($image, "Second duck", 3, true);
+        $image = $product2->addImage(__DIR__ . '/../images/duck3.png', false);
+        $product2->global()->setImageGalleryInformation($image, "Third duck", 3, true);
         $product2->global()->setImageRole($image, ProductStoreView::SMALL_IMAGE);
         $product2->storeView('default')->setImageGalleryInformation($image, "Derde eendje", 3, false);
 
-        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product2);
         $importer->flush();
 
         $attributeId = self::$metaData->mediaGalleryAttributeId;
 
         $this->assertEquals([], $errors);
-        $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/ducky3.png'));
+        $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck3_1.png'));
 
         $media = [
-            [$attributeId, '/d/u/duck1.jpg', 'image', 0],
-            [$attributeId, '/d/u/duck2.png', 'image', 0],
-            [$attributeId, '/d/u/duck3_1.png', 'image', 0],
+            [$attributeId, '/d/u/duck1.jpg', 'image', '0'],
+            [$attributeId, '/d/u/duck2.png', 'image', '0'],
+            [$attributeId, '/d/u/duck3_1.png', 'image', '1'],
         ];
 
         $values = [
-            ['0', $product1->id, 'First ducky', '1', '0'],
-            ['0', $product1->id, 'Second ducky', '2', '1'],
+            ['0', $product1->id, 'First duck', '1', '0'],
+            ['0', $product1->id, 'Second duck', '2', '1'],
             ['1', $product1->id, 'Tweede eendje', '3', '1'],
-            ['0', $product1->id, 'Third ducky', '2', '1'],
+            ['0', $product1->id, 'Third duck', '3', '0'],
             ['1', $product1->id, 'Derde eendje', '3', '1'],
         ];
 
         $this->checkImageData($product1, $media, $values);
 
-        $productS = self::$repository->get("ducky1-product-import");
-        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnailImage());
+        $productS = self::$repository->get("ducky1-product-import", false, 0, true);
+        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());
         $this->assertEquals('/d/u/duck2.png', $productS->getImage());
         $this->assertEquals('/d/u/duck3_1.png', $productS->getSmallImage());
 
         // update, no changes (important be we now have ducky3_1.png, it should stay that way)
 
-        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product2);
         $importer->flush();
 
-        $this->checkImageData($product1, $media, $values);
+        $this->checkImageData($product2, $media, $values);
     }
 
     private function checkImageData($product, $mediaData, $valueData)
@@ -621,7 +622,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             WHERE `entity_id` = " . $product->id . "
             ORDER BY value_id
         ");
-        $this->assertEquals(2, count($valueIds));
 
         $results = self::$db->fetchAllNumber("
             SELECT attribute_id, value, media_type, disabled

@@ -13,8 +13,11 @@ class Image
     /** @var string */
     protected $imagePath;
 
-    /** @var string  */
-    protected $storagePath;
+    /** @var string Image path if their are no conflicting image /d/u/duck.jpg */
+    protected $defaultStoragePath;
+
+    /** @var string Calculated image path where the file is really located (i.e.  /d/u/duck_2.jpg) */
+    protected $actualStoragePath;
 
     /** @var bool */
     protected $enabled;
@@ -22,9 +25,9 @@ class Image
     public function __construct(string $imagePath, bool $enabled)
     {
         $this->imagePath = $imagePath;
-        $this->storagePath = $this->createStoragePath($imagePath);
-
         $this->enabled = $enabled;
+
+        $this->defaultStoragePath = $this->createStoragePath($imagePath);
     }
 
     public function getImagePath(): string
@@ -37,9 +40,9 @@ class Image
         return $this->enabled;
     }
 
-    public function getStoragePath()
+    public function getDefaultStoragePath()
     {
-        return $this->storagePath;
+        return $this->defaultStoragePath;
     }
 
     protected function createStoragePath(string $imagePath)
@@ -58,5 +61,21 @@ class Image
         }
 
         return "/{$c1}/{$c2}/{$imageBase}";
+    }
+
+    /**
+     * @return string
+     */
+    public function getActualStoragePath(): string
+    {
+        return $this->actualStoragePath;
+    }
+
+    /**
+     * @param string $actualStoragePath
+     */
+    public function setActualStoragePath(string $actualStoragePath)
+    {
+        $this->actualStoragePath = $actualStoragePath;
     }
 }
