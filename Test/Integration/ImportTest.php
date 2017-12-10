@@ -523,7 +523,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $image = $product1->addImage(__DIR__ . '/../images/duck2.png', false);
         $product1->global()->setImageGalleryInformation($image, "Second duck", 2, false);
         $product1->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
-        $product1->storeView('default')->setImageGalleryInformation($image, "Tweede eendje", 3, false);
+        $product1->storeView('default')->setImageGalleryInformation($image, "Tweede eend", 3, false);
 
         $importer->importSimpleProduct($product1);
         $importer->flush();
@@ -540,9 +540,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         ];
 
         $values = [
-            [0, $product1->id, 'First ducky', 1, 1],
-            [0, $product1->id, 'Second ducky', 2, 0],
-            [1, $product1->id, 'Tweede eendje', 3, 0],
+            ['0', $product1->id, 'First duck', '1', '0'],
+            ['0', $product1->id, 'Second duck', '2', '1'],
+            ['1', $product1->id, 'Tweede eend', '3', '1'],
         ];
 
         $this->checkImageData($product1, $media, $values);
@@ -551,7 +551,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnailImage());
         $this->assertEquals('/d/u/duck2.png', $productS->getImage());
 
-        // add 2 other/same images for 3 same/other roles
+        // add 2 other/same images
+        // change disabled of one image
         // second image already in use
 
         link(__DIR__ . '/../images/duck3.png', BP . '/pub/media/catalog/product/d/u/duck3.png');
@@ -561,7 +562,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $global->setName("Ducky 1");
         $global->setPrice('1.00');
 
-        $image = $product2->addImage(__DIR__ . '/../images/duck2.png', false);
+        $image = $product2->addImage(__DIR__ . '/../images/duck2.png', true);
         $product2->global()->setImageGalleryInformation($image, "Second duck", 2, false);
         $product2->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
         $product2->storeView('default')->setImageGalleryInformation($image, "Tweede eendje", 3, false);
@@ -581,16 +582,16 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $media = [
             [$attributeId, '/d/u/duck1.jpg', 'image', 0],
-            [$attributeId, '/d/u/duck2.png', 'image', 1],
+            [$attributeId, '/d/u/duck2.png', 'image', 0],
             [$attributeId, '/d/u/duck3_1.png', 'image', 0],
         ];
 
         $values = [
-            [0, $product1->id, 'First ducky', 1, 1],
-            [0, $product1->id, 'Second ducky', 2, 0],
-            [1, $product1->id, 'Tweede eendje', 3, 0],
-            [0, $product1->id, 'Third ducky', 2, 0],
-            [1, $product1->id, 'Derde eendje', 3, 0],
+            ['0', $product1->id, 'First ducky', '1', '0'],
+            ['0', $product1->id, 'Second ducky', '2', '1'],
+            ['1', $product1->id, 'Tweede eendje', '3', '1'],
+            ['0', $product1->id, 'Third ducky', '2', '1'],
+            ['1', $product1->id, 'Derde eendje', '3', '1'],
         ];
 
         $this->checkImageData($product1, $media, $values);

@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Model\Data\Image;
+use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 
 /**
@@ -35,6 +36,12 @@ class ImageStorage
 
         foreach ($existingImages as $image) {
             $this->updateImage($image);
+        }
+
+        foreach ($product->getStoreViews() as $storeView) {
+            foreach ($storeView->getImageGalleryInformation() as $imageGalleryInformation) {
+                $this->upsertImageGalleryInformation($product->id, $storeView->getStoreViewId(), $imageGalleryInformation);
+            }
         }
     }
 
@@ -144,6 +151,37 @@ class ImageStorage
         return $valueId;
     }
 
+    protected function upsertImageGalleryInformation($productId, $storeViewId, ImageGalleryInformation $imageGalleryInformation)
+    {
+        $image = $imageGalleryInformation->getImage();
+
+        $recordId = $this->db->fetchSingleCell("
+            SELECT `record_id`
+            FROM {$this->metaData->mediaGalleryValueTable}
+            WHERE `value_id` = {$image->valueId} AND `entity_id` = {$productId} AND `store_id` = {$storeViewId}
+        ");
+
+        $dbLabel = $this->db->quote($imageGalleryInformation->getLabel());
+        $dbPosition = $imageGalleryInformation->getPosition();
+        $dbDisabled = $imageGalleryInformation->isEnabled() ? '0' : '1';
+
+        if ($recordId !== null) {
+
+            $this->db->execute("
+                UPDATE {$this->metaData->mediaGalleryValueTable}
+                SET `label` = {$dbLabel}, `position` = {$dbPosition}, `disabled` = {$dbDisabled}   
+                WHERE `record_id` = $recordId
+            ");
+
+        } else {
+
+            $this->db->execute("
+                INSERT INTO {$this->metaData->mediaGalleryValueTable}
+                SET `value_id` = {$image->valueId}, `store_id` = {$storeViewId}, `entity_id` = {$productId}, `label` = {$dbLabel}, `position` = {$dbPosition}, `disabled` = {$dbDisabled}
+            ");
+        }
+    }
+
     /**
      * From https://stackoverflow.com/questions/3060125/can-i-use-file-get-contents-to-compare-two-files
      *
@@ -154,18 +192,17 @@ class ImageStorage
     protected function filesAreEqual($a, $b)
     {
         // Check if filesize is different
-        if(filesize($a) !== filesize($b))
+        if (filesize($a) !== filesize($b)) {
             return false;
+        }
 
         // Check if content is different
         $ah = fopen($a, 'rb');
         $bh = fopen($b, 'rb');
 
         $result = true;
-        while(!feof($ah))
-        {
-            if(fread($ah, 8192) != fread($bh, 8192))
-            {
+        while (!feof($ah)) {
+            if (fread($ah, 65536) != fread($bh, 65536)) {
                 $result = false;
                 break;
             }
