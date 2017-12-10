@@ -211,6 +211,12 @@ class ProductStoreView
         unset($this->attributes[$name]);
     }
 
+    /**
+     * @param Image $image Should be an image retrieved from $product->addImage() on the same product.
+     * @param string $label Will be used as alt-tag on the product page
+     * @param int $position Gallery position (1, 2, 3, ...)
+     * @param bool $enabled Show on product page?
+     */
     public function setImageGalleryInformation(Image $image, string $label, int $position, bool $enabled)
     {
         $this->imageGalleryInformation[] = new ImageGalleryInformation($image, $label, $position, $enabled);
@@ -221,6 +227,12 @@ class ProductStoreView
         return $this->imageGalleryInformation;
     }
 
+    /**
+     * Choose a "role" (image, small_image, thumbnail, swatch_image) for the image. Use one of this class' constants.
+     *
+     * @param Image $image Should be an image retrieved from $product->addImage() on the same product.
+     * @param string $attributeCode A media_image attribute (use one of the class constants above, or a custom attribute code)
+     */
     public function setImageRole(Image $image, string $attributeCode)
     {
         $this->imageRoles[$attributeCode] = $image;

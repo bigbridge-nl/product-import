@@ -19,13 +19,13 @@ class Image
     /** @var string Calculated image path where the file is really located (i.e.  /d/u/duck_2.jpg) */
     protected $actualStoragePath;
 
-    /** @var bool */
+    /** @var bool Is this image in use (if not, it will not appear in frontend and backend. */
     protected $enabled;
 
-    public function __construct(string $imagePath, bool $enabled)
+    public function __construct(string $imagePath)
     {
         $this->imagePath = $imagePath;
-        $this->enabled = $enabled;
+        $this->enabled = true;
 
         $this->defaultStoragePath = $this->createStoragePath($imagePath);
     }
@@ -33,6 +33,15 @@ class Image
     public function getImagePath(): string
     {
         return $this->imagePath;
+    }
+
+    /**
+     * Disabling an image will make it invisible on the frontend and even in the backend.
+     * It has no use, it is added merely for completeness.
+     */
+    public function disable()
+    {
+        $this->enabled = false;
     }
 
     public function isEnabled(): bool

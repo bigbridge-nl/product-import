@@ -32,6 +32,8 @@ New products will be given the following default values, if they are not specifi
 
 ## Example Code
 
+### Basic
+
 The following example shows you a simple case of importing a simple product
 
     // load the import factory (preferably via DI)
@@ -84,6 +86,36 @@ The following example shows you a simple case of importing a simple product
     } catch (\Exception $e) {
         $log .= $e->getMessage();
     }
+
+### Images
+
+To import images, use this syntax
+
+    $image = $product1->addImage('/path/to/peanut_butter.png');
+
+You can use a url:
+
+    $image = $product1->addImage('http://sandwiches4you.com/path/to/peanut_butter.png');
+
+This will attach the image to the product and it will show up in the backend section "Images and Videos" of the product.
+
+If you want to add one or more roles (image, small_image, thumbnail, swatch_image) to it, use this:
+
+    $product1->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
+
+It is also possible to use the attribute code of a custom media image attribute.
+
+If necessary, you can even change this role per store view
+
+    $product1->storeView('store_de')->setImageRole($image, ProductStoreView::SMALL_IMAGE);
+
+If you want to add a label, specify the gallery position, and show/hide it on the product page, use this:
+
+    $product1->global()->setImageGalleryInformation($image, "Large jar of peanut butter", 2, true);
+
+Again, this can be store on the store view level:
+
+    $product1->storeView('store_nl')->setImageGalleryInformation($image, "Grote pot pindakaas", 2, true);
 
 ## Goals
 

@@ -129,9 +129,19 @@ class ImageStorage
             mkdir($targetDir, 0777, true);
         }
 
-        // first link the image (important to do this before storing the record)
-        link($image->getImagePath(), self::PRODUCT_IMAGE_PATH . $actualStoragePath);
+        // link or copy the source to the category images directory
+        if (is_file($image->getImagePath())) {
 
+            link($image->getImagePath(), self::PRODUCT_IMAGE_PATH . $actualStoragePath);
+
+        } else {
+
+            // not a simple file
+            copy($image->getImagePath(), self::PRODUCT_IMAGE_PATH . $actualStoragePath);
+
+        }
+
+        // first link the image (important to do this before storing the record)
         // then create the database record
         $imageValueId = $this->createImageValue($product->id, $actualStoragePath, $image->isEnabled());
 

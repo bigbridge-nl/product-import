@@ -517,11 +517,12 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $global->setName("Ducky 1");
         $global->setPrice('1.00');
 
-        $image = $product1->addImage(__DIR__ . '/../images/duck1.jpg', true);
+        $image = $product1->addImage(__DIR__ . '/../images/duck1.jpg');
         $product1->global()->setImageGalleryInformation($image, "First duck", 1, true);
         $product1->global()->setImageRole($image, ProductStoreView::THUMBNAIL_IMAGE);
 
-        $image = $product1->addImage(__DIR__ . '/../images/duck2.png', false);
+        $image = $product1->addImage(__DIR__ . '/../images/duck2.png');
+        $image->disable();
         $product1->global()->setImageGalleryInformation($image, "Second duck", 2, false);
         $product1->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
         $product1->storeView('default')->setImageGalleryInformation($image, "Tweede eend", 3, false);
@@ -563,12 +564,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $global->setName("Ducky 1");
         $global->setPrice('1.00');
 
-        $image = $product2->addImage(__DIR__ . '/../images/duck2.png', true);
+        $image = $product2->addImage(__DIR__ . '/../images/duck2.png');
         $product2->global()->setImageGalleryInformation($image, "Second duck", 2, false);
         $product2->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
         $product2->storeView('default')->setImageGalleryInformation($image, "Tweede eendje", 3, false);
 
-        $image = $product2->addImage(__DIR__ . '/../images/duck3.png', false);
+        $image = $product2->addImage(__DIR__ . '/../images/duck3.png');
+        $image->disable();
         $product2->global()->setImageGalleryInformation($image, "Third duck", 3, true);
         $product2->global()->setImageRole($image, ProductStoreView::SMALL_IMAGE);
         $product2->storeView('default')->setImageGalleryInformation($image, "Derde eendje", 3, false);
@@ -588,14 +590,14 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         ];
 
         $values = [
-            ['0', $product1->id, 'First duck', '1', '0'],
-            ['0', $product1->id, 'Second duck', '2', '1'],
-            ['1', $product1->id, 'Tweede eendje', '3', '1'],
-            ['0', $product1->id, 'Third duck', '3', '0'],
-            ['1', $product1->id, 'Derde eendje', '3', '1'],
+            ['0', $product2->id, 'First duck', '1', '0'],
+            ['0', $product2->id, 'Second duck', '2', '1'],
+            ['1', $product2->id, 'Tweede eendje', '3', '1'],
+            ['0', $product2->id, 'Third duck', '3', '0'],
+            ['1', $product2->id, 'Derde eendje', '3', '1'],
         ];
 
-        $this->checkImageData($product1, $media, $values);
+        $this->checkImageData($product2, $media, $values);
 
         $productS = self::$repository->get("ducky1-product-import", false, 0, true);
         $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());

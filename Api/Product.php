@@ -180,13 +180,12 @@ abstract class Product
     }
 
     /**
-     * @param string $imagePath
-     * @param bool $enabled
+     * @param string $imagePath Absolute path to JPEG or PNG image
      * @return Image
      */
-    public function addImage(string $imagePath, bool $enabled)
+    public function addImage(string $imagePath)
     {
-        $image = new Image($imagePath, $enabled);
+        $image = new Image($imagePath);
         $this->images[] = $image;
         return $image;
     }

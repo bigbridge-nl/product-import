@@ -13,10 +13,10 @@ class ImageGalleryInformation
     /**@var string */
     protected $label;
 
-    /** @var int */
+    /** @var int Position in product gallery (1, 2, 3, ...) */
     protected $position;
 
-    /** @var bool */
+    /** @var bool Show on product page */
     protected $enabled;
 
     public function __construct(Image $image, string $label, int $position, bool $enabled)
