@@ -500,6 +500,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         @unlink(BP . '/pub/media/catalog/product/d/u/duck3.png');
         @unlink(BP . '/pub/media/catalog/product/d/u/duck3_1.png');
 
+        $a = file_exists('https://upload.wikimedia.org/wikipedia/commons/1/11/Duck_front.jpg');
+
         $errors = [];
 
         $config = new ImportConfig();

@@ -97,6 +97,8 @@ You can use a url:
 
     $image = $product1->addImage('http://sandwiches4you.com/path/to/peanut_butter.png');
 
+It is also possible to use local files (these will be hard linked to their destination) and network files (these will be copied).
+
 This will attach the image to the product and it will show up in the backend section "Images and Videos" of the product.
 
 If you want to add one or more roles (image, small_image, thumbnail, swatch_image) to it, use this:

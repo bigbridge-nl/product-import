@@ -14,9 +14,13 @@ class Validator
     /** @var  MetaData */
     protected $metaData;
 
-    public function __construct(MetaData $metaData)
+    /** @var ImageValidator */
+    protected $imageValidator;
+
+    public function __construct(MetaData $metaData, ImageValidator $imageValidator)
     {
         $this->metaData = $metaData;
+        $this->imageValidator = $imageValidator;
     }
 
     /**
@@ -61,6 +65,9 @@ class Validator
                 break;
             }
         }
+
+        // images
+        $this->imageValidator->validateImages($product);
 
         foreach ($storeViews as $storeViewCode => $storeView) {
 

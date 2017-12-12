@@ -7,24 +7,27 @@ namespace BigBridge\ProductImport\Model\Data;
  */
 class Image
 {
-    /** @var int */
+    /** @var int Database gallery media image id */
     public $valueId;
 
-    /** @var string */
+    /** @var string Image path or url given by the user */
     protected $imagePath;
 
-    /** @var string Image path if their are no conflicting image /d/u/duck.jpg */
+    /** @var string Relative image path if there are no conflicting image /d/u/duck.jpg */
     protected $defaultStoragePath;
 
-    /** @var string Calculated image path where the file is really located (i.e.  /d/u/duck_2.jpg) */
+    /** @var string Calculated relative image path where the file is really located (i.e.  /d/u/duck_2.jpg) */
     protected $actualStoragePath;
+
+    /** @var string Absolute path. In the validation process the image is located here, temporarily */
+    protected $temporaryStoragePath;
 
     /** @var bool Is this image in use (if not, it will not appear in frontend and backend. */
     protected $enabled;
 
     public function __construct(string $imagePath)
     {
-        $this->imagePath = $imagePath;
+        $this->imagePath = trim($imagePath);
         $this->enabled = true;
 
         $this->defaultStoragePath = $this->createStoragePath($imagePath);
@@ -86,5 +89,21 @@ class Image
     public function setActualStoragePath(string $actualStoragePath)
     {
         $this->actualStoragePath = $actualStoragePath;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemporaryStoragePath(): string
+    {
+        return $this->temporaryStoragePath;
+    }
+
+    /**
+     * @param string $temporaryStoragePath
+     */
+    public function setTemporaryStoragePath(string $temporaryStoragePath)
+    {
+        $this->temporaryStoragePath = $temporaryStoragePath;
     }
 }
