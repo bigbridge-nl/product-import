@@ -4,13 +4,14 @@ namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
+use Magento\Catalog\Model\Category;
 
 /**
  * @author Patrick van Bergen
  */
 class CategoryImporter
 {
-    const CATEGORY_PATH_SEPARATOR = '/';
+    const CATEGORY_ID_PATH_SEPARATOR = '/';
 
     /**  @var Magento2DbConnection */
     protected $db;
@@ -37,9 +38,10 @@ class CategoryImporter
      *
      * @param array $categoryPaths
      * @param bool $autoCreateCategories
+     * @param string $categoryNamePathSeparator
      * @return array
      */
-    public function importCategoryPaths(array $categoryPaths, bool $autoCreateCategories)
+    public function importCategoryPaths(array $categoryPaths, bool $autoCreateCategories, string $categoryNamePathSeparator)
     {
         $ids = [];
         $error = "";
@@ -49,7 +51,7 @@ class CategoryImporter
                 $id = $this->categoryCache[$path];
                 $ids[] = $id;
             } else {
-                list($id, $error) = $this->importCategoryPath($path, $autoCreateCategories);
+                list($id, $error) = $this->importCategoryPath($path, $autoCreateCategories, $categoryNamePathSeparator);
 
                 if ($error !== "") {
                     $ids = [];
@@ -69,16 +71,17 @@ class CategoryImporter
      *
      * @param string $namePath A / separated path of category names.
      * @param bool $autoCreateCategories
+     * @param string $categoryNamePathSeparator
      * @return array
      */
-    public function importCategoryPath(string $namePath, bool $autoCreateCategories): array
+    public function importCategoryPath(string $namePath, bool $autoCreateCategories, string $categoryNamePathSeparator): array
     {
-        $categoryId = \Magento\Catalog\Model\Category::TREE_ROOT_ID;
+        $categoryId = Category::TREE_ROOT_ID;
         $error = "";
 
         $idPath = [$categoryId];
 
-        $categoryNames = explode(self::CATEGORY_PATH_SEPARATOR, $namePath);
+        $categoryNames = explode($categoryNamePathSeparator, $namePath);
 
         foreach ($categoryNames as $categoryName) {
 
@@ -133,7 +136,7 @@ class CategoryImporter
         $attributeSetId = $this->metaData->defaultCategoryAttributeSetId;
 
         $parentId = $idPath[count($idPath) - 1];
-        $parentPath = implode(self::CATEGORY_PATH_SEPARATOR, $idPath);
+        $parentPath = implode(self::CATEGORY_ID_PATH_SEPARATOR, $idPath);
         $parentLevel = count($idPath);
         $childLevel = $parentLevel + 1;
 
@@ -165,7 +168,7 @@ class CategoryImporter
         $categoryId = $this->db->getLastInsertId();
 
         // add path that contains the new id
-        $childPath = $parentPath . self::CATEGORY_PATH_SEPARATOR . $categoryId;
+        $childPath = $parentPath . self::CATEGORY_ID_PATH_SEPARATOR . $categoryId;
 
         $this->db->execute("
             UPDATE `{$categoryEntityTable}`

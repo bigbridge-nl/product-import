@@ -85,8 +85,9 @@ class ImageValidator
      * From http://php.net/manual/en/function.http-response-code.php
      *
      * @param $responseCode
+     * @return string
      */
-    protected function getHttpResponseDescription($responseCode)
+    protected function getHttpResponseDescription(int $responseCode)
     {
         switch ($responseCode) {
             case 100:

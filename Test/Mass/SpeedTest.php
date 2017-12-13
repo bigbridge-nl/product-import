@@ -134,6 +134,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
      * @param $skus
      * @param $categories
      * @param $importer
+     * @throws \Exception
      */
     public function insertProducts($skus, $categories, Importer $importer)
     {
@@ -168,6 +169,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
      * @param $skus
      * @param $categories
      * @param $importer
+     * @throws \Exception
      */
     public function updateProducts($skus, $categories, Importer $importer)
     {

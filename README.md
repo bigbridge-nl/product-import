@@ -87,6 +87,27 @@ The following example shows you a simple case of importing a simple product
         $log .= $e->getMessage();
     }
 
+### Categories
+
+Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials". Separate category names with "/".
+
+    $product->setCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+
+When the category does not exist, it is created. The name is added to the global scope. If you don't want auto-creation, and rather just see an error, use
+
+    $config->autoCreateCategories = false;
+
+You can also use ids
+
+    $product->setCategoryIds([123, 125]);
+
+The importer does not test whether the the ids exist and will throw an database exception if they don't.
+
+When your import set contains categories with a / in the name, like "Summer / Winter collection", you may want to change the category name separator into something else, like "$"
+Make sure to update the imported category paths when you do.
+
+    $config->categoryNamePathSeparator = "$";
+
 ### Images
 
 To import images, use this syntax

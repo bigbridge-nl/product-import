@@ -27,6 +27,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
     public function testConfig()
     {
         $config = new ImportConfig();
+        $importer = null;
 
         try {
             $importer = self::$factory->createImporter($config);

@@ -46,7 +46,7 @@ class ReferenceResolver
     public function resolveIds(Product $product, ImportConfig $config)
     {
         if ($product->getCategoryIds() instanceof References) {
-            list($ids, $error) = $this->categoryImporter->importCategoryPaths($product->getCategoryIds()->names, $config->autoCreateCategories);
+            list($ids, $error) = $this->categoryImporter->importCategoryPaths($product->getCategoryIds()->names, $config->autoCreateCategories, $config->categoryNamePathSeparator);
             $product->setCategoryIds($ids);
             if ($error !== "") {
                 $product->addError($error);

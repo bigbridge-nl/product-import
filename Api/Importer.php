@@ -43,6 +43,7 @@ class Importer
 
     /**
      * @param SimpleProduct $product
+     * @throws \Exception
      */
     public function importSimpleProduct(SimpleProduct $product)
     {
@@ -54,6 +55,7 @@ class Importer
 
     /**
      * @param ConfigurableProduct $product
+     * @throws \Exception
      */
     public function importConfigurableProduct(ConfigurableProduct $product)
     {
@@ -67,6 +69,7 @@ class Importer
     /**
      * Call this function only once, at the end of the full import.
      * Not once for every product!
+     * @throws \Exception
      */
     public function flush()
     {
@@ -74,6 +77,9 @@ class Importer
         $this->flushConfigurableProducts();
     }
 
+    /**
+     * @throws \Exception
+     */
     private function flushSimpleProducts()
     {
         $this->simpleStorage->storeSimpleProducts($this->simpleProducts, $this->config, $this->valueSerializer);

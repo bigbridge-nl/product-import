@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Api\Product;
@@ -52,211 +53,222 @@ class UrlRewriteTest extends \PHPUnit_Framework_TestCase
 
     public function testUrlRewritesGeneration()
     {
-        $config = new ImportConfig();
-        $config->magentoVersion = "2.1.8";
+        try {
+            $config = new ImportConfig();
+            $config->magentoVersion = "2.1.8";
 
-        $importer = self::$factory->createImporter($config);
+            $importer = self::$factory->createImporter($config);
 
-        // product
-        $product1 = new SimpleProduct('1-product-import');
-        $product1->setAttributeSetByName("Default");
-        $product1->setCategoriesByGlobalName(["Boxes"]);
-        $product1->global()->setName("Big Turquoise Box product-import");
-        $product1->global()->setPrice("2.75");
-        $product1->global()->generateUrlKey();
+            // product
+            $product1 = new SimpleProduct('1-product-import');
+            $product1->setAttributeSetByName("Default");
+            $product1->setCategoriesByGlobalName(["Boxes"]);
+            $product1->global()->setName("Big Turquoise Box product-import");
+            $product1->global()->setPrice("2.75");
+            $product1->global()->generateUrlKey();
 
-        // same sku, different store view
-        $default = $product1->storeView('default');
-        $default->setName("Grote Turquoise Doos product-import");
-        $default->generateUrlKey();
+            // same sku, different store view
+            $default = $product1->storeView('default');
+            $default->setName("Grote Turquoise Doos product-import");
+            $default->generateUrlKey();
 
-        $importer->importSimpleProduct($product1);
+            $importer->importSimpleProduct($product1);
 
-        // another product
-        $product3 = new SimpleProduct('2-product-import');
-        $product3->setAttributeSetByName("Default");
-        $product3->setCategoriesByGlobalName(["Boxes"]);
-        $product3->global()->setName("Big Grass Green Box product-import");
-        $product3->global()->setPrice("2.65");
-        $product3->global()->generateUrlKey();
+            // another product
+            $product3 = new SimpleProduct('2-product-import');
+            $product3->setAttributeSetByName("Default");
+            $product3->setCategoriesByGlobalName(["Boxes"]);
+            $product3->global()->setName("Big Grass Green Box product-import");
+            $product3->global()->setPrice("2.65");
+            $product3->global()->generateUrlKey();
 
-        $importer->importSimpleProduct($product3);
+            $importer->importSimpleProduct($product3);
 
-        $importer->flush();
+            $importer->flush();
 
-        $categoryId = $product1->getCategoryIds()[0];
+            $categoryId = $product1->getCategoryIds()[0];
 
-        // insert
+            // insert
 
-        $expectedRewrites = [
-#todo "dozen"
-            ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
+            $expectedRewrites = [
+    #todo "dozen"
+                ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+                ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                    serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
-        ];
+                ["product", "big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+                ["product", "boxes/big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                    serialize(['category_id' => (string)$categoryId])],
+            ];
 
-        $expectedIndexes = [
-            [$categoryId, $product1->id],
-            [$categoryId, $product3->id],
-        ];
+            $expectedIndexes = [
+                [$categoryId, $product1->id],
+                [$categoryId, $product3->id],
+            ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+            $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
 
-        // store again, with no changes
+            // store again, with no changes
 
-        $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product3);
+            $importer->importSimpleProduct($product1);
+            $importer->importSimpleProduct($product3);
 
-        $importer->flush();
+            $importer->flush();
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+            $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
 
-        // change url_key
+            // change url_key
 
-        $product3->global()->setUrlKey("a-" . $product3->global()->getUrlKey());
+            $product3->global()->setUrlKey("a-" . $product3->global()->getUrlKey());
 
-        $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product3);
+            $importer->importSimpleProduct($product1);
+            $importer->importSimpleProduct($product3);
 
-        $importer->flush();
+            $importer->flush();
 
-        $expectedRewrites = [
-#todo "dozen"
-            ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
+            $expectedRewrites = [
+    #todo "dozen"
+                ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+                ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                    serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
+                ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+                ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                    serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "0",
-                serialize(['category_id' => (string)$categoryId])],
-        ];
+                ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
+                ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "0",
+                    serialize(['category_id' => (string)$categoryId])],
+            ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+            $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
 
-        // change categories
+            // change categories
 
-        $product3->setCategoriesByGlobalName(["Containers"]);
+            $product3->setCategoriesByGlobalName(["Containers"]);
 
-        $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product3);
+            $importer->importSimpleProduct($product1);
+            $importer->importSimpleProduct($product3);
 
-        $importer->flush();
+            $importer->flush();
 
-        $newCategoryId = $product3->getCategoryIds()[0];
+            $newCategoryId = $product3->getCategoryIds()[0];
 
-        $expectedRewrites = [
-#todo "dozen"
-            ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
+            $expectedRewrites = [
+    #todo "dozen"
+                ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+                ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                    serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
-            ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$newCategoryId])],
+                ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+                ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                    serialize(['category_id' => (string)$categoryId])],
+                ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
+                    serialize(['category_id' => (string)$newCategoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "0",
-                serialize(['category_id' => (string)$categoryId])],
-        ];
+                ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
+                ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "0",
+                    serialize(['category_id' => (string)$categoryId])],
+            ];
 
-        $expectedIndexes = [
-            [$categoryId, $product1->id],
-            [$categoryId, $product3->id],
-            [$newCategoryId, $product3->id],
-        ];
+            $expectedIndexes = [
+                [$categoryId, $product1->id],
+                [$categoryId, $product3->id],
+                [$newCategoryId, $product3->id],
+            ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+            $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+
+        } catch (Exception $e) {
+            $this->assertTrue(false);
+        }
     }
 
     public function testUrlRewritesWithJson()
     {
-        $config = new ImportConfig();
-        $config->magentoVersion = "2.2.1";
+        try {
+            $config = new ImportConfig();
+            $config->magentoVersion = "2.2.1";
 
-        $importer = self::$factory->createImporter($config);
+            $importer = self::$factory->createImporter($config);
 
-        // product
-        $product1 = new SimpleProduct('3-product-import');
-        $product1->setAttributeSetByName("Default");
-        $product1->setCategoriesByGlobalName(["Boxes"]);
-        $product1->global()->setName("Big Red Box product-import");
-        $product1->global()->setPrice("2.75");
-        $product1->global()->generateUrlKey();
+            // product
+            $product1 = new SimpleProduct('3-product-import');
+            $product1->setAttributeSetByName("Default");
+            $product1->setCategoriesByGlobalName(["Boxes"]);
+            $product1->global()->setName("Big Red Box product-import");
+            $product1->global()->setPrice("2.75");
+            $product1->global()->generateUrlKey();
 
-        $default = $product1->storeView('default');
-        $default->setName("Grote Rode Doos product-import");
-        $default->generateUrlKey();
+            $default = $product1->storeView('default');
+            $default->setName("Grote Rode Doos product-import");
+            $default->generateUrlKey();
 
-        $importer->importSimpleProduct($product1);
+            $importer->importSimpleProduct($product1);
 
-        // another product
-        $product3 = new SimpleProduct('4-product-import');
-        $product3->setAttributeSetByName("Default");
-        $product3->setCategoriesByGlobalName(["Boxes"]);
-        $product3->global()->setName("Big Grass Yellow Box product-import");
-        $product3->global()->setPrice("2.65");
-        $product3->global()->generateUrlKey();
+            // another product
+            $product3 = new SimpleProduct('4-product-import');
+            $product3->setAttributeSetByName("Default");
+            $product3->setCategoriesByGlobalName(["Boxes"]);
+            $product3->global()->setName("Big Grass Yellow Box product-import");
+            $product3->global()->setPrice("2.65");
+            $product3->global()->generateUrlKey();
 
-        $importer->importSimpleProduct($product3);
+            $importer->importSimpleProduct($product3);
 
-        $importer->flush();
+            $importer->flush();
 
-        $categoryId = $product1->getCategoryIds()[0];
+            $categoryId = $product1->getCategoryIds()[0];
 
-        // change url_key
+            // change url_key
 
-        $product3->global()->setUrlKey("a-" . $product3->global()->getUrlKey());
+            $product3->global()->setUrlKey("a-" . $product3->global()->getUrlKey());
 
-        $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product3);
+            $importer->importSimpleProduct($product1);
+            $importer->importSimpleProduct($product3);
 
-        $importer->flush();
+            $importer->flush();
 
-        // change categories
+            // change categories
 
-        $product3->setCategoriesByGlobalName(["Containers"]);
+            $product3->setCategoriesByGlobalName(["Containers"]);
 
-        $importer->importSimpleProduct($product1);
-        $importer->importSimpleProduct($product3);
+            $importer->importSimpleProduct($product1);
+            $importer->importSimpleProduct($product3);
 
-        $importer->flush();
+            $importer->flush();
 
-        $newCategoryId = $product3->getCategoryIds()[0];
+            $newCategoryId = $product3->getCategoryIds()[0];
 
-        $expectedRewrites = [
-#todo "dozen"
-            ["product", "grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
-                json_encode(['category_id' => (string)$categoryId])],
+            $expectedRewrites = [
+    #todo "dozen"
+                ["product", "grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+                ["product", "boxes/grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                    json_encode(['category_id' => (string)$categoryId])],
 
-            ["product", "a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
-                json_encode(['category_id' => (string)$categoryId])],
-            ["product", "containers/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
-                json_encode(['category_id' => (string)$newCategoryId])],
+                ["product", "a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+                ["product", "boxes/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                    json_encode(['category_id' => (string)$categoryId])],
+                ["product", "containers/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
+                    json_encode(['category_id' => (string)$newCategoryId])],
 
-            ["product", "big-grass-yellow-box-product-import.html", "a-big-grass-yellow-box-product-import.html", "301", "1", "0", json_encode([])],
-            ["product", "boxes/big-grass-yellow-box-product-import.html", "boxes/a-big-grass-yellow-box-product-import.html", "301", "1", "0",
-                json_encode(['category_id' => (string)$categoryId])],
-        ];
+                ["product", "big-grass-yellow-box-product-import.html", "a-big-grass-yellow-box-product-import.html", "301", "1", "0", json_encode([])],
+                ["product", "boxes/big-grass-yellow-box-product-import.html", "boxes/a-big-grass-yellow-box-product-import.html", "301", "1", "0",
+                    json_encode(['category_id' => (string)$categoryId])],
+            ];
 
-        $expectedIndexes = [
-            [$categoryId, $product1->id],
-            [$categoryId, $product3->id],
-            [$newCategoryId, $product3->id],
-        ];
+            $expectedIndexes = [
+                [$categoryId, $product1->id],
+                [$categoryId, $product3->id],
+                [$newCategoryId, $product3->id],
+            ];
 
-        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+            $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+
+        } catch (Exception $e) {
+            $this->assertTrue(false);
+        }
+
     }
 
     private function doAsserts(array $expectedRewrites, array $expectedIndexes, Product $product1, Product $product3)

@@ -74,4 +74,14 @@ class ImportConfig
      * @var null
      */
     public $magentoVersion = null;
+
+    /**
+     * Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials"
+     * When your import set contains categories with a / in the name, like "Summer / Winter collection",
+     * you may want to change the category name separator into something else, like "$"
+     * Make sure to update the imported category paths when you do.
+     *
+     * @var string
+     */
+    public $categoryNamePathSeparator = '/';
 }

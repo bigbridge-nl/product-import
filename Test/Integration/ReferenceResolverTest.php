@@ -68,8 +68,8 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             $product->setAttributeSetId(4);
 
             $global = $product->global();
-            $global->name = "Big Blue Box";
-            $global->price = "123.00";
+            $global->setName("Big Blue Box");
+            $global->setPrice("123.00");
 
             foreach ($test[0] as $fieldName => $fieldValue) {
 
@@ -112,8 +112,8 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
             $product->setAttributeSetId(4);
 
             $global = $product->global();
-            $global->name = "Big Blue Box";
-            $global->price = "123.00";
+            $global->setName("Big Blue Box");
+            $global->setPrice("123.00");
 
             $product->storeView($test[0]);
 
