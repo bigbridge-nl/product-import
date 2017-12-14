@@ -1,15 +1,13 @@
 # Design considerations
 
-## Design principle
+## Goals
 
-This library follows the following principle
+The library aims to be
 
-    does exactly what it says on the tin
-
-That means: it just does what you tell it to do. Nothing less, and nothing more.
-
-You cannot expect it do enable a product by default, or to create url_rewrites. You need to specify what to create, and at what store view level.
-This makes it a reliable and efficient system. Yes, you need to know what you're doing. But then, you always did when importing stuff.
+* fast (a thousand products per second)
+* easy to use (the api should be simple to use, and well documented, it should be easy to do common things, and uncommon things should be possible)
+* robust (by default the library should take the safe side when a decision is to be made, also it should not halt on a single product failing)
+* complete (if at all possible, all product import features should be present)
 
 ## Approach
 

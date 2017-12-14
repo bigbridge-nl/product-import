@@ -44,7 +44,7 @@ The following example shows you a simple case of importing a simple product
 
     $config = new ImportConfig();
 
-    // the callback function to postprocess imported products
+    // a callback function to postprocess imported products
     $config->resultCallback[] = function(Product $product) use (&$log) {
 
         if ($product->isOk()) {
@@ -87,6 +87,43 @@ The following example shows you a simple case of importing a simple product
         $log .= $e->getMessage();
     }
 
+The following code pieces are extensions on this basic code.
+
+## Global scope and store view scope
+
+Many attributes (eav attributes) can be specified both on a global level and on a store view level.
+
+An attribute that is specified globally will be used on all store view levels, unless it is overridden by a store view value.
+
+The library makes this distinction explicit with these constructs:
+
+    $product->global()->setName();
+    $product->storeView('store_fr')->setName();
+
+Where storeView accepts a store view code.
+
+In the code below I will give examples using global() and storeView(). When I do, remember that both levels are available to you at all times.
+
+## EAV attributes
+
+You can set any attribute by calling a setter, like this
+
+    $product->global()->setWeight('1.21');
+
+and set a custom attribute like this
+
+    $product->storeView('nl')->setCustomAttribute('door_count', '3');
+
+## Errors
+
+The library detects problems in the input in its id-resolution and validation phrases. When it does, it adds descriptive error messages to the product this is processed.
+
+A product that one or more errors is not imported. Errors can be inspected via a custom callback function you can provide.
+
+    $config->resultCallback[] = function(Product $product)) {
+        $errors = $product->getErrors();
+    }
+
 ### Categories
 
 Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials". Separate category names with "/".
@@ -107,6 +144,16 @@ When your import set contains categories with a / in the name, like "Summer / Wi
 Make sure to update the imported category paths when you do.
 
     $config->categoryNamePathSeparator = "$";
+
+### Websites
+
+You can specify on which websites a product is used, by specifying their codes
+
+    $product->setWebsitesByCode(['clothes', 'bicycles']);
+
+or their ids
+
+    $product->setWebsiteIds([1, 3, 4]);
 
 ### Images
 
@@ -140,14 +187,43 @@ Again, this can be store on the store view level:
 
     $product1->storeView('store_nl')->setImageGalleryInformation($image, "Grote pot pindakaas", 2, true);
 
-## Goals
+### URL keys
 
-The library aims to be
+The url_key of a product is used by Magento to create the url of the product page. The url_key is not added to a product automatically by the library. You must do so explicitly with
 
-* fast (a thousand products per second)
-* easy to use (the api should be simple to use, and well documented, it should be easy to do common things, and uncommon things should be possible)
-* robust (by default the library should take the safe side when a decision is to be made, also it should not halt on a single product failing)
-* complete (if at all possible, all product import features should be present)
+    $product->global()->setUrlKey('synthetisch-kinderdekbed-4-seizoenen');
+
+It is common practise to generate url_keys based on the name of the product. You can do this with
+
+    $product->storeView('sweden')->generateUrlKey();
+
+If you want to use the "sku" field as the basis for the url_key, in stead of "name", use
+
+    $config->urlKeyScheme = ImportConfig::URL_KEY_SCHEME_FROM_SKU;
+
+A url_key needs to be unique within a store view or within the global level. If it is not, an error is added to the product.
+
+The library has two ways to deal with this problem. You can tell it to add a serial number to the new url_key in case the url_key was already in use by another product.
+
+    $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
+
+The url of the new product with the same name as an existing product will then look like this
+
+    https://myshop.com/synthetisch-kinderdekbed-4-seizoenen-1.html
+
+or you can add the sku (transformed to url)
+
+    $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU;
+
+The url will then look something like this
+
+    https://myshop.com/synthetisch-kinderdekbed-4-seizoenen-kdb-18004.html
+
+## Dry run
+
+If you want to see what errors an import produces without actually adding products to the database, set the config to "dry run"
+
+    $config->dryRun = true;
 
 ## Changes to Magento
 
