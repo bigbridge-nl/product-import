@@ -14,6 +14,7 @@ After an import has completed, the product and category indexers need to be run.
 
 * import of product data (new and updates, based on sku)
 * automatic category generation (no updates)
+* import of images from file or url
 * unique url_key generation
 * dry run (no writes to the database)
 * trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
@@ -169,6 +170,12 @@ It is also possible to use local files (these will be hard linked to their desti
 
 This will attach the image to the product and it will show up in the backend section "Images and Videos" of the product.
 
+About naming conflicts for image files:
+
+* if Magento already contained an image with this name, for another product, the image will get a serial number suffix (i.e _1)
+* if Magento already contained an image with this name, for the same product, and it is the same image, nothing happens
+* if Magento already contained an image with this name, for the same product, and it is a different image, it is overwritten
+
 If you want to add one or more roles (image, small_image, thumbnail, swatch_image) to it, use this:
 
     $product1->global()->setImageRole($image, ProductStoreView::BASE_IMAGE);
@@ -231,13 +238,16 @@ The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to
 
 ## Assumptions
 
+* Requires >= PHP 7.0
 * Input in UTF-8 (Magento standard)
-* Database query length is at least 1 MB (this has been a MySQL default for long)
+* Database query length is at least 1 MB (to support older MySQL versions)
 
 ## On empty values
 
 * A value of "" will be ignored, it is not imported. The reason is that in imports, an empty value often means unknown, or unimportant, but rarely: to be deleted.
 
 ## Thanks to
+
+Thanks to Marco de Vries for telling me about the intricacies of product import.
 
 This project ows a great deal of ideas and inspiration from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)

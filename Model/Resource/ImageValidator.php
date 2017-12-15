@@ -45,6 +45,7 @@ class ImageValidator
 
             if (filesize($temporaryStoragePath) === 0) {
                 $product->addError("File is empty: " . $imagePath);
+                unlink($temporaryStoragePath);
                 continue;
             }
 

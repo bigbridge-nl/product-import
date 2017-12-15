@@ -51,7 +51,7 @@ class ImageStorage
         // stores images and metadata
         // add valueId and actualStoragePath to new images
         foreach ($newImages as $image) {
-            $this->storeImage($product, $image);
+            $this->insertImage($product, $image);
         }
 
         // updates image metadata
@@ -91,12 +91,10 @@ class ImageStorage
                 $simpleStoragePath = preg_replace('/_\d+\./', '.', $storagePath);
 
                 if ($simpleStoragePath === $image->getDefaultStoragePath()) {
-                    if ($this->filesAreEqual(self::PRODUCT_IMAGE_PATH . $storagePath, $image->getImagePath())) {
-                        $found = true;
-                        $image->valueId = $imageDatum['value_id'];
-                        $image->setActualStoragePath($imageDatum['value']);
-                        break;
-                    }
+                    $found = true;
+                    $image->valueId = $imageDatum['value_id'];
+                    $image->setActualStoragePath($imageDatum['value']);
+                    break;
                 }
             }
 
@@ -110,7 +108,7 @@ class ImageStorage
         return [$existingImages, $newImages];
     }
 
-    public function storeImage(Product $product, Image $image)
+    public function insertImage(Product $product, Image $image)
     {
         $defaultStoragePath = $image->getDefaultStoragePath();
         $actualStoragePath = $defaultStoragePath;
@@ -133,8 +131,8 @@ class ImageStorage
             mkdir($targetDir, 0777, true);
         }
 
-        // move image to its final destination
-        link($image->getTemporaryStoragePath(), self::PRODUCT_IMAGE_PATH . $actualStoragePath);
+        // move image from its temporary position to its final position
+        rename($image->getTemporaryStoragePath(), self::PRODUCT_IMAGE_PATH . $actualStoragePath);
 
         // first link the image (important to do this before storing the record)
         // then create the database record
@@ -153,6 +151,23 @@ class ImageStorage
             SET `disabled` = {$dbDisabled}
             WHERE `value_id` = {$image->valueId} 
         ");
+
+        $targetPath = self::PRODUCT_IMAGE_PATH . $image->getActualStoragePath();
+
+        // only if the file is different in content will the old file be removed
+        if (!$this->filesAreEqual($targetPath, $image->getImagePath())) {
+
+            unlink($targetPath);
+
+            // move image from its temporary position to its final position
+            rename($image->getTemporaryStoragePath(), $targetPath);
+
+        } else {
+
+            // the old file is the same as the new file, no move is needed
+            // clean up temporary file
+            unlink($image->getTemporaryStoragePath());
+        }
     }
 
     protected function createImageValue($productId, string $storedPath, bool $enabled)
