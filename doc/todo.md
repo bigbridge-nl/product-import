@@ -10,9 +10,9 @@ Many things, some of which are:
 * auto add attribute option
 * csv import
 * rest request
-* import images using files, urls
 * trim: none, all except text fields
 * check attribute value uniqueness
+* import category-ids: check if the ids exist
 
 ## Testing
 

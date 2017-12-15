@@ -98,3 +98,7 @@ Magmi encountered this problem, in a more severe form, because products are hand
 
 https://sourceforge.net/p/magmi/patches/23/
 
+### Images
+
+All images are places in a temporary location in the validation phase, before being processed  further. This ensures that all images are valid when being processed.
+Make sure to remove all images from their temporary location later.
