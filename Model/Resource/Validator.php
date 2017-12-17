@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\ProductStockItem;
 
 /**
  * @author Patrick van Bergen
@@ -10,6 +11,8 @@ use BigBridge\ProductImport\Api\Product;
 class Validator
 {
     const SKU_MAX_LENGTH = 64;
+    const DATE_PATTERN = '/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/';
+    const DECIMAL_PATTERN = '/^-?\d{1,12}(\.\d{0,4})?$/';
 
     /** @var  MetaData */
     protected $metaData;
@@ -40,9 +43,8 @@ class Validator
             $product->addError("sku has " . mb_strlen($product->getSku()) . ' characters (max ' . self::SKU_MAX_LENGTH . ")");
         }
 
+        // attribute_set_id
         if ($product->id === null) {
-
-            // attribute_set_id
             if ($product->getAttributeSetId() === null) {
                 $product->addError("missing attribute set id");
             }
@@ -101,12 +103,12 @@ class Validator
                         }
                         break;
                     case MetaData::TYPE_DECIMAL:
-                        if (!preg_match('/^\d{1,12}(\.\d{0,4})?$/', $value)) {
-                            $product->addError($eavAttribute . " is not a positive decimal number with dot (" . $value . ")");
+                        if (!preg_match(self::DECIMAL_PATTERN, $value)) {
+                            $product->addError($eavAttribute . " is not a decimal number with dot (" . $value . ")");
                         }
                         break;
                     case MetaData::TYPE_DATETIME:
-                        if (!preg_match('/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/', $value)) {
+                        if (!preg_match(self::DATE_PATTERN, $value)) {
                             $product->addError($eavAttribute . " is not a MySQL date or date time (" . $value . ")");
                         }
                         break;
@@ -123,6 +125,34 @@ class Validator
                         }
                         break;
 //                    }
+                }
+            }
+        }
+
+        // stock items
+        foreach ($product->getStockItems() as $stockItem) {
+            $stockAttributes = $stockItem->getAttributes();
+
+            // dates
+            if (array_key_exists(ProductStockItem::LOW_STOCK_DATE, $stockAttributes)) {
+                $value = $stockAttributes[ProductStockItem::LOW_STOCK_DATE];
+                if (!preg_match(self::DATE_PATTERN, $value)) {
+                    $product->addError(ProductStockItem::LOW_STOCK_DATE . " is not a MySQL date or date time (" . $value . ")");
+                }
+            }
+
+            $decimalAttributes =
+                [ProductStockItem::QTY, ProductStockItem::MIN_QTY, ProductStockItem::NOTIFY_STOCK_QTY,
+                ProductStockItem::MIN_SALE_QTY, ProductStockItem::MAX_SALE_QTY, ProductStockItem::QTY_INCREMENTS];
+
+
+            // decimals
+            foreach ($decimalAttributes as $decimalAttribute) {
+                if (array_key_exists($decimalAttribute, $stockAttributes)) {
+                    $value = $stockAttributes[$decimalAttribute];
+                    if (!preg_match(self::DECIMAL_PATTERN, $value)) {
+                        $product->addError($decimalAttribute . " is not a decimal number with dot (" . $value . ")");
+                    }
                 }
             }
         }

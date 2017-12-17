@@ -16,6 +16,8 @@ abstract class Product
 {
     const GLOBAL_STORE_VIEW_CODE = 'admin';
 
+    const DEFAULT_STOCK_NAME = 'Default';
+
     /** @var  int */
     public $id;
 
@@ -31,6 +33,15 @@ abstract class Product
     /** @var array  */
     protected $website_ids = [];
 
+    /** @var ProductStoreView[] */
+    protected $storeViews = [];
+
+    /** @var ProductStockItem[] */
+    protected $stockItems = [];
+
+    /** @var Image[] */
+    protected $images = [];
+
     // =========================================
     // importer data
     // =========================================
@@ -41,15 +52,10 @@ abstract class Product
     /** @var string  */
     public $lineNumber = "";
 
-    /** @var ProductStoreView[] */
-    protected $storeViews = [];
-
-    /** @var Image[] */
-    protected $images = [];
-
     public function __construct(string $sku)
     {
         $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView();
+        $this->stockItems[self::DEFAULT_STOCK_NAME] = new ProductStockItem();
         $this->sku = trim($sku);
     }
 
@@ -104,6 +110,22 @@ abstract class Product
     public function getStoreViews()
     {
         return $this->storeViews;
+    }
+
+    /**
+     * @return ProductStockItem
+     */
+    public function defaultStockItem()
+    {
+        return $this->stockItems[self::DEFAULT_STOCK_NAME];
+    }
+
+    /**
+     * @return ProductStockItem[]
+     */
+    public function getStockItems()
+    {
+        return $this->stockItems;
     }
 
     public function setCategoryIds(array $categoryIds)

@@ -545,8 +545,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             @unlink(BP . '/pub/media/catalog/product/d/u/duck3.png');
             @unlink(BP . '/pub/media/catalog/product/d/u/duck3_1.png');
 
-            $a = file_exists('https://upload.wikimedia.org/wikipedia/commons/1/11/Duck_front.jpg');
-
             $errors = [];
 
             $config = new ImportConfig();
@@ -693,5 +691,162 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         ");
 
         $this->assertEquals($valueData, $results);
+    }
+
+    public function testStockItem()
+    {
+        try {
+
+            $errors = [];
+
+            $config = new ImportConfig();
+
+            $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+                $errors = array_merge($errors, $product->getErrors());
+            };
+            
+            $defaults = [
+                'qty' => null,
+                'min_qty' => '0.0000',
+                'use_config_min_qty' => '1',
+                'is_qty_decimal' => '0',
+                'backorders' => '0',
+                'use_config_backorders' => '1',
+                'min_sale_qty' => '1.0000',
+                'use_config_min_sale_qty' => '1',
+                'max_sale_qty' => '0.0000',
+                'use_config_max_sale_qty' => '1',
+                'is_in_stock' => '0',
+                'low_stock_date' => null,
+                'notify_stock_qty' => null,
+                'use_config_notify_stock_qty' => '1',
+                'manage_stock' => '0',
+                'use_config_manage_stock' => '1',
+                'stock_status_changed_auto' => '0',
+                'use_config_qty_increments' => '1',
+                'qty_increments' => '0.0000',
+                'use_config_enable_qty_inc' => '1',
+                'enable_qty_increments' => '0',
+                'is_decimal_divided' => '0'
+            ];
+
+            $importer = self::$factory->createImporter($config);
+
+            $product1 = new SimpleProduct("snoopy-product-import");
+            $global = $product1->global();
+            $global->setName("Snoopy");
+            $global->setPrice('5.95');
+
+            $stock = $product1->defaultStockItem();
+            $stock->setQuantity('11');
+
+            $importer->importSimpleProduct($product1);
+            $importer->flush();
+
+            // quantity + default values
+            $values = array_merge($defaults, ['qty' => '11.0000']);
+            $this->assertEquals([], $errors);
+            $this->assertEquals($values, $this->getStockData($product1->id));
+
+            // ------------------------------------------
+
+            $product2 = new SimpleProduct("woodstock-product-import");
+            $global = $product2->global();
+            $global->setName("Woodstock");
+            $global->setPrice('2.95');
+
+            $stock = $product2->defaultStockItem();
+            $stock->setQuantity('1.5');
+            $stock->setMinimumQuantity('1');
+            $stock->setUseConfigMinimumQuantity(false);
+            $stock->setIsQuantityDecimal(true);
+            $stock->setBackorders(true);
+            $stock->setUseConfigBackorders(false);
+            $stock->setMinimumSaleQuantity('0.1000');
+            $stock->setUseConfigMinimumSaleQuantity(false);
+            $stock->setMaximumSaleQuantity(10.5);
+            $stock->setUseConfigMaximumSaleQuantity(false);
+            $stock->setIsInStock(true);
+            $stock->setLowStockDate('2017-12-17');
+            $stock->setNotifyStockQuantity('0.2');
+            $stock->setUseConfigNotifyStockQuantity(false);
+            $stock->setManageStock(true);
+            $stock->setUseConfigManageStock(false);
+            $stock->setStockStatusChangedAuto(true);
+            $stock->setUseConfigQuantityIncrements(false);
+            $stock->setQuantityIncrements(0.1);
+            $stock->setUseConfigEnableQuantityIncrements(false);
+            $stock->setEnableQuantityIncrements(true);
+            $stock->setIsDecimalDivided(true);
+
+            $newValues = [
+                'qty' => '1.5000',
+                'min_qty' => '1.0000',
+                'use_config_min_qty' => '0',
+                'is_qty_decimal' => '1',
+                'backorders' => '1',
+                'use_config_backorders' => '0',
+                'min_sale_qty' => '0.1000',
+                'use_config_min_sale_qty' => '0',
+                'max_sale_qty' => '10.5000',
+                'use_config_max_sale_qty' => '0',
+                'is_in_stock' => '1',
+                'low_stock_date' => '2017-12-17 00:00:00',
+                'notify_stock_qty' => '0.200',
+                'use_config_notify_stock_qty' => '0',
+                'manage_stock' => '1',
+                'use_config_manage_stock' => '0',
+                'stock_status_changed_auto' => '1',
+                'use_config_qty_increments' => '0',
+                'qty_increments' => '0.1000',
+                'use_config_enable_qty_inc' => '0',
+                'enable_qty_increments' => '1',
+                'is_decimal_divided' => '1'
+            ];
+
+            $importer->importSimpleProduct($product2);
+            $importer->flush();
+
+            // quantity + default values
+            $this->assertEquals([], $errors);
+            $this->assertEquals($newValues, $this->getStockData($product2->id));
+
+        } catch (Exception $e) {
+            $this->assertTrue(false);
+        }
+
+    }
+
+    protected function getStockData($productId)
+    {
+        $data = self::$db->fetchRow("
+            SELECT
+                `qty`,
+                `min_qty`,
+                `use_config_min_qty`,
+                `is_qty_decimal`,
+                `backorders`,
+                `use_config_backorders`,
+                `min_sale_qty`,
+                `use_config_min_sale_qty`,
+                `max_sale_qty`,
+                `use_config_max_sale_qty`,
+                `is_in_stock`,
+                `low_stock_date`,
+                `notify_stock_qty`,
+                `use_config_notify_stock_qty`,
+                `manage_stock`,
+                `use_config_manage_stock`,
+                `stock_status_changed_auto`,
+                `use_config_qty_increments`,
+                `qty_increments`,
+                `use_config_enable_qty_inc`,
+                `enable_qty_increments`,
+                `is_decimal_divided`
+            FROM " . self::$metaData->stockItemTable . "
+            WHERE product_id = " . $productId . " AND website_id = 0
+        ");
+
+        return $data;
     }
 }

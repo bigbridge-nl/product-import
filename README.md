@@ -14,6 +14,7 @@ After an import has completed, the product and category indexers need to be run.
 
 * import of product data (new and updates, based on sku)
 * automatic category generation (no updates)
+* automatic attribute option creation
 * import of images from file or url
 * unique url_key generation
 * dry run (no writes to the database)
@@ -114,6 +115,23 @@ You can set any attribute by calling a setter, like this
 and set a custom attribute like this
 
     $product->storeView('nl')->setCustomAttribute('door_count', '3');
+
+## Automatic attribute option creation
+
+The library will create options for attributes, if they do not exist, but only for attributes listed in the config array:
+
+    $config->autoCreateAttributeOptions(['color_code', 'length']);
+
+## Stock item
+
+Inventory information (stock) is kept in a separate table. Currently Magento supports only a single (Default) stock.
+
+Stock information can be entered this way:
+
+    $product->defaultStockItem()->setQuantity('100');
+    $product->defaultStockItem()->setIsInStock(true);
+
+The other 20 stock info attributes are available as well.
 
 ## Errors
 

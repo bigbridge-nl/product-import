@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\ProductStockItem;
 use IntlChar;
 use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Api\ProductStoreView;
@@ -71,9 +72,8 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 
             // plain
             [['price' => '123.95'], true, ""],
-            [['price' => '-123.95'], false, "price is not a positive decimal number with dot (-123.95)"],
             // corrupt
-            [['price' => '123,95'], false, "price is not a positive decimal number with dot (123,95)"],
+            [['price' => '123,95'], false, "price is not a decimal number with dot (123,95)"],
 
             /* non-eav fields */
 
@@ -183,6 +183,41 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $global->setName("Big Blue Box");
             $global->setPrice("123.00");
             $product->addImage($test[0]);
+
+            $validator->validate($product);
+            $this->assertEquals($test[1], implode('; ', $product->getErrors()));
+        }
+
+    }
+
+    public function testStockItemValidation()
+    {
+        /** @var Validator $validator */
+        $validator = ObjectManager::getInstance()->get(Validator::class);
+
+        $tests = [
+            [['qty' => 'nul'], "qty is not a decimal number with dot (nul)"],
+            [['low_stock_date' => '4th of July'], "low_stock_date is not a MySQL date or date time (4th of July)"],
+        ];
+
+        foreach ($tests as $test) {
+
+            $product = new SimpleProduct('validator-product-import');
+            $product->setAttributeSetId(4);
+
+            $global = $product->global();
+            $global->setName("Big Blue Box");
+            $global->setPrice("123.00");
+
+            $stock = $product->defaultStockItem();
+
+            foreach ($test[0] as $name => $value) {
+                if ($name == ProductStockItem::QTY) {
+                    $stock->setQuantity($value);
+                } elseif ($name == ProductStockItem::LOW_STOCK_DATE) {
+                    $stock->setLowStockDate($value);
+                }
+            }
 
             $validator->validate($product);
             $this->assertEquals($test[1], implode('; ', $product->getErrors()));
