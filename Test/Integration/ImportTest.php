@@ -811,6 +811,20 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals([], $errors);
             $this->assertEquals($newValues, $this->getStockData($product2->id));
 
+            // update
+
+            $product3 = new SimpleProduct("woodstock-product-import");
+            $stock = $product3->defaultStockItem();
+            $stock->setQuantity('1.4');
+
+            $importer->importSimpleProduct($product3);
+            $importer->flush();
+
+            $newValues = array_merge($newValues, ['qty' => '1.4000']);
+            $this->assertEquals([], $errors);
+            $this->assertEquals($newValues, $this->getStockData($product3->id));
+
+
         } catch (Exception $e) {
             $this->assertTrue(false);
         }
