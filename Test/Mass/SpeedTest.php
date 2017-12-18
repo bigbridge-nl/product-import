@@ -77,7 +77,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
         $this->assertLessThan(0.02, $time);
-        $this->assertLessThan(400, $memory); // cached metadata
+        $this->assertLessThan(458, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -95,8 +95,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(5.7, $time);
-        $this->assertLessThan(540, $memory); // the size of the last $product
+        $this->assertLessThan(6.5, $time);
+        $this->assertLessThan(541, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -116,7 +116,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(7.9, $time);
+        $this->assertLessThan(8.9, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);
@@ -160,7 +160,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setTaxClassName('Taxable Goods');
             $global->generateUrlKey();
 
-#todo add stock item
+            $stock = $product->defaultStockItem();
+            $stock->setQuantity(100);
+            $stock->setIsInStock(true);
 
             $importer->importSimpleProduct($product);
         }
@@ -197,6 +199,10 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setVisibility(ProductStoreView::VISIBILITY_NOT_VISIBLE);
             $global->setTaxClassName('Retail Customer');
             $global->generateUrlKey();
+
+            $stock = $product->defaultStockItem();
+            $stock->setQuantity(98);
+            $stock->setIsInStock(true);
 
             $importer->importSimpleProduct($product);
         }
