@@ -95,8 +95,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(5.1, $time);
-        $this->assertLessThan(447, $memory); // the size of the last $product
+        $this->assertLessThan(5.7, $time);
+        $this->assertLessThan(540, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -116,7 +116,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(8.1, $time);
+        $this->assertLessThan(7.9, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);
@@ -155,9 +155,12 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setSpecialPrice("1.25");
             $global->setSpecialFromDate("2017-10-22");
             $global->setSpecialToDate("2017-10-28");
+            $global->setCost("0.1");
             $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
             $global->setTaxClassName('Taxable Goods');
             $global->generateUrlKey();
+
+#todo add stock item
 
             $importer->importSimpleProduct($product);
         }
@@ -190,6 +193,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setSpecialPrice("1.15");
             $global->setSpecialFromDate("2017-12-10");
             $global->setSpecialToDate("2017-12-20");
+            $global->setCost("0.2");
             $global->setVisibility(ProductStoreView::VISIBILITY_NOT_VISIBLE);
             $global->setTaxClassName('Retail Customer');
             $global->generateUrlKey();

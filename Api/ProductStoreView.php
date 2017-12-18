@@ -27,6 +27,7 @@ class ProductStoreView
     const ATTR_URL_KEY = 'url_key';
     const ATTR_TAX_CLASS_ID = 'tax_class_id';
     const ATTR_PRICE = 'price';
+    const ATTR_COST = 'cost';
     const ATTR_STATUS = 'status';
     const ATTR_DESCRIPTION = 'description';
     const ATTR_SHORT_DESCRIPTION = 'short_description';
@@ -108,6 +109,14 @@ class ProductStoreView
     public function setPrice(string $price)
     {
         $this->attributes[self::ATTR_PRICE] = trim($price);
+    }
+
+    /**
+     * @param string $cost A 12.4 decimal field
+     */
+    public function setCost(string $cost)
+    {
+        $this->attributes[self::ATTR_COST] = trim($cost);
     }
 
     public function setVisibility(int $visibility)
