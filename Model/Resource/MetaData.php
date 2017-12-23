@@ -32,6 +32,10 @@ class MetaData
     const MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE = 'catalog_product_entity_media_gallery_value_to_entity';
     const MEDIA_GALLERY_VALUE_TABLE = 'catalog_product_entity_media_gallery_value';
     const STOCK_ITEM_TABLE = 'cataloginventory_stock_item';
+    const CATALOG_PRODUCT_SUPER_ATTRIBUTE_TABLE = 'catalog_product_super_attribute';
+    const CATALOG_PRODUCT_SUPER_ATTRIBUTE_LABEL_TABLE = 'catalog_product_super_attribute_label';
+    const CATALOG_PRODUCT_SUPER_LINK_TABLE = 'catalog_product_super_link';
+    const CATALOG_PRODUCT_RELATION_TABLE = 'catalog_product_relation';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -76,6 +80,18 @@ class MetaData
 
     /** @var string */
     public $stockItemTable;
+
+    /** @var string */
+    public $superAttributeTable;
+
+    /** @var string */
+    public $superAttributeLabelTable;
+
+    /** @var string */
+    public $superLinkTable;
+
+    /** @var string */
+    public $relationTable;
 
     /** @var  int */
     public $defaultCategoryAttributeSetId;
@@ -134,6 +150,10 @@ class MetaData
         $this->mediaGalleryValueToEntityTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE);
         $this->mediaGalleryValueTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TABLE);
         $this->stockItemTable = $db->getFullTableName(self::STOCK_ITEM_TABLE);
+        $this->superAttributeTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_ATTRIBUTE_TABLE);
+        $this->superAttributeLabelTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_ATTRIBUTE_LABEL_TABLE);
+        $this->superLinkTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_LINK_TABLE);
+        $this->relationTable = $db->getFullTableName(self::CATALOG_PRODUCT_RELATION_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();

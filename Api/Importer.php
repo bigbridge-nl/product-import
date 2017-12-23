@@ -7,6 +7,10 @@ use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;
 
 /**
+ * This class implements the batch operation.
+ * Each batch performs inserts / updates of products of the same type (i.e. all products are either simples or configurables, not a mix of them).
+ * For speed it is important that all products in the batch can be treated the same.
+ *
  * @author Patrick van Bergen
  */
 class Importer
@@ -59,6 +63,10 @@ class Importer
      */
     public function importConfigurableProduct(ConfigurableProduct $product)
     {
+        foreach ($product->getVariants() as $simple) {
+            $this->importSimpleProduct($simple);
+        }
+
         $this->configurableProducts[] = $product;
         if (count($this->configurableProducts) == $this->config->batchSize) {
             $this->flushSimpleProducts();
@@ -82,13 +90,16 @@ class Importer
      */
     private function flushSimpleProducts()
     {
-        $this->simpleStorage->storeSimpleProducts($this->simpleProducts, $this->config, $this->valueSerializer);
+        $this->simpleStorage->storeProducts($this->simpleProducts, $this->config, $this->valueSerializer);
         $this->simpleProducts = [];
     }
 
+    /**
+     * @throws \Exception
+     */
     private function flushConfigurableProducts()
     {
-        $this->configurableStorage->storeConfigurableProducts($this->configurableProducts, $this->config);
+        $this->configurableStorage->storeProducts($this->configurableProducts, $this->config, $this->valueSerializer);
         $this->configurableProducts = [];
     }
 }

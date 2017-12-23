@@ -182,6 +182,7 @@ class Magento2DbConnection
      */
     public function fetchAllNumber(string $query)
     {
+#echo $query . "\n";
         $a = microtime(true);
 
         $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_NUM);

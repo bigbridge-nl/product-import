@@ -76,3 +76,7 @@ bundle_weight_type
 bundle_values
 bundle_shipment_type
 associated_skus
+
+## Ever?
+
+* product options

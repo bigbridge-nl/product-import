@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Api\ProductStoreView;
 use Exception;
 use Magento\Framework\App\ObjectManager;
@@ -824,11 +825,9 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals([], $errors);
             $this->assertEquals($newValues, $this->getStockData($product3->id));
 
-
         } catch (Exception $e) {
             $this->assertTrue(false);
         }
-
     }
 
     protected function getStockData($productId)
@@ -862,5 +861,174 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         ");
 
         return $data;
+    }
+
+    public function testImportConfigurable()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $simple1 = new SimpleProduct('bricks-red-redweiser-product-import');
+        $global = $simple1->global();
+        $global->setName("Bricks Red Redweiser");
+        $global->setPrice('99.00');
+
+        $simple2 = new SimpleProduct('bricks-red-scotts-product-import');
+        $global = $simple2->global();
+        $global->setName("Bricks Red Scotts");
+        $global->setPrice('89.00');
+
+        $simple3 = new SimpleProduct('bricks-orange-scotts-product-import');
+        $global = $simple3->global();
+        $global->setName("Bricks Orange Scotts");
+        $global->setPrice('90.00');
+
+        $configurable = new ConfigurableProduct('scotts-product-import', ['color', 'manufacturer'], [
+            $simple1,
+            $simple2,
+            $simple3
+        ]);
+        $global = $configurable->global();
+        $global->setName("Bricks");
+        $global->setPrice('90.00');
+
+        $importer->importConfigurableProduct($configurable);
+        $importer->flush();
+
+        $colorAttributeId = self::$metaData->productEavAttributeInfo['color']->attributeId;
+        $manufacturerAttributeId = self::$metaData->productEavAttributeInfo['manufacturer']->attributeId;
+
+        $attributeData = [
+            [$configurable->id, $colorAttributeId, '0'],
+            [$configurable->id, $manufacturerAttributeId, '1'],
+        ];
+
+        $labelData = [
+            ['0', '0', 'Color'],
+            ['0', '0', 'Manufacturer'],
+        ];
+
+        $linkData = [
+            [$simple1->id, $configurable->id],
+            [$simple2->id, $configurable->id],
+            [$simple3->id, $configurable->id],
+        ];
+
+        $relationData = [
+            [$configurable->id, $simple1->id],
+            [$configurable->id, $simple2->id],
+            [$configurable->id, $simple3->id],
+        ];
+
+        $this->assertEquals([], $errors);
+        $this->checkConfigurableData($configurable->id, $attributeData, $labelData, $linkData, $relationData);
+
+        $superAttributeIds = self::$db->fetchSingleColumn("
+            SELECT product_super_attribute_id
+            FROM " . self::$metaData->superAttributeTable . "
+            WHERE product_id = {$configurable->id}
+            ORDER BY position
+        ");
+
+        // no change
+
+        $importer->importConfigurableProduct($configurable);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+        $this->checkConfigurableData($configurable->id, $attributeData, $labelData, $linkData, $relationData);
+
+        $newSuperAttributeIds = self::$db->fetchSingleColumn("
+            SELECT product_super_attribute_id
+            FROM " . self::$metaData->superAttributeTable . "
+            WHERE product_id = {$configurable->id}
+            ORDER BY position
+        ");
+
+        // the super attributes must not have been touched
+        $this->assertEquals($newSuperAttributeIds, $superAttributeIds);
+
+        // change super attribute and simples
+
+        $configurable = new ConfigurableProduct('scotts-product-import', ['color'], [
+            $simple1,
+            $simple2
+        ]);
+        $global = $configurable->global();
+        $global->setName("Bricks");
+        $global->setPrice('90.00');
+
+        $importer->importConfigurableProduct($configurable);
+        $importer->flush();
+
+        $attributeData = [
+            [$configurable->id, $colorAttributeId, '0']
+        ];
+
+        $labelData = [
+            ['0', '0', 'Color']
+        ];
+
+        $linkData = [
+            [$simple1->id, $configurable->id],
+            [$simple2->id, $configurable->id],
+        ];
+
+        $relationData = [
+            [$configurable->id, $simple1->id],
+            [$configurable->id, $simple2->id],
+        ];
+
+        $this->assertEquals([], $errors);
+        $this->checkConfigurableData($configurable->id, $attributeData, $labelData, $linkData, $relationData);
+    }
+
+    private function checkConfigurableData($configurableId, $attributeData, $labelData, $linkData, $relationData)
+    {
+        $data = self::$db->fetchAllNumber("
+            SELECT product_id, attribute_id, position
+            FROM " . self::$metaData->superAttributeTable . "
+            WHERE product_id = {$configurableId}
+            ORDER BY position
+        ");
+
+        $superAttributeIds = self::$db->fetchSingleColumn("
+            SELECT product_super_attribute_id
+            FROM " . self::$metaData->superAttributeTable . "
+            WHERE product_id = {$configurableId}
+        ");
+
+        $this->assertEquals($attributeData, $data);
+
+        $data = self::$db->fetchAllNumber("
+            SELECT store_id, use_default, value
+            FROM " . self::$metaData->superAttributeLabelTable . "
+            WHERE product_super_attribute_id IN (" . implode(", ", $superAttributeIds) . ")
+        ");
+
+        $this->assertEquals($labelData, $data);
+
+        $data = self::$db->fetchAllNumber("
+            SELECT product_id, parent_id
+            FROM " . self::$metaData->superLinkTable . "
+            WHERE parent_id = {$configurableId}
+        ");
+
+        $this->assertEquals($linkData, $data);
+
+        $data = self::$db->fetchAllNumber("
+            SELECT parent_id, child_id
+            FROM " . self::$metaData->relationTable . "
+            WHERE parent_id = {$configurableId}
+        ");
+
+        $this->assertSame($relationData, $data);
     }
 }

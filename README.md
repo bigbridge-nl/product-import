@@ -32,6 +32,10 @@ New products will be given the following default values, if they are not specifi
 * status: Disabled
 * tax class: "Taxable Goods"
 
+## Mutation mode
+
+The library only supports the insert/update mode. It does not remove or replace items.
+
 ## Example Code
 
 ### Basic
