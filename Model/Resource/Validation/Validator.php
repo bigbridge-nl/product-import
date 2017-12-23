@@ -1,9 +1,11 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Api\ProductStockItem;
+use BigBridge\ProductImport\Model\Resource\ImageValidator;
+use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
  * @author Patrick van Bergen

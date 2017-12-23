@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Api\SimpleProduct;
 
 /**
@@ -13,14 +12,6 @@ class SimpleStorage extends ProductStorage
     public function getType()
     {
         return 'simple';
-    }
-
-    /**
-     * @param SimpleProduct $product
-     */
-    public function performTypeSpecificValidation(Product $product)
-    {
-
     }
 
     /**

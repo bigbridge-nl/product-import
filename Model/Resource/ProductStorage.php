@@ -9,6 +9,7 @@ use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
+use BigBridge\ProductImport\Model\Resource\Validation\Validator;
 use Exception;
 
 /**
@@ -80,11 +81,6 @@ abstract class ProductStorage
     }
 
     /**
-     * @param Product $product
-     */
-    public abstract function performTypeSpecificValidation(Product $product);
-
-    /**
      * @param Product[] $insertProducts
      * @param Product[] $updateProducts
      * @return
@@ -143,8 +139,6 @@ abstract class ProductStorage
 
             // checks all attributes, changes $product->errors
             $this->validator->validate($product);
-
-            $this->performTypeSpecificValidation($product);
 
             if (!$product->isOk()) {
                 continue;

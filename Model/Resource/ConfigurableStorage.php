@@ -3,13 +3,28 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\ConfigurableProduct;
-use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
+use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
+use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
 
 /**
  * @author Patrick van Bergen
  */
 class ConfigurableStorage extends ProductStorage
 {
+    public function __construct(
+        Magento2DbConnection $db,
+        MetaData $metaData,
+        ConfigurableValidator $validator,
+        ReferenceResolver $referenceResolver,
+        UrlKeyGenerator $urlKeyGenerator,
+        UrlRewriteStorage $urlRewriteStorage,
+        ImageStorage $imageStorage)
+    {
+        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $imageStorage);
+    }
+
     public function getType()
     {
         return 'configurable';
@@ -23,24 +38,6 @@ class ConfigurableStorage extends ProductStorage
     public function getRequiredOptions()
     {
         return '1';
-    }
-
-    /**
-     * @param ConfigurableProduct $product
-     */
-    public function performTypeSpecificValidation(Product $product)
-    {
-        $skus = [];
-
-        foreach ($product->getVariants() as $variant) {
-            if (!$variant->isOk()) {
-                $skus[] = $variant->getSku();
-            }
-        }
-
-        if (!empty($skus)) {
-            $product->addError("These variants have errors: " . implode(', ', $skus));
-        }
     }
 
     /**

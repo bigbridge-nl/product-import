@@ -2,11 +2,13 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use BigBridge\ProductImport\Api\ProductStockItem;
 use IntlChar;
 use Magento\Framework\App\ObjectManager;
+use BigBridge\ProductImport\Api\ConfigurableProduct;
+use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
+use BigBridge\ProductImport\Api\ProductStockItem;
 use BigBridge\ProductImport\Api\ProductStoreView;
-use BigBridge\ProductImport\Model\Resource\Validator;
+use BigBridge\ProductImport\Model\Resource\Validation\Validator;
 use BigBridge\ProductImport\Api\SimpleProduct;
 use BigBridge\ProductImport\Api\ImporterFactory;
 
@@ -222,6 +224,48 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $validator->validate($product);
             $this->assertEquals($test[1], implode('; ', $product->getErrors()));
         }
+    }
 
+    public function testConfigurableValidator()
+    {
+        /** @var ConfigurableValidator $configurableValidator */
+        $configurableValidator = ObjectManager::getInstance()->get(ConfigurableValidator::class);
+        /** @var Validator $validator */
+        $validator = ObjectManager::getInstance()->get(Validator::class);
+
+        $simple1 = new SimpleProduct('bricks-red-redweiser-product-import');
+        $simple1->setAttributeSetId(4);
+        $global = $simple1->global();
+        $global->setName("Bricks Red Redweiser");
+        $global->setPrice('99.00');
+
+        $simple2 = new SimpleProduct('bricks-red-scotts-product-import');
+        $simple2->setAttributeSetId(4);
+        $global = $simple2->global();
+        // note: missing name
+        $global->setPrice('89.00');
+
+        $simple3 = new SimpleProduct('bricks-orange-scotts-product-import');
+        $simple3->setAttributeSetId(4);
+        $global = $simple3->global();
+        $global->setName("Bricks Orange Scotts");
+        $global->setPrice('90.00');
+
+        $configurable = new ConfigurableProduct('scotts-product-import', ['color', 'manufacturer'], [
+            $simple1,
+            $simple2,
+            $simple3
+        ]);
+        $configurable->setAttributeSetId(4);
+        $global = $configurable->global();
+        $global->setName("Bricks");
+        $global->setPrice('90.00');
+
+        $validator->validate($simple1);
+        $validator->validate($simple2);
+        $validator->validate($simple3);
+        $configurableValidator->validate($configurable);
+
+        $this->assertSame(["These variants have errors: bricks-red-scotts-product-import"], $configurable->getErrors());
     }
 }
