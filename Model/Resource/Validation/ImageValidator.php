@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Product;
 
