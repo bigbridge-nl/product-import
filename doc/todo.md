@@ -43,9 +43,6 @@ Check ho_import, for compatibility
 
 product_type
 product_online
-meta_title
-meta_keywords
-meta_description
 new_from_date
 new_to_date
 display_product_options_in

@@ -1037,4 +1037,27 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($relationData, $data);
     }
+
+    public function testSelectAttributes()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+
+        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct("ducky1-product-import");
+        $global = $product1->global();
+        $global->setName("Ducky 1");
+        $global->setPrice('1.00');
+
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+    }
 }

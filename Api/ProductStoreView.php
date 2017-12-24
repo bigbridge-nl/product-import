@@ -6,6 +6,7 @@ use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
 use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
 use BigBridge\ProductImport\Model\Resource\Reference\Reference;
+use BigBridge\ProductImport\Model\Resource\Reference\References;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 
@@ -62,6 +63,12 @@ class ProductStoreView
 
     /** @var array  */
     protected $attributes = [];
+
+    /** @var Reference[]  */
+    protected $unresolvedSelects = [];
+
+    /** @var References[]  */
+    protected $unresolvedMultipleSelects = [];
 
     public function setName(string $name)
     {
@@ -231,6 +238,22 @@ class ProductStoreView
     }
 
     /**
+     * @return array Attribute codes of selects whose option value names are given
+     */
+    public function getUnresolvedSelects()
+    {
+        return $this->unresolvedSelects;
+    }
+
+    /**
+     * @return array Attribute codes of multiple selects whose option value names are given
+     */
+    public function getUnresolvedMultipleSelects()
+    {
+        return $this->unresolvedMultipleSelects;
+    }
+
+    /**
      * Removes an attribute
      */
     public function removeAttribute(string $name)
@@ -271,5 +294,23 @@ class ProductStoreView
     public function getImageRoles()
     {
         return $this->imageRoles;
+    }
+
+    /**
+     * @param string $attributeCode
+     * @param string $option The admin name of the attribute option
+     */
+    public function setSelectAttribute(string $attributeCode, string $option)
+    {
+        $this->unresolvedSelects[trim($attributeCode)] = trim($option);
+    }
+
+    /**
+     * @param string $attributeCode
+     * @param array $option The admin names of the attribute options
+     */
+    public function setMultipleSelectAttribute(string $attributeCode, array $options)
+    {
+        $this->unresolvedMultipleSelects[trim($attributeCode)] = array_map('trim', $options);
     }
 }

@@ -47,6 +47,9 @@ class MetaData
     /** @var  Magento2DbConnection */
     protected $db;
 
+    /** @var string  */
+    public $entityTypeTable;
+
     /** @var  string  */
     public $productEntityTable;
 
@@ -91,6 +94,30 @@ class MetaData
 
     /** @var string */
     public $relationTable;
+
+    /** @var string  */
+    public $attributeTable;
+
+    /** @var string  */
+    public $catalogAttributeTable;
+
+    /** @var string  */
+    public $attributeOptionTable;
+
+    /** @var string */
+    public $attributeOptionValueTable;
+
+    /** @var string */
+    public $attributeSetTable;
+
+    /** @var string */
+    public $storeTable;
+
+    /** @var string */
+    public $websiteTable;
+
+    /** @var string */
+    public $taxClassTable;
 
     /** @var  int */
     public $defaultCategoryAttributeSetId;
@@ -138,6 +165,7 @@ class MetaData
     {
         $this->db = $db;
 
+        $this->entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
         $this->categoryEntityTable = $db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
         $this->urlRewriteTable = $db->getFullTableName(self::URL_REWRITE_TABLE);
@@ -153,6 +181,14 @@ class MetaData
         $this->superAttributeLabelTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_ATTRIBUTE_LABEL_TABLE);
         $this->superLinkTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_LINK_TABLE);
         $this->relationTable = $db->getFullTableName(self::CATALOG_PRODUCT_RELATION_TABLE);
+        $this->attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
+        $this->catalogAttributeTable = $this->db->getFullTableName(self::CATALOG_ATTRIBUTE_TABLE);
+        $this->attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);
+        $this->attributeOptionValueTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_VALUE_TABLE);
+        $this->attributeSetTable = $this->db->getFullTableName(self::ATTRIBUTE_SET_TABLE);
+        $this->storeTable = $this->db->getFullTableName(self::STORE_TABLE);
+        $this->websiteTable = $this->db->getFullTableName(self::WEBSITE_TABLE);
+        $this->taxClassTable = $this->db->getFullTableName(self::TAX_CLASS_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
@@ -182,8 +218,7 @@ class MetaData
      */
     protected function getDefaultCategoryAttributeSetId()
     {
-        $entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
-        $attributeSetId = $this->db->fetchSingleCell("SELECT `default_attribute_set_id` FROM {$entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
+        $attributeSetId = $this->db->fetchSingleCell("SELECT `default_attribute_set_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
         return $attributeSetId;
     }
 
@@ -194,8 +229,7 @@ class MetaData
      */
     protected function getProductEntityTypeId()
     {
-        $entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
-        $productEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$entityTypeTable} WHERE `entity_type_code` = 'catalog_product'");
+        $productEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_product'");
         return $productEntityTypeId;
     }
 
@@ -206,8 +240,7 @@ class MetaData
      */
     protected function getCategoryEntityTypeId()
     {
-        $entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
-        $categoryEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
+        $categoryEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
         return $categoryEntityTypeId;
     }
 
@@ -218,8 +251,7 @@ class MetaData
      */
     protected function getProductAttributeSetMap()
     {
-        $attributeSetTable = $this->db->getFullTableName(self::ATTRIBUTE_SET_TABLE);
-        $map = $this->db->fetchMap("SELECT `attribute_set_name`, `attribute_set_id` FROM {$attributeSetTable} WHERE `entity_type_id` = {$this->productEntityTypeId}");
+        $map = $this->db->fetchMap("SELECT `attribute_set_name`, `attribute_set_id` FROM {$this->attributeSetTable} WHERE `entity_type_id` = {$this->productEntityTypeId}");
         return $map;
     }
 
@@ -230,8 +262,7 @@ class MetaData
      */
     protected function getStoreViewMap()
     {
-        $storeTable = $this->db->getFullTableName(self::STORE_TABLE);
-        $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$storeTable}");
+        $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$this->storeTable}");
         return $map;
     }
 
@@ -242,8 +273,7 @@ class MetaData
      */
     protected function getWebsiteMap()
     {
-        $websiteTable = $this->db->getFullTableName(self::WEBSITE_TABLE);
-        $map = $this->db->fetchMap("SELECT `code`, `website_id` FROM {$websiteTable}");
+        $map = $this->db->fetchMap("SELECT `code`, `website_id` FROM {$this->websiteTable}");
         return $map;
     }
 
@@ -254,8 +284,7 @@ class MetaData
      */
     protected function getTaxClassMap()
     {
-        $taxClassTable = $this->db->getFullTableName(self::TAX_CLASS_TABLE);
-        $map = $this->db->fetchMap("SELECT `class_name`, `class_id` FROM {$taxClassTable}");
+        $map = $this->db->fetchMap("SELECT `class_name`, `class_id` FROM {$this->taxClassTable}");
         return $map;
     }
 
@@ -266,8 +295,7 @@ class MetaData
      */
     protected function getCategoryAttributeMap()
     {
-        $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
-        $map = $this->db->fetchMap("SELECT `attribute_code`, `attribute_id` FROM {$attributeTable} WHERE `entity_type_id` = {$this->categoryEntityTypeId}");
+        $map = $this->db->fetchMap("SELECT `attribute_code`, `attribute_id` FROM {$this->attributeTable} WHERE `entity_type_id` = {$this->categoryEntityTypeId}");
         return $map;
     }
     
@@ -276,16 +304,11 @@ class MetaData
      */
     protected function getProductEavAttributeInfo()
     {
-        $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
-        $attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);
-        $attributeOptionValueTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_VALUE_TABLE);
-        $catalogAttributeTable = $this->db->getFullTableName(self::CATALOG_ATTRIBUTE_TABLE);
-
         $optionValueRows = $this->db->fetchAllAssoc("
             SELECT A.`attribute_code`, O.`option_id`, V.`value`
-            FROM {$attributeTable} A
-            INNER JOIN {$attributeOptionTable} O ON O.attribute_id = A.attribute_id
-            INNER JOIN {$attributeOptionValueTable} V ON V.option_id = O.option_id
+            FROM {$this->attributeTable} A
+            INNER JOIN {$this->attributeOptionTable} O ON O.attribute_id = A.attribute_id
+            INNER JOIN {$this->attributeOptionValueTable} V ON V.option_id = O.option_id
             WHERE A.`entity_type_id` = {$this->productEntityTypeId} AND A.frontend_input IN ('select', 'multiselect') AND V.store_id = 0
         ");
 
@@ -296,8 +319,8 @@ class MetaData
 
         $rows = $this->db->fetchAllAssoc("
             SELECT A.`attribute_id`, A.`attribute_code`, A.`is_required`, A.`backend_type`, A.`frontend_input`, C.`is_global` 
-            FROM {$attributeTable} A
-            INNER JOIN {$catalogAttributeTable} C ON C.`attribute_id` = A.`attribute_id`
+            FROM {$this->attributeTable} A
+            INNER JOIN {$this->catalogAttributeTable} C ON C.`attribute_id` = A.`attribute_id`
             WHERE A.`entity_type_id` = {$this->productEntityTypeId} AND A.backend_type != 'static'");
 
         $info = [];
@@ -317,6 +340,38 @@ class MetaData
         }
 
         return $info;
+    }
+
+    public function addAttributeOption(string $attributeCode, string $optionName): int
+    {
+        $attributeId = $this->productEavAttributeInfo[$attributeCode]->attributeId;
+
+        $lastOrderIndex = $this->db->fetchSingleCell("
+            SELECT MAX(sort_order)
+            FROM {$this->attributeOptionTable}
+            WHERE attribute_id = $attributeId
+        ");
+
+        $sortOrder = is_null($lastOrderIndex) ? 1 : ($lastOrderIndex + 1);
+
+        $this->db->execute("
+            INSERT INTO {$this->attributeOptionTable}
+            SET attribute_id = $attributeId, sort_order = $sortOrder
+        ");
+
+        $optionId = $this->db->getLastInsertId();
+
+        // update cached values
+        $this->productEavAttributeInfo[$attributeCode]->optionValues[$optionName] = $optionId;
+
+        $dbValue = $this->db->quote($optionName);
+
+        $this->db->execute("
+            INSERT INTO {$this->attributeOptionValueTable}
+            SET option_id = $optionId, store_id = 0, value = {$dbValue}
+        ");
+
+        return $optionId;
     }
 
     protected function getMediaGalleryAttributeId()

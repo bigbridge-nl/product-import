@@ -11,6 +11,8 @@
 * catalog_product_entity_media_gallery_value_to_entity
 * catalog_product_entity_media_gallery_value
 * cataloginventory_stock_item
+* eav_attribute_option
+* eav_attribute_option_value
 
 ## Remarks
 

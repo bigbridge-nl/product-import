@@ -120,11 +120,21 @@ and set a custom attribute like this
 
     $product->storeView('nl')->setCustomAttribute('door_count', '3');
 
+## Select and multiple select attributes
+
+Values of Select attributes can only be entered with the admin name of the select option
+
+    $product->global()->setSelectAttribute('color', 'maroon);
+
+Values of Multiple Select attributes are entered as an array of admin names of options
+
+    $product->storeView('us')->setMultipleSelectAttribute('color_group', ['red', 'orange']);
+
 ## Automatic attribute option creation
 
-The library will create options for attributes, if they do not exist, but only for attributes listed in the config array:
+The library will create options for attributes if they do not exist, but only for attributes listed in the config array:
 
-    $config->autoCreateAttributeOptions(['color_code', 'length']);
+    $config->autoCreateAttributeOptions(['color_group', 'length']);
 
 ## Stock item
 

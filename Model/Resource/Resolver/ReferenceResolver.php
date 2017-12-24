@@ -23,24 +23,29 @@ class ReferenceResolver
     /** @var AttributeSetResolver */
     protected $attributeSetResolver;
 
-    /**@var StoreViewResolver */
+    /** @var StoreViewResolver */
     protected $storeViewResolver;
 
-    /**@var WebsiteResolver */
+    /** @var WebsiteResolver */
     protected $websiteResolver;
+
+    /** @var OptionResolver */
+    protected $optionResolver;
 
     public function __construct(
         CategoryImporter $categoryImporter,
         TaxClassResolver $taxClassResolver,
         AttributeSetResolver $attributeSetResolver,
         StoreViewResolver $storeViewResolver,
-        WebsiteResolver $websiteResolver)
+        WebsiteResolver $websiteResolver,
+        OptionResolver $optionResolver)
     {
         $this->categoryImporter = $categoryImporter;
         $this->taxClassResolver = $taxClassResolver;
         $this->attributeSetResolver = $attributeSetResolver;
         $this->storeViewResolver = $storeViewResolver;
         $this->websiteResolver = $websiteResolver;
+        $this->optionResolver = $optionResolver;
     }
 
     public function resolveIds(Product $product, ImportConfig $config)
@@ -93,6 +98,26 @@ class ReferenceResolver
                 } else {
                     $product->addError($error);
                     $storeView->removeAttribute('tax_class_id');
+                }
+            }
+
+            foreach ($storeView->getUnresolvedSelects() as $attribute => $optionName) {
+                list ($id, $error) = $this->optionResolver->resolveOption($attribute, $optionName, $config->autoCreateOptionAttributes);
+                if ($error === "") {
+                    $storeView->setSelectAttribute($attribute, $id);
+                } else {
+                    $product->addError($error);
+                    $storeView->removeAttribute($attribute);
+                }
+            }
+
+            foreach ($storeView->getUnresolvedMultipleSelects() as $attribute => $optionNames) {
+                list ($ids, $error) = $this->optionResolver->resolveOptions($attribute, $optionNames, $config->autoCreateOptionAttributes);
+                if ($error === "") {
+                    $storeView->setSelectAttribute($attribute, implode(',', $ids));
+                } else {
+                    $product->addError($error);
+                    $storeView->removeAttribute($attribute);
                 }
             }
         }

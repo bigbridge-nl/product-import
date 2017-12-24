@@ -43,6 +43,13 @@ class ImportConfig
     public $autoCreateCategories = true;
 
     /**
+     * An array of attribute codes of select or multiple select attributes whose options should be created by the import if they did not exist.
+     *
+     * @var array
+     */
+    public $autoCreateOptionAttributes = [];
+
+    /**
      * Create url keys based on name or sku?
      *
      * @var string
