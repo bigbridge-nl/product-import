@@ -14,6 +14,7 @@ class EavAttributeInfo
     const SCOPE_WEBSITE = 2;
 
     const FRONTEND_SELECT = 'select';
+    const FRONTEND_MEDIA_IMAGE = 'media_image';
 
     /** @var  string */
     public $attributeCode;

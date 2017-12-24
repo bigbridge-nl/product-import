@@ -189,7 +189,29 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             $validator->validate($product);
             $this->assertEquals($test[1], implode('; ', $product->getErrors()));
         }
+    }
 
+    public function testImageRoleValidation()
+    {
+        /** @var Validator $validator */
+        $validator = ObjectManager::getInstance()->get(Validator::class);
+
+        $product = new SimpleProduct('validator-product-import');
+        $product->setAttributeSetId(4);
+
+        $global = $product->global();
+        $global->setName("Big Blue Box");
+        $global->setPrice("123.00");
+
+        $image = $product->addImage(__DIR__ . "/../images/duck1.jpg");
+        $product->global()->setImageRole($image, 'not-an-attribute');
+        $product->global()->setImageRole($image, 'name');
+
+        $validator->validate($product);
+        $this->assertEquals([
+            "Image role attribute does not exist: not-an-attribute",
+            "Image role attribute input type is not media image: name"
+        ], $product->getErrors());
     }
 
     public function testStockItemValidation()

@@ -4,11 +4,11 @@ Many things, some of which are:
 
 ## To be supported
 
-* check if the attribute of setImageRole is an existing media image attribute
-
+* resolve attribute values by name
+* multiple select attributes
+* auto add attribute option
 * all types of products
 * tier prices
-* auto add attribute option
 * csv import
 * rest request
 * trim: none, all except text fields
