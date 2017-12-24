@@ -238,18 +238,23 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $global = $simple1->global();
         $global->setName("Bricks Red Redweiser");
         $global->setPrice('99.00');
+        $global->setCustomAttribute('color', 1);
+        $global->setCustomAttribute('manufacturer', 1);
 
         $simple2 = new SimpleProduct('bricks-red-scotts-product-import');
         $simple2->setAttributeSetId(4);
         $global = $simple2->global();
         // note: missing name
         $global->setPrice('89.00');
+        $global->setCustomAttribute('manufacturer', 1);
 
         $simple3 = new SimpleProduct('bricks-orange-scotts-product-import');
         $simple3->setAttributeSetId(4);
         $global = $simple3->global();
         $global->setName("Bricks Orange Scotts");
         $global->setPrice('90.00');
+        $global->setCustomAttribute('color', 1);
+        $global->setCustomAttribute('manufacturer', 1);
 
         $configurable = new ConfigurableProduct('scotts-product-import', ['color', 'manufacturer'], [
             $simple1,
@@ -266,6 +271,25 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
         $validator->validate($simple3);
         $configurableValidator->validate($configurable);
 
-        $this->assertSame(["These variants have errors: bricks-red-scotts-product-import"], $configurable->getErrors());
+        $this->assertSame([
+            "These variants have errors: bricks-red-scotts-product-import",
+            "Variant bricks-red-scotts-product-import does not have a value for color",
+            "The variants bricks-orange-scotts-product-import and bricks-red-redweiser-product-import have the same combination of super attributes: 1-1",
+        ], $configurable->getErrors());
+
+        // ----
+
+        $configurable = new ConfigurableProduct('scotts-product-import', [], []);
+        $configurable->setAttributeSetId(4);
+        $global = $configurable->global();
+        $global->setName("Bricks");
+        $global->setPrice('90.00');
+
+        $configurableValidator->validate($configurable);
+
+        $this->assertSame([
+            "Specify at least 1 super attribute",
+            "Specify at least 1 variant"
+        ], $configurable->getErrors());
     }
 }

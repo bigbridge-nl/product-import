@@ -6,9 +6,7 @@ Many things, some of which are:
 
 * check if the attribute of setImageRole is an existing media image attribute
 
-* import text entries per row
 * all types of products
-* stock
 * tier prices
 * auto add attribute option
 * csv import

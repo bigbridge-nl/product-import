@@ -9,6 +9,12 @@ namespace BigBridge\ProductImport\Model\Data;
  */
 class EavAttributeInfo
 {
+    const SCOPE_STORE_VIEW = 0;
+    const SCOPE_GLOBAL = 1;
+    const SCOPE_WEBSITE = 2;
+
+    const FRONTEND_SELECT = 'select';
+
     /** @var  string */
     public $attributeCode;
 
@@ -30,7 +36,10 @@ class EavAttributeInfo
     /** @var  string */
     public $tableName;
 
-    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string  $backendType, string $tableName, $frontendInput, array $optionValues)
+    /** @var int */
+    public $scope;
+
+    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string  $backendType, string $tableName, $frontendInput, array $optionValues, int $scope)
     {
         $this->attributeCode = $attributeCode;
         $this->attributeId = $attributeId;
@@ -39,5 +48,6 @@ class EavAttributeInfo
         $this->tableName = $tableName;
         $this->frontendInput = $frontendInput;
         $this->optionValues = $optionValues;
+        $this->scope = $scope;
     }
 }

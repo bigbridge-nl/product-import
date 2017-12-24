@@ -24,6 +24,7 @@ class MetaData
     const ATTRIBUTE_TABLE = 'eav_attribute';
     const ATTRIBUTE_OPTION_TABLE = 'eav_attribute_option';
     const ATTRIBUTE_OPTION_VALUE_TABLE = 'eav_attribute_option_value';
+    const CATALOG_ATTRIBUTE_TABLE = 'catalog_eav_attribute';
     const STORE_TABLE = 'store';
     const WEBSITE_TABLE = 'store_website';
     const TAX_CLASS_TABLE = 'tax_class';
@@ -42,8 +43,6 @@ class MetaData
     const TYPE_INTEGER = 'int';
     const TYPE_VARCHAR = 'varchar';
     const TYPE_TEXT = 'text';
-
-    const FRONTEND_SELECT = 'select';
 
     /** @var  Magento2DbConnection */
     protected $db;
@@ -280,6 +279,7 @@ class MetaData
         $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
         $attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);
         $attributeOptionValueTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_VALUE_TABLE);
+        $catalogAttributeTable = $this->db->getFullTableName(self::CATALOG_ATTRIBUTE_TABLE);
 
         $optionValueRows = $this->db->fetchAllAssoc("
             SELECT A.`attribute_code`, O.`option_id`, V.`value`
@@ -295,9 +295,10 @@ class MetaData
         }
 
         $rows = $this->db->fetchAllAssoc("
-            SELECT `attribute_id`, `attribute_code`, `is_required`, `backend_type`, `frontend_input` 
-            FROM {$attributeTable} 
-            WHERE `entity_type_id` = {$this->productEntityTypeId} AND backend_type != 'static'");
+            SELECT A.`attribute_id`, A.`attribute_code`, A.`is_required`, A.`backend_type`, A.`frontend_input`, C.`is_global` 
+            FROM {$attributeTable} A
+            INNER JOIN {$catalogAttributeTable} C ON C.`attribute_id` = A.`attribute_id`
+            WHERE A.`entity_type_id` = {$this->productEntityTypeId} AND A.backend_type != 'static'");
 
         $info = [];
         foreach ($rows as $row) {
@@ -311,7 +312,8 @@ class MetaData
                 $row['backend_type'],
                 $this->productEntityTable . '_' . $row['backend_type'],
                 $row['frontend_input'],
-                $optionValues);
+                $optionValues,
+                $row['is_global']);
         }
 
         return $info;

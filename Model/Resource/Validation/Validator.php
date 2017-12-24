@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Api\ProductStockItem;
+use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Resource\Validation\ImageValidator;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -119,7 +120,7 @@ class Validator
                             $product->addError($eavAttribute . " is not an integer (" . $value . ")");
                         } else {
                             // validate possible options
-                            if ($info->frontendInput === MetaData::FRONTEND_SELECT) {
+                            if ($info->frontendInput === EavAttributeInfo::FRONTEND_SELECT) {
                                 if (!array_key_exists($value, $info->optionValues)) {
                                     //                                      $product->addError("illegal value for " . $eavAttribute . " status: (" . $value  . "), 3 (allowed = " . implode(", ", $info->optionValues) . ")"(;
                                 }

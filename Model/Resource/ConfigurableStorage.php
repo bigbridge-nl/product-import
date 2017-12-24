@@ -139,6 +139,7 @@ class ConfigurableStorage extends ProductStorage
 
     /**
      * @param ConfigurableProduct[] $products
+     * @return array
      */
     protected function collectChangedSuperAttributes(array $products)
     {

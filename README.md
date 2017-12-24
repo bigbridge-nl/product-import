@@ -137,6 +137,26 @@ Stock information can be entered this way:
 
 The other 20 stock info attributes are available as well.
 
+## Configurables
+
+Configurable products are defined as the configuration of configuration attributes and variants
+
+Given some simple products (SimpleProduct, here: $simple1, $simple2, $simple3), they can be combined to form a configurable with:
+
+    $configurable = new ConfigurableProduct('scottish-table', ['color', 'weight'], [
+        $simple1,
+        $simple2,
+        $simple3
+    ]);
+
+Here the configurable with sku 'scottish-table' defines two "super attributes": color and weight. The attributes must have global scope and input type Dropdown.
+
+The three simples each need to have a unique combination of attribute values for these super attributes.
+
+Importing is done with
+
+    $importer->importConfigurableProduct($configurable);
+
 ## Errors
 
 The library detects problems in the input in its id-resolution and validation phrases. When it does, it adds descriptive error messages to the product this is processed.
@@ -146,6 +166,8 @@ A product that one or more errors is not imported. Errors can be inspected via a
     $config->resultCallback[] = function(Product $product)) {
         $errors = $product->getErrors();
     }
+
+Callbacks are called in the order that the products were added. However, configurables are collected in a different set from simples, and will be processed at a later time.
 
 ### Categories
 

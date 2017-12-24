@@ -879,16 +879,22 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $global = $simple1->global();
         $global->setName("Bricks Red Redweiser");
         $global->setPrice('99.00');
+        $global->setCustomAttribute('color', 1);
+        $global->setCustomAttribute('manufacturer', 1);
 
         $simple2 = new SimpleProduct('bricks-red-scotts-product-import');
         $global = $simple2->global();
         $global->setName("Bricks Red Scotts");
         $global->setPrice('89.00');
+        $global->setCustomAttribute('color', 2);
+        $global->setCustomAttribute('manufacturer', 1);
 
         $simple3 = new SimpleProduct('bricks-orange-scotts-product-import');
         $global = $simple3->global();
         $global->setName("Bricks Orange Scotts");
         $global->setPrice('90.00');
+        $global->setCustomAttribute('color', 2);
+        $global->setCustomAttribute('manufacturer', 2);
 
         $configurable = new ConfigurableProduct('scotts-product-import', ['color', 'manufacturer'], [
             $simple1,
