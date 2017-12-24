@@ -7,6 +7,7 @@ Many things, some of which are:
 * resolve attribute values by name
 * multiple select attributes
 * auto add attribute option
+* related, crosssell, upsell products
 * all types of products
 * tier prices
 * csv import

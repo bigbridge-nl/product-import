@@ -76,8 +76,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
-        $this->assertLessThan(0.02, $time);
-        $this->assertLessThan(458, $memory); // cached metadata
+        $this->assertLessThan(0.03, $time);
+        $this->assertLessThan(535, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -95,8 +95,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(6.5, $time);
-        $this->assertLessThan(541, $memory); // the size of the last $product
+        $this->assertLessThan(7.3, $time);
+        $this->assertLessThan(543, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -116,7 +116,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame([], $lastErrors);
         $this->assertTrue($success);
-        $this->assertLessThan(8.9, $time);
+        $this->assertLessThan(10.4, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);
@@ -149,6 +149,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setName(uniqid("name"));
             $global->setDescription("A wunderful product that will enhance the quality of your live");
             $global->setShortDescription("A wunderful product");
+            $global->setMetaTitle("Wonderful product");
+            $global->setMetaDescription("Wonderful product, lifechanger");
+            $global->setMetaKeywords("wonderful, lifechanger");
             $global->setWeight("6");
             $global->setStatus(ProductStoreView::STATUS_ENABLED);
             $global->setPrice("1.39");
@@ -189,6 +192,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setName(uniqid("name"));
             $global->setDescription("A wonderful product that will enhance the quality of your life");
             $global->setShortDescription("A wonderful product");
+            $global->setMetaTitle("Wonderful product");
+            $global->setMetaDescription("Wonderful product, lifechanger");
+            $global->setMetaKeywords("wonderful, lifechanger");
             $global->setWeight("5.80");
             $global->setStatus(ProductStoreView::STATUS_DISABLED);
             $global->setPrice("1.39");

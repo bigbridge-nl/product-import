@@ -36,6 +36,9 @@ class ProductStoreView
     const ATTR_SPECIAL_PRICE = 'special_price';
     const ATTR_SPECIAL_FROM_DATE = 'special_from_date';
     const ATTR_SPECIAL_TO_DATE = 'special_to_date';
+    const ATTR_META_TITLE = 'meta_title';
+    const ATTR_META_DESCRIPTION = 'meta_description';
+    const ATTR_META_KEYWORDS = 'meta_keyword';
 
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
@@ -101,6 +104,21 @@ class ProductStoreView
     public function setShortDescription(string $shortDescription)
     {
         $this->attributes[self::ATTR_SHORT_DESCRIPTION] = trim($shortDescription);
+    }
+
+    public function setMetaTitle(string $metaTitle)
+    {
+        $this->attributes[self::ATTR_META_TITLE] = trim($metaTitle);
+    }
+
+    public function setMetaDescription(string $metaDescription)
+    {
+        $this->attributes[self::ATTR_META_DESCRIPTION] = trim($metaDescription);
+    }
+
+    public function setMetaKeywords(string $metaKeywords)
+    {
+        $this->attributes[self::ATTR_META_KEYWORDS] = trim($metaKeywords);
     }
 
     /**
