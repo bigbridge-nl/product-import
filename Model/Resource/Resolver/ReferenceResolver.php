@@ -104,7 +104,7 @@ class ReferenceResolver
             foreach ($storeView->getUnresolvedSelects() as $attribute => $optionName) {
                 list ($id, $error) = $this->optionResolver->resolveOption($attribute, $optionName, $config->autoCreateOptionAttributes);
                 if ($error === "") {
-                    $storeView->setSelectAttribute($attribute, $id);
+                    $storeView->setSelectAttributeOptionId($attribute, $id);
                 } else {
                     $product->addError($error);
                     $storeView->removeAttribute($attribute);
@@ -114,7 +114,7 @@ class ReferenceResolver
             foreach ($storeView->getUnresolvedMultipleSelects() as $attribute => $optionNames) {
                 list ($ids, $error) = $this->optionResolver->resolveOptions($attribute, $optionNames, $config->autoCreateOptionAttributes);
                 if ($error === "") {
-                    $storeView->setSelectAttribute($attribute, implode(',', $ids));
+                    $storeView->setMultiSelectAttributeOptionIds($attribute, $ids);
                 } else {
                     $product->addError($error);
                     $storeView->removeAttribute($attribute);

@@ -305,6 +305,11 @@ class ProductStoreView
         $this->unresolvedSelects[trim($attributeCode)] = trim($option);
     }
 
+    public function setSelectAttributeOptionId(string $attributeCode, int $optionId)
+    {
+        $this->attributes[$attributeCode] = $optionId;
+    }
+
     /**
      * @param string $attributeCode
      * @param array $option The admin names of the attribute options
@@ -312,5 +317,10 @@ class ProductStoreView
     public function setMultipleSelectAttribute(string $attributeCode, array $options)
     {
         $this->unresolvedMultipleSelects[trim($attributeCode)] = array_map('trim', $options);
+    }
+
+    public function setMultiSelectAttributeOptionIds(string $attributeCode, array $optionIds)
+    {
+        $this->attributes[$attributeCode] = implode(',', array_map('trim', $optionIds));
     }
 }

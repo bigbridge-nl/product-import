@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Api\ProductStoreView;
+use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -56,6 +57,36 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $table = self::$metaData->productEntityTable;
         self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE '%-product-import'");
+
+        // create a multiple select attribute
+        self::$db->execute("
+            INSERT IGNORE INTO " . self::$metaData->attributeTable . "
+            SET 
+                entity_type_id = " . self::$metaData->productEntityTypeId . ",
+                attribute_code = 'color_group_product_importer',
+                frontend_input = 'multiselect',
+                backend_type = 'varchar'
+        ");
+
+        $insertId = self::$db->getLastInsertId();
+
+        self::$db->execute("
+            INSERT IGNORE INTO " . self::$metaData->catalogAttributeTable . "
+            SET 
+                attribute_id = " . $insertId . ",
+                is_global = 1
+        ");
+
+        self::$metaData->productEavAttributeInfo['color_group_product_importer'] = new EavAttributeInfo('color_group_product_importer', $insertId, false, 'varchar', 'catalog_product_entity_varchar', 'multiselect', [], 1);
+    }
+
+    public static function tearDownAfterClass()
+    {
+        // remove the multiple select attribute
+        self::$db->execute("
+            DELETE FROM " . self::$metaData->attributeTable . "
+            WHERE attribute_code = 'color_group_product_importer'
+        ");
     }
 
     public function testInsertAndUpdate()
@@ -1040,24 +1071,64 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
     public function testSelectAttributes()
     {
-        $errors = [];
-
         $config = new ImportConfig();
-
-        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
-            $errors = array_merge($errors, $product->getErrors());
-        };
-
         $importer = self::$factory->createImporter($config);
 
-        $product1 = new SimpleProduct("ducky1-product-import");
+        $product1 = new SimpleProduct("christmas-tree-product-import");
         $global = $product1->global();
-        $global->setName("Ducky 1");
-        $global->setPrice('1.00');
-
+        $global->setName("Christmas tree");
+        $global->setPrice('98.00');
+        $global->setSelectAttribute('color', 'white');
+        $global->setMultipleSelectAttribute('color_group_product_importer', ['red', 'blue']);
 
         $importer->importSimpleProduct($product1);
         $importer->flush();
 
+        $this->assertEquals(["option white not found in attribute color", "option(s) red, blue not found in attribute color_group_product_importer"], $product1->getErrors());
+
+        // auto create option
+
+        $config->autoCreateOptionAttributes = ['color', 'tax_class_id', 'color_group_product_importer'];
+        $importer = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct("christmas-tree-product-import");
+        $global = $product1->global();
+        $global->setName("Christmas tree");
+        $global->setPrice('98.00');
+        $global->setSelectAttribute('color', 'grey');
+        $global->setMultipleSelectAttribute('color_group_product_importer', ['red', 'blue']);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->assertEquals([], $product1->getErrors());
+
+        // option value color
+
+        $colorAttributeId = self::$metaData->productEavAttributeInfo['color']->attributeId;
+        $colorOptionId =  self::$metaData->productEavAttributeInfo['color']->optionValues['grey'];
+
+        $value = self::$db->fetchSingleCell("
+            SELECT value
+            FROM " . self::$metaData->productEntityTable ."_int
+            WHERE entity_id = {$product1->id} AND attribute_id = {$colorAttributeId} AND store_id = 0
+        ");
+
+        $this->assertEquals($colorOptionId, $value);
+
+        // option values color_group
+
+        $colorGroupAttributeId = self::$metaData->productEavAttributeInfo['color_group_product_importer']->attributeId;
+
+        $colorGroupOptionId1 =  self::$metaData->productEavAttributeInfo['color_group_product_importer']->optionValues['red'];
+        $colorGroupOptionId2 =  self::$metaData->productEavAttributeInfo['color_group_product_importer']->optionValues['blue'];
+
+        $value = self::$db->fetchSingleCell("
+            SELECT value
+            FROM " . self::$metaData->productEntityTable ."_varchar
+            WHERE entity_id = {$product1->id} AND attribute_id = {$colorGroupAttributeId} AND store_id = 0
+        ");
+
+        $this->assertEquals($colorGroupOptionId1 . ',' . $colorGroupOptionId2, $value);
     }
 }

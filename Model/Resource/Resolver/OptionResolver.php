@@ -35,7 +35,7 @@ class OptionResolver
                 if (in_array($attributeCode, $autoCreateOptionAttributes)) {
                     $id = $this->metaData->addAttributeOption($attributeCode, $optionName);
                 } else {
-                    $error = "option " . $optionName . " not found in attribute  " . $attributeCode;
+                    $error = "option " . $optionName . " not found in attribute " . $attributeCode;
                 }
 
             } else {
@@ -61,6 +61,8 @@ class OptionResolver
 
             $info = $this->metaData->productEavAttributeInfo[$attributeCode];
 
+            $missingOptions = [];
+
             foreach ($optionNames as $optionName) {
 
                 if (!array_key_exists($optionName, $info->optionValues)) {
@@ -68,12 +70,16 @@ class OptionResolver
                     if (in_array($attributeCode, $autoCreateOptionAttributes)) {
                         $ids[] = $this->metaData->addAttributeOption($attributeCode, $optionName);
                     } else {
-                        $error = "option " . $optionName . " not found in attribute  " . $attributeCode;
+                        $missingOptions[] = $optionName;
                     }
 
                 } else {
                     $ids[] = $info->optionValues[$optionName];
                 }
+            }
+
+            if (!empty($missingOptions)) {
+                $error = "option(s) " . implode(', ', $missingOptions) . " not found in attribute " . $attributeCode;
             }
 
         }

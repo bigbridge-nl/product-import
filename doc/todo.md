@@ -4,16 +4,16 @@ Many things, some of which are:
 
 ## To be supported
 
-* resolve attribute values by name
-* multiple select attributes
-* auto add attribute option
 * related, crosssell, upsell products
 * all types of products
 * tier prices
 * csv import
 * rest request
+* create unresolved attributes for all
+* create functions for config
 * trim: none, all except text fields
 * check attribute value uniqueness
+* check if reference ids exist
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
 
