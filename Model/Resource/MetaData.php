@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Data\CategoryInfo;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
+use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 
 /**
@@ -37,6 +38,10 @@ class MetaData
     const CATALOG_PRODUCT_SUPER_ATTRIBUTE_LABEL_TABLE = 'catalog_product_super_attribute_label';
     const CATALOG_PRODUCT_SUPER_LINK_TABLE = 'catalog_product_super_link';
     const CATALOG_PRODUCT_RELATION_TABLE = 'catalog_product_relation';
+    const LINK_TABLE = 'catalog_product_link';
+    const LINK_ATTRIBUTE_TABLE = 'catalog_product_link_attribute';
+    const LINK_ATTRIBUTE_INT_TABLE = 'catalog_product_link_attribute_int';
+    const LINK_TYPE_TABLE = 'catalog_product_link_type';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -119,6 +124,18 @@ class MetaData
     /** @var string */
     public $taxClassTable;
 
+    /** @var string */
+    public $linkTable;
+
+    /** @var string */
+    public $linkAttributeTable;
+
+    /** @var string */
+    public $linkAttributeIntTable;
+
+    /** @var string */
+    public $linkTypeTable;
+
     /** @var  int */
     public $defaultCategoryAttributeSetId;
 
@@ -161,6 +178,9 @@ class MetaData
     /** @var CategoryInfo[] */
     public $allCategoryInfo;
 
+    /** @var LinkInfo[] */
+    public $linkInfo;
+
     public function __construct(Magento2DbConnection $db)
     {
         $this->db = $db;
@@ -189,6 +209,10 @@ class MetaData
         $this->storeTable = $this->db->getFullTableName(self::STORE_TABLE);
         $this->websiteTable = $this->db->getFullTableName(self::WEBSITE_TABLE);
         $this->taxClassTable = $this->db->getFullTableName(self::TAX_CLASS_TABLE);
+        $this->linkTable = $this->db->getFullTableName(self::LINK_TABLE);
+        $this->linkAttributeTable = $this->db->getFullTableName(self::LINK_ATTRIBUTE_TABLE);
+        $this->linkAttributeIntTable = $this->db->getFullTableName(self::LINK_ATTRIBUTE_INT_TABLE);
+        $this->linkTypeTable = $this->db->getFullTableName(self::LINK_TYPE_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
@@ -209,6 +233,8 @@ class MetaData
         $this->saveRewritesHistory  = $this->getSaveRewritesHistory();
 
         $this->allCategoryInfo = $this->getAllCategoryInfo();
+
+        $this->linkInfo = $this->getLinkInfo();
     }
 
     /**
@@ -475,5 +501,55 @@ class MetaData
     public function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
     {
         $this->allCategoryInfo[$categoryId] = new CategoryInfo($idPath, $urlKeys);
+    }
+
+    protected function getLinkInfo()
+    {
+        $linkTypeIdRelation = $linkTypeIdUpSell = $linkTypeIdCrossSell = null;
+        $linkRelationAttributeIdPosition = $linkUpSellAttributeIdPosition = $linkCrossSellAttributeIdPosition = null;
+
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `code`, `link_type_id`
+            FROM `{$this->linkTypeTable}`
+        ");
+
+        foreach ($rows as $row) {
+            switch ($row['code']) {
+                case 'relation':
+                    $linkTypeIdRelation = $row['link_type_id'];
+                    break;
+                case 'up_sell':
+                    $linkTypeIdUpSell = $row['link_type_id'];
+                    break;
+                case 'cross_sell':
+                    $linkTypeIdCrossSell = $row['link_type_id'];
+                    break;
+            }
+        }
+
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `product_link_attribute_id`, `link_type_id`, `product_link_attribute_code`
+            FROM `{$this->linkAttributeTable}`
+        ");
+
+        foreach ($rows as $row) {
+            switch ($row['link_type_id']) {
+                case $linkTypeIdRelation:
+                    $linkRelationAttributeIdPosition = $row['product_link_attribute_id'];
+                    break;
+                case $linkTypeIdUpSell:
+                    $linkUpSellAttributeIdPosition = $row['product_link_attribute_id'];
+                    break;
+                case $linkTypeIdCrossSell:
+                    $linkCrossSellAttributeIdPosition = $row['product_link_attribute_id'];
+                    break;
+            }
+        }
+
+        return [
+            LinkInfo::RELATED => new LinkInfo($linkTypeIdRelation, $linkRelationAttributeIdPosition),
+            LinkInfo::UP_SELL => new LinkInfo($linkTypeIdUpSell, $linkUpSellAttributeIdPosition),
+            LinkInfo::CROSS_SELL => new LinkInfo($linkTypeIdCrossSell, $linkCrossSellAttributeIdPosition)
+        ];
     }
 }

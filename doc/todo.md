@@ -14,6 +14,7 @@ Many things, some of which are:
 * trim: none, all except text fields
 * check attribute value uniqueness
 * check if reference ids exist
+* allow change type of updated product
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
 

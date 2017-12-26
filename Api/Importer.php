@@ -51,7 +51,9 @@ class Importer
      */
     public function importSimpleProduct(SimpleProduct $product)
     {
-        $this->simpleProducts[] = $product;
+        // the sku key is necessary: later products in this batch with the same sku will overwrite former products
+        $this->simpleProducts[$product->getSku()] = $product;
+
         if (count($this->simpleProducts) == $this->config->batchSize) {
             $this->flushSimpleProducts();
         }
@@ -63,11 +65,14 @@ class Importer
      */
     public function importConfigurableProduct(ConfigurableProduct $product)
     {
+        // variants must be done first, their id is needed by the configurable
         foreach ($product->getVariants() as $simple) {
             $this->importSimpleProduct($simple);
         }
 
-        $this->configurableProducts[] = $product;
+        // the sku key is necessary: later products in this batch with the same sku will overwrite former products
+        $this->configurableProducts[$product->getSku()] = $product;
+
         if (count($this->configurableProducts) == $this->config->batchSize) {
             $this->flushSimpleProducts();
             $this->flushConfigurableProducts();

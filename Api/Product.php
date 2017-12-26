@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Data\Image;
+use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Resource\Reference\Reference;
 use BigBridge\ProductImport\Model\Resource\Reference\References;
 
@@ -17,6 +18,9 @@ abstract class Product
     const GLOBAL_STORE_VIEW_CODE = 'admin';
 
     const DEFAULT_STOCK_NAME = 'Default';
+
+    const PLACEHOLDER_NAME = 'Linked Product Placeholder';
+    const PLACEHOLDER_PRICE = '123456.78';
 
     /** @var  int */
     public $id;
@@ -41,6 +45,20 @@ abstract class Product
 
     /** @var Image[] */
     protected $images = [];
+
+    /** @var string[] */
+    protected $linkedProductSkus = [
+        LinkInfo::RELATED => [],
+        LinkInfo::UP_SELL => [],
+        LinkInfo::CROSS_SELL => []
+    ];
+
+    /** @var int[] */
+    protected $linkedProductIds = [
+        LinkInfo::RELATED => [],
+        LinkInfo::UP_SELL => [],
+        LinkInfo::CROSS_SELL => []
+    ];
 
     // =========================================
     // importer data
@@ -168,7 +186,7 @@ abstract class Product
     }
 
     /**
-     * @param array $attributeSetName An attribute set name
+     * @param string $attributeSetName An attribute set name
      */
     public function setAttributeSetByName(string $attributeSetName)
     {
@@ -218,5 +236,45 @@ abstract class Product
     public function getImages()
     {
         return $this->images;
+    }
+
+    public function setRelatedProductSkus(array $skus)
+    {
+        $this->linkedProductSkus[LinkInfo::RELATED] = array_map('trim', $skus);
+    }
+
+    public function setUpSellProductSkus(array $skus)
+    {
+        $this->linkedProductSkus[LinkInfo::UP_SELL] = array_map('trim', $skus);
+    }
+
+    public function setCrossSellProductSkus(array $skus)
+    {
+        $this->linkedProductSkus[LinkInfo::CROSS_SELL] = array_map('trim', $skus);
+    }
+
+    public function setRelatedProductId(array $ids)
+    {
+        $this->linkedProductIds[LinkInfo::RELATED] = array_map('trim', $ids);
+    }
+
+    public function setUpSellProductIds(array $ids)
+    {
+        $this->linkedProductIds[LinkInfo::UP_SELL] = array_map('trim', $ids);
+    }
+
+    public function setCrossSellProductIds(array $ids)
+    {
+        $this->linkedProductIds[LinkInfo::CROSS_SELL] = array_map('trim', $ids);
+    }
+
+    public function getLinkedProductSkus(): array
+    {
+        return $this->linkedProductSkus;
+    }
+
+    public function getLinkedProductIds(): array
+    {
+        return $this->linkedProductIds;
     }
 }

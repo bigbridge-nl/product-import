@@ -122,6 +122,7 @@ class Magento2DbConnection
         $a = microtime(true);
 
         $map = [];
+#echo $query . "\n";
         foreach ($this->pdo->query($query)->fetchAll() as $row) {
             $map[$row[0]] = $row[1];
         }

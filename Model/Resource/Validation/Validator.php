@@ -5,7 +5,6 @@ namespace BigBridge\ProductImport\Model\Resource\Validation;
 use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Api\ProductStockItem;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
-use BigBridge\ProductImport\Model\Resource\Validation\ImageValidator;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**

@@ -14,7 +14,7 @@ After an import has completed, the product and category indexers need to be run.
 
 * import of product data (new and updates, based on sku)
 * automatic category generation (no updates)
-* automatic attribute option creation
+* automatic select and multiselect attribute option creation
 * import of images from file or url
 * unique url_key generation
 * dry run (no writes to the database)
@@ -34,7 +34,7 @@ New products will be given the following default values, if they are not specifi
 
 ## Mutation mode
 
-The library only supports the insert/update mode. It does not remove or replace items.
+The library only supports the insert/update mode. It does not remove attributes or replace products.
 
 ## Example Code
 
@@ -122,13 +122,18 @@ and set a custom attribute like this
 
 ## Select and multiple select attributes
 
-Values of Select attributes can only be entered with the admin name of the select option
+Values of Select attributes can best be entered with the admin name of the select option
 
-    $product->global()->setSelectAttribute('color', 'maroon);
+    $product->global()->setSelectAttribute('color', 'maroon');
 
 Values of Multiple Select attributes are entered as an array of admin names of options
 
     $product->storeView('us')->setMultipleSelectAttribute('color_group', ['red', 'orange']);
+
+Entering values by option id is possible as well.
+
+    $product->global()->setSelectAttributeOptionId('color', 2);
+    $product->global()->setMultiSelectAttributeOptionIds('color_group', [2, 3]);
 
 ## Automatic attribute option creation
 
@@ -166,6 +171,31 @@ The three simples each need to have a unique combination of attribute values for
 Importing is done with
 
     $importer->importConfigurableProduct($configurable);
+
+## Related, Up Sell, and Cross Sell Products
+
+These so called "linked" products are stored as references to other products. When entering them, specify a product with an sku.
+
+    $product1->setRelatedProducts([
+        "microsoft-natural-keyboard",
+        "hp-classic-keyboard"
+    ]);
+
+    $product1->setUpSellProducts([
+       "hp-supersonic",
+       "microsoft-keyless-keyboard"
+    ]);
+
+    $product->setCrossSellProducts([
+        "logitech-wired-mouse",
+        "some-batteries"
+    ]);
+
+Linked products may have a dependency conflict. Two products may be linked together. When attempting to create the first product, it needs the id of the other product for a link (e.g. being related). But the same problem exists when we start with the second problem. It's a deadlock.
+
+In order to get out of this situation, this library creates temporary dummy products for linked products that do not yet exist. These products are disabled simple products with the name "Linked Product Placeholder", and have a price of 123456.78.
+
+While other solutions are thinkable, this solution is simple to implement and very robust. The user of the library must make sure the placeholder products will be imported at a later time. Placeholder Products that were not used can be removed via the backend product overview page by searching for the name "Linked Product Placeholder".
 
 ## Errors
 

@@ -27,7 +27,7 @@ class ImporterFactory
      *
      * Note: the config object is copied; making changes to it later does not affect the importer.
      *
-     * @param ImportConfig $config
+     * @param ImportConfig $originalConfig
      * @return Importer
      * @throws Exception
      */

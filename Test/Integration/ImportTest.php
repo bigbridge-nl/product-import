@@ -1131,4 +1131,35 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($colorGroupOptionId1 . ',' . $colorGroupOptionId2, $value);
     }
+
+    public function testLinks()
+    {
+        $config = new ImportConfig();
+        $importer = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct("christmas-angel-product-import");
+        $global = $product1->global();
+        $global->setName("Christmas angel");
+        $global->setPrice('98.00');
+
+        $product1->setRelatedProductSkus([
+            "christmas-baby-jesus-product-import",
+            "christmas-josef-product-import"
+        ]);
+
+        $product1->setUpSellProductSkus([
+            "christmas-josef-product-import",
+            "christmas-maria-product-import"
+        ]);
+
+        $product1->setCrossSellProductSkus([
+            "christmas-baby-jesus-product-import",
+            "christmas-maria-product-import"
+        ]);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+
+    }
 }

@@ -178,7 +178,7 @@ class ProductStoreView
     }
 
     /**
-     * @param string $price A 12.4 decimal field
+     * @param string $weight A 12.4 decimal field
      */
     public function setWeight(string $weight)
     {
@@ -255,6 +255,7 @@ class ProductStoreView
 
     /**
      * Removes an attribute
+     * @param string $name
      */
     public function removeAttribute(string $name)
     {
@@ -312,7 +313,7 @@ class ProductStoreView
 
     /**
      * @param string $attributeCode
-     * @param array $option The admin names of the attribute options
+     * @param array $options The admin names of the attribute options
      */
     public function setMultipleSelectAttribute(string $attributeCode, array $options)
     {

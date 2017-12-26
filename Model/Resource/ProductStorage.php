@@ -4,6 +4,8 @@ namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Api\ProductStoreView;
+use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
@@ -38,6 +40,9 @@ abstract class ProductStorage
     /** @var ImageStorage */
     protected $imageStorage;
 
+    /** @var LinkedProductStorage */
+    protected $linkedProductStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
@@ -45,7 +50,8 @@ abstract class ProductStorage
         ReferenceResolver $referenceResolver,
         UrlKeyGenerator $urlKeyGenerator,
         UrlRewriteStorage $urlRewriteStorage,
-        ImageStorage $imageStorage)
+        ImageStorage $imageStorage,
+        LinkedProductStorage $linkedProductStorage)
     {
         $this->db = $db;
         $this->metaData = $metaData;
@@ -54,6 +60,7 @@ abstract class ProductStorage
         $this->urlKeyGenerator = $urlKeyGenerator;
         $this->urlRewriteStorage = $urlRewriteStorage;
         $this->imageStorage = $imageStorage;
+        $this->linkedProductStorage = $linkedProductStorage;
     }
 
     /**
@@ -83,18 +90,24 @@ abstract class ProductStorage
     /**
      * @param Product[] $insertProducts
      * @param Product[] $updateProducts
-     * @return
      */
     public abstract function performTypeSpecificStorage(array $insertProducts, array $updateProducts);
 
     /**
-     * @param Product[] $products
+     * @param Product[] $sourceProducts Sku-indexed products of various product types
      * @param ImportConfig $config
      * @param ValueSerializer $valueSerializer
      * @throws Exception
      */
-    public function storeProducts(array $products, ImportConfig $config, ValueSerializer $valueSerializer)
+    public function storeProducts(array $sourceProducts, ImportConfig $config, ValueSerializer $valueSerializer)
     {
+        // create placeholders for non-existing linked products
+        // treat them like normal imported products
+        // note: placeholders must come first; they may be overwritten by the merge with the actual products (array key = sku)
+
+        /** @var Product[] $products */
+        $products = array_merge($this->createLinkedProductPlaceholders($sourceProducts), $sourceProducts);
+
         // connect store view to product
         $this->setupStoreViewWiring($products);
 
@@ -156,7 +169,8 @@ abstract class ProductStorage
 
         // call user defined functions to let them process the results
         foreach ($config->resultCallbacks as $callback) {
-            foreach ($products as $product) {
+            // note: source products excludes placeholders
+            foreach ($sourceProducts as $product) {
                 call_user_func($callback, $product);
             }
         }
@@ -191,6 +205,38 @@ abstract class ProductStorage
                 $storeView->parent = null;
             }
         }
+    }
+
+    /**
+     * @param Product[] $products
+     * @return Product[] An sku indexed array of placeholders
+     */
+    protected function createLinkedProductPlaceholders(array $products): array
+    {
+        $placeholders = [];
+        $allLinkedSkus = [];
+
+        foreach ($products as $product) {
+            $linkedSkus = $product->getLinkedProductSkus();
+            $allLinkedSkus = array_merge($allLinkedSkus, $linkedSkus[LinkInfo::RELATED], $linkedSkus[LinkInfo::UP_SELL], $linkedSkus[LinkInfo::CROSS_SELL]);
+        }
+
+        $sku2id = $this->getExistingSkus($allLinkedSkus);
+
+        foreach (array_unique($allLinkedSkus) as $sku) {
+            if (!array_key_exists($sku, $sku2id)) {
+
+                $placeholder = new SimpleProduct($sku);
+
+                $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
+                $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
+                $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
+
+                $placeholders[$sku] = $placeholder;
+            }
+        }
+
+        return $placeholders;
     }
 
     /**
@@ -275,6 +321,9 @@ abstract class ProductStorage
             $this->insertCategoryIds($productsWithCategories);
             $this->insertWebsiteIds($productsWithWebsites);
             $this->insertStockItems($validProducts);
+
+            $this->linkedProductStorage->insertLinkedProducts($validInsertProducts);
+            $this->linkedProductStorage->updateLinkedProducts($validInsertProducts);
 
             $this->imageStorage->storeProductImages($validProducts);
 

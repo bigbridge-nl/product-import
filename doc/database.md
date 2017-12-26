@@ -1,6 +1,8 @@
 # Database
 
-## Supported Magento 2 database tables
+## Magento 2 database tables
+
+Tables that will be changed by the importer (insert, update)
 
 * catalog_product_entity and catalog_product_entity_*
 * catalog_category_product
@@ -11,8 +13,14 @@
 * catalog_product_entity_media_gallery_value_to_entity
 * catalog_product_entity_media_gallery_value
 * cataloginventory_stock_item
+* catalog_product_super_attribute_label
+* catalog_product_super_link
+* catalog_product_relation
 * eav_attribute_option
 * eav_attribute_option_value
+* catalog_product_link
+* catalog_product_link_attribute_int
+* catalog_product_link_attribute
 
 ## Remarks
 

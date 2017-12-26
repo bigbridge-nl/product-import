@@ -20,9 +20,10 @@ class ConfigurableStorage extends ProductStorage
         ReferenceResolver $referenceResolver,
         UrlKeyGenerator $urlKeyGenerator,
         UrlRewriteStorage $urlRewriteStorage,
-        ImageStorage $imageStorage)
+        ImageStorage $imageStorage,
+        LinkedProductStorage $linkedProductStorage)
     {
-        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $imageStorage);
+        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $imageStorage, $linkedProductStorage);
     }
 
     public function getType()
