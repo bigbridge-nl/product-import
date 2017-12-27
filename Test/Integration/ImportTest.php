@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Api\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
+use BigBridge\ProductImport\Model\Data\LinkInfo;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -1160,6 +1161,113 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $importer->importSimpleProduct($product1);
         $importer->flush();
 
+        $a = new SimpleProduct("christmas-baby-jesus-product-import");
+        $b = new SimpleProduct("christmas-josef-product-import");
+        $c = new SimpleProduct("christmas-maria-product-import");
 
+        $importer->importSimpleProduct($a);
+        $importer->importSimpleProduct($b);
+        $importer->importSimpleProduct($c);
+        $importer->flush();
+
+        $links =
+        [
+            LinkInfo::RELATED => [
+                [$product1->id, $a->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 1],
+                [$product1->id, $b->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 2]
+            ],
+            LinkInfo::UP_SELL => [
+                [$product1->id, $b->id, self::$metaData->linkInfo[LinkInfo::UP_SELL]->typeId, 1],
+                [$product1->id, $c->id, self::$metaData->linkInfo[LinkInfo::UP_SELL]->typeId, 2]
+            ],
+            LinkInfo::CROSS_SELL => [
+                [$product1->id, $a->id, self::$metaData->linkInfo[LinkInfo::CROSS_SELL]->typeId, 1],
+                [$product1->id, $c->id, self::$metaData->linkInfo[LinkInfo::CROSS_SELL]->typeId, 2]
+            ]
+        ];
+
+        $this->assertEquals($links, $this->getLinks($product1));
+
+        // do not specify links; the should not be removed
+
+        $product1 = new SimpleProduct("christmas-angel-product-import");
+        $global = $product1->global();
+        $global->setName("Christmas angel");
+        $global->setPrice('98.00');
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->assertEquals($links, $this->getLinks($product1));
+
+        // change the order of the related products. do not specify the other links: they should not be removed
+
+        $product1 = new SimpleProduct("christmas-angel-product-import");
+        $global = $product1->global();
+        $global->setName("Christmas angel");
+        $global->setPrice('98.00');
+
+        $product1->setRelatedProductSkus([
+            "christmas-josef-product-import",
+            "christmas-baby-jesus-product-import"
+        ]);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $links[LinkInfo::RELATED] = [
+            [$product1->id, $b->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 1],
+            [$product1->id, $a->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 2]
+        ];
+
+        $this->assertEquals($links, $this->getLinks($product1));
+
+        // remove links: they should be removed
+
+        $product1 = new SimpleProduct("christmas-angel-product-import");
+        $global = $product1->global();
+        $global->setName("Christmas angel");
+        $global->setPrice('98.00');
+
+        $product1->setRelatedProductSkus([]);
+        $product1->setUpSellProductSkus([]);
+        $product1->setCrossSellProductSkus([]);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $links =
+            [
+                LinkInfo::RELATED => [
+                ],
+                LinkInfo::UP_SELL => [
+                ],
+                LinkInfo::CROSS_SELL => [
+                ]
+            ];
+
+        $this->assertEquals($links, $this->getLinks($product1));
+    }
+
+    private function getLinks($product)
+    {
+        $result = [];
+
+        foreach ([LinkInfo::RELATED, LinkInfo::UP_SELL, LinkInfo::CROSS_SELL] as $linkType) {
+
+            $linkInfo = self::$metaData->linkInfo[$linkType];
+
+            $r = self::$db->fetchAllNumber("
+                SELECT L.product_id, L.linked_product_id, L.link_type_id, P.value 
+                FROM " . self::$metaData->linkTable . " L
+                INNER JOIN " . self::$metaData->linkAttributeIntTable . " P ON P.link_id = L.link_id AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
+                WHERE product_id = {$product->id}
+                ORDER BY P.value
+            ");
+
+            $result[$linkType] = $r;
+        }
+
+        return $result;
     }
 }

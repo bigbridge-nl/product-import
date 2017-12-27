@@ -291,7 +291,7 @@ abstract class ProductStorage
             $this->insertStockItems($validProducts);
 
             $this->linkedProductStorage->insertLinkedProducts($validInsertProducts);
-            $this->linkedProductStorage->updateLinkedProducts($validInsertProducts);
+            $this->linkedProductStorage->updateLinkedProducts($validUpdateProducts);
 
             $this->imageStorage->storeProductImages($validProducts);
 

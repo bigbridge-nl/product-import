@@ -63,11 +63,9 @@ class LinkedProductStorage
 
         $linkInfo = $this->metaData->linkInfo[$linkType];
 
-# note! DESC
-
         // Note: the position of the linked products is taken in account as well
         $existingLinks = $this->db->fetchMap("
-            SELECT `product_id`, GROUP_CONCAT(L.`linked_product_id` ORDER BY P.`value` DESC SEPARATOR ' ')
+            SELECT `product_id`, GROUP_CONCAT(L.`linked_product_id` ORDER BY P.`value` SEPARATOR ' ')
             FROM `{$this->metaData->linkTable}` L
             INNER JOIN `{$this->metaData->linkAttributeIntTable}` P ON P.`link_id` = L.`link_id` AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
             WHERE 
