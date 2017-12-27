@@ -46,19 +46,11 @@ abstract class Product
     /** @var Image[] */
     protected $images = [];
 
-    /** @var string[] */
-    protected $linkedProductSkus = [
-        LinkInfo::RELATED => [],
-        LinkInfo::UP_SELL => [],
-        LinkInfo::CROSS_SELL => []
-    ];
+    /** @var string[][] */
+    protected $linkedProductSkus = [];
 
-    /** @var int[] */
-    protected $linkedProductIds = [
-        LinkInfo::RELATED => [],
-        LinkInfo::UP_SELL => [],
-        LinkInfo::CROSS_SELL => []
-    ];
+    /** @var int[][] */
+    protected $linkedProductIds = [];
 
     // =========================================
     // importer data
@@ -273,8 +265,15 @@ abstract class Product
         return $this->linkedProductSkus;
     }
 
-    public function getLinkedProductIds(): array
+    /**
+     * Returns the ids of linked products of the given type
+     * A return of null denotes that the user has not specified any links, and existing links should not be modified
+     *
+     * @param string $linkType
+     * @return int[]|null
+     */
+    public function getLinkedProductIds(string $linkType)
     {
-        return $this->linkedProductIds;
+        return array_key_exists($linkType, $this->linkedProductIds) ? $this->linkedProductIds[$linkType] : null;
     }
 }

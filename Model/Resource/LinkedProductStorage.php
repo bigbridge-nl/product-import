@@ -79,9 +79,17 @@ class LinkedProductStorage
         $changed = [];
 
         foreach ($products as $product) {
-            $linkedIds = implode(' ', $product->getLinkedProductIds()[$linkType]);
+            
+            $linkedIds = $product->getLinkedProductIds($linkType);
 
-            if (!array_key_exists($product->id, $existingLinks) || $existingLinks[$product->id] !== $linkedIds) {
+            // if the user has not specified links of this type, do not change existing links
+            if ($linkedIds === null) {
+                continue;
+            }
+
+            $serializedlinkedIds = implode(' ', $linkedIds);
+
+            if (!array_key_exists($product->id, $existingLinks) || $existingLinks[$product->id] !== $serializedlinkedIds) {
                 $changed[] = $product;
             }
         }
@@ -120,7 +128,13 @@ class LinkedProductStorage
         $linkInfo = $this->metaData->linkInfo[$linkType];
 
         foreach ($products as $product) {
-            $linkedIds = $product->getLinkedProductIds()[$linkType];
+            $linkedIds = $product->getLinkedProductIds($linkType);
+
+            // check if the user has specified links of this type at all
+            if ($linkedIds === null) {
+                continue;
+            }
+
             $position = 1;
             foreach ($linkedIds as $i => $linkedId) {
 

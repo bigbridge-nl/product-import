@@ -121,11 +121,9 @@ class Importer
      */
     protected function ensureThatLinkedProductsExist(Product $product)
     {
-        if ($product->hasLinkedProducts()) {
-            // make sure linked products exist, by creating placeholders for non-existing linked products
-            foreach ($this->createLinkedProductPlaceholders($product) as $placeholder) {
-                $this->importSimpleProduct($placeholder);
-            }
+        // make sure linked products exist, by creating placeholders for non-existing linked products
+        foreach ($this->createLinkedProductPlaceholders($product) as $placeholder) {
+            $this->importSimpleProduct($placeholder);
         }
     }
 
@@ -135,15 +133,26 @@ class Importer
      */
     protected function createLinkedProductPlaceholders(Product $product): array
     {
+        $linkedSkus = $product->getLinkedProductSkus();
+
+        // quick check if linked products were used here at all
+        if (empty($linkedSkus)) {
+            return [];
+        }
+
         $placeholders = [];
 
-        $linkedSkus = $product->getLinkedProductSkus();
-        $allLinkedSkus = array_merge($linkedSkus[LinkInfo::RELATED], $linkedSkus[LinkInfo::UP_SELL], $linkedSkus[LinkInfo::CROSS_SELL]);
+        // collect all linked product skus
+        $allLinkedSkus = [];
+        foreach ($linkedSkus as $skus) {
+            $allLinkedSkus = array_merge($allLinkedSkus, $skus);
+        }
+        $allLinkedSkus = array_unique($allLinkedSkus);
 
 #todo: it is not pretty to use simpleStorage for this
         $sku2id = $this->simpleStorage->getExistingSkus($allLinkedSkus);
 
-        foreach (array_unique($allLinkedSkus) as $sku) {
+        foreach ($allLinkedSkus as $sku) {
             if (!array_key_exists($sku, $sku2id)) {
 
                 $placeholder = new SimpleProduct($sku);
