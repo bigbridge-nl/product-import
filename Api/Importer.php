@@ -2,8 +2,8 @@
 
 namespace BigBridge\ProductImport\Api;
 
-use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
+use BigBridge\ProductImport\Model\Resource\ProductEntityStorage;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;
 
@@ -16,6 +16,9 @@ use BigBridge\ProductImport\Model\Resource\SimpleStorage;
  */
 class Importer
 {
+    /** @var SimpleProduct[] */
+    protected $placeholderProducts = [];
+
     /** @var SimpleProduct[] */
     protected $simpleProducts = [];
 
@@ -34,16 +37,21 @@ class Importer
     /** @var  ConfigurableStorage */
     protected $configurableStorage;
 
+    /** @var ProductEntityStorage */
+    protected $productEntityStorage;
+
     public function __construct(
         ImportConfig $config,
         ValueSerializer $valueSerializer,
         SimpleStorage $simpleStorage,
-        ConfigurableStorage $configurableStorage)
+        ConfigurableStorage $configurableStorage,
+        ProductEntityStorage $productEntityStorage)
     {
         $this->config = $config;
         $this->valueSerializer = $valueSerializer;
         $this->simpleStorage = $simpleStorage;
         $this->configurableStorage = $configurableStorage;
+        $this->productEntityStorage = $productEntityStorage;
     }
 
     /**
@@ -59,6 +67,7 @@ class Importer
         $this->simpleProducts[$product->getSku()] = $product;
 
         if (count($this->simpleProducts) == $this->config->batchSize) {
+            $this->flushPlaceholderProducts();
             $this->flushSimpleProducts();
         }
     }
@@ -81,6 +90,7 @@ class Importer
         $this->configurableProducts[$product->getSku()] = $product;
 
         if (count($this->configurableProducts) == $this->config->batchSize) {
+            $this->flushPlaceholderProducts();
             $this->flushSimpleProducts();
             $this->flushConfigurableProducts();
         }
@@ -93,8 +103,18 @@ class Importer
      */
     public function flush()
     {
+        $this->flushPlaceholderProducts();
         $this->flushSimpleProducts();
         $this->flushConfigurableProducts();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function flushPlaceholderProducts()
+    {
+        $this->simpleStorage->storeProducts($this->placeholderProducts, $this->config, $this->valueSerializer);
+        $this->placeholderProducts = [];
     }
 
     /**
@@ -116,6 +136,19 @@ class Importer
     }
 
     /**
+     * @param Product $placeholder
+     * @throws \Exception
+     */
+    protected function importPlaceholder(Product $placeholder)
+    {
+        $this->placeholderProducts[$placeholder->getSku()] = $placeholder;
+
+        if (count($this->placeholderProducts) == $this->config->batchSize) {
+            $this->flushPlaceholderProducts();
+        }
+    }
+
+    /**
      * @param Product $product
      * @throws \Exception
      */
@@ -123,7 +156,7 @@ class Importer
     {
         // make sure linked products exist, by creating placeholders for non-existing linked products
         foreach ($this->createLinkedProductPlaceholders($product) as $placeholder) {
-            $this->importSimpleProduct($placeholder);
+            $this->importPlaceholder($placeholder);
         }
     }
 
@@ -144,13 +177,12 @@ class Importer
 
         // collect all linked product skus
         $allLinkedSkus = [];
-        foreach ($linkedSkus as $skus) {
-            $allLinkedSkus = array_merge($allLinkedSkus, $skus);
+        foreach ($linkedSkus as $skuArray) {
+            $allLinkedSkus = array_merge($allLinkedSkus, $skuArray);
         }
         $allLinkedSkus = array_unique($allLinkedSkus);
 
-#todo: it is not pretty to use simpleStorage for this
-        $sku2id = $this->simpleStorage->getExistingSkus($allLinkedSkus);
+        $sku2id = $this->productEntityStorage->getExistingSkus($allLinkedSkus);
 
         foreach ($allLinkedSkus as $sku) {
             if (!array_key_exists($sku, $sku2id)) {

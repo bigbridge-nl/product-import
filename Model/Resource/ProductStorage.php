@@ -41,6 +41,9 @@ abstract class ProductStorage
     /** @var LinkedProductStorage */
     protected $linkedProductStorage;
 
+    /** @var ProductEntityStorage */
+    protected $productEntityStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
@@ -48,6 +51,7 @@ abstract class ProductStorage
         ReferenceResolver $referenceResolver,
         UrlKeyGenerator $urlKeyGenerator,
         UrlRewriteStorage $urlRewriteStorage,
+        ProductEntityStorage $productEntityStorage,
         ImageStorage $imageStorage,
         LinkedProductStorage $linkedProductStorage)
     {
@@ -57,6 +61,7 @@ abstract class ProductStorage
         $this->referenceResolver = $referenceResolver;
         $this->urlKeyGenerator = $urlKeyGenerator;
         $this->urlRewriteStorage = $urlRewriteStorage;
+        $this->productEntityStorage = $productEntityStorage;
         $this->imageStorage = $imageStorage;
         $this->linkedProductStorage = $linkedProductStorage;
     }
@@ -109,7 +114,7 @@ abstract class ProductStorage
         }
 
         // find existing products ids from their skus
-        $sku2id = $this->getExistingSkus($skus);
+        $sku2id = $this->productEntityStorage->getExistingSkus($skus);
 
         // separate new products from existing products and assign id
         $insertProducts = $updateProducts = [];
@@ -127,9 +132,7 @@ abstract class ProductStorage
         $this->setDefaultValues($insertProducts);
 
         // replace Reference(s) with ids, changes $product->errors
-        foreach ($products as $product) {
-            $this->referenceResolver->resolveIds($product, $config);
-        }
+        $this->referenceResolver->resolveIds($products, $config);
 
         // create url keys based on name and id
         // changes $product->errors
@@ -160,8 +163,14 @@ abstract class ProductStorage
 
         // call user defined functions to let them process the results
         foreach ($config->resultCallbacks as $callback) {
-            // note: source products excludes placeholders
+
             foreach ($products as $product) {
+
+                // do not give feedback for placeholder products; this would be confusing to the user
+                if ($product->global()->getName() === Product::PLACEHOLDER_NAME) {
+                    continue;
+                }
+
                 call_user_func($callback, $product);
             }
         }
@@ -270,8 +279,8 @@ abstract class ProductStorage
 
         try {
 
-            $this->insertMainTable($validInsertProducts);
-            $this->updateMainTable($validUpdateProducts);
+            $this->productEntityStorage->insertMainTable($validInsertProducts, $this->getType(), $this->getHasOptions(), $this->getRequiredOptions());
+            $this->productEntityStorage->updateMainTable($validUpdateProducts);
 
             foreach ($productsByAttribute as $eavAttribute => $products) {
                 $this->insertEavAttribute($products, $eavAttribute);
@@ -334,106 +343,6 @@ abstract class ProductStorage
         }
 
         return $data;
-    }
-
-    /**
-     * Returns an sku => id map for all existing skus.
-     *
-     * @param array $skus
-     * @return array
-     */
-    public function getExistingSkus(array $skus)
-    {
-        if (count($skus) == 0) {
-            return [];
-        }
-
-        $serialized = $this->db->quoteSet($skus);
-        return $this->db->fetchMap("SELECT `sku`, `entity_id` FROM {$this->metaData->productEntityTable} WHERE `sku` in ({$serialized})");
-    }
-
-    /**
-     * @param Product[] $products
-     */
-    protected function insertMainTable(array $products)
-    {
-        $values = [];
-        $skus = [];
-
-        $type = $this->getType();
-        $hasOptions = $this->getHasOptions();
-        $requiredOptions = $this->getRequiredOptions();
-
-        foreach ($products as $product) {
-
-            // index with sku to prevent creation of multiple products with the same sku
-            // (this happens when products with different store views are inserted at once)
-            if (array_key_exists($product->getSku(), $skus)) {
-                continue;
-            }
-            $skus[$product->getSku()] = $product->getSku();
-
-            $sku = $this->db->quote($product->getSku());
-            $attributeSetId = $product->getAttributeSetId();
-            $values[] = "({$attributeSetId}, '{$type}', {$sku}, {$hasOptions}, {$requiredOptions})";
-        }
-
-        if (count($values) > 0) {
-
-            $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) VALUES " .
-                implode(',', $values);
-
-            $this->db->execute($sql);
-
-            // store the new ids with the products
-            $serialized = $this->db->quoteSet($skus);
-            $sql = "SELECT `sku`, `entity_id` FROM `{$this->metaData->productEntityTable}` WHERE `sku` IN ({$serialized})";
-            $sku2id = $this->db->fetchMap($sql);
-
-            foreach ($products as $product) {
-                $product->id = $sku2id[$product->getSku()];
-            }
-        }
-    }
-
-    /**
-     * @param Product[] $products
-     */
-    protected function updateMainTable(array $products)
-    {
-
-        $dateTime = date('Y-m-d H:i:s');
-
-        $attributeSetUpdates = [];
-        $dateOnlyUpdates = [];
-        foreach ($products as $product) {
-            $attributeSetId = $product->getAttributeSetId();
-            if ($attributeSetId !== null) {
-                $attributeSetUpdates[] = "({$product->id}, {$attributeSetId}, '{$dateTime}')";
-            } else {
-                $dateOnlyUpdates[] = "({$product->id}, '{$dateTime}')";
-            }
-        }
-
-        if (count($attributeSetUpdates) > 0) {
-
-            $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-                " (`entity_id`, `attribute_set_id`, `updated_at`) " .
-                " VALUES " . implode(', ', $attributeSetUpdates) .
-                " ON DUPLICATE KEY UPDATE `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)";
-
-            $this->db->execute($sql);
-        }
-
-        if (count($dateOnlyUpdates) > 0) {
-
-            $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-                " (`entity_id`, `updated_at`) " .
-                " VALUES " . implode(', ', $dateOnlyUpdates) .
-                " ON DUPLICATE KEY UPDATE `updated_at`= VALUES(`updated_at`)";
-
-            $this->db->execute($sql);
-        }
     }
 
     /**

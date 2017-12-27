@@ -84,7 +84,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
                 }
             }
 
-            $resolver->resolveIds($product, $config);
+            $resolver->resolveIds([$product], $config);
             $this->assertEquals($test[2], implode('; ', $product->getErrors()));
             $this->assertEquals($test[1], $product->isOk());
 
@@ -117,7 +117,7 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
 
             $product->storeView($test[0]);
 
-            $resolver->resolveIds($product, $config);
+            $resolver->resolveIds([$product], $config);
             $this->assertEquals($test[2], implode('; ', $product->getErrors()));
             $this->assertEquals($test[1], $product->isOk());
 
