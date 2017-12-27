@@ -4,9 +4,8 @@ Many things, some of which are:
 
 ## To be supported
 
-* related, crosssell, upsell products
-* all types of products
 * tier prices
+* all types of products
 * csv import
 * rest request
 * create unresolved attributes for all
@@ -14,7 +13,7 @@ Many things, some of which are:
 * trim: none, all except text fields
 * check attribute value uniqueness
 * check if reference ids exist
-* allow change type of updated product
+* allow change type of updated product (needed for placeholders!)
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
 
@@ -33,16 +32,12 @@ Check ho_import, for compatibility
 
 * If category_ids contains an id that does not belong to a category, it is discarded without an error message
 * Think about very long field values (not crossing default 1MB query size?)
-* People might import configurables before simples
 * check for non-utf-8 in csv imports
-* Is there no better way to ensure that no 2 products get the same sku?
 * Other values than 1 and 2 can be entered for 'status'
-* Updates: do not use default value for attribute_set_code, because it may unintentionally overwrite an existing one
 * attribute_set_id can currently not be updated. Reason: if one would forget it as a field, it would default to something, and this could produce an unsolicited change.
 
 ## Fields
 
-product_type
 product_online
 new_from_date
 new_to_date
@@ -59,12 +54,6 @@ page_layout
 product_options_container
 msrp_display_actual_price_type
 country_of_manufacture
-related_skus
-related_position
-crosssell_skus
-crosssell_position
-upsell_skus
-upsell_position
 hide_from_product_page
 bundle_price_type
 bundle_sku_type

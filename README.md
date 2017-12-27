@@ -2,6 +2,10 @@
 
 Imports product data into Magento 2 via direct database access.
 
+## Warning!
+
+This library has not been used except by its own tests. The chance you find a bug is big. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will help you as fast as I can -- Patrick van Bergen
+
 ## Important
 
 Use this library if you need speed and don't care about any plugins or custom event handlers that are normally activated when products change in Magento.
@@ -191,11 +195,21 @@ These so called "linked" products are stored as references to other products. Wh
         "some-batteries"
     ]);
 
-Linked products may have a dependency conflict. Two products may be linked together. When attempting to create the first product, it needs the id of the other product for a link (e.g. being related). But the same problem exists when we start with the second problem. It's a deadlock.
+The order (position) of the linked products stored in the database is that specified in the array.
 
-In order to get out of this situation, this library creates temporary dummy products for linked products that do not yet exist. These products are disabled simple products with the name "Linked Product Placeholder", and have a price of 123456.78.
+Linked products may have a dependency conflict. One product link to another product that has not been imported yet. And yet the id of the other product is necessary to store the links in the database.
 
-While other solutions are thinkable, this solution is simple to implement and very robust. The user of the library must make sure the placeholder products will be imported at a later time. Placeholder Products that were not used can be removed via the backend product overview page by searching for the name "Linked Product Placeholder".
+Two products may even linked to each other. This is common for related products. When attempting to create the first product, it needs the id of the other product for a link (e.g. being related). But the same problem exists when we start with the second problem. It's a deadlock.
+
+In order to get out of this situation, this library creates temporary "placeholder" products for linked products that do not yet exist. These products are stored in Magento as disabled simple products with the name "Linked Product Placeholder", and with a price of 123456.78.
+
+While other solutions are thinkable, this solution has the following advantages:
+
+* it is simple to implement and easy to understand
+* products and their links can be imported in a single run
+* the linked products do not have to be available in the current job. A later job may import them.
+
+The user of the library must make sure the placeholder products will be imported at a later time. Placeholder Products that were not used can be removed via the backend product overview page by searching for the name "Linked Product Placeholder".
 
 ## Errors
 
