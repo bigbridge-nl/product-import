@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Api;
 
+use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;
@@ -51,6 +52,9 @@ class Importer
      */
     public function importSimpleProduct(SimpleProduct $product)
     {
+        // create placeholders for non-existing linked products
+        $this->ensureThatLinkedProductsExist($product);
+
         // the sku key is necessary: later products in this batch with the same sku will overwrite former products
         $this->simpleProducts[$product->getSku()] = $product;
 
@@ -69,6 +73,9 @@ class Importer
         foreach ($product->getVariants() as $simple) {
             $this->importSimpleProduct($simple);
         }
+
+        // create placeholders for non-existing linked products
+        $this->ensureThatLinkedProductsExist($product);
 
         // the sku key is necessary: later products in this batch with the same sku will overwrite former products
         $this->configurableProducts[$product->getSku()] = $product;
@@ -93,7 +100,7 @@ class Importer
     /**
      * @throws \Exception
      */
-    private function flushSimpleProducts()
+    protected function flushSimpleProducts()
     {
         $this->simpleStorage->storeProducts($this->simpleProducts, $this->config, $this->valueSerializer);
         $this->simpleProducts = [];
@@ -106,5 +113,49 @@ class Importer
     {
         $this->configurableStorage->storeProducts($this->configurableProducts, $this->config, $this->valueSerializer);
         $this->configurableProducts = [];
+    }
+
+    /**
+     * @param Product $product
+     * @throws \Exception
+     */
+    protected function ensureThatLinkedProductsExist(Product $product)
+    {
+        if ($product->hasLinkedProducts()) {
+            // make sure linked products exist, by creating placeholders for non-existing linked products
+            foreach ($this->createLinkedProductPlaceholders($product) as $placeholder) {
+                $this->importSimpleProduct($placeholder);
+            }
+        }
+    }
+
+    /**
+     * @param Product $product
+     * @return Product[] An sku indexed array of placeholders
+     */
+    protected function createLinkedProductPlaceholders(Product $product): array
+    {
+        $placeholders = [];
+
+        $linkedSkus = $product->getLinkedProductSkus();
+        $allLinkedSkus = array_merge($linkedSkus[LinkInfo::RELATED], $linkedSkus[LinkInfo::UP_SELL], $linkedSkus[LinkInfo::CROSS_SELL]);
+
+#todo: it is not pretty to use simpleStorage for this
+        $sku2id = $this->simpleStorage->getExistingSkus($allLinkedSkus);
+
+        foreach (array_unique($allLinkedSkus) as $sku) {
+            if (!array_key_exists($sku, $sku2id)) {
+
+                $placeholder = new SimpleProduct($sku);
+
+                $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
+                $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
+                $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
+
+                $placeholders[$sku] = $placeholder;
+            }
+        }
+
+        return $placeholders;
     }
 }
