@@ -4,7 +4,6 @@ Many things, some of which are:
 
 ## To be supported
 
-* tier prices
 * all types of products
 * csv import
 * rest request

@@ -4,7 +4,7 @@ Imports product data into Magento 2 via direct database access.
 
 ## Warning!
 
-This library has not been used except by its own tests. The chance you find a bug is big. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will help you as fast as I can -- Patrick van Bergen
+This is a new library. It has not been used except by its own tests. The chance you find a bug is big. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will help you as fast as I can -- Patrick van Bergen
 
 ## Important
 
@@ -99,6 +99,18 @@ The following example shows you a simple case of importing a simple product
 
 The following code pieces are extensions on this basic code.
 
+## Errors
+
+The library detects problems in the input in its id-resolution and validation phrases. When it does, it adds descriptive error messages to the product this is processed.
+
+A product that one or more errors is not imported. Errors can be inspected via a custom callback function you can provide.
+
+    $config->resultCallback[] = function(Product $product)) {
+        $errors = $product->getErrors();
+    }
+
+Callbacks are called in the order that the products were added. However, configurables are collected in a different set from simples, and will be processed at a later time.
+
 ## Global scope and store view scope
 
 Many attributes (eav attributes) can be specified both on a global level and on a store view level.
@@ -120,7 +132,9 @@ You can set any attribute by calling a setter, like this
 
     $product->global()->setWeight('1.21');
 
-and set a custom attribute like this
+Setters for all other attributes are available.
+
+Set a custom attribute like this
 
     $product->storeView('nl')->setCustomAttribute('door_count', '3');
 
@@ -145,7 +159,7 @@ The library will create options for attributes if they do not exist, but only fo
 
     $config->autoCreateAttributeOptions(['color_group', 'length']);
 
-## Stock item
+## Stock items
 
 Inventory information (stock) is kept in a separate table. Currently Magento supports only a single (Default) stock.
 
@@ -211,18 +225,6 @@ While other solutions are thinkable, this solution has the following advantages:
 
 The user of the library must make sure the placeholder products will be imported at a later time. Placeholder Products that were not used can be removed via the backend product overview page by searching for the name "Linked Product Placeholder".
 
-## Errors
-
-The library detects problems in the input in its id-resolution and validation phrases. When it does, it adds descriptive error messages to the product this is processed.
-
-A product that one or more errors is not imported. Errors can be inspected via a custom callback function you can provide.
-
-    $config->resultCallback[] = function(Product $product)) {
-        $errors = $product->getErrors();
-    }
-
-Callbacks are called in the order that the products were added. However, configurables are collected in a different set from simples, and will be processed at a later time.
-
 ### Categories
 
 Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials". Separate category names with "/".
@@ -282,15 +284,28 @@ It is also possible to use the attribute code of a custom media image attribute.
 
 If necessary, you can even change this role per store view
 
-    $product1->storeView('store_de')->setImageRole($image, ProductStoreView::SMALL_IMAGE);
+    $product->storeView('store_de')->setImageRole($image, ProductStoreView::SMALL_IMAGE);
 
 If you want to add a label, specify the gallery position, and show/hide it on the product page, use this:
 
-    $product1->global()->setImageGalleryInformation($image, "Large jar of peanut butter", 2, true);
+    $product->global()->setImageGalleryInformation($image, "Large jar of peanut butter", 2, true);
 
 Again, this can be store on the store view level:
 
-    $product1->storeView('store_nl')->setImageGalleryInformation($image, "Grote pot pindakaas", 2, true);
+    $product->storeView('store_nl')->setImageGalleryInformation($image, "Grote pot pindakaas", 2, true);
+
+### Tier prices
+
+Import all tier prices of a product with
+
+    $product->setTierPrices([
+        new TierPrice(10, '12.25', 'General', 'base'),
+        new TierPrice(20, '12.10'),
+    ]);
+
+The first tier price in this example contains a minimum quantity, a price, the name (code) of the customer group, and the code of a website.
+
+The second tier price does not contain a customer group and no website code. This signifies that all customer groups and all websites are affected by this tier price.
 
 ### URL keys
 
