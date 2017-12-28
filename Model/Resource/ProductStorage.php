@@ -109,6 +109,10 @@ abstract class ProductStorage
      */
     public function storeProducts(array $products, ImportConfig $config, ValueSerializer $valueSerializer)
     {
+        if (empty($products)) {
+            return;
+        }
+
         // connect store view to product
         $this->setupStoreViewWiring($products);
 

@@ -39,14 +39,54 @@ class TierPriceStorage
     {
         // updating tier prices relies on the unique key (`entity_id`,`all_groups`,`customer_group_id`,`qty`,`website_id`)
         // this handles the inserts and updates
-        // the deletes are handled by an diff on the serialized tier price data
 
         $this->upsertTierPrices($products);
 
-        $existingTierPricesSerialized = $this->getExistingTierPrices($products);
-        $newTierPrices = $this->getExistingTierPrices($products);
-        $removeList = array_diff_key($existingTierPricesSerialized, $newTierPrices);
-        $this->removeTierPricesByValue($removeList);
+        // the deletes are handled by first collecting products that have more stored values than that should be currently active
+
+        $productsWithOutdatedStoredTierPrices = $this->findProductsWithDeletableTierPrices($products);
+
+        // for these products we check the individual tier prices to see if they are outdated, and remove them
+
+        $this->removeOutdatedStoredTierPrices($productsWithOutdatedStoredTierPrices);
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    protected function findProductsWithDeletableTierPrices(array $products)
+    {
+        if (empty($products)) {
+            return [];
+        }
+
+        $productIds = array_column($products, 'id');
+
+        // count the number of stored tier prices per product
+        $counts = $this->db->fetchMap("
+            SELECT `entity_id`, COUNT(*) FROM `{$this->metaData->tierPriceTable}`
+            WHERE `entity_id` IN (" . implode(', ', $productIds) . ")
+            GROUP BY `entity_id`
+        ");
+
+        // the products whose outdated tier prices must be removed from the database
+        $resultProducts = [];
+
+        foreach ($products as $product) {
+
+            $tierPrices = $product->getTierPrices();
+            if ($tierPrices !== null) {
+
+                if (array_key_exists($product->id, $counts)) {
+                    $storedTierPriceCount = $counts[$product->id];
+                    if ($storedTierPriceCount != count($tierPrices)) {
+                        $resultProducts[] = $product;
+                    }
+                }
+            }
+        }
+
+        return $resultProducts;
     }
 
     /**
@@ -69,7 +109,7 @@ class TierPriceStorage
                     $qty = $tierPrice->getQuantity();
                     $value = $tierPrice->getValue();
                     $websiteId = $tierPrice->getWebsiteId();
-                    $values[] = "({$entityId}, {$allGroups}, {$customerGroupId}, {$qty}, {$value}, {$websiteId})";
+                    $values[] = "({$entityId}, {$allGroups}, {$customerGroupId}, {$qty}, '{$value}', {$websiteId})";
                 }
             }
         }
@@ -83,58 +123,58 @@ class TierPriceStorage
         }
     }
 
-    protected function removeTierPricesByValue(array $tierPriceValueIds)
-    {
-        if (empty($tierPriceValueIds)) {
-            return;
-        }
-
-        $this->db->execute("
-            DELETE FROM `{$this->metaData->tierPriceTable}`
-            WHERE `value_id` IN (" . implode(',', $tierPriceValueIds) . ")
-        ");
-    }
-
-    protected function getExistingTierPrices(array $products)
+    /**
+     * @param Product[] $products
+     */
+    protected function removeOutdatedStoredTierPrices(array $products)
     {
         if (empty($products)) {
-            return [];
+            return;
         }
 
         $productIds = array_column($products, 'id');
 
-        $tierPrices = $this->db->fetchMap("
-            SELECT CONCAT(' ', `entity_id`, `all_groups`, `customer_group_id`, `qty`, `value`, `website_id`), `value_id`
+        // collect tier prices that are stored in the database
+        $storedTierPriceData = $this->db->fetchAllAssoc("
+            SELECT `value_id`, `entity_id`, `all_groups`, `customer_group_id`, `qty`, `value`, `website_id`,
+                CONCAT_WS(' ', `entity_id`, `all_groups`, `customer_group_id`, `qty`, `value`, `website_id`) as serialized
             FROM `{$this->metaData->tierPriceTable}`
             WHERE `entity_id` IN (" . implode(', ', $productIds) . ")
         ");
 
-        return $tierPrices;
-    }
-
-    /**
-     * @param Product[] $products
-     * @return array
-     */
-    protected function getNewTierPrices(array $products)
-    {
-        $tierPrices = [];
-
+        // serialize current tier prices
+        $activeTierPriceData = [];
         foreach ($products as $product) {
             foreach ($product->getTierPrices() as $tierPrice) {
                 $serialized = sprintf("%s %s %s %s %s %s",
                     $product->id,
                     (int)($tierPrice->getCustomerGroupId() === null),
                     (int)$tierPrice->getCustomerGroupId(),
-                    $tierPrice->getQuantity(),
-                    $tierPrice->getValue(),
+                    sprintf("%.4f", $tierPrice->getQuantity()),
+                    sprintf("%.4f", $tierPrice->getValue()),
                     $tierPrice->getWebsiteId()
                 );
-
-                $tierPrices[$serialized] = $tierPrice;
+                $activeTierPriceData[$serialized] = true;
             }
         }
 
-        return $tierPrices;
+        // check stored tier prices with current prices
+        // if it is not present, remove it from the database
+        $removableValueIds = [];
+
+        foreach ($storedTierPriceData as $datum) {
+            $serialized = $datum['serialized'];
+            if (!array_key_exists($serialized, $activeTierPriceData)) {
+                $removableValueIds[] = $datum['value_id'];
+            }
+        }
+
+        // remove the outdated tier prices
+        if (!empty($removableValueIds)) {
+            $this->db->execute("
+                DELETE FROM `{$this->metaData->tierPriceTable}`
+                WHERE `value_id` IN (" . implode(',', $removableValueIds) . ")
+            ");
+        }
     }
 }

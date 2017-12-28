@@ -164,7 +164,7 @@ class Magento2DbConnection
     public function fetchAllAssoc(string $query)
     {
         $a = microtime(true);
-
+#echo $query . "\n";
         $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
         if ($this->logSlowQueries) {

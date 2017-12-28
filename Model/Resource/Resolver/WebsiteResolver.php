@@ -41,14 +41,13 @@ class WebsiteResolver
 
     public function resolveCode(string $code): array
     {
-        $notFound = [];
         $id = null;
         $error = "";
 
         if (!array_key_exists($code, $this->metaData->websiteMap)) {
-            $error = "website code not found: " . implode(', ', $notFound);
+            $error = "website code not found: " . $code;
         } else {
-            $id = $this->metaData->websiteMap[$name];
+            $id = $this->metaData->websiteMap[$code];
         }
 
         return [$id, $error];

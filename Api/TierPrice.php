@@ -13,18 +13,26 @@ class TierPrice
     /** @var string A 12.4 price */
     protected $value;
 
-    /** @var string */
+    /** @var string|null Null means: all customer groups */
     protected $customerGroupName;
 
     /** @var int */
     protected $customerGroupId = null;
 
-    /** @var string */
+    /** @var string|null Null means: all websites */
     protected $websiteCode;
 
     /** @var int */
     protected $websiteId = null;
 
+    /**
+     * TierPrice constructor.
+     *
+     * @param int $quantity
+     * @param string $value
+     * @param string|null $customerGroupName The name (code) of a customer group. Null means: all customer groups
+     * @param string|null $websiteCode The code of the website. Null means: all websites
+     */
     public function __construct(int $quantity, string $value, string $customerGroupName = null, string $websiteCode = null)
     {
         $this->quantity = $quantity;
@@ -50,9 +58,9 @@ class TierPrice
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCustomerGroupName(): string
+    public function getCustomerGroupName()
     {
         return $this->customerGroupName;
     }
@@ -66,9 +74,9 @@ class TierPrice
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getWebsiteCode(): string
+    public function getWebsiteCode()
     {
         return $this->websiteCode;
     }

@@ -1283,10 +1283,63 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $global->setPrice('225.00');
 
         $product1->setTierPrices([
-            new TierPrice(10, '12.25', 'Not Logged In', 'Clothes'),
+            new TierPrice(10, '12.25', 'NOT LOGGED IN', 'base'),
+            new TierPrice(20, '12.15'),
         ]);
 
         $importer->importSimpleProduct($product1);
         $importer->flush();
+
+        $expected = [
+            [$product1->id, 0, 0, 10, 12.25, 1],
+            [$product1->id, 1, 0, 20, 12.15, 0],
+        ];
+
+        $this->assertEquals([], $product1->getErrors());
+        $this->assertEquals($expected, $this->getTierPrices($product1->id));
+
+        // no tier prices specified: do not remove tier prices
+
+        $product1 = new SimpleProduct("window-sill-modern-product-import");
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->assertEquals([], $product1->getErrors());
+        $this->assertEquals($expected, $this->getTierPrices($product1->id));
+
+        // update: change one entry (causes an insert and a delete) and update a price value (update)
+
+        $product1 = new SimpleProduct("window-sill-modern-product-import");
+
+        $product1->setTierPrices([
+            new TierPrice(10, '12.25', 'General', 'base'),
+            new TierPrice(20, '12.10'),
+        ]);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $expected = [
+            [$product1->id, 0, 1, 10, 12.25, 1],
+            [$product1->id, 1, 0, 20, 12.10, 0],
+        ];
+
+        $this->assertEquals([], $product1->getErrors());
+        $this->assertEquals($expected, $this->getTierPrices($product1->id));
+    }
+
+    /**
+     * @param $productId
+     * @return array
+     */
+    public function getTierPrices($productId)
+    {
+        return self::$db->fetchAllNumber("
+            SELECT entity_id, all_groups, customer_group_id, qty, value, website_id
+            FROM " . self::$metaData->tierPriceTable . "
+            WHERE entity_id = {$productId}
+            ORDER BY qty
+        ");
     }
 }
