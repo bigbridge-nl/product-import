@@ -17,18 +17,18 @@ class WebsiteResolver
         $this->metaData = $metaData;
     }
 
-    public function resolveNames(array $names): array
+    public function resolveCodes(array $codes): array
     {
         $notFound = [];
         $ids = [];
         $error = "";
 
-        foreach ($names as $name) {
+        foreach ($codes as $code) {
 
-            if (!array_key_exists($name, $this->metaData->websiteMap)) {
-                $notFound[] = $name;
+            if (!array_key_exists($code, $this->metaData->websiteMap)) {
+                $notFound[] = $code;
             } else {
-                $ids[] = $this->metaData->websiteMap[$name];
+                $ids[] = $this->metaData->websiteMap[$code];
             }
         }
 
@@ -37,5 +37,20 @@ class WebsiteResolver
         }
 
         return [$ids, $error];
+    }
+
+    public function resolveCode(string $code): array
+    {
+        $notFound = [];
+        $id = null;
+        $error = "";
+
+        if (!array_key_exists($code, $this->metaData->websiteMap)) {
+            $error = "website code not found: " . implode(', ', $notFound);
+        } else {
+            $id = $this->metaData->websiteMap[$name];
+        }
+
+        return [$id, $error];
     }
 }

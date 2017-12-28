@@ -150,8 +150,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setDescription("A wunderful product that will enhance the quality of your live");
             $global->setShortDescription("A wunderful product");
             $global->setMetaTitle("Wonderful product");
-            $global->setMetaDescription("Wonderful product, lifechanger");
-            $global->setMetaKeywords("wonderful, lifechanger");
+            $global->setMetaDescription("Wonderful product, life changer");
+            $global->setMetaKeywords("wonderful, life changer");
             $global->setWeight("6");
             $global->setStatus(ProductStoreView::STATUS_ENABLED);
             $global->setPrice("1.39");

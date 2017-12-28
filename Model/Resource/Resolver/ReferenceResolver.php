@@ -35,6 +35,9 @@ class ReferenceResolver
     /** @var LinkedProductReferenceResolver */
     protected $linkedProductReferenceResolver;
 
+    /** @var TierPriceResolver */
+    protected $tierPriceResolver;
+
     public function __construct(
         CategoryImporter $categoryImporter,
         TaxClassResolver $taxClassResolver,
@@ -42,7 +45,8 @@ class ReferenceResolver
         StoreViewResolver $storeViewResolver,
         WebsiteResolver $websiteResolver,
         OptionResolver $optionResolver,
-        LinkedProductReferenceResolver $linkedProductReferenceResolver)
+        LinkedProductReferenceResolver $linkedProductReferenceResolver,
+        TierPriceResolver $tierPriceResolver)
     {
         $this->categoryImporter = $categoryImporter;
         $this->taxClassResolver = $taxClassResolver;
@@ -51,6 +55,7 @@ class ReferenceResolver
         $this->websiteResolver = $websiteResolver;
         $this->optionResolver = $optionResolver;
         $this->linkedProductReferenceResolver = $linkedProductReferenceResolver;
+        $this->tierPriceResolver = $tierPriceResolver;
     }
 
     /**
@@ -63,9 +68,13 @@ class ReferenceResolver
         // linked product references (related, up sell, cross sell
         $this->linkedProductReferenceResolver->resolveLinkedProductReferences($products);
 
+        // resolve customer groups and websites in tier prices
+        $this->tierPriceResolver->resolveReferences($products);
+
         foreach ($products as $product) {
             if ($product->getCategoryIds() instanceof References) {
-                list($ids, $error) = $this->categoryImporter->importCategoryPaths($product->getCategoryIds()->names, $config->autoCreateCategories, $config->categoryNamePathSeparator);
+                list($ids, $error) = $this->categoryImporter->importCategoryPaths($product->getCategoryIds()->names,
+                    $config->autoCreateCategories, $config->categoryNamePathSeparator);
                 $product->setCategoryIds($ids);
                 if ($error !== "") {
                     $product->addError($error);
@@ -74,7 +83,7 @@ class ReferenceResolver
             }
 
             if ($product->getWebsiteIds() instanceof References) {
-                list($ids, $error) = $this->websiteResolver->resolveNames($product->getWebsiteIds()->names);
+                list($ids, $error) = $this->websiteResolver->resolveCodes($product->getWebsiteIds()->names);
                 if ($error === "") {
                     $product->setWebsitesIds($ids);
                 } else {

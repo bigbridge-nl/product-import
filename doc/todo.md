@@ -16,6 +16,7 @@ Many things, some of which are:
 * allow change type of updated product (needed for placeholders!)
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
+* make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
 
 ## Testing
 

@@ -314,4 +314,23 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
             "Specify at least 1 variant"
         ], $configurable->getErrors());
     }
+
+    public function testTierPrices()
+    {
+        $product = new SimpleProduct('big-blue-box');
+        $product->setAttributeSetId(4);
+
+        $global = $product->global();
+        $global->setName("Big Blue Box");
+        $global->setPrice("123.00");
+
+        $product->setTierPrices([[10, 12.95, "Not Logged In", "Clothing"], [20, 12.75, "Not Logged In", "Clothing"]]);
+
+        /** @var Validator $validator */
+        $validator = ObjectManager::getInstance()->get(Validator::class);
+
+        $validator->validate($product);
+
+        $this->assertSame(["tierprices should be an array of TierPrice"], $product->getErrors());
+    }
 }

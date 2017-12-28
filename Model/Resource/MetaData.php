@@ -29,6 +29,7 @@ class MetaData
     const STORE_TABLE = 'store';
     const WEBSITE_TABLE = 'store_website';
     const TAX_CLASS_TABLE = 'tax_class';
+    const CUSTOMER_GROUP_TABLE = 'customer_group';
     const PRODUCT_WEBSITE_TABLE = 'catalog_product_website';
     const MEDIA_GALLERY_TABLE = 'catalog_product_entity_media_gallery';
     const MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE = 'catalog_product_entity_media_gallery_value_to_entity';
@@ -42,6 +43,7 @@ class MetaData
     const LINK_ATTRIBUTE_TABLE = 'catalog_product_link_attribute';
     const LINK_ATTRIBUTE_INT_TABLE = 'catalog_product_link_attribute_int';
     const LINK_TYPE_TABLE = 'catalog_product_link_type';
+    const TIER_PRICE_TABLE = 'catalog_product_entity_tier_price';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -125,6 +127,9 @@ class MetaData
     public $taxClassTable;
 
     /** @var string */
+    public $customerGroupTable;
+
+    /** @var string */
     public $linkTable;
 
     /** @var string */
@@ -135,6 +140,9 @@ class MetaData
 
     /** @var string */
     public $linkTypeTable;
+
+    /** @var string */
+    public $tierPriceTable;
 
     /** @var  int */
     public $defaultCategoryAttributeSetId;
@@ -150,6 +158,9 @@ class MetaData
 
     /** @var  array Maps website code to id */
     public $websiteMap;
+
+    /** @var array Maps customer group name to id */
+    public $customerGroupMap;
 
     /** @var int  */
     public $productEntityTypeId;
@@ -213,6 +224,8 @@ class MetaData
         $this->linkAttributeTable = $this->db->getFullTableName(self::LINK_ATTRIBUTE_TABLE);
         $this->linkAttributeIntTable = $this->db->getFullTableName(self::LINK_ATTRIBUTE_INT_TABLE);
         $this->linkTypeTable = $this->db->getFullTableName(self::LINK_TYPE_TABLE);
+        $this->customerGroupTable = $this->db->getFullTableName(self::CUSTOMER_GROUP_TABLE);
+        $this->tierPriceTable = $this->db->getFullTableName(self::TIER_PRICE_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
@@ -227,6 +240,7 @@ class MetaData
         $this->storeViewMap = $this->getStoreViewMap();
         $this->websiteMap = $this->getWebsiteMap();
         $this->taxClassMap = $this->getTaxClassMap();
+        $this->customerGroupMap = $this->getCustomerGroupMap();
 
         $this->productUrlSuffix = $this->getProductUrlSuffix();
         $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
@@ -311,6 +325,17 @@ class MetaData
     protected function getTaxClassMap()
     {
         $map = $this->db->fetchMap("SELECT `class_name`, `class_id` FROM {$this->taxClassTable}");
+        return $map;
+    }
+
+    /**
+     * Returns a customer code (name) => id array
+     *
+     * @return array
+     */
+    protected function getCustomerGroupMap()
+    {
+        $map = $this->db->fetchMap("SELECT `customer_group_code`, `customer_group_id` FROM {$this->customerGroupTable}");
         return $map;
     }
 

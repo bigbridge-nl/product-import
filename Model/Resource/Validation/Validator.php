@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Api\ProductStockItem;
+use BigBridge\ProductImport\Api\TierPrice;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -70,6 +71,17 @@ class Validator
             }
         }
 
+        // tier prices
+        $tierPrices = $product->getTierPrices();
+        if ($tierPrices !== null) {
+            foreach ($tierPrices as $tierPrice) {
+                if (!($tierPrice instanceof TierPrice)) {
+                    $product->addError("tierprices should be an array of TierPrice");
+                    break;
+                }
+            }
+        }
+
         // images
         $this->imageValidator->validateImages($product);
 
@@ -117,16 +129,8 @@ class Validator
                     case MetaData::TYPE_INTEGER:
                         if (!preg_match('/^-?\d+$/', $value)) {
                             $product->addError($eavAttribute . " is not an integer (" . $value . ")");
-                        } else {
-                            // validate possible options
-                            if ($info->frontendInput === EavAttributeInfo::FRONTEND_SELECT) {
-                                if (!array_key_exists($value, $info->optionValues)) {
-                                    //                                      $product->addError("illegal value for " . $eavAttribute . " status: (" . $value  . "), 3 (allowed = " . implode(", ", $info->optionValues) . ")"(;
-                                }
-                            }
                         }
                         break;
-//                    }
                 }
             }
         }

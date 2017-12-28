@@ -52,6 +52,9 @@ abstract class Product
     /** @var int[][] */
     protected $linkedProductIds = [];
 
+    /** @var TierPrice[]|null An array of tier prices. null means: not used in this import */
+    protected $tierPrices = null;
+
     // =========================================
     // importer data
     // =========================================
@@ -275,5 +278,21 @@ abstract class Product
     public function getLinkedProductIds(string $linkType)
     {
         return array_key_exists($linkType, $this->linkedProductIds) ? $this->linkedProductIds[$linkType] : null;
+    }
+
+    /**
+     * @param TierPrice[] $tierPrices
+     */
+    public function setTierPrices(array $tierPrices)
+    {
+        $this->tierPrices = $tierPrices;
+    }
+
+    /**
+     * @return TierPrice[]|null
+     */
+    public function getTierPrices()
+    {
+        return $this->tierPrices;
     }
 }

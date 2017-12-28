@@ -44,6 +44,9 @@ abstract class ProductStorage
     /** @var ProductEntityStorage */
     protected $productEntityStorage;
 
+    /** @var TierPriceStorage */
+    protected $tierPriceStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
@@ -53,7 +56,8 @@ abstract class ProductStorage
         UrlRewriteStorage $urlRewriteStorage,
         ProductEntityStorage $productEntityStorage,
         ImageStorage $imageStorage,
-        LinkedProductStorage $linkedProductStorage)
+        LinkedProductStorage $linkedProductStorage,
+        TierPriceStorage $tierPriceStorage)
     {
         $this->db = $db;
         $this->metaData = $metaData;
@@ -64,6 +68,7 @@ abstract class ProductStorage
         $this->productEntityStorage = $productEntityStorage;
         $this->imageStorage = $imageStorage;
         $this->linkedProductStorage = $linkedProductStorage;
+        $this->tierPriceStorage = $tierPriceStorage;
     }
 
     /**
@@ -294,6 +299,9 @@ abstract class ProductStorage
             $this->linkedProductStorage->updateLinkedProducts($validUpdateProducts);
 
             $this->imageStorage->storeProductImages($validProducts);
+
+            $this->tierPriceStorage->insertTierPrices($validInsertProducts);
+            $this->tierPriceStorage->updateTierPrices($validUpdateProducts);
 
             // url_rewrite (must be done after url_key and category_id)
             $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);

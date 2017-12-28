@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Api\ProductStoreView;
+use BigBridge\ProductImport\Api\TierPrice;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use Exception;
@@ -1269,5 +1270,23 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         }
 
         return $result;
+    }
+
+    public function testTierPrices()
+    {
+        $config = new ImportConfig();
+        $importer = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct("window-sill-modern-product-import");
+        $global = $product1->global();
+        $global->setName("Window sill modern");
+        $global->setPrice('225.00');
+
+        $product1->setTierPrices([
+            new TierPrice(10, '12.25', 'Not Logged In', 'Clothes'),
+        ]);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
     }
 }
