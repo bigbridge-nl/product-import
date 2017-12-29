@@ -141,6 +141,8 @@ abstract class ProductStorage
 
         // in a "dry run" no actual imports to the database are done
         if (!$config->dryRun) {
+
+            // store the products in the database
             $this->saveProducts($validProducts, $valueSerializer);
         }
 
@@ -154,6 +156,7 @@ abstract class ProductStorage
         }
 
         // disconnect store view to product
+        // this is done to remove reference cycles that trouble garbage collection
         $this->tearDownStoreViewWiring($products);
     }
 
