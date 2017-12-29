@@ -6,7 +6,7 @@ use Exception;
 use BigBridge\ProductImport\Api\Product;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Resource\ProductEntityStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 
 /**
  * @author Patrick van Bergen

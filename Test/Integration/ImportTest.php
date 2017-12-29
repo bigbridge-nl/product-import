@@ -2,14 +2,15 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use Exception;
+use Magento\Framework\App\ObjectManager;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Api\ProductStoreView;
 use BigBridge\ProductImport\Api\TierPrice;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
-use Exception;
-use Magento\Framework\App\ObjectManager;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
@@ -17,7 +18,6 @@ use BigBridge\ProductImport\Api\SimpleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Api\Product;
-use Magento\Framework\Exception\NoSuchEntityException;
 
 /**
  * Integration test. It can only be executed from within a shop that has

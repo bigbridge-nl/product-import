@@ -9,6 +9,11 @@ use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
+use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
 use BigBridge\ProductImport\Model\Resource\Validation\Validator;
 use Exception;
 

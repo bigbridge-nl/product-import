@@ -6,6 +6,11 @@ use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
+use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
 
 /**
