@@ -44,7 +44,7 @@ class ProductEntityStorage
      * @param bool $hasOptions
      * @param bool $requiredOptions
      */
-    public function insertMainTable(array $products, string $type, int $hasOptions, int $requiredOptions)
+    public function insertMainTable(array $products)
     {
         $values = [];
         $skus = [];
@@ -60,6 +60,9 @@ class ProductEntityStorage
 
             $sku = $this->db->quote($product->getSku());
             $attributeSetId = $product->getAttributeSetId();
+            $type = $product->getType();
+            $hasOptions = $product->getHasOptions();
+            $requiredOptions = $product->getRequiredOptions();
             $values[] = "({$attributeSetId}, '{$type}', {$sku}, {$hasOptions}, {$requiredOptions})";
         }
 

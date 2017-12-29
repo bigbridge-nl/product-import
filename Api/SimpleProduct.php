@@ -7,4 +7,8 @@ namespace BigBridge\ProductImport\Api;
  */
 class SimpleProduct extends Product
 {
+    public function getType()
+    {
+        return 'simple';
+    }
 }

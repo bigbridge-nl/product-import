@@ -9,10 +9,12 @@ Many things, some of which are:
 * bundled products
 * grouped products
 * downloadable products
+* virtual products
 * make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
 * csv import
 * allow delete products
 * url_key is a default attribute?
+* by default add to all websites?
 * check if all indexes have been updated correctly after reindex, or that the importer must initiate some of it
 * speed test calibration tool
 * rest request
@@ -55,13 +57,26 @@ Check other importers for features and code
 
 ## Fields
 
+### Downloadable
+
 product_online
-new_from_date
-new_to_date
+
+### Bundle
+
+bundle_price_type
+bundle_sku_type
+bundle_price_view
+bundle_weight_type
+bundle_values
+bundle_shipment_type
+
+### Other
+
 display_product_options_in
 map_price
-msrp_price
 map_enabled
+msrp_price
+msrp_display_actual_price_type
 gift_message_available
 custom_design
 custom_design_from
@@ -69,15 +84,7 @@ custom_design_to
 custom_layout_update
 page_layout
 product_options_container
-msrp_display_actual_price_type
 country_of_manufacture
-hide_from_product_page
-bundle_price_type
-bundle_sku_type
-bundle_price_view
-bundle_weight_type
-bundle_values
-bundle_shipment_type
 associated_skus
 
 ## Ever?

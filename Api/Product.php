@@ -99,6 +99,30 @@ abstract class Product
     }
 
     /**
+     * Used in catalog_product_entity table
+     * @return string
+     */
+    public abstract function getType();
+
+    /**
+     * Used in catalog_product_entity table
+     * @return string
+     */
+    public function getHasOptions()
+    {
+        return '0';
+    }
+
+    /**
+     * Used in catalog_product_entity table
+     * @return string
+     */
+    public function getRequiredOptions()
+    {
+        return '0';
+    }
+
+    /**
      * @param string $storeViewCode
      * @return ProductStoreView
      */

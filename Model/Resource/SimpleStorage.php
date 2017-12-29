@@ -9,11 +9,6 @@ use BigBridge\ProductImport\Api\SimpleProduct;
  */
 class SimpleStorage extends ProductStorage
 {
-    public function getType()
-    {
-        return 'simple';
-    }
-
     /**
      * @param SimpleProduct[] $insertProducts
      * @param SimpleProduct[] $updateProducts

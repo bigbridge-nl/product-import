@@ -33,21 +33,6 @@ class ConfigurableStorage extends ProductStorage
         parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage);
     }
 
-    public function getType()
-    {
-        return 'configurable';
-    }
-
-    public function getHasOptions()
-    {
-        return '1';
-    }
-
-    public function getRequiredOptions()
-    {
-        return '1';
-    }
-
     /**
      * @param ConfigurableProduct[] $insertProducts
      * @param ConfigurableProduct[] $updateProducts

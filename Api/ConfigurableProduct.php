@@ -26,6 +26,21 @@ class ConfigurableProduct extends Product
         $this->variants = $variants;
     }
 
+    public function getType()
+    {
+        return 'configurable';
+    }
+
+    public function getHasOptions()
+    {
+        return '1';
+    }
+
+    public function getRequiredOptions()
+    {
+        return '1';
+    }
+
     /**
      * @return SimpleProduct[]
      */

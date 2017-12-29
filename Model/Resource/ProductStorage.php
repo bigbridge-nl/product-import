@@ -77,30 +77,6 @@ abstract class ProductStorage
     }
 
     /**
-     * Used in catalog_product_entity table
-     * @return string
-     */
-    public abstract function getType();
-
-    /**
-     * Used in catalog_product_entity table
-     * @return string
-     */
-    public function getHasOptions()
-    {
-        return '0';
-    }
-
-    /**
-     * Used in catalog_product_entity table
-     * @return string
-     */
-    public function getRequiredOptions()
-    {
-        return '0';
-    }
-
-    /**
      * @param Product[] $insertProducts
      * @param Product[] $updateProducts
      */
@@ -293,7 +269,7 @@ abstract class ProductStorage
 
         try {
 
-            $this->productEntityStorage->insertMainTable($validInsertProducts, $this->getType(), $this->getHasOptions(), $this->getRequiredOptions());
+            $this->productEntityStorage->insertMainTable($validInsertProducts);
             $this->productEntityStorage->updateMainTable($validUpdateProducts);
 
             foreach ($productsByAttribute as $eavAttribute => $products) {

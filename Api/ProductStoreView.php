@@ -40,6 +40,8 @@ class ProductStoreView
     const ATTR_META_TITLE = 'meta_title';
     const ATTR_META_DESCRIPTION = 'meta_description';
     const ATTR_META_KEYWORDS = 'meta_keyword';
+    const ATTR_NEWS_FROM_DATE = 'news_from_date';
+    const ATTR_NEWS_TO_DATE = 'news_to_date';
 
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
@@ -207,6 +209,22 @@ class ProductStoreView
     public function setSpecialToDate(string $specialPriceToDate)
     {
         $this->attributes[self::ATTR_SPECIAL_TO_DATE] = trim($specialPriceToDate);
+    }
+
+    /**
+     * @param string $newsFromDate A y-m-d MySql date
+     */
+    public function setNewsFromDate(string $newsFromDate)
+    {
+        $this->attributes[self::ATTR_NEWS_FROM_DATE] = trim($newsFromDate);
+    }
+
+    /**
+     * @param string $newsToDate A y-m-d MySql date
+     */
+    public function setNewsToDate(string $newsToDate)
+    {
+        $this->attributes[self::ATTR_NEWS_TO_DATE] = trim($newsToDate);
     }
 
     /**
