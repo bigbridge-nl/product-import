@@ -2,6 +2,8 @@
 
 I will just name some things that are of interest to the library.
 
+## Public Domain
+
 ### FastSimpleImport 2
 
 https://github.com/firegento/FireGento_FastSimpleImport2
@@ -14,14 +16,20 @@ http://firegento-fastsimpleimport2.readthedocs.io/en/latest/
 
 https://github.com/ho-nl/magento2-Ho_Import
 
-### Firebear
+### Tech Division
+
+https://github.com/techdivision/import
+
+### Commercial
+
+## Firebear
 
 https://firebearstudio.com/the-improved-import.html
 
 * Creation of product attributes
 * Import jobs
 
-### Commerce Extensions
+## Commerce Extensions
 
 https://www.commerceextensions.com/magento-product-import-export-magento-2.html
 
@@ -32,14 +40,14 @@ https://www.commerceextensions.com/magento-product-import-export-magento-2.html
 * Explicit choice of insert/update and replace for images, websites, tier prices, categories
 * Auto create categories
 
-### Mage Bees
+## Mage Bees
 
 https://www.magebees.com/magento-2-import-export-products-extension.html
 
 * Extended user manual
 * Custom options
 
-### Magesales
+## Magesales
 
 https://www.magesales.com/magento-2-product-import-export.html
 
@@ -51,14 +59,14 @@ https://bsscommerce.com/magento-2-import-export-product-attributes.html
 
 * Import of extra image information
 
-### CED Commerce
+## CED Commerce
 
 https://cedcommerce.com/magento-2-extensions/marketplace/vendor-mass-import-export-addon
 
 * No technical details given
 * For vendors (?)
 
-### VNEComs
+## VNEComs
 
 https://www.vnecoms.com/magento2-marketplace/vendor-mass-import-export-magento2.html
 
