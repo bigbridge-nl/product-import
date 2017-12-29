@@ -4,7 +4,9 @@ Imports product data into Magento 2 via direct database access.
 
 ## Warning!
 
-This is a new library. It has not been used except by its own tests. The chance you find a bug is big. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will help you as fast as I can -- Patrick van Bergen
+This is a new library. It has not been used except by its own tests. The chance you find a bug is big. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will help you as fast as I can.
+
+My name is Patrick van Bergen, I created this library because I needed product import to be fast. I am from the Magento 2 age. I have not done much Magento 1 programming so I am taking a new approach to importing, but missing a lot of the Magento 1 era common knowledge. This means that I am reinventing the wheel at many points.
 
 ## Important
 
