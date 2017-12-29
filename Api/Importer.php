@@ -113,7 +113,7 @@ class Importer
      */
     protected function flushPlaceholderProducts()
     {
-        $this->simpleStorage->storeProducts($this->placeholderProducts, $this->config, $this->valueSerializer);
+        $this->simpleStorage->storeProducts($this->placeholderProducts, $this->config, $this->valueSerializer, false);
         $this->placeholderProducts = [];
     }
 
@@ -122,7 +122,7 @@ class Importer
      */
     protected function flushSimpleProducts()
     {
-        $this->simpleStorage->storeProducts($this->simpleProducts, $this->config, $this->valueSerializer);
+        $this->simpleStorage->storeProducts($this->simpleProducts, $this->config, $this->valueSerializer, true);
         $this->simpleProducts = [];
     }
 
@@ -131,7 +131,7 @@ class Importer
      */
     private function flushConfigurableProducts()
     {
-        $this->configurableStorage->storeProducts($this->configurableProducts, $this->config, $this->valueSerializer);
+        $this->configurableStorage->storeProducts($this->configurableProducts, $this->config, $this->valueSerializer, true);
         $this->configurableProducts = [];
     }
 

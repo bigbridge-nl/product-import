@@ -92,9 +92,10 @@ abstract class ProductStorage
      * @param Product[] $products Sku-indexed products of various product types
      * @param ImportConfig $config
      * @param ValueSerializer $valueSerializer
+     * @param bool $useCallbacks
      * @throws Exception
      */
-    public function storeProducts(array $products, ImportConfig $config, ValueSerializer $valueSerializer)
+    public function storeProducts(array $products, ImportConfig $config, ValueSerializer $valueSerializer, bool $useCallbacks)
     {
         if (empty($products)) {
             return;
@@ -133,41 +134,22 @@ abstract class ProductStorage
         // create url keys based on name and id
         // changes $product->errors
         $this->urlKeyGenerator->createUrlKeysForNewProducts($insertProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
-
         $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
 
-        $validProducts = [];
-
-        foreach ($products as $product) {
-
-            // checks all attributes, changes $product->errors
-            $this->validator->validate($product);
-
-            if (!$product->isOk()) {
-                continue;
-            }
-
-            // collect valid products
-            $validProducts[] = $product;
-        }
+        // create an array of products without errors
+        $validProducts = $this->collectValidProducts($products);
 
         // in a "dry run" no actual imports to the database are done
         if (!$config->dryRun) {
-
             $this->saveProducts($validProducts, $valueSerializer);
         }
 
         // call user defined functions to let them process the results
-        foreach ($config->resultCallbacks as $callback) {
-
-            foreach ($products as $product) {
-
-                // do not give feedback for placeholder products; this would be confusing to the user
-                if ($product->global()->getName() === Product::PLACEHOLDER_NAME) {
-                    continue;
+        if ($useCallbacks) {
+            foreach ($config->resultCallbacks as $callback) {
+                foreach ($products as $product) {
+                    call_user_func($callback, $product);
                 }
-
-                call_user_func($callback, $product);
             }
         }
 
@@ -201,6 +183,29 @@ abstract class ProductStorage
                 $storeView->parent = null;
             }
         }
+    }
+
+    /**
+     * @param array $products
+     * @return array
+     */
+    public function collectValidProducts(array $products): array
+    {
+        $validProducts = [];
+
+        foreach ($products as $product) {
+
+            // checks all attributes, changes $product->errors
+            $this->validator->validate($product);
+
+            if (!$product->isOk()) {
+                continue;
+            }
+
+            // collect valid products
+            $validProducts[] = $product;
+        }
+        return $validProducts;
     }
 
     /**
