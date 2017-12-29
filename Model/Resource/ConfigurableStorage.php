@@ -9,6 +9,7 @@ use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
 use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\StockItemStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
@@ -28,9 +29,10 @@ class ConfigurableStorage extends ProductStorage
         ProductEntityStorage $productEntityStorage,
         ImageStorage $imageStorage,
         LinkedProductStorage $linkedProductStorage,
-        TierPriceStorage $tierPriceStorage)
+        TierPriceStorage $tierPriceStorage,
+        StockItemStorage $stockItemStorage)
     {
-        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage);
+        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage, $stockItemStorage);
     }
 
     /**
