@@ -2,6 +2,8 @@
 
 Many things, some of which are:
 
+* Check if all relevant indexes are in Update by Schedule mode; even better, set this mode while importing. If the latter is done, inform the user that the cron must be run for the indexes to be updated.
+
 ## To be supported
 
 * create functions for config

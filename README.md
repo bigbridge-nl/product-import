@@ -14,7 +14,7 @@ Use this library if you need speed and don't care about any plugins or custom ev
 
 This library just helps you to get products into Magento's database quickly, low level.
 
-After an import has completed, the product and category indexers need to be run. The library will not do this for you.
+The product indexes Category Products, product Categories, Product Price, Product EAV, Stock must be in the mode Update by Schedule, since this import does not update indexes by itself.
 
 ## Features
 
