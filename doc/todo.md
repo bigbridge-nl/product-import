@@ -4,6 +4,11 @@ Many things, some of which are:
 
 * Check if all relevant indexes are in Update by Schedule mode; even better, set this mode while importing. If the latter is done, inform the user that the cron must be run for the indexes to be updated.
 
+##CSV import
+
+* Support import of Magento export csv
+* Update table import_history
+
 ## To be supported
 
 * create functions for config
@@ -13,6 +18,7 @@ Many things, some of which are:
 * downloadable products
 * virtual products
 * make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
+* add a importer function runIndexers()
 * csv import
 * allow delete products
 * url_key is a default attribute?

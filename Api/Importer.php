@@ -8,6 +8,8 @@ use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;
 
 /**
+ * This is the main class for API based imports.
+ *
  * This class implements the batch operation.
  * Each batch performs inserts / updates of products of the same type (i.e. all products are either simples or configurables, not a mix of them).
  * For speed it is important that all products in the batch can be treated the same.

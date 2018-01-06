@@ -14,8 +14,6 @@ Use this library if you need speed and don't care about any plugins or custom ev
 
 This library just helps you to get products into Magento's database quickly, low level.
 
-The product indexes Category Products, product Categories, Product Price, Product EAV, Stock must be in the mode Update by Schedule, since this import does not update indexes by itself.
-
 ## Features
 
 * import of product data (new and updates, based on sku)
@@ -28,6 +26,16 @@ The product indexes Category Products, product Categories, Product Price, Produc
 * input is validated on data type, requiredness,  and length restrictions
 * result callback, a function that is called with the results of each imported product (id, error)
 * information is only added and overwritten, never removed; the import is not considered to be the only source of information of the shop
+
+## Indexing
+
+It is important to think about indexing when using this library.
+
+Magento supports "Update on Save" and "Update by Schedule". The relevant indexes are Category Products, product Categories, Product Price, Product EAV, and Stock.
+
+If these indexes are set to "Update by Schedule", a Magento cron job based indexer will update the indexes. This mode works well with this library.
+
+If these indexes are set to "Update on Save", you will need to run the indexers manually after the import is done. This is less advisable.
 
 ## Default values
 
