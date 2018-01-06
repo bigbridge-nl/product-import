@@ -4,7 +4,7 @@ Many things, some of which are:
 
 * Check if all relevant indexes are in Update by Schedule mode; even better, set this mode while importing. If the latter is done, inform the user that the cron must be run for the indexes to be updated.
 
-##CSV import
+## CSV import
 
 * Support import of Magento export csv
 * Update table import_history
@@ -39,7 +39,7 @@ Many things, some of which are:
 ## Try this out
 
 * is it faster to loop through 1000 products in 1 function faster than calling 1000 functions? use it
-* check if prepared functions are really faster (and / or safer)
+* all attributes in an array: collect products per attribute to save time
 
 ## Testing
 

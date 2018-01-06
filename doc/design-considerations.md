@@ -102,3 +102,59 @@ https://sourceforge.net/p/magmi/patches/23/
 
 All images are places in a temporary location in the validation phase, before being processed  further. This ensures that all images are valid when being processed.
 Make sure to remove all images from their temporary location later.
+
+### Query speed
+
+I use queries with many inserts / updates at once, because this is faster than individual queries.
+
+I tested this. For the mass import of eav attributes I tried prepared statements
+
+    $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
+            " VALUES (:a, :b, :c, :d) " .
+            " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+
+    $stm = $this->db->prepare($sql);
+
+    $values = [];
+    foreach ($storeViews as $storeView) {
+
+        $entityId = $storeView->parent->id;
+        $value = $this->db->quote($storeView->getAttribute($eavAttribute));
+        $storeViewId = $storeView->getStoreViewId();
+
+        $stm->execute([
+            'a' => $entityId,
+            'b' => $attributeId,
+            'c' => $storeViewId,
+            'd' => $value
+        ]);
+    }
+
+I tried this both with and without prepared statements, it didn't matter. Both were about 4 times slower than the single query with 1000 inserts.
+
+I checked
+
+    $values[] = "({$entityId},{$attributeId},{$storeViewId},{$value})";
+    $values[] = sprintf("(%s,%s,%s,%s)", $entityId, $attributeId, $storeViewId, $value);
+    $values[] = "(" . $entityId . "," . $attributeId . "," . $storeViewId . "," . $value . ")";
+
+they are all the same speed.
+
+I tried concatenation in stead of array implode
+
+    $values = "";
+    $sep = "";
+    foreach ($storeViews as $storeView) {
+
+        $entityId = $storeView->parent->id;
+        $value = $this->db->quote($storeView->getAttribute($eavAttribute));
+        $storeViewId = $storeView->getStoreViewId();
+        $values .= "{$sep}({$entityId},{$attributeId},{$storeViewId},{$value})";
+        $sep = ",";
+    }
+
+    $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
+        " VALUES " . $values .
+        " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
+
+it made not difference in speed.
