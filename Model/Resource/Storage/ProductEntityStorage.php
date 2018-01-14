@@ -40,6 +40,30 @@ class ProductEntityStorage
 
     /**
      * @param Product[] $products
+     */
+    public function checkIfIdsExist(array $products)
+    {
+        if (empty($products)) {
+            return;
+        }
+
+        $productIds = array_column($products, 'id');
+
+        $exists = $this->db->fetchMap("
+            SELECT `entity_id`, `entity_id`
+            FROM {$this->metaData->productEntityTable}
+            WHERE `entity_id` IN (" . implode(', ', $productIds) . ")
+        ");
+
+        foreach ($products as $product) {
+            if (!array_key_exists($product->id, $exists)) {
+                $product->addError("Id does not belong to existing product: " . $product->id);
+            }
+        }
+    }
+
+    /**
+     * @param Product[] $products
      * @param string $type
      * @param bool $hasOptions
      * @param bool $requiredOptions
@@ -93,32 +117,33 @@ class ProductEntityStorage
         $dateTime = date('Y-m-d H:i:s');
 
         $attributeSetUpdates = [];
-        $dateOnlyUpdates = [];
+        $otherUpdates = [];
         foreach ($products as $product) {
+            $sku = $product->getSku();
             $attributeSetId = $product->getAttributeSetId();
             if ($attributeSetId !== null) {
-                $attributeSetUpdates[] = "({$product->id}, {$attributeSetId}, '{$dateTime}')";
+                $attributeSetUpdates[] = "({$product->id}, '{$sku}', {$attributeSetId}, '{$dateTime}')";
             } else {
-                $dateOnlyUpdates[] = "({$product->id}, '{$dateTime}')";
+                $otherUpdates[] = "({$product->id}, '{$sku}', '{$dateTime}')";
             }
         }
 
         if (count($attributeSetUpdates) > 0) {
 
             $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-                " (`entity_id`, `attribute_set_id`, `updated_at`) " .
+                " (`entity_id`, `sku`, `attribute_set_id`, `updated_at`) " .
                 " VALUES " . implode(', ', $attributeSetUpdates) .
-                " ON DUPLICATE KEY UPDATE `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)";
+                " ON DUPLICATE KEY UPDATE `sku` = VALUES(`sku`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)";
 
             $this->db->execute($sql);
         }
 
-        if (count($dateOnlyUpdates) > 0) {
+        if (count($otherUpdates) > 0) {
 
             $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-                " (`entity_id`, `updated_at`) " .
-                " VALUES " . implode(', ', $dateOnlyUpdates) .
-                " ON DUPLICATE KEY UPDATE `updated_at`= VALUES(`updated_at`)";
+                " (`entity_id`, `sku`, `updated_at`) " .
+                " VALUES " . implode(', ', $otherUpdates) .
+                " ON DUPLICATE KEY UPDATE `sku` = VALUES(`sku`), `updated_at`= VALUES(`updated_at`)";
 
             $this->db->execute($sql);
         }

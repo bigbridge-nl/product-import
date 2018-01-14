@@ -13,7 +13,6 @@ use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
-use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
 use BigBridge\ProductImport\Api\SimpleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;

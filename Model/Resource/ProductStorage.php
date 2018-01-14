@@ -114,16 +114,22 @@ abstract class ProductStorage
         $sku2id = $this->productEntityStorage->getExistingSkus($skus);
 
         // separate new products from existing products and assign id
-        $insertProducts = $updateProducts = [];
+        $insertProducts = $updateProducts = $productsWithId = [];
         foreach ($products as $product) {
 
-            if (array_key_exists($product->getSku(), $sku2id)) {
+            if ($product->id) {
+                $updateProducts[] = $product;
+                $productsWithId[] = $product;
+            } else if (array_key_exists($product->getSku(), $sku2id)) {
                 $product->id = $sku2id[$product->getSku()];
                 $updateProducts[] = $product;
             } else {
                 $insertProducts[] = $product;
             }
         }
+
+        // check if the pre-specified ids exist
+        $this->productEntityStorage->checkIfIdsExist($productsWithId);
 
         // set default values for new products
         $this->setDefaultValues($insertProducts);

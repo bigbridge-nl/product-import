@@ -11,8 +11,6 @@ Many things, some of which are:
 
 ## To be supported
 
-* create functions for config
-* allow (sku) updates with given ip
 * bundled products
 * grouped products
 * downloadable products

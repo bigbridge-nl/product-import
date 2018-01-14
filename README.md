@@ -16,7 +16,7 @@ This library just helps you to get products into Magento's database quickly, low
 
 ## Features
 
-* import of product data (new and updates, based on sku)
+* import of product data (new and updates, based on sku or id)
 * automatic category generation (no updates)
 * automatic select and multiselect attribute option creation
 * import of images from file or url
@@ -101,6 +101,7 @@ The following example shows you a simple case of importing a simple product
             $importer->importSimpleProduct($product);
         }
 
+        // process any remaining products in the pipeline
         $importer->flush();
 
     } catch (\Exception $e) {
@@ -348,6 +349,20 @@ or you can add the sku (transformed to url)
 The url will then look something like this
 
     https://myshop.com/synthetisch-kinderdekbed-4-seizoenen-kdb-18004.html
+
+## Import by ID
+
+While it is not required to specify the id of a product to import it, it may sometimes be necessary.
+Particularly, if the sku of a product may change during the import, it is necessary to specify the id.
+
+Import by ID happens the same as import by sku, except that the ID is specified:
+
+    $product = new SimpleProduct('new-identity-product-import');
+    $product->id = 32711;
+
+When the id is specified, it is treated as the identifier of an object. The sku will be updated to match the one given in the import.
+
+Import by id always concerns updates, not inserts. When a non-existing id is used, an error is added to the product.
 
 ## Dry run
 
