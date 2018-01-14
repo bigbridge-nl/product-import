@@ -38,7 +38,6 @@ Many things, some of which are:
 
 ## Try this out
 
-* is it faster to loop through 1000 products in 1 function faster than calling 1000 functions? use it
 * all attributes in an array: collect products per attribute to save time
 
 ## Testing

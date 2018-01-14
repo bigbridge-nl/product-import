@@ -33,6 +33,11 @@ class ImageStorage
     public function storeProductImages(array $products)
     {
         foreach ($products as $product) {
+
+            if (empty($product->getImages())) {
+                continue;
+            }
+
             $this->storeImages($product);
         }
 
@@ -41,10 +46,6 @@ class ImageStorage
 
     protected function storeImages(Product $product)
     {
-        if (empty($product->getImages())) {
-            return;
-        }
-
         // separates new from existing images
         // add valueId and actualStoragePath to existing images
         list($existingImages, $newImages) = $this->splitNewAndExistingImages($product);

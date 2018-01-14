@@ -60,9 +60,15 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $table = self::$metaData->productEntityTable;
         self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE '%-product-import'");
 
+        // remove the multiple select attribute
+        self::$db->execute("
+            DELETE FROM " . self::$metaData->attributeTable . "
+            WHERE attribute_code = 'color_group_product_importer'
+        ");
+
         // create a multiple select attribute
         self::$db->execute("
-            INSERT IGNORE INTO " . self::$metaData->attributeTable . "
+            INSERT INTO " . self::$metaData->attributeTable . "
             SET 
                 entity_type_id = " . self::$metaData->productEntityTypeId . ",
                 attribute_code = 'color_group_product_importer',
@@ -73,7 +79,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $insertId = self::$db->getLastInsertId();
 
         self::$db->execute("
-            INSERT IGNORE INTO " . self::$metaData->catalogAttributeTable . "
+            INSERT INTO " . self::$metaData->catalogAttributeTable . "
             SET 
                 attribute_id = " . $insertId . ",
                 is_global = 1
