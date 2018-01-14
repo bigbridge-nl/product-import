@@ -42,6 +42,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testImportSpeed()
     {
         $success = true;

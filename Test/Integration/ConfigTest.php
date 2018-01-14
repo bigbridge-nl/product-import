@@ -84,7 +84,7 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $config = new ImportConfig();
 
         try {
-            $importer = self::$factory->createImporter($config);
+            self::$factory->createImporter($config);
         } catch (Exception $exception) {
             $this->assertTrue(false);
         }

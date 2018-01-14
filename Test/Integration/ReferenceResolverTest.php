@@ -26,6 +26,9 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testReferenceResolver()
     {
         $config = new ImportConfig();
@@ -91,6 +94,9 @@ class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testStoreViewResolver()
     {
         $config = new ImportConfig();
