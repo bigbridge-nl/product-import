@@ -42,6 +42,7 @@ class ProductStoreView
     const ATTR_META_KEYWORDS = 'meta_keyword';
     const ATTR_NEWS_FROM_DATE = 'news_from_date';
     const ATTR_NEWS_TO_DATE = 'news_to_date';
+    const ATTR_GIFT_MESSAGE_AVAILABLE = 'gift_message_available';
 
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
@@ -103,6 +104,11 @@ class ProductStoreView
     public function setStatus(int $status)
     {
         $this->attributes[self::ATTR_STATUS] = $status;
+    }
+
+    public function setGiftMessageAvailable(bool $available)
+    {
+        $this->attributes[self::ATTR_GIFT_MESSAGE_AVAILABLE] = (int)$available;
     }
 
     public function setDescription(string $description)

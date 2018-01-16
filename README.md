@@ -207,7 +207,7 @@ Linked products may have a dependency conflict. One product link to another prod
 
 Two products may even linked to each other. This is common for related products. When attempting to create the first product, it needs the id of the other product for a link (e.g. being related). But the same problem exists when we start with the second problem. It's a deadlock.
 
-In order to get out of this situation, this library creates temporary "placeholder" products for linked products that do not yet exist. These products are stored in Magento as disabled simple products with the name "Linked Product Placeholder", and with a price of 123456.78.
+In order to get out of this situation, this library creates temporary "placeholder" products for linked products that do not yet exist. These products are stored in Magento as disabled simple products with the name "Product Placeholder", and with a price of 123456.78.
 
 While other solutions are thinkable, this solution has the following advantages:
 
@@ -215,7 +215,7 @@ While other solutions are thinkable, this solution has the following advantages:
 * products and their links can be imported in a single run
 * the linked products do not have to be available in the current job. A later job may import them.
 
-The user of the library must make sure the placeholder products will be imported at a later time. Placeholder Products that were not used can be removed via the backend product overview page by searching for the name "Linked Product Placeholder".
+The user of the library must make sure the placeholder products will be imported at a later time. Placeholder Products that were not used can be removed via the backend product overview page by searching for the name "Product Placeholder".
 
 ## Configurables
 

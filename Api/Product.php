@@ -19,7 +19,7 @@ abstract class Product
 
     const DEFAULT_STOCK_NAME = 'Default';
 
-    const PLACEHOLDER_NAME = 'Linked Product Placeholder';
+    const PLACEHOLDER_NAME = 'Product Placeholder';
     const PLACEHOLDER_PRICE = '123456.78';
 
     /** @var  int */
