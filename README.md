@@ -17,6 +17,7 @@ This library just helps you to get products into Magento's database quickly, low
 ## Features
 
 * import of product data (new and updates, based on sku or id)
+* support for simple products, configurable products and grouped products
 * automatic category generation (no updates)
 * automatic select and multiselect attribute option creation
 * import of images from file or url
@@ -181,26 +182,6 @@ Stock information can be entered this way:
 
 The other 20 stock info attributes are available as well.
 
-## Configurables
-
-Configurable products are defined as the configuration of configuration attributes and variants
-
-Given some simple products (SimpleProduct, here: $simple1, $simple2, $simple3), they can be combined to form a configurable with:
-
-    $configurable = new ConfigurableProduct('scottish-table', ['color', 'weight'], [
-        $simple1,
-        $simple2,
-        $simple3
-    ]);
-
-Here the configurable with sku 'scottish-table' defines two "super attributes": color and weight. The attributes must have global scope and input type Dropdown.
-
-The three simples each need to have a unique combination of attribute values for these super attributes.
-
-Importing is done with
-
-    $importer->importConfigurableProduct($configurable);
-
 ## Related, Up Sell, and Cross Sell Products
 
 These so called "linked" products are stored as references to other products. When entering them, specify a product with an sku.
@@ -235,6 +216,40 @@ While other solutions are thinkable, this solution has the following advantages:
 * the linked products do not have to be available in the current job. A later job may import them.
 
 The user of the library must make sure the placeholder products will be imported at a later time. Placeholder Products that were not used can be removed via the backend product overview page by searching for the name "Linked Product Placeholder".
+
+## Configurables
+
+Configurable products are defined as the configuration of configuration attributes and variants
+
+Given some simple products (SimpleProduct, here: $simple1, $simple2, $simple3), they can be combined to form a configurable with:
+
+    $configurable = new ConfigurableProduct('scottish-table', ['color', 'weight'], [
+        $simple1,
+        $simple2,
+        $simple3
+    ]);
+
+Here the configurable with sku 'scottish-table' defines two "super attributes": color and weight. The attributes must have global scope and input type Dropdown.
+
+The three simples each need to have a unique combination of attribute values for these super attributes.
+
+Importing is done with
+
+    $importer->importConfigurableProduct($configurable);
+
+## Grouped products
+
+Grouped products are defined as an array of group members. Each member has an sku and a default quantity. The order of the members in the array is used for the position.
+
+    $group = new GroupedProduct("bucky-cutlery", [
+        new GroupedProductMember("bucky-knife", 5),
+        new GroupedProductMember("bucky-fork", 5),
+        new GroupedProductMember("bucky-spoon", 5),
+    ]);
+
+The member products need not have been imported before. If an sku does not belong to a known product, a temporary placeholder is created. See Related Products.
+
+If a group is imported with no members, any members it might have had will be removed.
 
 ### Categories
 
@@ -376,6 +391,7 @@ The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to
 
 ## Assumptions
 
+* For Magento 2.1+ Opensource Edition
 * Requires >= PHP 7.0
 * Input in UTF-8 (Magento standard)
 * Database query length is at least 1 MB (to support older MySQL versions)

@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
+use BigBridge\ProductImport\Model\Resource\GroupedStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\SimpleStorage;
@@ -27,6 +28,9 @@ class Importer
     /** @var ConfigurableProduct[] */
     protected $configurableProducts = [];
 
+    /** @var GroupedProduct[] */
+    protected $groupedProducts = [];
+
     /** @var  ImportConfig */
     protected $config;
 
@@ -42,11 +46,15 @@ class Importer
     /** @var ProductEntityStorage */
     protected $productEntityStorage;
 
+    /** @var GroupedStorage */
+    protected $groupedStorage;
+
     public function __construct(
         ImportConfig $config,
         ValueSerializer $valueSerializer,
         SimpleStorage $simpleStorage,
         ConfigurableStorage $configurableStorage,
+        GroupedStorage $groupedStorage,
         ProductEntityStorage $productEntityStorage)
     {
         $this->config = $config;
@@ -54,6 +62,7 @@ class Importer
         $this->simpleStorage = $simpleStorage;
         $this->configurableStorage = $configurableStorage;
         $this->productEntityStorage = $productEntityStorage;
+        $this->groupedStorage = $groupedStorage;
     }
 
     /**
@@ -99,6 +108,28 @@ class Importer
     }
 
     /**
+     * @param GroupedProduct $product
+     * @throws \Exception
+     */
+    public function importGroupedProduct(GroupedProduct $product)
+    {
+        // create placeholders for non-existing member products
+        $this->ensureThatMemberProductsExist($product);
+
+        // create placeholders for non-existing linked products
+        $this->ensureThatLinkedProductsExist($product);
+
+        // the sku key is necessary: later products in this batch with the same sku will overwrite former products
+        $this->groupedProducts[$product->getSku()] = $product;
+
+        if (count($this->groupedProducts) == $this->config->batchSize) {
+            $this->flushPlaceholderProducts();
+            $this->flushSimpleProducts();
+            $this->flushGroupedProducts();
+        }
+    }
+
+    /**
      * Call this function only once, at the end of the full import.
      * Not once for every product!
      * @throws \Exception
@@ -108,6 +139,7 @@ class Importer
         $this->flushPlaceholderProducts();
         $this->flushSimpleProducts();
         $this->flushConfigurableProducts();
+        $this->flushGroupedProducts();
     }
 
     /**
@@ -131,10 +163,19 @@ class Importer
     /**
      * @throws \Exception
      */
-    private function flushConfigurableProducts()
+    protected function flushConfigurableProducts()
     {
         $this->configurableStorage->storeProducts($this->configurableProducts, $this->config, $this->valueSerializer, true);
         $this->configurableProducts = [];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function flushGroupedProducts()
+    {
+        $this->groupedStorage->storeProducts($this->groupedProducts, $this->config, $this->valueSerializer, true);
+        $this->groupedProducts = [];
     }
 
     /**
@@ -187,6 +228,56 @@ class Importer
         $sku2id = $this->productEntityStorage->getExistingSkus($allLinkedSkus);
 
         foreach ($allLinkedSkus as $sku) {
+            if (!array_key_exists($sku, $sku2id)) {
+
+                $placeholder = new SimpleProduct($sku);
+
+                $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
+                $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
+                $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
+
+                $placeholders[$sku] = $placeholder;
+            }
+        }
+
+        return $placeholders;
+    }
+
+    /**
+     * @param GroupedProduct $product
+     * @throws \Exception
+     */
+    protected function ensureThatMemberProductsExist(GroupedProduct $product)
+    {
+        // make sure grouped product members exist, by creating placeholders for non-existing linked products
+        foreach ($this->createGroupedProductPlaceholders($product) as $placeholder) {
+            $this->importPlaceholder($placeholder);
+        }
+    }
+
+    /**
+     * @param Product $product
+     * @return Product[] An sku indexed array of placeholders
+     */
+    protected function createGroupedProductPlaceholders(GroupedProduct $product): array
+    {
+        $memberSkus = [];
+        foreach ($product->getMembers() as $member) {
+            $memberSkus[] = $member->getSku();
+        }
+
+        // quick check if member products were used here at all
+        if (empty($memberSkus)) {
+            return [];
+        }
+
+        $placeholders = [];
+
+        $memberSkus = array_unique($memberSkus);
+
+        $sku2id = $this->productEntityStorage->getExistingSkus($memberSkus);
+
+        foreach ($memberSkus as $sku) {
             if (!array_key_exists($sku, $sku2id)) {
 
                 $placeholder = new SimpleProduct($sku);

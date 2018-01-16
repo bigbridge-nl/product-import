@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use Composer\Package\Link;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -17,6 +18,8 @@ use BigBridge\ProductImport\Api\SimpleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\GroupedProduct;
+use BigBridge\ProductImport\Api\GroupedProductMember;
 
 /**
  * Integration test. It can only be executed from within a shop that has
@@ -1124,7 +1127,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($links, $this->getLinks($product1));
 
-        // do not specify links; the should not be removed
+        // do not specify links; they should not be removed
 
         $product1 = new SimpleProduct("christmas-angel-product-import");
         $global = $product1->global();
@@ -1205,6 +1208,123 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         }
 
         return $result;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGroupedProduct()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $simple1 = new SimpleProduct("knife-product-import");
+        $global = $simple1->global();
+        $global->setName("Knife");
+        $global->setPrice('2.25');
+
+        $simple2 = new SimpleProduct("fork-product-import");
+        $global = $simple2->global();
+        $global->setName("Fork");
+        $global->setPrice('2.25');
+
+        $group = new GroupedProduct("cutlery-product-import", [
+            new GroupedProductMember("knife-product-import", 2),
+            new GroupedProductMember("fork-product-import", 3),
+            // this one does not exist yet
+            new GroupedProductMember("spoon-product-import", 4),
+        ]);
+
+        $global = $group->global();
+        $global->setName("Cutlery");
+        $global->setPrice('25.00');
+
+        $importer->importSimpleProduct($simple1);
+        $importer->importSimpleProduct($simple2);
+        $importer->importGroupedProduct($group);
+        $importer->flush();
+
+        $this->assertSame([], $errors);
+
+        // look up id for simple3 that must have been created as a placeholder
+        $simple3 = new SimpleProduct("spoon-product-import");
+        $importer->importSimpleProduct($simple3);
+        $importer->flush();
+
+        $this->assertSame([], $errors);
+
+        $memberData = [
+            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, "2.0000"],
+            [$group->id, $simple2->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, "3.0000"],
+            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, "4.0000"],
+        ];
+
+        $this->assertEquals($memberData, $this->getMemberData($group));
+
+        // change the order of the member products and the default quantities, remove 1, add 1
+
+        $group = new GroupedProduct("cutlery-product-import", [
+            new GroupedProductMember("teaspoon-product-import", 3),
+            new GroupedProductMember("knife-product-import", 2.5),
+            new GroupedProductMember("spoon-product-import", 4),
+        ]);
+
+        $importer->importGroupedProduct($group);
+        $importer->flush();
+
+        $this->assertSame([], $errors);
+
+        // look up id for simple4 that must have been created as a placeholder
+        $simple4 = new SimpleProduct("teaspoon-product-import");
+        $importer->importSimpleProduct($simple4);
+        $importer->flush();
+
+        $this->assertSame([], $errors);
+
+        $memberData = [
+            [$group->id, $simple4->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, "3.0000"],
+            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, "2.5000"],
+            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, "4.0000"],
+        ];
+
+        $this->assertEquals($memberData, $this->getMemberData($group));
+
+        // no members: they should be removed
+
+        $group = new GroupedProduct("cutlery-product-import", [
+        ]);
+
+        $importer->importGroupedProduct($group);
+        $importer->flush();
+
+        $memberData =
+            [
+            ];
+
+        $this->assertEquals($memberData, $this->getMemberData($group));
+    }
+
+    private function getMemberData($group)
+    {
+        $linkInfo = self::$metaData->linkInfo[LinkInfo::SUPER];
+
+        $r = self::$db->fetchAllNumber("
+            SELECT L.product_id, L.linked_product_id, L.link_type_id, P.value, Q.value
+            FROM " . self::$metaData->linkTable . " L
+            INNER JOIN " . self::$metaData->linkAttributeIntTable . " P ON P.link_id = L.link_id AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
+            INNER JOIN " . self::$metaData->linkAttributeDecimalTable . " Q ON Q.link_id = L.link_id AND Q.product_link_attribute_id = {$linkInfo->defaultQuantityAttributeId}
+            WHERE product_id = {$group->id}
+            ORDER BY P.value
+        ");
+
+        return $r;
     }
 
     /**

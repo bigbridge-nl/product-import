@@ -1,0 +1,182 @@
+<?php
+
+namespace BigBridge\ProductImport\Model\Resource;
+
+use BigBridge\ProductImport\Api\GroupedProduct;
+use BigBridge\ProductImport\Model\Data\LinkInfo;
+use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Resource\Resolver\GroupedProductReferenceResolver;
+use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
+use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\StockItemStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
+use BigBridge\ProductImport\Model\Resource\Validation\Validator;
+
+/**
+ * @author Patrick van Bergen
+ */
+class GroupedStorage extends ProductStorage
+{
+    public function __construct(
+        Magento2DbConnection $db,
+        MetaData $metaData,
+        Validator $validator,
+        GroupedProductReferenceResolver $referenceResolver,
+        UrlKeyGenerator $urlKeyGenerator,
+        UrlRewriteStorage $urlRewriteStorage,
+        ProductEntityStorage $productEntityStorage,
+        ImageStorage $imageStorage,
+        LinkedProductStorage $linkedProductStorage,
+        TierPriceStorage $tierPriceStorage,
+        StockItemStorage $stockItemStorage)
+    {
+        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage, $stockItemStorage);
+    }
+
+    /**
+     * @param GroupedProduct[] $insertProducts
+     * @param GroupedProduct[] $updateProducts
+     */
+    public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
+    {
+        $this->insertLinkedProducts($insertProducts);
+        $this->updateLinkedProducts($updateProducts);
+    }
+
+    /**
+     * @param GroupedProduct[] $products
+     */
+    public function insertLinkedProducts(array $products)
+    {
+        $this->insertGroupMembers($products);
+    }
+
+    /**
+     * @param GroupedProduct[] $products
+     */
+    public function updateLinkedProducts(array $products)
+    {
+        $changedProducts = $this->findProductsWithChangedGroupMembers($products);
+
+        $this->removeGroupMembers($changedProducts);
+        $this->insertGroupMembers($changedProducts);
+    }
+
+    /**
+     * @param GroupedProduct[] $products
+     * @return GroupedProduct[]
+     */
+    protected function findProductsWithChangedGroupMembers(array $products)
+    {
+        if (empty($products)) {
+            return [];
+        }
+
+        $productIds = array_column($products, 'id');
+
+        $linkInfo = $this->metaData->linkInfo[LinkInfo::SUPER];
+
+        // Note: the position and default quantity of the member products are taken in account as well
+        $existingMembers = $this->db->fetchMap("
+            SELECT `product_id`, CONCAT(
+                GROUP_CONCAT(L.`linked_product_id` ORDER BY P.`value` SEPARATOR ' '),
+                ' ',
+                GROUP_CONCAT(Q.`value` ORDER BY P.`value` SEPARATOR ' '))
+            FROM `{$this->metaData->linkTable}` L
+            INNER JOIN `{$this->metaData->linkAttributeIntTable}` P ON P.`link_id` = L.`link_id` AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
+            INNER JOIN `{$this->metaData->linkAttributeDecimalTable}` Q ON Q.`link_id` = L.`link_id` AND Q.product_link_attribute_id = {$linkInfo->defaultQuantityAttributeId}
+            WHERE 
+                L.`link_type_id` = {$linkInfo->typeId} AND
+                L.`product_id` IN (" . implode(', ', $productIds) . ")                 
+            GROUP by L.`product_id`
+        ");
+
+        $changed = [];
+
+        foreach ($products as $product) {
+
+            $members = $product->getMembers();
+            $memberIds = array_column($members, 'id');
+            $serializedMemberData = implode(' ', $memberIds);
+
+            foreach ($members as $member) {
+                $serializedMemberData .= ' ' . sprintf('%.4f', $member->getDefaultQuantity());
+            }
+
+            if (!array_key_exists($product->id, $existingMembers) || $existingMembers[$product->id] !== $serializedMemberData) {
+                $changed[] = $product;
+            }
+        }
+
+        return $changed;
+    }
+
+    /**
+     * @param GroupedProduct[] $products
+     */
+    protected function removeGroupMembers(array $products)
+    {
+        if (empty($products)) {
+            return;
+        }
+
+        $productIds = array_column($products, 'id');
+
+        $linkInfo = $this->metaData->linkInfo[LinkInfo::SUPER];
+
+        $this->db->execute("
+            DELETE FROM `{$this->metaData->linkTable}`
+            WHERE 
+                `product_id` IN (" . implode(', ', $productIds) . ") AND
+                `link_type_id` = {$linkInfo->typeId}
+        ");
+    }
+
+    /**
+     * @param GroupedProduct[] $products
+     */
+    protected function insertGroupMembers(array $products)
+    {
+        $linkInfo = $this->metaData->linkInfo[LinkInfo::SUPER];
+
+        foreach ($products as $product) {
+            $position = 1;
+            foreach ($product->getMembers() as $i => $member) {
+
+                $memberId = $member->getProductId();
+                $qty = $this->db->quote($member->getDefaultQuantity());
+
+                $this->db->execute("
+                    INSERT INTO `{$this->metaData->linkTable}`
+                    SET 
+                        `product_id` = {$product->id},
+                        `linked_product_id` = {$memberId},
+                        `link_type_id` = {$linkInfo->typeId}
+                ");
+
+                $linkId = $this->db->getLastInsertId();
+
+                $this->db->execute("
+                    INSERT INTO `{$this->metaData->linkAttributeIntTable}`
+                    SET
+                        `product_link_attribute_id` = {$linkInfo->positionAttributeId},
+                        `link_id` = {$linkId},
+                        `value` = {$position}
+                ");
+
+                $this->db->execute("
+                    INSERT INTO `{$this->metaData->linkAttributeDecimalTable}`
+                    SET
+                        `product_link_attribute_id` = {$linkInfo->defaultQuantityAttributeId},
+                        `link_id` = {$linkId},
+                        `value` = {$qty}
+                ");
+
+                $position++;
+            }
+        }
+    }
+}

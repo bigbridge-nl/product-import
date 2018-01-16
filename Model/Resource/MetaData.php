@@ -42,6 +42,7 @@ class MetaData
     const LINK_TABLE = 'catalog_product_link';
     const LINK_ATTRIBUTE_TABLE = 'catalog_product_link_attribute';
     const LINK_ATTRIBUTE_INT_TABLE = 'catalog_product_link_attribute_int';
+    const LINK_ATTRIBUTE_DECIMAL_TABLE = 'catalog_product_link_attribute_decimal';
     const LINK_TYPE_TABLE = 'catalog_product_link_type';
     const TIER_PRICE_TABLE = 'catalog_product_entity_tier_price';
 
@@ -139,6 +140,9 @@ class MetaData
     public $linkAttributeIntTable;
 
     /** @var string */
+    public $linkAttributeDecimalTable;
+
+    /** @var string */
     public $linkTypeTable;
 
     /** @var string */
@@ -223,6 +227,7 @@ class MetaData
         $this->linkTable = $this->db->getFullTableName(self::LINK_TABLE);
         $this->linkAttributeTable = $this->db->getFullTableName(self::LINK_ATTRIBUTE_TABLE);
         $this->linkAttributeIntTable = $this->db->getFullTableName(self::LINK_ATTRIBUTE_INT_TABLE);
+        $this->linkAttributeDecimalTable = $this->db->getFullTableName(self::LINK_ATTRIBUTE_DECIMAL_TABLE);
         $this->linkTypeTable = $this->db->getFullTableName(self::LINK_TYPE_TABLE);
         $this->customerGroupTable = $this->db->getFullTableName(self::CUSTOMER_GROUP_TABLE);
         $this->tierPriceTable = $this->db->getFullTableName(self::TIER_PRICE_TABLE);
@@ -530,8 +535,9 @@ class MetaData
 
     protected function getLinkInfo()
     {
-        $linkTypeIdRelation = $linkTypeIdUpSell = $linkTypeIdCrossSell = null;
+        $linkTypeIdRelation = $linkTypeIdUpSell = $linkTypeIdCrossSell = $linkTypeIdSuper = null;
         $linkRelationAttributeIdPosition = $linkUpSellAttributeIdPosition = $linkCrossSellAttributeIdPosition = null;
+        $linkSuperAttributeIdPosition = $linkSuperAttributeIdDefaultQuantity = null;
 
         $rows = $this->db->fetchAllAssoc("
             SELECT `code`, `link_type_id`
@@ -549,6 +555,9 @@ class MetaData
                 case 'cross_sell':
                     $linkTypeIdCrossSell = $row['link_type_id'];
                     break;
+                case 'super':
+                    $linkTypeIdSuper = $row['link_type_id'];
+                    break;
             }
         }
 
@@ -558,23 +567,38 @@ class MetaData
         ");
 
         foreach ($rows as $row) {
-            switch ($row['link_type_id']) {
-                case $linkTypeIdRelation:
-                    $linkRelationAttributeIdPosition = $row['product_link_attribute_id'];
+            switch ($row['product_link_attribute_code']) {
+                case 'position':
+                    switch ($row['link_type_id']) {
+                        case $linkTypeIdRelation:
+                            $linkRelationAttributeIdPosition = $row['product_link_attribute_id'];
+                            break;
+                        case $linkTypeIdUpSell:
+                            $linkUpSellAttributeIdPosition = $row['product_link_attribute_id'];
+                            break;
+                        case $linkTypeIdCrossSell:
+                            $linkCrossSellAttributeIdPosition = $row['product_link_attribute_id'];
+                            break;
+                        case $linkTypeIdSuper:
+                            $linkSuperAttributeIdPosition = $row['product_link_attribute_id'];
+                            break;
+                    }
                     break;
-                case $linkTypeIdUpSell:
-                    $linkUpSellAttributeIdPosition = $row['product_link_attribute_id'];
-                    break;
-                case $linkTypeIdCrossSell:
-                    $linkCrossSellAttributeIdPosition = $row['product_link_attribute_id'];
-                    break;
+                case 'qty':
+                    switch ($row['link_type_id']) {
+                        case $linkTypeIdSuper:
+                            $linkSuperAttributeIdDefaultQuantity = $row['product_link_attribute_id'];
+                            break;
+                    }
+
             }
         }
 
         return [
             LinkInfo::RELATED => new LinkInfo($linkTypeIdRelation, $linkRelationAttributeIdPosition),
             LinkInfo::UP_SELL => new LinkInfo($linkTypeIdUpSell, $linkUpSellAttributeIdPosition),
-            LinkInfo::CROSS_SELL => new LinkInfo($linkTypeIdCrossSell, $linkCrossSellAttributeIdPosition)
+            LinkInfo::CROSS_SELL => new LinkInfo($linkTypeIdCrossSell, $linkCrossSellAttributeIdPosition),
+            LinkInfo::SUPER => new LinkInfo($linkTypeIdSuper, $linkSuperAttributeIdPosition, $linkSuperAttributeIdDefaultQuantity)
         ];
     }
 }

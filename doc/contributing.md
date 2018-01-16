@@ -15,6 +15,8 @@ For each supported product property
 * Add a test for insert
 * Add a test for update
 * Update the speed test
+* Add validation code
+* Add a test for validation
 * If a property is not set explicitly by the user, no action should be taken. Especially: no values should be removed when the user has not set any values.
 * Update the documentation
 
