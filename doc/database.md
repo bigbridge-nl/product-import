@@ -1,26 +1,74 @@
 # Database
 
-## Magento 2 database tables
-
 Tables that will be changed by the importer (insert, update)
 
-* catalog_product_entity and catalog_product_entity_*
+## Magento 2 database tables
+
+### Main product and EAV attributes
+
 * catalog_category_product
-* catalog_category_entity (insert only)
+* catalog_product_entity and catalog_product_entity_*
+
+### Url rewrite
+
 * url_rewrite
 * catalog_url_rewrite_product_category
+
+### Images
+
 * catalog_product_entity_media_gallery
 * catalog_product_entity_media_gallery_value_to_entity
 * catalog_product_entity_media_gallery_value
-* cataloginventory_stock_item
-* catalog_product_super_attribute_label
-* catalog_product_super_link
-* catalog_product_relation
+
+### Attribute options
+
 * eav_attribute_option
 * eav_attribute_option_value
+
+### Stock items
+
+* cataloginventory_stock_item
+
+### Tier prices
+
+* catalog_product_entity_tier_price
+
+### Configurable products
+
+* catalog_product_super_attribute_label
+* catalog_product_super_link
+
+### Related / Up-sell / Cross-sell links, Grouped product links
+
+* catalog_product_relation
 * catalog_product_link
-* catalog_product_link_attribute_int
 * catalog_product_link_attribute
+* catalog_product_link_attribute_int
+* catalog_product_link_attribute_decimal
+* catalog_product_link_type
+
+### Downloadable products
+
+* downloadable_link
+* downloadable_link_title
+* downloadable_link_price
+* downloadable_sample
+* downloadable_sample_title
+
+### Category
+
+(insert only)
+
+* catalog_category_entity
+* catalog_category_entity_*
+
+### Category links
+
+* catalog_category_product
+
+### Website links
+
+* catalog_product_website
 
 ## Remarks
 

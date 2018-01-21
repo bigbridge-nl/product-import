@@ -248,9 +248,74 @@ Grouped products are defined as an array of group members. Each member has an sk
         new GroupedProductMember("bucky-spoon", 5),
     ]);
 
+    $importer->importGroupedProduct($group);
+
 The member products need not have been imported before. If an sku does not belong to a known product, a temporary placeholder is created. See Related Products.
 
 If a group is imported with no members, any members it might have had will be removed.
+
+## Downloadable products
+
+A downloadable product has some download links and samples. The titles and prices of the links can a different value per store view.
+
+Create a downloadable product
+
+    $downloadable = new DownloadableProduct("morlord-the-game");
+
+Set some product attributes:
+
+    $downloadable->global()->setLinksPurchasedSeparately(true);
+    $downloadable->global()->setLinksTitle("Links");
+    $downloadable->global()->setSamplesTitle("Samples");
+
+Add a link (or several links). Add a url or a file, specify the number of downloads (0 = unlimited), and if the link may be shared. Add an optional sample url or file. Save the resulting object in a variable.
+
+If a file or url starts with "http://", "https://" or "//:" (case insensitive) it is considered a url. This type is stored in the database.
+
+    $link1 = $downloadable->addDownloadLink('http://download-resources.net/morlord-setup.exe', 0, true, "morlord sample.jpg");
+
+Create a global title and price for the link. Use the link object just created.
+
+    $product->global()->setDownloadLinkTitle($link1, "Morlord The Game");
+    $product->global()->setDownloadLinkPrice($link1, "12.95");
+
+Add a title and price per store view
+
+    $product->storeView('store_de')->setDownloadLinkTitle($link1, "Morlord Das Spiel");
+    $product->storeView('store_de')->setDownloadLinkPrice($link1, "12.45");
+
+    $product->storeView('store_nl')->setDownloadLinkTitle($link1, "Morlord Het Spel");
+    $product->storeView('store_nl')->setDownloadLinkPrice($link1, "13.45");
+
+The "sort order" of the links is determined by the order in which you add the links in code.
+
+Create a sample with a file or a url:
+
+    $sample1 = $downloadable->addDownloadSample("morlord sample 2.jpg");
+
+Add a global title for the sample
+
+    $product->global()->setDownloadSampleTitle($sample1, "Morlord The Game - Example");
+
+Add a title per store view
+
+    $product->storeView('store_de')->setDownloadSampleTitle($sample1, "Morlord Das Spiel - Beispiel");
+
+The "sort order" of the samples is determined by the order in which you add the samples in code.
+
+Import the downloadable product
+
+    $importer->importDownloadableProduct($product);
+
+Note: Links and samples of downloadable products are fully removed and re-added on each update.
+
+## Virtual products
+
+A virtual product is exactly like a simple product. The only difference is the type, and the fact that it should not have a weight attribute.
+
+    $product = new VirtualProduct("single-consult");
+
+    $importer->importVirtualProduct($product);
 
 ### Categories
 

@@ -135,7 +135,7 @@ class LinkedProductStorage
             }
 
             $position = 1;
-            foreach ($linkedIds as $i => $linkedId) {
+            foreach ($linkedIds as $linkedId) {
 
                 $this->db->execute("
                     INSERT INTO `{$this->metaData->linkTable}`

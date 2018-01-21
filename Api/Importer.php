@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
+use BigBridge\ProductImport\Model\Resource\DownloadableStorage;
 use BigBridge\ProductImport\Model\Resource\GroupedStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
@@ -24,6 +25,9 @@ class Importer
 
     /** @var SimpleProduct[] */
     protected $simpleProducts = [];
+
+    /** @var DownloadableProduct[] */
+    protected $downloadableProducts = [];
 
     /** @var ConfigurableProduct[] */
     protected $configurableProducts = [];
@@ -49,13 +53,17 @@ class Importer
     /** @var GroupedStorage */
     protected $groupedStorage;
 
+    /** @var DownloadableStorage */
+    protected $downloadableStorage;
+
     public function __construct(
         ImportConfig $config,
         ValueSerializer $valueSerializer,
         SimpleStorage $simpleStorage,
         ConfigurableStorage $configurableStorage,
         GroupedStorage $groupedStorage,
-        ProductEntityStorage $productEntityStorage)
+        ProductEntityStorage $productEntityStorage,
+        DownloadableStorage $downloadableStorage)
     {
         $this->config = $config;
         $this->valueSerializer = $valueSerializer;
@@ -63,6 +71,7 @@ class Importer
         $this->configurableStorage = $configurableStorage;
         $this->productEntityStorage = $productEntityStorage;
         $this->groupedStorage = $groupedStorage;
+        $this->downloadableStorage = $downloadableStorage;
     }
 
     /**
@@ -90,6 +99,24 @@ class Importer
     public function importVirtualProduct(VirtualProduct $product)
     {
         $this->importSimpleProduct($product);
+    }
+
+    /**
+     * @param DownloadableProduct $product
+     * @throws \Exception
+     */
+    public function importDownloadableProduct(DownloadableProduct $product)
+    {
+        // create placeholders for non-existing linked products
+        $this->ensureThatLinkedProductsExist($product);
+
+        // the sku key is necessary: later products in this batch with the same sku will overwrite former products
+        $this->downloadableProducts[$product->getSku()] = $product;
+
+        if (count($this->downloadableProducts) == $this->config->batchSize) {
+            $this->flushPlaceholderProducts();
+            $this->flushDownloadableProducts();
+        }
     }
 
     /**
@@ -147,6 +174,7 @@ class Importer
     {
         $this->flushPlaceholderProducts();
         $this->flushSimpleProducts();
+        $this->flushDownloadableProducts();
         $this->flushConfigurableProducts();
         $this->flushGroupedProducts();
     }
@@ -167,6 +195,15 @@ class Importer
     {
         $this->simpleStorage->storeProducts($this->simpleProducts, $this->config, $this->valueSerializer, true);
         $this->simpleProducts = [];
+    }
+
+    /**
+     * @throws \Exception
+     */
+    protected function flushDownloadableProducts()
+    {
+        $this->downloadableStorage->storeProducts($this->downloadableProducts, $this->config, $this->valueSerializer, true);
+        $this->downloadableProducts = [];
     }
 
     /**
@@ -265,7 +302,7 @@ class Importer
     }
 
     /**
-     * @param Product $product
+     * @param GroupedProduct $product
      * @return Product[] An sku indexed array of placeholders
      */
     protected function createGroupedProductPlaceholders(GroupedProduct $product): array

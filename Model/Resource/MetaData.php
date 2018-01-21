@@ -45,6 +45,11 @@ class MetaData
     const LINK_ATTRIBUTE_DECIMAL_TABLE = 'catalog_product_link_attribute_decimal';
     const LINK_TYPE_TABLE = 'catalog_product_link_type';
     const TIER_PRICE_TABLE = 'catalog_product_entity_tier_price';
+    const DOWNLOADABLE_LINK_TABLE = 'downloadable_link';
+    const DOWNLOADABLE_LINK_TITLE_TABLE = 'downloadable_link_title';
+    const DOWNLOADABLE_LINK_PRICE_TABLE = 'downloadable_link_price';
+    const DOWNLOADABLE_SAMPLE_TABLE = 'downloadable_link';
+    const DOWNLOADABLE_SAMPLE_TITLE_TABLE = 'downloadable_sample_title';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -148,6 +153,21 @@ class MetaData
     /** @var string */
     public $tierPriceTable;
 
+    /** @var string */
+    public $downloadableLinkTable;
+
+    /** @var string */
+    public $downloadableLinkTitleTable;
+
+    /** @var string */
+    public $downloadableLinkPriceTable;
+
+    /** @var string */
+    public $downloadableSampleTable;
+
+    /** @var string */
+    public $downloadableSampleTitleTable;
+
     /** @var  int */
     public $defaultCategoryAttributeSetId;
 
@@ -231,6 +251,11 @@ class MetaData
         $this->linkTypeTable = $this->db->getFullTableName(self::LINK_TYPE_TABLE);
         $this->customerGroupTable = $this->db->getFullTableName(self::CUSTOMER_GROUP_TABLE);
         $this->tierPriceTable = $this->db->getFullTableName(self::TIER_PRICE_TABLE);
+        $this->downloadableLinkTable = $this->db->getFullTableName(self::DOWNLOADABLE_LINK_TABLE);
+        $this->downloadableLinkTitleTable = $this->db->getFullTableName(self::DOWNLOADABLE_LINK_TITLE_TABLE);
+        $this->downloadableLinkPriceTable = $this->db->getFullTableName(self::DOWNLOADABLE_LINK_PRICE_TABLE);
+        $this->downloadableSampleTable = $this->db->getFullTableName(self::DOWNLOADABLE_SAMPLE_TABLE);
+        $this->downloadableSampleTitleTable = $this->db->getFullTableName(self::DOWNLOADABLE_SAMPLE_TITLE_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
