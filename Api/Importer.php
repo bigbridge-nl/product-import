@@ -84,6 +84,15 @@ class Importer
     }
 
     /**
+     * @param VirtualProduct $product
+     * @throws \Exception
+     */
+    public function importVirtualProduct(VirtualProduct $product)
+    {
+        $this->importSimpleProduct($product);
+    }
+
+    /**
      * @param ConfigurableProduct $product
      * @throws \Exception
      */

@@ -12,7 +12,6 @@ Many things, some of which are:
 ## To be supported
 
 * bundled products
-* grouped products
 * downloadable products
 * virtual products
 * make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
@@ -62,6 +61,8 @@ Check other importers for features and code
 
 ## Fields
 
+https://stackoverflow.com/questions/8585943/magento-1-6-1-what-is-options-container
+
 ### Downloadable
 
 product_online
@@ -82,7 +83,6 @@ map_price
 map_enabled
 msrp_price
 msrp_display_actual_price_type
-gift_message_available
 custom_design
 custom_design_from
 custom_design_to

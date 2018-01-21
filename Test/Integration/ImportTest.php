@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\VirtualProduct;
 use Composer\Package\Link;
 use Exception;
 use Magento\Framework\App\ObjectManager;
@@ -1302,14 +1303,14 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $group = new GroupedProduct("cutlery-product-import", [
         ]);
 
-//        $importer->importGroupedProduct($group);
-//        $importer->flush();
-//
-//        $memberData =
-//            [
-//            ];
-//
-//        $this->assertEquals($memberData, $this->getMemberData($group));
+        $importer->importGroupedProduct($group);
+        $importer->flush();
+
+        $memberData =
+            [
+            ];
+
+        $this->assertEquals($memberData, $this->getMemberData($group));
     }
 
     private function getMemberData($group)
@@ -1400,5 +1401,34 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             WHERE entity_id = {$productId}
             ORDER BY qty
         ");
+    }
+
+    /**
+     * @throws Exception
+     * @throws NoSuchEntityException
+     */
+    public function testVirtualProduct()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $product = new VirtualProduct('virtual_product_import');
+        $product->setAttributeSetByName("Default");
+
+        $global = $product->global();
+        $global->setName("Washing the dishes");
+        $global->setPrice('2.50');
+
+        $importer->importVirtualProduct($product);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+        $this->assertNotNull($product->id);
     }
 }
