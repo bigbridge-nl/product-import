@@ -44,12 +44,6 @@ class ProductStoreView
     const ATTR_NEWS_TO_DATE = 'news_to_date';
     const ATTR_GIFT_MESSAGE_AVAILABLE = 'gift_message_available';
 
-    // downloadable products
-
-    const ATTR_LINKS_PURCHASED_SEPARATELY = 'links_purchased_separately';
-    const ATTR_LINKS_TITLE = 'links_title';
-    const ATTR_SAMPLES_TITLE = 'samples_title';
-
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
     const BASE_IMAGE = 'image';
@@ -353,35 +347,5 @@ class ProductStoreView
     public function setMultiSelectAttributeOptionIds(string $attributeCode, array $optionIds)
     {
         $this->attributes[$attributeCode] = implode(',', array_map('trim', $optionIds));
-    }
-
-    /**
-     * Can each of the links from the downloadable product be purchased separately?
-     *
-     * @param bool $separately
-     */
-    public function setLinksPurchasedSeparately(bool $separately)
-    {
-        $this->attributes[self::ATTR_LINKS_PURCHASED_SEPARATELY] = $separately;
-    }
-
-    /**
-     * The caption of the links section of a downloadable product.
-     *
-     * @param string $linksTitle
-     */
-    public function setLinksTitle(string $linksTitle)
-    {
-        $this->attributes[self::ATTR_LINKS_TITLE] = trim($linksTitle);
-    }
-
-    /**
-     * The caption of the samples section of a downloadable product.
-     *
-     * @param string $samplesTitle
-     */
-    public function setSamplesTitle(string $samplesTitle)
-    {
-        $this->attributes[self::ATTR_SAMPLES_TITLE] = trim($samplesTitle);
     }
 }
