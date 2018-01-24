@@ -50,6 +50,14 @@ class DownloadableProduct extends SimpleProduct
         return $this->storeViews[self::GLOBAL_STORE_VIEW_CODE];
     }
 
+    /**
+     * @return DownloadableProductStoreView[]|ProductStoreView[]
+     */
+    public function getStoreViews()
+    {
+        return $this->storeViews;
+    }
+
     public function addDownloadLink(string $fileOrUrl, int $numberOfDownloads, bool $isShareable, string $sampleLink = '')
     {
         $link = new DownloadLink($fileOrUrl, $numberOfDownloads, $isShareable, $sampleLink);

@@ -22,6 +22,12 @@ class DownloadLink
     /** @var int */
     protected $id = null;
 
+    /** @var string */
+    protected $temporaryStoragePathLink;
+
+    /** @var string */
+    protected $temporaryStoragePathSample;
+
     public function __construct(string $fileOrUrl, int $numberOfDownloads, bool $isShareable, string $sampleFileOrUrl = '')
     {
         $this->fileOrUrl = $fileOrUrl;
@@ -70,5 +76,37 @@ class DownloadLink
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemporaryStoragePathLink()
+    {
+        return $this->temporaryStoragePathLink;
+    }
+
+    /**
+     * @param string $temporaryStoragePathLink
+     */
+    public function setTemporaryStoragePathLink($temporaryStoragePathLink)
+    {
+        $this->temporaryStoragePathLink = $temporaryStoragePathLink;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemporaryStoragePathSample()
+    {
+        return $this->temporaryStoragePathSample;
+    }
+
+    /**
+     * @param string $temporaryStoragePathSample
+     */
+    public function setTemporaryStoragePathSample($temporaryStoragePathSample)
+    {
+        $this->temporaryStoragePathSample = $temporaryStoragePathSample;
     }
 }

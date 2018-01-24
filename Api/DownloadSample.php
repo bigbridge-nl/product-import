@@ -13,6 +13,9 @@ class DownloadSample
     /** @var int */
     protected $id = null;
 
+    /** @var string */
+    protected $temporaryStoragePathSample;
+
     public function __construct(string $fileOrUrl)
     {
         $this->fileOrUrl = $fileOrUrl;
@@ -40,5 +43,21 @@ class DownloadSample
     public function setId(int $id)
     {
         $this->id = $id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemporaryStoragePathSample()
+    {
+        return $this->temporaryStoragePathSample;
+    }
+
+    /**
+     * @param string $temporaryStoragePathSample
+     */
+    public function setTemporaryStoragePathSample($temporaryStoragePathSample)
+    {
+        $this->temporaryStoragePathSample = $temporaryStoragePathSample;
     }
 }

@@ -48,7 +48,7 @@ class MetaData
     const DOWNLOADABLE_LINK_TABLE = 'downloadable_link';
     const DOWNLOADABLE_LINK_TITLE_TABLE = 'downloadable_link_title';
     const DOWNLOADABLE_LINK_PRICE_TABLE = 'downloadable_link_price';
-    const DOWNLOADABLE_SAMPLE_TABLE = 'downloadable_link';
+    const DOWNLOADABLE_SAMPLE_TABLE = 'downloadable_sample';
     const DOWNLOADABLE_SAMPLE_TITLE_TABLE = 'downloadable_sample_title';
 
     const TYPE_DATETIME = 'datetime';
@@ -177,8 +177,11 @@ class MetaData
     /** @var array Maps tax class name to id */
     public $taxClassMap;
 
-    /** @var  array Maps store view code to id */
+    /** @var array Maps store view code to id */
     public $storeViewMap;
+
+    /** @var array Maps store view id to website id */
+    public $storeViewWebsiteMap;
 
     /** @var  array Maps website code to id */
     public $websiteMap;
@@ -268,6 +271,7 @@ class MetaData
         $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
 
         $this->storeViewMap = $this->getStoreViewMap();
+        $this->storeViewWebsiteMap = $this->getStoreViewWebsiteMap();
         $this->websiteMap = $this->getWebsiteMap();
         $this->taxClassMap = $this->getTaxClassMap();
         $this->customerGroupMap = $this->getCustomerGroupMap();
@@ -333,6 +337,12 @@ class MetaData
     protected function getStoreViewMap()
     {
         $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$this->storeTable}");
+        return $map;
+    }
+
+    protected function getStoreViewWebsiteMap()
+    {
+        $map = $this->db->fetchMap("SELECT `store_id`, `website_id` FROM {$this->storeTable}");
         return $map;
     }
 

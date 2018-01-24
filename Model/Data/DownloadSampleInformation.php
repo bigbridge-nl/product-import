@@ -17,7 +17,7 @@ class DownloadSampleInformation
 
     public function __construct(DownloadSample $downloadSample, string $title)
     {
-        $this->downloadSample = trim($downloadSample);
+        $this->downloadSample = $downloadSample;
         $this->title = trim($title);
     }
 

@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\DownloadableProduct;
 use BigBridge\ProductImport\Api\VirtualProduct;
 use Composer\Package\Link;
 use Exception;
@@ -1430,5 +1431,142 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals([], $errors);
         $this->assertNotNull($product->id);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testDownloadableProduct()
+    {
+        @unlink(BP . '/pub/media/downloadable/files/links/d/u/duck1.jpg');
+        @unlink(BP . '/pub/media/downloadable/files/links/d/u/duck1_1.jpg');
+        @unlink(BP . '/pub/media/downloadable/files/link_samples/d/u/duck2.png');
+        @unlink(BP . '/pub/media/downloadable/files/samples/d/u/duck3.png');
+
+        $errors = [];
+
+        $config = new ImportConfig();
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $downloadable = new DownloadableProduct("morlord-the-game");
+
+        $downloadable->global()->setName("Morlord the game");
+        $downloadable->global()->setPrice("25.95");
+        $downloadable->global()->setLinksPurchasedSeparately(true);
+        $downloadable->global()->setLinksTitle("Links");
+        $downloadable->global()->setSamplesTitle("Samples");
+
+        $link1 = $downloadable->addDownloadLink('http://download-resources.net/morlord-setup.exe', 0, true);
+        $downloadable->global()->setDownloadLinkInformation($link1, "Morlord The Game", "12.95");
+        $downloadable->storeView('default')->setDownloadLinkInformation($link1, "Morlord Het Spel", "13.45");
+
+        $link2 = $downloadable->addDownloadLink(__DIR__ . '/../images/duck1.jpg', 10, false, __DIR__ . '/../images/duck2.png');
+        $downloadable->global()->setDownloadLinkInformation($link2, "Morlord The Game 2", "22.95");
+        $downloadable->storeView('default')->setDownloadLinkInformation($link2, "Morlord Het Spel 2", "23.45");
+
+        $sample1 = $downloadable->addDownloadSample(__DIR__ . '/../images/duck3.png');
+        $downloadable->global()->setDownloadSampleInformation($sample1, "Morlord The Game - Example");
+        $downloadable->storeView('default')->setDownloadSampleInformation($sample1, "Morlord Het Spel - Voorbeeld");
+
+        $sample2 = $downloadable->addDownloadSample('https://download-resources.net/morlord-sample.pdf');
+        $downloadable->global()->setDownloadSampleInformation($sample2, "Morlord The Game - Example 2");
+        $downloadable->storeView('default')->setDownloadSampleInformation($sample2, "Morlord Het Spel - Voorbeeld 2");
+
+        $importer->importDownloadableProduct($downloadable);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        $this->checkDownloadable($downloadable);
+
+        // another import should give the same results
+
+        $importer->importDownloadableProduct($downloadable);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        $this->checkDownloadable($downloadable);
+    }
+
+    private function checkDownloadable($downloadable) {
+
+        $linkResults = self::$db->fetchAllNumber("
+            SELECT sort_order, number_of_downloads, is_shareable, link_url, link_file, link_type, sample_url, sample_file, sample_type
+            FROM " . self::$metaData->downloadableLinkTable . "
+            WHERE product_id = {$downloadable->id}
+        ");
+
+        $this->assertEquals([
+            ['1', '0', '1', 'http://download-resources.net/morlord-setup.exe', null, 'url', null, null, null],
+            ['2', '10', '0', null, '/d/u/duck1.jpg', 'file', null, '/d/u/duck2.png', 'file']
+        ], $linkResults);
+
+        $sampleResults = self::$db->fetchAllNumber("
+            SELECT sort_order, sample_url, sample_file, sample_type
+            FROM " . self::$metaData->downloadableSampleTable . "
+            WHERE product_id = {$downloadable->id}
+        ");
+
+        $this->assertEquals([
+            ['1', null, '/d/u/duck3.png', 'file'],
+            ['2', 'https://download-resources.net/morlord-sample.pdf', null, 'url']
+        ], $sampleResults);
+
+        $linkIds = self::$db->fetchSingleColumn("SELECT link_id FROM " . self::$metaData->downloadableLinkTable . " WHERE product_id = {$downloadable->id}");
+
+        $linkPriceResults = self::$db->fetchAllNumber("
+            SELECT website_id, price
+            FROM " . self::$metaData->downloadableLinkPriceTable . "
+            WHERE link_id IN (" . implode(',', $linkIds) . ")
+            ORDER BY price_id
+        ");
+
+        $this->assertEquals([
+            ['0', '12.95'],
+            ['0', '22.95'],
+            ['1', '13.45'],
+            ['1', '23.45']
+        ], $linkPriceResults);
+
+        $linkTitleResults = self::$db->fetchAllNumber("
+            SELECT store_id, title
+            FROM " . self::$metaData->downloadableLinkTitleTable . "
+            WHERE link_id IN (" . implode(',', $linkIds) . ")
+            ORDER BY title_id
+        ");
+
+        $this->assertEquals([
+            ['0', "Morlord The Game"],
+            ['0', "Morlord The Game 2"],
+            ['1', "Morlord Het Spel"],
+            ['1', "Morlord Het Spel 2"]
+        ], $linkTitleResults);
+
+        $sampleIds = self::$db->fetchSingleColumn("SELECT sample_id FROM " . self::$metaData->downloadableSampleTable . " WHERE product_id = {$downloadable->id}");
+
+        $sampleTitleResults = self::$db->fetchAllNumber("
+            SELECT store_id, title
+            FROM " . self::$metaData->downloadableSampleTitleTable . "
+            WHERE sample_id IN (" . implode(',', $sampleIds) . ")
+            ORDER BY title_id
+        ");
+
+        $this->assertEquals([
+            ['0', "Morlord The Game - Example"],
+            ['0', "Morlord The Game - Example 2"],
+            ['1', "Morlord Het Spel - Voorbeeld"],
+            ['1', "Morlord Het Spel - Voorbeeld 2"]
+        ], $sampleTitleResults);
+
+        $this->assertTrue(file_exists(BP . "/pub/media/downloadable/files/links/d/u/duck1.jpg"));
+        $this->assertTrue(file_exists(BP . "/pub/media/downloadable/files/link_samples/d/u/duck2.png"));
+        $this->assertTrue(file_exists(BP . "/pub/media/downloadable/files/samples/d/u/duck3.png"));
+
+        $this->assertTrue(!file_exists(BP . "/pub/media/downloadable/files/links/d/u/duck1_1.jpg"));
     }
 }

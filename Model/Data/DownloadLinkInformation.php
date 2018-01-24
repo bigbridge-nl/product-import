@@ -20,9 +20,9 @@ class DownloadLinkInformation
 
     public function __construct(DownloadLink $downloadLink, string $title, string $price)
     {
+        $this->downloadLink = $downloadLink;
         $this->title = trim($title);
         $this->price = trim($price);
-        $this->downloadLink = trim($downloadLink);
     }
 
     /**

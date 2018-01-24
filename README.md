@@ -276,16 +276,14 @@ If a file or url starts with "http://", "https://" or "//:" (case insensitive) i
 
 Create a global title and price for the link. Use the link object just created.
 
-    $product->global()->setDownloadLinkTitle($link1, "Morlord The Game");
-    $product->global()->setDownloadLinkPrice($link1, "12.95");
+    $downloadable->global()->setDownloadLinkInformation($link1, "Morlord The Game", "12.95");
 
 Add a title and price per store view
 
-    $product->storeView('store_de')->setDownloadLinkTitle($link1, "Morlord Das Spiel");
-    $product->storeView('store_de')->setDownloadLinkPrice($link1, "12.45");
+    $downloadable->storeView('store_de')->setDownloadLinkInformation($link1, "Morlord Das Spiel", "12.45");
+    $downloadable->storeView('store_nl')->setDownloadLinkInformation($link1, "Morlord Het Spel", "13.45");
 
-    $product->storeView('store_nl')->setDownloadLinkTitle($link1, "Morlord Het Spel");
-    $product->storeView('store_nl')->setDownloadLinkPrice($link1, "13.45");
+Note: Download link prices are stored per website, not per store view. The prices of all store views of a website should be the same.
 
 The "sort order" of the links is determined by the order in which you add the links in code.
 
@@ -295,17 +293,17 @@ Create a sample with a file or a url:
 
 Add a global title for the sample
 
-    $product->global()->setDownloadSampleTitle($sample1, "Morlord The Game - Example");
+    $downloadable->global()->setDownloadSampleTitle($sample1, "Morlord The Game - Example");
 
 Add a title per store view
 
-    $product->storeView('store_de')->setDownloadSampleTitle($sample1, "Morlord Das Spiel - Beispiel");
+    $downloadable->storeView('store_de')->setDownloadSampleTitle($sample1, "Morlord Das Spiel - Beispiel");
 
 The "sort order" of the samples is determined by the order in which you add the samples in code.
 
 Import the downloadable product
 
-    $importer->importDownloadableProduct($product);
+    $importer->importDownloadableProduct($downloadable);
 
 Note: Links and samples of downloadable products are fully removed and re-added on each update.
 

@@ -112,7 +112,18 @@ class ImageStorage
 
     public function insertImage(Product $product, Image $image)
     {
-        $defaultStoragePath = $image->getDefaultStoragePath();
+        $actualStoragePath = $this->move($image->getTemporaryStoragePath(), $image->getDefaultStoragePath());
+
+        // first link the image (important to do this before storing the record)
+        // then create the database record
+        $imageValueId = $this->createImageValue($product->id, $actualStoragePath, $image->isEnabled());
+
+        $image->valueId = $imageValueId;
+        $image->setActualStoragePath($actualStoragePath);
+    }
+
+    public function move(string $temporaryStoragePath, $defaultStoragePath)
+    {
         $actualStoragePath = $defaultStoragePath;
 
         if (file_exists(self::PRODUCT_IMAGE_PATH . $actualStoragePath)) {
@@ -134,14 +145,9 @@ class ImageStorage
         }
 
         // move image from its temporary position to its final position
-        rename($image->getTemporaryStoragePath(), self::PRODUCT_IMAGE_PATH . $actualStoragePath);
+        rename($temporaryStoragePath, self::PRODUCT_IMAGE_PATH . $actualStoragePath);
 
-        // first link the image (important to do this before storing the record)
-        // then create the database record
-        $imageValueId = $this->createImageValue($product->id, $actualStoragePath, $image->isEnabled());
-
-        $image->valueId = $imageValueId;
-        $image->setActualStoragePath($actualStoragePath);
+        return $actualStoragePath;
     }
 
     protected function updateImage(Image $image)
@@ -263,7 +269,7 @@ class ImageStorage
      * @param $b
      * @return bool
      */
-    protected function filesAreEqual($a, $b)
+    public function filesAreEqual($a, $b)
     {
         // Check if filesize is different
         if (filesize($a) !== filesize($b)) {

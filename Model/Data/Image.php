@@ -57,7 +57,7 @@ class Image
         return $this->defaultStoragePath;
     }
 
-    protected function createStoragePath(string $imagePath)
+    public function createStoragePath(string $imagePath)
     {
         $imageBase = basename($imagePath);
 
