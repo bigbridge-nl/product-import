@@ -12,8 +12,6 @@ Many things, some of which are:
 ## To be supported
 
 * bundled products
-* downloadable products
-* virtual products
 * make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
 * add a importer function runIndexers()
 * csv import

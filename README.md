@@ -17,7 +17,7 @@ This library just helps you to get products into Magento's database quickly, low
 ## Features
 
 * import of product data (new and updates, based on sku or id)
-* support for simple products, virtual products, configurable products and grouped products
+* support for simple products, configurable products, grouped products, virtual products and downloadable products
 * automatic category generation (no updates)
 * automatic select and multiselect attribute option creation
 * import of images from file or url

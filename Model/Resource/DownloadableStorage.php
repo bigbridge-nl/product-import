@@ -47,8 +47,10 @@ class DownloadableStorage extends ProductStorage
      */
     public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
     {
+        // new products: insert
         $this->insertLinksAndSamples($insertProducts);
 
+        // updated products: remove and reinsert links and samples
         $this->removeLinksAndSamples($updateProducts);
         $this->insertLinksAndSamples($updateProducts);
     }
@@ -81,6 +83,7 @@ class DownloadableStorage extends ProductStorage
             return;
         }
 
+        // insert links and samples
         foreach ($products as $product) {
             foreach ($product->getDownloadLinks() as $i => $downloadLink) {
 
@@ -90,6 +93,7 @@ class DownloadableStorage extends ProductStorage
 
                 list($linkUrl, $linkFile, $linkType) = $this->interpretFileOrUrl(
                     $downloadLink->getFileOrUrl(), $downloadLink->getTemporaryStoragePathLink(), self::LINKS_PATH);
+
                 list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
                     $downloadLink->getSampleFileOrUrl(), $downloadLink->getTemporaryStoragePathSample(), self::LINK_SAMPLES_PATH);
 
@@ -132,12 +136,15 @@ class DownloadableStorage extends ProductStorage
             }
         }
 
+        // insert titles and prices, per store view
         foreach ($products as $product) {
             foreach ($product->getStoreViews() as $storeView) {
+
                 foreach ($storeView->getDownloadLinkInformations() as $downloadLinkInformation) {
 
                     $downloadLinkId = $downloadLinkInformation->getDownloadLink()->getId();
                     if ($downloadLinkId !== null) {
+
                         $title = $this->db->quote($downloadLinkInformation->getTitle());
                         $price = $this->db->quote($downloadLinkInformation->getPrice());
 
