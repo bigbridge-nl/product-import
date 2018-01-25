@@ -167,6 +167,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
             $global->setTaxClassName('Taxable Goods');
             $global->generateUrlKey();
+            $global->setCountryOfManufacture('NL');
 
             $stock = $product->defaultStockItem();
             $stock->setQuantity(100);

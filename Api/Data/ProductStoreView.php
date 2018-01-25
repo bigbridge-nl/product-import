@@ -43,6 +43,7 @@ class ProductStoreView
     const ATTR_NEWS_FROM_DATE = 'news_from_date';
     const ATTR_NEWS_TO_DATE = 'news_to_date';
     const ATTR_GIFT_MESSAGE_AVAILABLE = 'gift_message_available';
+    const ATTR_COUNTRY_OF_MANUFACTURE = 'country_of_manufacture';
 
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
@@ -231,6 +232,14 @@ class ProductStoreView
     public function setNewsToDate(string $newsToDate)
     {
         $this->attributes[self::ATTR_NEWS_TO_DATE] = trim($newsToDate);
+    }
+
+    /**
+     * @param string $countryCode 2 characters, uppercase
+     */
+    public function setCountryOfManufacture(string $countryCode)
+    {
+        $this->attributes[self::ATTR_COUNTRY_OF_MANUFACTURE] = trim($countryCode);
     }
 
     /**
