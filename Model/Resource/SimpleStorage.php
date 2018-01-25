@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
 
 /**
  * @author Patrick van Bergen

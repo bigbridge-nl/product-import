@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Api\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;

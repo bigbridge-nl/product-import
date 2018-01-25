@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Api\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;

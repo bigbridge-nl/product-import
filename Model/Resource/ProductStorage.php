@@ -2,8 +2,8 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Api\Product;
-use BigBridge\ProductImport\Api\ProductStoreView;
+use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;

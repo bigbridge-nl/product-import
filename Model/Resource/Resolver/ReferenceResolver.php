@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
-use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Reference\Reference;
 use BigBridge\ProductImport\Model\Resource\Reference\References;

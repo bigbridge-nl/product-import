@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Data;
 
-use BigBridge\ProductImport\Api\DownloadLink;
+use BigBridge\ProductImport\Api\Data\DownloadLink;
 
 /**
  * @author Patrick van Bergen

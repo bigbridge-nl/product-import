@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
-use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;

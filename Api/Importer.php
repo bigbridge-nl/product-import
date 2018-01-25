@@ -2,6 +2,13 @@
 
 namespace BigBridge\ProductImport\Api;
 
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
+use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\DownloadableStorage;
 use BigBridge\ProductImport\Model\Resource\GroupedStorage;

@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Api\GroupedProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Resolver\GroupedProductReferenceResolver;

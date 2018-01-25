@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
-use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\Data\Product;
 
 /**
  * @author Patrick van Bergen

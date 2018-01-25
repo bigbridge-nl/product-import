@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Data;
 
-use BigBridge\ProductImport\Api\DownloadSample;
+use BigBridge\ProductImport\Api\Data\DownloadSample;
 
 /**
  * @author Patrick van Bergen
@@ -13,7 +13,7 @@ class DownloadSampleInformation
     protected $downloadSample;
 
     /** @var string */
-    private $title;
+    protected $title;
 
     public function __construct(DownloadSample $downloadSample, string $title)
     {

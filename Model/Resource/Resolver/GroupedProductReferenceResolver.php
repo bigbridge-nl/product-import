@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
-use BigBridge\ProductImport\Api\GroupedProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 use Exception;

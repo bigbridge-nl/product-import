@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
-use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -54,6 +54,7 @@ class TierPriceStorage
 
     /**
      * @param Product[] $products
+     * @return array
      */
     protected function findProductsWithDeletableTierPrices(array $products)
     {

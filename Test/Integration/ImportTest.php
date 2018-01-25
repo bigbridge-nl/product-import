@@ -2,26 +2,25 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use BigBridge\ProductImport\Api\DownloadableProduct;
-use BigBridge\ProductImport\Api\VirtualProduct;
-use Composer\Package\Link;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
-use BigBridge\ProductImport\Api\ConfigurableProduct;
-use BigBridge\ProductImport\Api\ProductStoreView;
-use BigBridge\ProductImport\Api\TierPrice;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
-use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\VirtualProduct;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Data\TierPrice;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
-use BigBridge\ProductImport\Api\Product;
-use BigBridge\ProductImport\Api\GroupedProduct;
-use BigBridge\ProductImport\Api\GroupedProductMember;
+use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProductMember;
 
 /**
  * Integration test. It can only be executed from within a shop that has

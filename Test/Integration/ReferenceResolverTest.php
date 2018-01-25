@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Model\Resource\Resolver\NameToUrlKeyConverter;

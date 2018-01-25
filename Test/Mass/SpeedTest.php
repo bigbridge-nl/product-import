@@ -4,9 +4,9 @@ namespace BigBridge\ProductImport\Test\Integration\Mass;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\App\ObjectManager;
-use BigBridge\ProductImport\Api\Product;
-use BigBridge\ProductImport\Api\ProductStoreView;
-use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Importer;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
@@ -79,8 +79,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
 
-        $this->assertLessThan(0.03, $time);
-        $this->assertLessThan(660, $memory); // cached metadata
+        $this->assertLessThan(0.031, $time);
+        $this->assertLessThan(800, $memory); // cached metadata
 
         // ----------------------------------------------------
 

@@ -64,7 +64,9 @@ class ImporterFactory
             // But is takes 0.2 seconds to execute, this is too long
             // See also https://magento.stackexchange.com/questions/96858/how-to-get-magento-version-in-magento2-equivalent-of-magegetversion
 
-            if (preg_match('/"version": "([^\"]+)"/', file_get_contents(BP . '/vendor/magento/magento2-base/composer.json'), $matches)) {
+            if (preg_match('/"version": "([^\"]+)"/',
+                file_get_contents(BP . '/vendor/magento/magento2-base/composer.json'), $matches)) {
+
                 $config->magentoVersion = $matches[1];
             } else {
                 throw new Exception("Magento version could not be detected.");

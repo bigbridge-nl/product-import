@@ -4,12 +4,12 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use IntlChar;
 use Magento\Framework\App\ObjectManager;
-use BigBridge\ProductImport\Api\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
-use BigBridge\ProductImport\Api\ProductStockItem;
-use BigBridge\ProductImport\Api\ProductStoreView;
 use BigBridge\ProductImport\Model\Resource\Validation\Validator;
-use BigBridge\ProductImport\Api\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\ProductStockItem;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\ImporterFactory;
 
 /**

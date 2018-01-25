@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Api;
+namespace BigBridge\ProductImport\Api\Data;
 
 use BigBridge\ProductImport\Model\Data\DownloadLinkInformation;
 use BigBridge\ProductImport\Model\Data\DownloadSampleInformation;

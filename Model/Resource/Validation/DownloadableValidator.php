@@ -2,8 +2,8 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
-use BigBridge\ProductImport\Api\DownloadableProduct;
-use BigBridge\ProductImport\Api\Product;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\Product;
 
 /**
  * @author Patrick van Bergen

@@ -2,10 +2,9 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
-use BigBridge\ProductImport\Api\Product;
-use BigBridge\ProductImport\Api\ProductStockItem;
-use BigBridge\ProductImport\Api\TierPrice;
-use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
+use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStockItem;
+use BigBridge\ProductImport\Api\Data\TierPrice;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
