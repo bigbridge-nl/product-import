@@ -20,6 +20,11 @@ class ProductStoreView
     const STATUS_ENABLED = Status::STATUS_ENABLED;
     const STATUS_DISABLED = Status::STATUS_DISABLED;
 
+    const MSRP_USE_CONFIG = 0;
+    const MSRP_ON_GESTURE = 1;
+    const MSRP_IN_CART = 2;
+    const MSRP_BEFORE_ORDER_CONFIRMATION = 3;
+
     const VISIBILITY_NOT_VISIBLE = Visibility::VISIBILITY_NOT_VISIBLE;
     const VISIBILITY_IN_CATALOG = Visibility::VISIBILITY_IN_CATALOG;
     const VISIBILITY_IN_SEARCH = Visibility::VISIBILITY_IN_SEARCH;
@@ -44,6 +49,8 @@ class ProductStoreView
     const ATTR_NEWS_TO_DATE = 'news_to_date';
     const ATTR_GIFT_MESSAGE_AVAILABLE = 'gift_message_available';
     const ATTR_COUNTRY_OF_MANUFACTURE = 'country_of_manufacture';
+    const ATTR_MSRP = 'msrp';
+    const ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE = 'msrp_display_actual_price_type';
 
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
@@ -151,6 +158,24 @@ class ProductStoreView
     public function setCost(string $cost)
     {
         $this->attributes[self::ATTR_COST] = trim($cost);
+    }
+
+    /**
+     * @param string $msrp Manufacturer Suggested Retail Price. A 12.4 decimal field
+     */
+    public function setMsrp(string $msrp)
+    {
+        $this->attributes[self::ATTR_MSRP] = trim($msrp);
+    }
+
+    /**
+     * Check "MSRP" class constants for values.
+     *
+     * @param string $int
+     */
+    public function setMsrpDisplayActualPriceType(int $type)
+    {
+        $this->attributes[self::ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE] = $type;
     }
 
     public function setVisibility(int $visibility)

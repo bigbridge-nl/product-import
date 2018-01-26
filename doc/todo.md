@@ -61,10 +61,6 @@ Check other importers for features and code
 
 https://stackoverflow.com/questions/8585943/magento-1-6-1-what-is-options-container
 
-### Downloadable
-
-product_online
-
 ### Bundle
 
 bundle_price_type
@@ -77,17 +73,12 @@ bundle_shipment_type
 ### Other
 
 display_product_options_in
-map_price
-map_enabled
-msrp_price
-msrp_display_actual_price_type
 custom_design
 custom_design_from
 custom_design_to
 custom_layout_update
 page_layout
 product_options_container
-country_of_manufacture
 associated_skus
 
 ## Ever?

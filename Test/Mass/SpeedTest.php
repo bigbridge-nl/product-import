@@ -168,6 +168,8 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
             $global->setTaxClassName('Taxable Goods');
             $global->generateUrlKey();
             $global->setCountryOfManufacture('NL');
+            $global->setMsrp('8.95');
+            $global->setMsrpDisplayActualPriceType(ProductStoreView::MSRP_USE_CONFIG);
 
             $stock = $product->defaultStockItem();
             $stock->setQuantity(100);
