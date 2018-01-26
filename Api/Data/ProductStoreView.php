@@ -51,6 +51,8 @@ class ProductStoreView
     const ATTR_COUNTRY_OF_MANUFACTURE = 'country_of_manufacture';
     const ATTR_MSRP = 'msrp';
     const ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE = 'msrp_display_actual_price_type';
+    const ATTR_COLOR = 'color';
+    const ATTR_MANUFACTURER = 'manufacturer';
 
     const SWATCH_IMAGE = 'swatch_image';
     const SMALL_IMAGE = 'small_image';
@@ -260,11 +262,27 @@ class ProductStoreView
     }
 
     /**
+     * @param string $option The admin name of the manufacturer attribute option
+     */
+    public function setManufacturer(string $option)
+    {
+        $this->unresolvedSelects[self::ATTR_MANUFACTURER] = trim($option);
+    }
+
+    /**
      * @param string $countryCode 2 characters, uppercase
      */
     public function setCountryOfManufacture(string $countryCode)
     {
         $this->attributes[self::ATTR_COUNTRY_OF_MANUFACTURE] = trim($countryCode);
+    }
+
+    /**
+     * @param string $option The admin name of the color attribute option
+     */
+    public function setColor(string $option)
+    {
+        $this->unresolvedSelects[self::ATTR_COLOR] = trim($option);
     }
 
     /**
