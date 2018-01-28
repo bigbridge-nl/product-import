@@ -2,6 +2,10 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProductStoreView;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
@@ -243,6 +247,34 @@ abstract class ProductStorage
             // tax class: Taxable Goods
             if (!array_key_exists(ProductStoreView::ATTR_TAX_CLASS_ID, $attributes)) {
                 $global->setTaxClassName("Taxable Goods");
+            }
+
+            if ($global instanceof DownloadableProductStoreView) {
+                if (!array_key_exists(DownloadableProductStoreView::ATTR_LINKS_PURCHASED_SEPARATELY, $attributes)) {
+                    $global->setLinksPurchasedSeparately(false);
+                }
+                if (!array_key_exists(DownloadableProductStoreView::ATTR_LINKS_TITLE, $attributes)) {
+                    $global->setLinksTitle("Links");
+                }
+                if (!array_key_exists(DownloadableProductStoreView::ATTR_SAMPLES_TITLE, $attributes)) {
+                    $global->setSamplesTitle("Samples");
+                }
+            } elseif ($global instanceof BundleProductStoreView) {
+                if (!array_key_exists(BundleProductStoreView::ATTR_PRICE_TYPE, $attributes)) {
+                    $global->setPriceType(BundleProductStoreView::PRICE_TYPE_DYNAMIC);
+                }
+                if (!array_key_exists(BundleProductStoreView::ATTR_PRICE_VIEW, $attributes)) {
+                    $global->setPriceView(BundleProductStoreView::PRICE_VIEW_PRICE_RANGE);
+                }
+                if (!array_key_exists(BundleProductStoreView::ATTR_SKU_TYPE, $attributes)) {
+                    $global->setSkuType(BundleProductStoreView::SKU_TYPE_DYNAMIC);
+                }
+                if (!array_key_exists(BundleProductStoreView::ATTR_WEIGHT_TYPE, $attributes)) {
+                    $global->setWeightType(BundleProductStoreView::WEIGHT_TYPE_DYNAMIC);
+                }
+                if (!array_key_exists(BundleProductStoreView::ATTR_SHIPMENT_TYPE, $attributes)) {
+                    $global->setShipmentType(BundleProductStoreView::SHIPMENT_TYPE_TOGETHER);
+                }
             }
         }
     }

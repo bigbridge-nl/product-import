@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -1567,5 +1569,36 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(file_exists(BP . "/pub/media/downloadable/files/samples/d/u/duck3.png"));
 
         $this->assertTrue(!file_exists(BP . "/pub/media/downloadable/files/links/d/u/duck1_1.jpg"));
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testBundleProduct()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $bundle = new BundleProduct("ibm-pc-import-product");
+
+        $global = $bundle->global();
+        $global->setName("Morlord the game");
+        $global->setPrice("25.95");
+        $global->setPriceType(BundleProductStoreView::PRICE_TYPE_DYNAMIC);
+        $global->setSkuType(BundleProductStoreView::SKU_TYPE_DYNAMIC);
+        $global->setWeightType(BundleProductStoreView::WEIGHT_TYPE_DYNAMIC);
+        $global->setPriceView(BundleProductStoreView::PRICE_VIEW_PRICE_RANGE);
+        $global->setShipmentType(BundleProductStoreView::SHIPMENT_TYPE_TOGETHER);
+
+        $importer->importBundleProduct($bundle);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
     }
 }

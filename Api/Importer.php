@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Api;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
@@ -9,6 +10,7 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
+use BigBridge\ProductImport\Model\Resource\BundleStorage;
 use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\DownloadableStorage;
 use BigBridge\ProductImport\Model\Resource\GroupedStorage;
@@ -22,6 +24,8 @@ use BigBridge\ProductImport\Model\Resource\SimpleStorage;
  * This class implements the batch operation.
  * Each batch performs inserts / updates of products of the same type (i.e. all products are either simples or configurables, not a mix of them).
  * For speed it is important that all products in the batch can be treated the same.
+ *
+ * Virtual products are treated like simple products throughout this class.
  *
  * @author Patrick van Bergen
  */
@@ -41,6 +45,9 @@ class Importer
 
     /** @var GroupedProduct[] */
     protected $groupedProducts = [];
+
+    /** @var BundleProduct[] */
+    protected $bundleProducts = [];
 
     /** @var  ImportConfig */
     protected $config;
@@ -62,6 +69,9 @@ class Importer
 
     /** @var DownloadableStorage */
     protected $downloadableStorage;
+    
+    /** @var BundleStorage */
+    protected $bundleStorage;
 
     public function __construct(
         ImportConfig $config,
@@ -70,7 +80,8 @@ class Importer
         ConfigurableStorage $configurableStorage,
         GroupedStorage $groupedStorage,
         ProductEntityStorage $productEntityStorage,
-        DownloadableStorage $downloadableStorage)
+        DownloadableStorage $downloadableStorage,
+        BundleStorage $bundleStorage)
     {
         $this->config = $config;
         $this->valueSerializer = $valueSerializer;
@@ -79,6 +90,7 @@ class Importer
         $this->productEntityStorage = $productEntityStorage;
         $this->groupedStorage = $groupedStorage;
         $this->downloadableStorage = $downloadableStorage;
+        $this->bundleStorage = $bundleStorage;
     }
 
     /**
@@ -150,6 +162,31 @@ class Importer
         }
     }
 
+
+    /**
+     * @param BundleProduct $product
+     * @throws \Exception
+     */
+    public function importBundleProduct(BundleProduct $product)
+    {
+        // variants must be done first, their id is needed by the bundle
+//        foreach ($product->getVariants() as $simple) {
+//            $this->importSimpleProduct($simple);
+//        }
+
+        // create placeholders for non-existing linked products
+        $this->ensureThatLinkedProductsExist($product);
+
+        // the sku key is necessary: later products in this batch with the same sku will overwrite former products
+        $this->bundleProducts[$product->getSku()] = $product;
+
+        if (count($this->bundleProducts) == $this->config->batchSize) {
+            $this->flushPlaceholderProducts();
+            $this->flushSimpleProducts();
+            $this->flushBundleProducts();
+        }
+    }
+    
     /**
      * @param GroupedProduct $product
      * @throws \Exception
@@ -180,9 +217,11 @@ class Importer
     public function flush()
     {
         $this->flushPlaceholderProducts();
+
         $this->flushSimpleProducts();
         $this->flushDownloadableProducts();
         $this->flushConfigurableProducts();
+        $this->flushBundleProducts();
         $this->flushGroupedProducts();
     }
 
@@ -222,6 +261,15 @@ class Importer
         $this->configurableProducts = [];
     }
 
+    /**
+     * @throws \Exception
+     */
+    protected function flushBundleProducts()
+    {
+        $this->bundleStorage->storeProducts($this->bundleProducts, $this->config, $this->valueSerializer, true);
+        $this->bundleProducts = [];
+    }
+    
     /**
      * @throws \Exception
      */

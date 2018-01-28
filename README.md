@@ -254,6 +254,25 @@ The member products need not have been imported before. If an sku does not belon
 
 If a group is imported with no members, any members it might have had will be removed.
 
+## Bundle products
+
+Add a bundle product
+
+    $bundle = new BundleProduct("ibm-pc", [
+
+    ]);
+
+Add some some specific attributes (global and store view specific)
+
+    $global = $bundle->global();
+    $global->setPriceType(BundleProductStoreView::PRICE_TYPE_DYNAMIC);
+    $global->setSkuType(BundleProductStoreView::SKU_TYPE_DYNAMIC);
+    $global->setWeightType(BundleProductStoreView::WEIGHT_TYPE_DYNAMIC);
+    $global->setPriceView(BundleProductStoreView::PRICE_VIEW_PRICE_RANGE);
+    $global->setShipmentType(BundleProductStoreView::SHIPMENT_TYPE_TOGETHER);
+
+The values used here are also the defaults that will be used if no values are set for these attributes.
+
 ## Downloadable products
 
 A downloadable product has some download links and samples. The titles and prices of the links can a different value per store view.

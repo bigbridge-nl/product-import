@@ -15,12 +15,13 @@ Many things, some of which are:
 * make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
 * add a importer function runIndexers()
 * csv import
+* xlsx import
+* rest request
 * allow delete products
+* deleting attribute values
 * url_key is a default attribute?
 * by default add to all websites?
-* check if all indexes have been updated correctly after reindex, or that the importer must initiate some of it
 * speed test calibration tool
-* rest request
 * are there attributes with site-scope? how to import / update?
 * create unresolved attributes for all
 * check attribute value uniqueness
@@ -29,7 +30,6 @@ Many things, some of which are:
 * allow change type of updated product (needed for placeholders!)
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
-* deleting attribute values
 
 ## Try this out
 
