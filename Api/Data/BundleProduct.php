@@ -7,6 +7,14 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class BundleProduct extends Product
 {
+    const INPUT_TYPE_DROP_DOWN = 'select';
+    const INPUT_TYPE_RADIO_BUTTONS = 'radio';
+    const INPUT_TYPE_CHECKBOX = 'checkbox';
+    const INPUT_TYPE_MULTIPLE_SELECT = 'multi';
+
+    /** @var BundleProductOption[] */
+    protected $options = [];
+
     public function getType()
     {
         return 'bundle';
@@ -60,5 +68,17 @@ class BundleProduct extends Product
     public function getStoreViews()
     {
         return $this->storeViews;
+    }
+
+    /**
+     * @param int $inputType Use the INPUT_TYPE constants of this class
+     * @param bool $required
+     * @return BundleProductOption
+     */
+    public function addOption(int $inputType, bool $required)
+    {
+        $option = new BundleProductOption($inputType, $required);
+        $this->options[] = $option;
+        return $option;
     }
 }

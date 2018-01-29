@@ -112,6 +112,39 @@ The following example shows you a simple case of importing a simple product
 
 The following code pieces are extensions on this basic code.
 
+## Standard attributes
+
+Here are the possible standard attribute functions, with examples for the global level. They can be applied both at the global and the store view level.
+
+    $global->setName('Colorful cube');
+    $global->setStatus(ProductStoreView::STATUS_ENABLED);
+    $global->setGiftMessageAvailable(true);
+    $global->setDescription('A mathematical curiosity that will twist your mind');
+    $global->setShortDescription('A twistable colorful cube');
+    $global->setMetaTitle('Six sides, twelve edges');
+    $global->setMetaDescription('Can you find the solution on this magical device');
+    $global->setMetaKeywords('Cube, colors, mathematics');
+    $global->setPrice('6.95');
+    $global->setCost('3.01');
+    $global->setMsrp('8.95');
+    $global->setMsrpDisplayActualPriceType(ProductStoreView::MSRP_USE_CONFIG);
+    $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
+    $global->setUrlKey('ruby-colored-cube');
+    $global->setTaxClassName('Taxable Goods');
+    $global->setWeight('0.105');
+    $global->setSpecialPrice('5.95');
+    $global->setSpecialFromDate('2018-01-01');
+    $global->setSpecialToDate('2018-03-01');
+    $global->setNewsFromDate('2018-01-01');
+    $global->setNewsToDate('2018-01-15');
+    $global->setManufacturer('Ruby');
+    $global->setCountryOfManufacture('Hungaria');
+    $global->setColor('Multicolor');
+
+An example of the name attribute on the Danish store view 'store_dk':
+
+    $product->storeView('store_dk')->setName('Farverige terning');
+
 ## Errors
 
 The library detects problems in the input in its id-resolution and validation phrases. When it does, it adds descriptive error messages to the product this is processed.

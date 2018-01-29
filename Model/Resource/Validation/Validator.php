@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\TierPrice;
@@ -168,22 +170,16 @@ class Validator
 
             // new product
 
-            if (!array_key_exists(Product::GLOBAL_STORE_VIEW_CODE, $storeViews)) {
-                $product->addError("product has no global values. Please specify global() for name and price");
-            } else {
+            // check required values
+            $globalAttributes = $storeViews[Product::GLOBAL_STORE_VIEW_CODE]->getAttributes();
 
-                // check required values
+            if (!array_key_exists('name', $globalAttributes)) {
+                $product->addError("missing " . 'name');
+            }
 
-// todo: depends on product type
-// for example: https://magento.stackexchange.com/questions/147349/the-value-of-attribute-price-view-must-be-set-in-magento-2
-
-                $globalAttributes = $storeViews[Product::GLOBAL_STORE_VIEW_CODE]->getAttributes();
-
-                $requiredValues = ['name', 'price'];
-                foreach ($requiredValues as $attributeCode) {
-                    if (!array_key_exists($attributeCode, $globalAttributes)) {
-                        $product->addError("missing " . $attributeCode);
-                    }
+            if (!($product instanceof GroupedProduct) && !($product instanceof BundleProduct)) {
+                if (!array_key_exists('price', $globalAttributes)) {
+                    $product->addError("missing " . 'price');
                 }
             }
         }
