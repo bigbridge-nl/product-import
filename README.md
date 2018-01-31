@@ -291,9 +291,7 @@ If a group is imported with no members, any members it might have had will be re
 
 Add a bundle product
 
-    $bundle = new BundleProduct("ibm-pc", [
-
-    ]);
+    $bundle = new BundleProduct("ibm-pc");
 
 Add some some specific attributes (global and store view specific)
 
@@ -305,6 +303,23 @@ Add some some specific attributes (global and store view specific)
     $global->setShipmentType(BundleProductStoreView::SHIPMENT_TYPE_TOGETHER);
 
 The values used here are also the defaults that will be used if no values are set for these attributes.
+
+Add some options with
+
+    $option = $bundle->addOption(BundleProduct::INPUT_TYPE_DROP_DOWN, true);
+
+Note that an option object is returned. Use this object to add products to the option:
+
+    $option->addProductSelection('monitor-import-product', true, 1, '300.00', '1', false);
+
+The object is also used to specify the title of the option, globally and per store view:
+
+    $bundle->global->setOptionTitle($option, 'Monitor');
+    $bundle->storeView('dk')->setOptionTitle($option, 'Overvåge');
+
+Finally, import the product
+
+    $importer->importBundleProduct($bundle);
 
 ## Downloadable products
 

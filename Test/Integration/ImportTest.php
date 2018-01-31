@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
-use BigBridge\ProductImport\Api\Data\BundleProductOption;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use Exception;
 use Magento\Framework\App\ObjectManager;
@@ -1600,7 +1599,8 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $option = $bundle->addOption(BundleProduct::INPUT_TYPE_DROP_DOWN, true);
         $option->addProductSelection('monitor-import-product', true, 1, '300.00', '1', false);
 
-        //$global->setOptionTitle($option, $title);
+        $global->setOptionTitle($option, 'Monitor');
+        $bundle->storeView('default')->setOptionTitle($option, 'Monitor');
 
         $importer->importBundleProduct($bundle);
         $importer->flush();

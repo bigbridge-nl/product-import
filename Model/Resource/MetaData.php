@@ -50,6 +50,9 @@ class MetaData
     const DOWNLOADABLE_LINK_PRICE_TABLE = 'downloadable_link_price';
     const DOWNLOADABLE_SAMPLE_TABLE = 'downloadable_sample';
     const DOWNLOADABLE_SAMPLE_TITLE_TABLE = 'downloadable_sample_title';
+    const BUNDLE_OPTION_TABLE = 'catalog_product_bundle_option';
+    const BUNDLE_OPTION_VALUE_TABLE = 'catalog_product_bundle_option_value';
+    const BUNDLE_SELECTION_TABLE = 'catalog_product_bundle_selection';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -168,6 +171,15 @@ class MetaData
     /** @var string */
     public $downloadableSampleTitleTable;
 
+    /** @var string */
+    public $bundleOptionTable;
+
+    /** @var string */
+    public $bundleOptionValueTable;
+
+    /** @var string */
+    public $bundleSelectionTable;
+
     /** @var  int */
     public $defaultCategoryAttributeSetId;
 
@@ -259,6 +271,9 @@ class MetaData
         $this->downloadableLinkPriceTable = $this->db->getFullTableName(self::DOWNLOADABLE_LINK_PRICE_TABLE);
         $this->downloadableSampleTable = $this->db->getFullTableName(self::DOWNLOADABLE_SAMPLE_TABLE);
         $this->downloadableSampleTitleTable = $this->db->getFullTableName(self::DOWNLOADABLE_SAMPLE_TITLE_TABLE);
+        $this->bundleOptionTable = $this->db->getFullTableName(self::BUNDLE_OPTION_TABLE);
+        $this->bundleOptionValueTable = $this->db->getFullTableName(self::BUNDLE_OPTION_VALUE_TABLE);
+        $this->bundleSelectionTable = $this->db->getFullTableName(self::BUNDLE_SELECTION_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();

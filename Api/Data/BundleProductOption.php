@@ -7,7 +7,7 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class BundleProductOption
 {
-    /** @var int */
+    /** @var string */
     protected $inputType;
 
     /** @var bool */
@@ -16,16 +16,19 @@ class BundleProductOption
     /** @var BundleProductSelection[] */
     protected $selections = [];
 
-    public function __construct(int $inputType, bool $required)
+    /** @var int */
+    public $id;
+
+    public function __construct(string $inputType, bool $required)
     {
         $this->inputType = $inputType;
         $this->required = $required;
     }
 
     /**
-     * @return int
+     * @return string
      */
-    public function getInputType(): int
+    public function getInputType(): string
     {
         return $this->inputType;
     }
@@ -42,4 +45,13 @@ class BundleProductOption
     {
         $this->selections[] = new BundleProductSelection($sku, $isDefault, $priceType, $priceValue, $quantity, $canChangeQuantity);
     }
+
+    /**
+     * @return BundleProductSelection[]
+     */
+    public function getSelections(): array
+    {
+        return $this->selections;
+    }
+
 }

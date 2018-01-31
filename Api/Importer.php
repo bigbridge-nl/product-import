@@ -169,10 +169,8 @@ class Importer
      */
     public function importBundleProduct(BundleProduct $product)
     {
-        // variants must be done first, their id is needed by the bundle
-//        foreach ($product->getVariants() as $simple) {
-//            $this->importSimpleProduct($simple);
-//        }
+        // create placeholders for non-existing selection products
+        $this->ensureThatSelectionProductsExist($product);
 
         // create placeholders for non-existing linked products
         $this->ensureThatLinkedProductsExist($product);
@@ -350,8 +348,16 @@ class Importer
      */
     protected function ensureThatMemberProductsExist(GroupedProduct $product)
     {
-        // make sure grouped product members exist, by creating placeholders for non-existing linked products
+        // make sure grouped product members exist, by creating placeholders for non-existing products
         foreach ($this->createGroupedProductPlaceholders($product) as $placeholder) {
+            $this->importPlaceholder($placeholder);
+        }
+    }
+
+    protected function ensureThatSelectionProductsExist(BundleProduct $product)
+    {
+        // make sure bundle product selection products exist, by creating placeholders for non-existing products
+        foreach ($this->createBundleProductPlaceholders($product) as $placeholder) {
             $this->importPlaceholder($placeholder);
         }
     }
@@ -379,6 +385,47 @@ class Importer
         $sku2id = $this->productEntityStorage->getExistingSkus($memberSkus);
 
         foreach ($memberSkus as $sku) {
+            if (!array_key_exists($sku, $sku2id)) {
+
+                $placeholder = new SimpleProduct($sku);
+
+                $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
+                $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
+                $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
+
+                $placeholders[$sku] = $placeholder;
+            }
+        }
+
+        return $placeholders;
+    }
+
+
+    /**
+     * @param BundleProduct $product
+     * @return Product[] An sku indexed array of placeholders
+     */
+    protected function createBundleProductPlaceholders(BundleProduct $product): array
+    {
+        $selectionSkus = [];
+        foreach ($product->getOptions() as $option) {
+            foreach ($option->getSelections() as $selection) {
+                $selectionSkus[] = $selection->getSku();
+            }
+        }
+
+        // quick check if member products were used here at all
+        if (empty($selectionSkus)) {
+            return [];
+        }
+
+        $placeholders = [];
+
+        $selectionSkus = array_unique($selectionSkus);
+
+        $sku2id = $this->productEntityStorage->getExistingSkus($selectionSkus);
+
+        foreach ($selectionSkus as $sku) {
             if (!array_key_exists($sku, $sku2id)) {
 
                 $placeholder = new SimpleProduct($sku);

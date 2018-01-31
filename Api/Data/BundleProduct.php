@@ -71,14 +71,22 @@ class BundleProduct extends Product
     }
 
     /**
-     * @param int $inputType Use the INPUT_TYPE constants of this class
+     * @param string $inputType Use the INPUT_TYPE constants of this class
      * @param bool $required
      * @return BundleProductOption
      */
-    public function addOption(int $inputType, bool $required)
+    public function addOption(string $inputType, bool $required)
     {
         $option = new BundleProductOption($inputType, $required);
         $this->options[] = $option;
         return $option;
+    }
+
+    /**
+     * @return BundleProductOption[]
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
     }
 }

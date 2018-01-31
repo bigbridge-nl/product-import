@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Model\Data\BundleOptionInformation;
+
 /**
  * @author Patrick van Bergen
  */
@@ -27,6 +29,9 @@ class BundleProductStoreView extends ProductStoreView
 
     const SHIPMENT_TYPE_TOGETHER = 0;
     const SHIPMENT_TYPE_SEPARATELY = 1;
+
+    /** @var BundleOptionInformation[] */
+    protected $optionInformations = [];
 
     /**
      * @param int $priceType Use the PRICE_TYPE constants from this class
@@ -66,5 +71,18 @@ class BundleProductStoreView extends ProductStoreView
     public function setShipmentType(int $shipmentType)
     {
         $this->attributes[self::ATTR_SHIPMENT_TYPE] = $shipmentType;
+    }
+
+    public function setOptionTitle(BundleProductOption $option, string $title)
+    {
+        $this->optionInformations[] = new BundleOptionInformation($option, $title);
+    }
+
+    /**
+     * @return BundleOptionInformation[]
+     */
+    public function getOptionInformations(): array
+    {
+        return $this->optionInformations;
     }
 }
