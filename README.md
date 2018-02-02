@@ -310,7 +310,7 @@ Add some options with
 
 Note that an option object is returned. Use this object to add products to the option:
 
-    $option->addProductSelection('monitor-import-product', true, 1, '300.00', '1', false);
+    $option->addProductSelection('monitor-import-product', true, BundleProductOption::PRICE_TYPE_FIXED, '300.00', '1', false);
 
 The object is also used to specify the title of the option, globally and per store view:
 

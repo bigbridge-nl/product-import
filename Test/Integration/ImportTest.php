@@ -1407,7 +1407,6 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @throws Exception
-     * @throws NoSuchEntityException
      */
     public function testVirtualProduct()
     {
@@ -1629,19 +1628,19 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         // update with change
 
-        $bundle->storeView('default')->setOptionTitle($option,'Keyboard B');
+        $bundle->addOption(BundleProduct::INPUT_TYPE_RADIO_BUTTONS, false);
 
         $importer->importBundleProduct($bundle);
         $importer->flush();
 
         $this->assertEquals([], $errors);
 
-        $newFirstOptionId = $this->checkBundleProduct($bundle);
+        $newFirstOptionId = $this->checkBundleProduct($bundle, true);
 
         $this->assertNotEquals($firstOptionId, $newFirstOptionId);
     }
 
-    protected function checkBundleProduct(BundleProduct $bundle)
+    protected function checkBundleProduct(BundleProduct $bundle, bool $extended = false)
     {
         $optionResults = self::$db->fetchAllNumber("
             SELECT required, position, type
@@ -1650,10 +1649,18 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ORDER BY position
         ");
 
-        $this->assertEquals([
-            ['1', '1', 'select'],
-            ['0', '2', 'multi']
-        ], $optionResults);
+        if (!$extended) {
+            $this->assertEquals([
+                ['1', '1', 'select'],
+                ['0', '2', 'multi']
+            ], $optionResults);
+        } else {
+            $this->assertEquals([
+                ['1', '1', 'select'],
+                ['0', '2', 'multi'],
+                ['0', '3', 'radio']
+            ], $optionResults);
+        }
 
         $optionIds = self::$db->fetchSingleColumn("
             SELECT option_id

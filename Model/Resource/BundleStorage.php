@@ -167,7 +167,7 @@ class BundleStorage extends ProductStorage
             SELECT `parent_product_id`, `product_id`, `is_default`, `selection_price_type`, `selection_price_value`, `selection_qty`, `selection_can_change_qty`
             FROM `{$this->metaData->bundleSelectionTable}`
             WHERE `option_id` IN (" . implode(', ', $optionIds) . ")
-            ORDER BY `position`
+            ORDER BY `selection_id`
         ");
 
         $titleInfo = $this->db->fetchAllAssoc("
@@ -210,9 +210,12 @@ class BundleStorage extends ProductStorage
             }
             foreach ($product->getOptions() as $option) {
                 foreach ($option->getSelections() as $selection) {
-                    $serialized .= '*' . $selection->getProductId() . '-' . (int)$selection->isDefault()
-                        . '-' . $selection->getPriceType() . '-' . sprintf('%.4f', $selection->getPriceValue()) . '-' . $selection->getQuantity()
-                        . '-' . (int)$selection->isCanChangeQuantity();
+                    $serialized .= '*' . $selection->getProductId() .
+                        '-' . (int)$selection->isDefault() .
+                        '-' . $selection->getPriceType() .
+                        '-' . sprintf('%.4f', $selection->getPriceValue()) .
+                        '-' . sprintf('%.4f', $selection->getQuantity()) . '-' .
+                        (int)$selection->isCanChangeQuantity();
                 }
             }
             foreach ($product->getStoreViews() as $storeView) {
