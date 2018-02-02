@@ -17,8 +17,8 @@ This library just helps you to get products into Magento's database quickly, low
 ## Features
 
 * import of product data (new and updates, based on sku or id)
-* support for simple products, configurable products, grouped products, virtual products and downloadable products
-* automatic category generation (no updates)
+* support for all product types: simple products, configurable products, grouped products, bundle products, downloadable products, and virtual products
+* automatic category generation (no updates of categories)
 * automatic select and multiselect attribute option creation
 * import of images from file or url
 * unique url_key generation
@@ -37,7 +37,7 @@ Magento supports "Update on Save" and "Update by Schedule". The relevant indexes
 
 If these indexes are set to "Update by Schedule", a Magento cron job based indexer will update the indexes. This mode works well with this library.
 
-If these indexes are set to "Update on Save", you will need to run the indexers manually after the import is done. This is less advisable.
+If these indexes are set to "Update on Save", you will need to run the indexers manually after the import is done (bin/magento indexer:reindex). This is less advisable.
 
 ## Default values
 
@@ -47,6 +47,8 @@ New products will be given the following default values, if they are not specifi
 * visibility: Catalog, Search
 * status: Disabled
 * tax class: "Taxable Goods"
+
+Different product types have different default values. See the respective sections.
 
 ## Mutation mode
 
@@ -525,7 +527,7 @@ The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to
 * For Magento 2.1+ Opensource Edition
 * Requires >= PHP 7.0
 * Input in UTF-8 (Magento standard)
-* Database query length is at least 1 MB (to support older MySQL versions)
+* MySQL query length is at least 1 MB
 
 ## On empty values
 

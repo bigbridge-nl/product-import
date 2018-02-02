@@ -1,8 +1,13 @@
 # Todo
 
-Many things, some of which are:
+## Several todo
 
-* Check if all relevant indexes are in Update by Schedule mode; even better, set this mode while importing. If the latter is done, inform the user that the cron must be run for the indexes to be updated.
+* uniformization of the API
+* make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
+* all attributes in an array: collect products per attribute to save time
+* url_key is a default attribute?
+* are there attributes with site-scope? how to import / update?
+* Solve todo's in code
 
 ## CSV import
 
@@ -11,19 +16,13 @@ Many things, some of which are:
 
 ## To be supported
 
-* bundled products
-* uniformization of the API
-* make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
-* add a importer function runIndexers()
 * csv import
 * xlsx import
 * rest request
 * allow delete products
 * deleting attribute values
-* url_key is a default attribute?
 * by default add to all websites?
 * speed test calibration tool
-* are there attributes with site-scope? how to import / update?
 * create unresolved attributes for all
 * check attribute value uniqueness
 * check if reference ids exist
@@ -32,19 +31,12 @@ Many things, some of which are:
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
 
-## Try this out
-
-* all attributes in an array: collect products per attribute to save time
-
 ## Testing
 
 - test with minimal products should be very fast (is a check that no unnecessary code is executed)
+* tests may only be run in a special shop (not production)
 - remove created test-records
 - test with 500.000 records in the database
-
-## Todo's in code
-
-* Solve todo's in code
 
 ## Notes
 
@@ -62,17 +54,6 @@ Check other importers for features and code
 
 https://stackoverflow.com/questions/8585943/magento-1-6-1-what-is-options-container
 
-### Bundle
-
-bundle_price_type
-bundle_sku_type
-bundle_price_view
-bundle_weight_type
-bundle_values
-bundle_shipment_type
-
-### Other
-
 display_product_options_in
 custom_design
 custom_design_from
@@ -80,7 +61,6 @@ custom_design_to
 custom_layout_update
 page_layout
 product_options_container
-associated_skus
 
 ## Ever?
 

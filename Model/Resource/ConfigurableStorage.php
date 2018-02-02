@@ -201,7 +201,7 @@ class ConfigurableStorage extends ProductStorage
 
         $configurableIds = array_column($products, 'id');
 
-        $rows = $this->db->fetchAllNumber("
+        $rows = $this->db->fetchAllNonAssoc("
             SELECT parent_id, product_id 
             FROM {$this->metaData->superLinkTable}
             WHERE parent_id in (" . implode(", ", $configurableIds) . ")
@@ -258,7 +258,7 @@ class ConfigurableStorage extends ProductStorage
 
         $configurableIds = array_column($products, 'id');
 
-        $rows = $this->db->fetchAllNumber("
+        $rows = $this->db->fetchAllNonAssoc("
             SELECT parent_id, child_id 
             FROM {$this->metaData->relationTable}
             WHERE parent_id in (" . implode(", ", $configurableIds) . ")

@@ -374,7 +374,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals([], $errors);
 
-        $websiteIds = self::$db->fetchAllNumber("
+        $websiteIds = self::$db->fetchAllNonAssoc("
             SELECT `product_id`, `website_id` FROM `" . self::$metaData->productWebsiteTable . "`
             WHERE `product_id` = {$product1->id}
         ");
@@ -643,7 +643,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ORDER BY value_id
         ");
 
-        $results = self::$db->fetchAllNumber("
+        $results = self::$db->fetchAllNonAssoc("
             SELECT attribute_id, value, media_type, disabled
             FROM {$media}
             WHERE value_id IN (" . implode(',', $valueIds) . ")
@@ -652,7 +652,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($mediaData, $results);
 
-        $results = self::$db->fetchAllNumber("
+        $results = self::$db->fetchAllNonAssoc("
             SELECT store_id, entity_id, label, position, disabled
             FROM {$value}
             WHERE value_id IN (" . implode(',', $valueIds) . ")
@@ -966,7 +966,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
     private function checkConfigurableData($configurableId, $attributeData, $labelData, $linkData, $relationData)
     {
-        $data = self::$db->fetchAllNumber("
+        $data = self::$db->fetchAllNonAssoc("
             SELECT product_id, attribute_id, position
             FROM " . self::$metaData->superAttributeTable . "
             WHERE product_id = {$configurableId}
@@ -981,7 +981,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($attributeData, $data);
 
-        $data = self::$db->fetchAllNumber("
+        $data = self::$db->fetchAllNonAssoc("
             SELECT store_id, use_default, value
             FROM " . self::$metaData->superAttributeLabelTable . "
             WHERE product_super_attribute_id IN (" . implode(", ", $superAttributeIds) . ")
@@ -989,7 +989,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($labelData, $data);
 
-        $data = self::$db->fetchAllNumber("
+        $data = self::$db->fetchAllNonAssoc("
             SELECT product_id, parent_id
             FROM " . self::$metaData->superLinkTable . "
             WHERE parent_id = {$configurableId}
@@ -997,7 +997,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($linkData, $data);
 
-        $data = self::$db->fetchAllNumber("
+        $data = self::$db->fetchAllNonAssoc("
             SELECT parent_id, child_id
             FROM " . self::$metaData->relationTable . "
             WHERE parent_id = {$configurableId}
@@ -1199,7 +1199,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
             $linkInfo = self::$metaData->linkInfo[$linkType];
 
-            $r = self::$db->fetchAllNumber("
+            $r = self::$db->fetchAllNonAssoc("
                 SELECT L.product_id, L.linked_product_id, L.link_type_id, P.value 
                 FROM " . self::$metaData->linkTable . " L
                 INNER JOIN " . self::$metaData->linkAttributeIntTable . " P ON P.link_id = L.link_id AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
@@ -1319,7 +1319,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     {
         $linkInfo = self::$metaData->linkInfo[LinkInfo::SUPER];
 
-        $r = self::$db->fetchAllNumber("
+        $r = self::$db->fetchAllNonAssoc("
             SELECT L.product_id, L.linked_product_id, L.link_type_id, P.value, Q.value
             FROM " . self::$metaData->linkTable . " L
             INNER JOIN " . self::$metaData->linkAttributeIntTable . " P ON P.link_id = L.link_id AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
@@ -1397,7 +1397,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
      */
     public function getTierPrices($productId)
     {
-        return self::$db->fetchAllNumber("
+        return self::$db->fetchAllNonAssoc("
             SELECT entity_id, all_groups, customer_group_id, qty, value, website_id
             FROM " . self::$metaData->tierPriceTable . "
             WHERE entity_id = {$productId}
@@ -1495,7 +1495,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
     private function checkDownloadable($downloadable) {
 
-        $linkResults = self::$db->fetchAllNumber("
+        $linkResults = self::$db->fetchAllNonAssoc("
             SELECT sort_order, number_of_downloads, is_shareable, link_url, link_file, link_type, sample_url, sample_file, sample_type
             FROM " . self::$metaData->downloadableLinkTable . "
             WHERE product_id = {$downloadable->id}
@@ -1506,7 +1506,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ['2', '10', '0', null, '/d/u/duck1.jpg', 'file', null, '/d/u/duck2.png', 'file']
         ], $linkResults);
 
-        $sampleResults = self::$db->fetchAllNumber("
+        $sampleResults = self::$db->fetchAllNonAssoc("
             SELECT sort_order, sample_url, sample_file, sample_type
             FROM " . self::$metaData->downloadableSampleTable . "
             WHERE product_id = {$downloadable->id}
@@ -1519,7 +1519,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $linkIds = self::$db->fetchSingleColumn("SELECT link_id FROM " . self::$metaData->downloadableLinkTable . " WHERE product_id = {$downloadable->id}");
 
-        $linkPriceResults = self::$db->fetchAllNumber("
+        $linkPriceResults = self::$db->fetchAllNonAssoc("
             SELECT website_id, price
             FROM " . self::$metaData->downloadableLinkPriceTable . "
             WHERE link_id IN (" . implode(',', $linkIds) . ")
@@ -1533,7 +1533,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             ['1', '23.45']
         ], $linkPriceResults);
 
-        $linkTitleResults = self::$db->fetchAllNumber("
+        $linkTitleResults = self::$db->fetchAllNonAssoc("
             SELECT store_id, title
             FROM " . self::$metaData->downloadableLinkTitleTable . "
             WHERE link_id IN (" . implode(',', $linkIds) . ")
@@ -1549,7 +1549,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $sampleIds = self::$db->fetchSingleColumn("SELECT sample_id FROM " . self::$metaData->downloadableSampleTable . " WHERE product_id = {$downloadable->id}");
 
-        $sampleTitleResults = self::$db->fetchAllNumber("
+        $sampleTitleResults = self::$db->fetchAllNonAssoc("
             SELECT store_id, title
             FROM " . self::$metaData->downloadableSampleTitleTable . "
             WHERE sample_id IN (" . implode(',', $sampleIds) . ")
@@ -1642,7 +1642,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
     protected function checkBundleProduct(BundleProduct $bundle, bool $extended = false)
     {
-        $optionResults = self::$db->fetchAllNumber("
+        $optionResults = self::$db->fetchAllNonAssoc("
             SELECT required, position, type
             FROM " . self::$metaData->bundleOptionTable . "
             WHERE parent_id = {$bundle->id}
@@ -1668,7 +1668,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             WHERE parent_id = {$bundle->id}
         ");
 
-        $selectionResults = self::$db->fetchAllNumber("
+        $selectionResults = self::$db->fetchAllNonAssoc("
             SELECT `product_id`, `is_default`, `selection_price_type`, `selection_price_value`, `selection_qty`, `selection_can_change_qty`
             FROM " . self::$metaData->bundleSelectionTable . "
             WHERE option_id IN (" . implode(', ', $optionIds) . ")
@@ -1685,7 +1685,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             [$p3, 0, 2, '200.0000', 2, 1],
         ], $selectionResults);
 
-        $titleResults = self::$db->fetchAllNumber("
+        $titleResults = self::$db->fetchAllNonAssoc("
             SELECT store_id, title
             FROM " . self::$metaData->bundleOptionValueTable . "
             WHERE option_id IN (" . implode(', ', $optionIds) . ")

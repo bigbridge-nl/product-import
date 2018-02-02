@@ -21,7 +21,7 @@ class Magento2DbConnection
     /** @var  PDO */
     protected $pdo;
 
-    protected $logSlowQueries = false;
+    protected $echoSlowQueries = false;
 
     public function __construct(ResourceConnection $connection)
     {
@@ -48,7 +48,7 @@ class Magento2DbConnection
 #echo $query . "\n";
         $this->pdo->exec($query);
 
-        if ($this->logSlowQueries) {
+        if ($this->echoSlowQueries) {
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
@@ -76,7 +76,7 @@ class Magento2DbConnection
 
         $column = $this->pdo->query($query)->fetchColumn(0);
 
-        if ($this->logSlowQueries) {
+        if ($this->echoSlowQueries) {
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
@@ -101,7 +101,7 @@ class Magento2DbConnection
             $map[] = $row[0];
         }
 
-        if ($this->logSlowQueries) {
+        if ($this->echoSlowQueries) {
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
@@ -127,7 +127,7 @@ class Magento2DbConnection
             $map[$row[0]] = $row[1];
         }
 
-        if ($this->logSlowQueries) {
+        if ($this->echoSlowQueries) {
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
@@ -147,7 +147,7 @@ class Magento2DbConnection
 
         $row = $this->pdo->query($query)->fetch(PDO::FETCH_ASSOC);
 
-        if ($this->logSlowQueries) {
+        if ($this->echoSlowQueries) {
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
@@ -167,7 +167,7 @@ class Magento2DbConnection
 #echo $query . "\n";
         $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
 
-        if ($this->logSlowQueries) {
+        if ($this->echoSlowQueries) {
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
@@ -181,14 +181,14 @@ class Magento2DbConnection
      * @param string $query
      * @return array
      */
-    public function fetchAllNumber(string $query)
+    public function fetchAllNonAssoc(string $query)
     {
 #echo $query . "\n";
         $a = microtime(true);
 
         $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_NUM);
 
-        if ($this->logSlowQueries) {
+        if ($this->echoSlowQueries) {
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
