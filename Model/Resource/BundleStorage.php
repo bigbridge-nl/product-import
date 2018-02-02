@@ -44,9 +44,9 @@ class BundleStorage extends ProductStorage
     {
         $this->createOptions($insertProducts);
 
-//        $changedProducts = $this->detectChangedProducts($updateProducts);
-//        $this->removeOptions($changedProducts);
-//        $this->createOptions($changedProducts);
+        $changedProducts = $this->detectChangedProducts($updateProducts);
+        $this->removeOptions($changedProducts);
+        $this->createOptions($changedProducts);
     }
 
     /**
@@ -123,14 +123,109 @@ class BundleStorage extends ProductStorage
      */
     protected function removeOptions(array $products)
     {
+        $productIds = array_column($products, 'id');
 
+        if (empty($productIds)) {
+            return;
+        }
+
+        $this->db->execute("
+            DELETE FROM `{$this->metaData->bundleOptionTable}`
+            WHERE `parent_id` IN (" . implode(', ', $productIds) . ")
+        ");
     }
 
     /**
      * @param BundleProduct[] $products
+     * @return BundleProduct[]
      */
-    protected function detectChangedProducts(array $products)
+    protected function detectChangedProducts(array $products): array
     {
+        if (empty($products)) {
+            return [];
+        }
 
+        // fetch all data that forms the option, per table
+
+        $productIds = array_column($products, 'id');
+
+        $optionInfo = $this->db->fetchAllAssoc("
+            SELECT `option_id`, `parent_id`, `required`, `type`
+            FROM `{$this->metaData->bundleOptionTable}` 
+            WHERE `parent_id` IN (" . implode(', ', $productIds) . ")
+            ORDER BY `position`
+        ");
+
+        $optionIds = array_column($optionInfo, 'option_id');
+
+        $option2product = [];
+        foreach ($optionInfo as $optionData) {
+            $option2product[$optionData['option_id']] = $optionData['parent_id'];
+        }
+
+        $selectionInfo = $this->db->fetchAllAssoc("
+            SELECT `parent_product_id`, `product_id`, `is_default`, `selection_price_type`, `selection_price_value`, `selection_qty`, `selection_can_change_qty`
+            FROM `{$this->metaData->bundleSelectionTable}`
+            WHERE `option_id` IN (" . implode(', ', $optionIds) . ")
+            ORDER BY `position`
+        ");
+
+        $titleInfo = $this->db->fetchAllAssoc("
+            SELECT `option_id`, `title`
+            FROM `{$this->metaData->bundleOptionValueTable}` 
+            WHERE `option_id` IN (" . implode(', ', $optionIds) . ")
+            ORDER BY `value_id`
+        ");
+
+        // create a string with all option fields, per product id
+
+        $productInfo = [];
+        foreach ($products as $product) {
+            $productInfo[$product->id] = '';
+        }
+
+        foreach ($optionInfo as $optionData) {
+            $productInfo[$optionData['parent_id']] .= '*' . $optionData['required'] . '-' . $optionData['type'];
+        }
+        foreach ($selectionInfo as $selectionData) {
+            $productInfo[$selectionData['parent_product_id']] .= '*' . $selectionData['product_id'] . '-' . $selectionData['is_default']
+                . '-' . $selectionData['selection_price_type'] . '-' . $selectionData['selection_price_value'] . '-' . $selectionData['selection_qty']
+                . '-' . $selectionData['selection_can_change_qty'];
+        }
+        foreach ($titleInfo as $titleData) {
+            $productId = $option2product[$titleData['option_id']];
+            $productInfo[$productId] .= '*' . $titleData['title'];
+        }
+
+        // compare the stored data with the new data to determine which products have changed
+
+        $changed = [];
+
+        foreach ($products as $product) {
+
+            $serialized = '';
+
+            foreach ($product->getOptions() as $option) {
+                $serialized .= '*' . (int)$option->isRequired() . '-' . $option->getInputType();
+            }
+            foreach ($product->getOptions() as $option) {
+                foreach ($option->getSelections() as $selection) {
+                    $serialized .= '*' . $selection->getProductId() . '-' . (int)$selection->isDefault()
+                        . '-' . $selection->getPriceType() . '-' . sprintf('%.4f', $selection->getPriceValue()) . '-' . $selection->getQuantity()
+                        . '-' . (int)$selection->isCanChangeQuantity();
+                }
+            }
+            foreach ($product->getStoreViews() as $storeView) {
+                foreach ($storeView->getOptionInformations() as $optionInformation) {
+                    $serialized .= '*' . $optionInformation->getTitle();
+                }
+            }
+
+            if ($productInfo[$product->id] !== $serialized) {
+                $changed[] = $product;
+            }
+        }
+
+        return $changed;
     }
 }

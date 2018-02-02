@@ -1585,7 +1585,7 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $importer = self::$factory->createImporter($config);
 
-        $bundle = new BundleProduct("ibm-pc-import-product");
+        $bundle = new BundleProduct("ibm-pc-product-import");
 
         $global = $bundle->global();
         $global->setName("IBM PC");
@@ -1597,14 +1597,101 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $global->setShipmentType(BundleProductStoreView::SHIPMENT_TYPE_TOGETHER);
 
         $option = $bundle->addOption(BundleProduct::INPUT_TYPE_DROP_DOWN, true);
-        $option->addProductSelection('monitor-import-product', true, 1, '300.00', '1', false);
+        $option->addProductSelection('monitor1-product-import', true, 1, '25.00', '1', false);
+        $option->addProductSelection('monitor2-product-import', false, 0, '300.00', '2', true);
 
         $global->setOptionTitle($option, 'Monitor');
-        $bundle->storeView('default')->setOptionTitle($option, 'Monitor');
+        $bundle->storeView('default')->setOptionTitle($option, 'Monitor A');
+
+        $option = $bundle->addOption(BundleProduct::INPUT_TYPE_MULTIPLE_SELECT, false);
+        $option->addProductSelection('keyboard-product-import', false, 2, '200.00', '2', true);
+
+        $global->setOptionTitle($option, 'Keyboard');
+        $bundle->storeView('default')->setOptionTitle($option, 'Keyboard A');
 
         $importer->importBundleProduct($bundle);
         $importer->flush();
 
         $this->assertEquals([], $errors);
+
+        $firstOptionId = $this->checkBundleProduct($bundle);
+
+        // update, no change
+
+        $importer->importBundleProduct($bundle);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        $newFirstOptionId = $this->checkBundleProduct($bundle);
+
+        $this->assertEquals($firstOptionId, $newFirstOptionId);
+
+        // update with change
+
+        $bundle->storeView('default')->setOptionTitle($option,'Keyboard B');
+
+        $importer->importBundleProduct($bundle);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        $newFirstOptionId = $this->checkBundleProduct($bundle);
+
+        $this->assertNotEquals($firstOptionId, $newFirstOptionId);
+    }
+
+    protected function checkBundleProduct(BundleProduct $bundle)
+    {
+        $optionResults = self::$db->fetchAllNumber("
+            SELECT required, position, type
+            FROM " . self::$metaData->bundleOptionTable . "
+            WHERE parent_id = {$bundle->id}
+            ORDER BY position
+        ");
+
+        $this->assertEquals([
+            ['1', '1', 'select'],
+            ['0', '2', 'multi']
+        ], $optionResults);
+
+        $optionIds = self::$db->fetchSingleColumn("
+            SELECT option_id
+            FROM " . self::$metaData->bundleOptionTable . "
+            WHERE parent_id = {$bundle->id}
+        ");
+
+        $selectionResults = self::$db->fetchAllNumber("
+            SELECT `product_id`, `is_default`, `selection_price_type`, `selection_price_value`, `selection_qty`, `selection_can_change_qty`
+            FROM " . self::$metaData->bundleSelectionTable . "
+            WHERE option_id IN (" . implode(', ', $optionIds) . ")
+            ORDER BY selection_id
+        ");
+
+        $p1 = $bundle->getOptions()[0]->getSelections()[0]->getProductId();
+        $p2 = $bundle->getOptions()[0]->getSelections()[1]->getProductId();
+        $p3 = $bundle->getOptions()[1]->getSelections()[0]->getProductId();
+
+        $this->assertEquals([
+            [$p1, 1, 1, '25.0000', 1, 0],
+            [$p2, 0, 0, '300.0000', 2, 1],
+            [$p3, 0, 2, '200.0000', 2, 1],
+        ], $selectionResults);
+
+        $titleResults = self::$db->fetchAllNumber("
+            SELECT store_id, title
+            FROM " . self::$metaData->bundleOptionValueTable . "
+            WHERE option_id IN (" . implode(', ', $optionIds) . ")
+            ORDER BY value_id
+        ");
+
+        $this->assertEquals([
+            [0, 'Monitor'],
+            [0, 'Keyboard'],
+            [1, 'Monitor A'],
+            [1, 'Keyboard A'],
+        ], $titleResults);
+
+        return min($optionIds);
     }
 }

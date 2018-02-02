@@ -7,6 +7,9 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class BundleProductOption
 {
+    const PRICE_TYPE_FIXED = 0;
+    const PRICE_TYPE_PERCENT = 1;
+
     /** @var string */
     protected $inputType;
 
@@ -41,6 +44,14 @@ class BundleProductOption
         return $this->required;
     }
 
+    /**
+     * @param string $sku
+     * @param bool $isDefault Is this product selected by default from this option
+     * @param int $priceType Fixed or percent. Use a PRICE_TYPE constant from this class
+     * @param string $priceValue Price, 12.4 decimal Either a fixed price or a percentage
+     * @param string $quantity Default quantity
+     * @param bool $canChangeQuantity Is the customer enabled to change the quantity?
+     */
     public function addProductSelection(string $sku, bool $isDefault, int $priceType, string $priceValue, string $quantity, bool $canChangeQuantity)
     {
         $this->selections[] = new BundleProductSelection($sku, $isDefault, $priceType, $priceValue, $quantity, $canChangeQuantity);
@@ -53,5 +64,4 @@ class BundleProductOption
     {
         return $this->selections;
     }
-
 }
