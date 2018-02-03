@@ -8,6 +8,9 @@
 * url_key is a default attribute?
 * are there attributes with site-scope? how to import / update?
 * Solve todo's in code
+* use var/import as temporary image directory, not /etc
+* downloading http images: perform a HEAD request to check if the image size (or hash?) has changed (config option)
+* url_rewrite: make sure the translated url_keys of the categories are used
 
 ## CSV import
 
@@ -30,6 +33,7 @@
 * allow change type of updated product (needed for placeholders!)
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
+* an url-rewrite tool
 
 ## Testing
 

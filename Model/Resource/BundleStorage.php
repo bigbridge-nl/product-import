@@ -188,9 +188,12 @@ class BundleStorage extends ProductStorage
             $productInfo[$optionData['parent_id']] .= '*' . $optionData['required'] . '-' . $optionData['type'];
         }
         foreach ($selectionInfo as $selectionData) {
-            $productInfo[$selectionData['parent_product_id']] .= '*' . $selectionData['product_id'] . '-' . $selectionData['is_default']
-                . '-' . $selectionData['selection_price_type'] . '-' . $selectionData['selection_price_value'] . '-' . $selectionData['selection_qty']
-                . '-' . $selectionData['selection_can_change_qty'];
+            $productInfo[$selectionData['parent_product_id']] .= '*' . $selectionData['product_id'] .
+                '-' . $selectionData['is_default'] .
+                '-' . $selectionData['selection_price_type'] .
+                '-' . $selectionData['selection_price_value'] .
+                '-' . $selectionData['selection_qty'].
+                '-' . $selectionData['selection_can_change_qty'];
         }
         foreach ($titleInfo as $titleData) {
             $productId = $option2product[$titleData['option_id']];
