@@ -1,8 +1,23 @@
-# Contribute
+# Contributing
 
 If you want to help to maintain this library, great!
 
 Please read the text below if you do.
+
+### Speed benchmark
+
+The speed benchmark is important, because speed is one of the main targets of this library. The class MemoryTest is the benchmark.
+
+Before you decide to change something, run the test MemoryTest in your own test environment. Or maybe even after the second or third run. These tests have the habit of passing only the second time. The benchmark currently looks like this on my laptop:
+
+    Factory: 0.023 seconds; 858 kB
+    Inserts: 13.2 seconds; 569 kB
+    Updates: 15.0 seconds; 0 kB
+    Peak mem: 16 MB
+
+Write down the results of the benchmark. After you are done making the changes, run the benchmark again. It will tell you if your change has slowed down the import. It is up to you and me to decide if the slowing down is acceptable or not.
+
+The primary aim of MemoryTest is to test memory use. If your change makes the library use more or less memory than before, change the target numbers of the test. We can discuss whether the change in memory use is acceptable.
 
 ## General
 
@@ -31,11 +46,3 @@ Codes are preferable for use in imports. They cannot be changed by the user, so 
 Please keep the naming the same as Magento uses it. Do not confuse ids, codes and names, as is often done in imports.
 
 Sometimes Magento uses different names for the same thing. A customer group for example is a "code" internally, although it is a name in the user interface.
-
-### Speed test
-
-The speed tests are important, because speed is one of the main targets of this library.
-
-Before you decide to change something, calibrate the speed tests to your own test environment. Make sure that the tests "just" pass. Or maybe even after the second or third run. These tests have the habit of passing only the second time.
-
-Only when you have calibrated the speed tests should you make changes. After you are done, check the speed test. It will tell you if your change has slowed down the import. It is up to you and me to decide if the slowing down is acceptable or not.

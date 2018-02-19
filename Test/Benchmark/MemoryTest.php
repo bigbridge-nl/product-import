@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Test\Integration\Mass;
+namespace BigBridge\ProductImport\Test\Integration\Benchmark;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\App\ObjectManager;
@@ -12,15 +12,13 @@ use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 
 /**
- * This test only works on my laptop ;)
- *
- * Seriously, this test keeps track of the amount of time a large import takes.
+ * This test keeps track of the amount of time a large import takes.
  * If you are changing the code, do a pre-test with this class.
  * Then, when you're done, do a post test (or several) to check if the importer has not become intolerably slower.
  *
  * @author Patrick van Bergen
  */
-class SpeedTest extends \PHPUnit_Framework_TestCase
+class MemoryTest extends \PHPUnit_Framework_TestCase
 {
     const PRODUCT_COUNT = 2500;
 
@@ -45,14 +43,12 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
     /**
      * @throws \Exception
      */
-    public function testImportSpeed()
+    public function testImport()
     {
-        $success = true;
         $lastErrors = [];
 
         $config = new ImportConfig();
         $config->resultCallbacks[] = function (Product $product) use (&$success, &$lastErrors) {
-            $success = $success && $product->isOk();
             if ($product->getErrors()) {
                 $lastErrors = $product->getErrors();
             }
@@ -77,10 +73,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $time = $afterTime - $beforeTime;
         $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Factory: " . $time . " seconds; " . $memory . " kB \n";
+        echo "Factory: " . sprintf('%.3f', $time) . " seconds; " . $memory . " kB \n";
 
-        $this->assertLessThan(0.031, $time);
-        $this->assertLessThan(800, $memory); // cached metadata
+        $this->assertLessThan(900, $memory); // cached metadata
 
         // ----------------------------------------------------
 
@@ -94,16 +89,12 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $time = $afterTime - $beforeTime;
         $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Inserts: " . $time . " seconds; " . $memory . " kB \n";
+        echo "Inserts: " . sprintf('%.1f', $time) . " seconds; " . $memory . " kB \n";
 
         $this->assertSame([], $lastErrors);
-        $this->assertTrue($success);
-        $this->assertLessThan(7.7, $time);
-        $this->assertLessThan(562, $memory); // the size of the last $product
+        $this->assertLessThan(570, $memory); // the size of the last $product
 
         // ----------------------------------------------------
-
-        $success = true;
 
         $beforeMemory = memory_get_usage();
         $beforeTime = microtime(true);
@@ -115,11 +106,9 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
         $time = $afterTime - $beforeTime;
         $memory = (int)(($afterMemory - $beforeMemory) / 1000);
 
-        echo "Updates: " . $time . " seconds; " . $memory . " kB \n";
+        echo "Updates: " . sprintf('%.1f', $time) . " seconds; " . $memory . " kB \n";
 
         $this->assertSame([], $lastErrors);
-        $this->assertTrue($success);
-        $this->assertLessThan(11.1, $time);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
         $this->assertLessThan(66, $memory);
@@ -128,7 +117,7 @@ class SpeedTest extends \PHPUnit_Framework_TestCase
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000000);
-        $this->assertLessThan(16, $peakMemory);
+        $this->assertLessThan(17, $peakMemory);
 
         echo "Peak mem: " . $peakMemory . " MB \n";
     }
