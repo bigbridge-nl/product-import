@@ -4,8 +4,7 @@
     "type": "magento2-module",
     "version": "1.0.0",
     "require": {
-      "php": "~7.0",
-      "magento/module-catalog": "^100.0|^101.0"
+      "php": "~7.0"
     },
     "license": [
         "MIT"
