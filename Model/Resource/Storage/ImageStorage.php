@@ -152,13 +152,14 @@ class ImageStorage
 
     protected function updateImage(Image $image)
     {
-        $dbDisabled = $image->isEnabled() ? '0' : '1';
-
         $this->db->execute("
             UPDATE {$this->metaData->mediaGalleryTable}
-            SET `disabled` = {$dbDisabled}
-            WHERE `value_id` = {$image->valueId} 
-        ");
+            SET `disabled` = ?
+            WHERE `value_id` = ? 
+        ", [
+            $image->isEnabled() ? '0' : '1',
+            $image->valueId
+        ]);
 
         $targetPath = self::PRODUCT_IMAGE_PATH . $image->getActualStoragePath();
 
@@ -182,20 +183,24 @@ class ImageStorage
     {
         $attributeId = $this->metaData->mediaGalleryAttributeId;
 
-        $dbStoredPath = $this->db->quote($storedPath);
-        $dbDisabled = $enabled ? '0' : '1';
-
         $this->db->execute("
             INSERT INTO {$this->metaData->mediaGalleryTable}
-            SET `attribute_id` = {$attributeId}, `value` = {$dbStoredPath}, `media_type` = 'image', `disabled` = {$dbDisabled} 
-        ");
+            SET `attribute_id` = ?, `value` = ?, `media_type` = 'image', `disabled` = ? 
+        ", [
+            $attributeId,
+            $storedPath,
+            $enabled ? '0' : '1'
+        ]);
 
         $valueId = $this->db->getLastInsertId();
 
         $this->db->execute("
             INSERT INTO {$this->metaData->mediaGalleryValueToEntityTable}
-            SET `value_id` = {$valueId}, `entity_id` = {$productId} 
-        ");
+            SET `value_id` = ?, `entity_id` = ? 
+        ", [
+            $valueId,
+            $productId
+        ]);
 
         return $valueId;
     }
@@ -210,24 +215,42 @@ class ImageStorage
             WHERE `value_id` = {$image->valueId} AND `entity_id` = {$productId} AND `store_id` = {$storeViewId}
         ");
 
-        $dbLabel = $this->db->quote($imageGalleryInformation->getLabel());
-        $dbPosition = $imageGalleryInformation->getPosition();
-        $dbDisabled = $imageGalleryInformation->isEnabled() ? '0' : '1';
+        $label = $imageGalleryInformation->getLabel();
+        $position = $imageGalleryInformation->getPosition();
+        $disabled = $imageGalleryInformation->isEnabled() ? '0' : '1';
 
         if ($recordId !== null) {
 
             $this->db->execute("
                 UPDATE {$this->metaData->mediaGalleryValueTable}
-                SET `label` = {$dbLabel}, `position` = {$dbPosition}, `disabled` = {$dbDisabled}   
-                WHERE `record_id` = $recordId
-            ");
+                SET `label` = ?, `position` = ?, `disabled` = ?   
+                WHERE `record_id` = ?
+            ", [
+                $label,
+                $position,
+                $disabled,
+                $recordId
+            ]);
 
         } else {
 
             $this->db->execute("
                 INSERT INTO {$this->metaData->mediaGalleryValueTable}
-                SET `value_id` = {$image->valueId}, `store_id` = {$storeViewId}, `entity_id` = {$productId}, `label` = {$dbLabel}, `position` = {$dbPosition}, `disabled` = {$dbDisabled}
-            ");
+                SET 
+                    `value_id` = ?, 
+                    `store_id` = ?, 
+                    `entity_id` = ?, 
+                    `label` = ?, 
+                    `position` = ?, 
+                    `disabled` = ?
+            ", [
+                $image->valueId,
+                $storeViewId,
+                $productId,
+                $label,
+                $position,
+                $disabled
+            ]);
         }
     }
 
@@ -240,26 +263,20 @@ class ImageStorage
         $tableName = $attributeInfo->tableName;
 
         $values = [];
+
         foreach ($products as $product) {
             foreach ($product->getStoreViews() as $storeView) {
                 foreach ($storeView->getImageRoles() as $attributeCode => $image) {
 
-                    $attributeId = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
-                    $storeViewId = $storeView->getStoreViewId();
-                    $value = $this->db->quote($image->getActualStoragePath());
-                    $values[] = "({$product->id}, {$attributeId}, {$storeViewId}, {$value})";
+                    $values[] = $product->id;
+                    $values[] = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
+                    $values[] = $storeView->getStoreViewId();
+                    $values[] = $image->getActualStoragePath();
                 }
             }
         }
 
-        if (!empty($values)) {
-
-            $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
-                " VALUES " . implode(', ', $values) .
-                " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
-
-            $this->db->execute($sql);
-        }
+        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values, "`value` = VALUES(`value`)");
     }
 
     /**

@@ -57,21 +57,10 @@ class DownloadableStorage extends ProductStorage
 
     protected function removeLinksAndSamples(array $products)
     {
-        if (empty($products)) {
-            return;
-        }
-
         $productIds = array_column($products, 'id');
 
-        $this->db->execute("
-            DELETE FROM `" . $this->metaData->downloadableLinkTable . "`
-            WHERE `product_id`  IN (" . implode(', ', $productIds) . ")
-        ");
-
-        $this->db->execute("
-            DELETE FROM `" . $this->metaData->downloadableSampleTable . "`
-            WHERE `product_id`  IN (" . implode(', ', $productIds) . ")
-        ");
+        $this->db->deleteMultiple($this->metaData->downloadableLinkTable, 'product_id', $productIds);
+        $this->db->deleteMultiple($this->metaData->downloadableSampleTable, 'product_id', $productIds);
     }
 
     /**
@@ -100,24 +89,33 @@ class DownloadableStorage extends ProductStorage
                 $this->db->execute("
                     INSERT INTO `" . $this->metaData->downloadableLinkTable . "`
                     SET 
-                        `product_id` = {$product->id}, 
-                        `sort_order` = {$order}, 
-                        `number_of_downloads` = {$numberOfDownloads}, 
-                        `is_shareable` = {$isShareable}, 
-                        `link_url` = {$linkUrl}, 
-                        `link_file` = {$linkFile},
-                        `link_type` = {$linkType}, 
-                        `sample_url` = {$sampleUrl}, 
-                        `sample_file` = {$sampleFile},
-                        `sample_type` = {$sampleType}
-                ");
+                        `product_id` = ?, 
+                        `sort_order` = ?, 
+                        `number_of_downloads` = ?, 
+                        `is_shareable` = ?, 
+                        `link_url` = ?, 
+                        `link_file` = ?,
+                        `link_type` = ?, 
+                        `sample_url` = ?, 
+                        `sample_file` = ?,
+                        `sample_type` = ?
+                ", [
+                    $product->id,
+                    $order,
+                    $numberOfDownloads,
+                    $isShareable,
+                    $linkUrl,
+                    $linkFile,
+                    $linkType,
+                    $sampleUrl,
+                    $sampleFile,
+                    $sampleType
+                ]);
 
                 $downloadLink->setId($this->db->getLastInsertId());
             }
 
             foreach ($product->getDownloadSamples() as $i => $downloadSample) {
-
-                $order = $i + 1;
 
                 list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
                     $downloadSample->getFileOrUrl(), $downloadSample->getTemporaryStoragePathSample(), self::SAMPLES_PATH);
@@ -125,12 +123,18 @@ class DownloadableStorage extends ProductStorage
                 $this->db->execute("
                     INSERT INTO `" . $this->metaData->downloadableSampleTable . "`
                     SET 
-                        `product_id` = {$product->id}, 
-                        `sort_order` = {$order}, 
-                        `sample_url` = {$sampleUrl}, 
-                        `sample_file` = {$sampleFile},
-                        `sample_type` = {$sampleType}
-                ");
+                        `product_id` = ?, 
+                        `sort_order` = ?, 
+                        `sample_url` = ?, 
+                        `sample_file` = ?,
+                        `sample_type` = ?
+                ", [
+                    $product->id,
+                    $i + 1,
+                    $sampleUrl,
+                    $sampleFile,
+                    $sampleType
+                ]);
 
                 $downloadSample->setId($this->db->getLastInsertId());
             }
@@ -145,16 +149,17 @@ class DownloadableStorage extends ProductStorage
                     $downloadLinkId = $downloadLinkInformation->getDownloadLink()->getId();
                     if ($downloadLinkId !== null) {
 
-                        $title = $this->db->quote($downloadLinkInformation->getTitle());
-                        $price = $this->db->quote($downloadLinkInformation->getPrice());
-
                         $this->db->execute("
                             INSERT INTO `" . $this->metaData->downloadableLinkTitleTable . "`
                             SET 
-                                `link_id` = {$downloadLinkId}, 
-                                `store_id` = {$storeView->getStoreViewId()}, 
-                                `title` = {$title}
-                        ");
+                                `link_id` = ?, 
+                                `store_id` = ?, 
+                                `title` = ?
+                        ", [
+                            $downloadLinkId,
+                            $storeView->getStoreViewId(),
+                            $downloadLinkInformation->getTitle()
+                        ]);
 
                         // find the website that belongs to the store view (the website of store view "default" is "admin")
                         $websiteId = $this->metaData->storeViewWebsiteMap[$storeView->getStoreViewId()];
@@ -162,10 +167,14 @@ class DownloadableStorage extends ProductStorage
                         $this->db->execute("
                             INSERT INTO `" . $this->metaData->downloadableLinkPriceTable . "`
                             SET 
-                                `link_id` = {$downloadLinkId}, 
-                                `website_id` = {$websiteId}, 
-                                `price` = {$price}
-                        ");
+                                `link_id` = ?, 
+                                `website_id` = ?, 
+                                `price` = ?
+                        ", [
+                            $downloadLinkId,
+                            $websiteId,
+                            $downloadLinkInformation->getPrice()
+                        ]);
                     }
                 }
 
@@ -174,15 +183,17 @@ class DownloadableStorage extends ProductStorage
                     $downloadSampleId = $downloadSampleInformation->getDownloadSample()->getId();
                     if ($downloadSampleId !== null) {
 
-                        $title = $this->db->quote($downloadSampleInformation->getTitle());
-
                         $this->db->execute("
                             INSERT INTO `" . $this->metaData->downloadableSampleTitleTable . "`
                             SET 
-                                `sample_id` = {$downloadSampleId}, 
-                                `store_id` = {$storeView->getStoreViewId()}, 
-                                `title` = {$title}
-                        ");
+                                `sample_id` = ?, 
+                                `store_id` = ?, 
+                                `title` = ?
+                        ", [
+                            $downloadSampleId,
+                            $storeView->getStoreViewId(),
+                            $downloadSampleInformation->getTitle()
+                        ]);
                     }
                 }
             }
@@ -192,17 +203,17 @@ class DownloadableStorage extends ProductStorage
     protected function interpretFileOrUrl(string $fileOrUrl, $temporaryStoragePath, $targetBaseDir)
     {
         if ($fileOrUrl === '') {
-            $type = 'null';
-            $file = 'null';
-            $url = 'null';
+            $type = null;
+            $file = null;
+            $url = null;
         } elseif (preg_match('#^(http://|https://|://)#i', $fileOrUrl)) {
-            $type = "'url'";
-            $file = 'null';
-            $url = $this->db->quote($fileOrUrl);
+            $type = "url";
+            $file = null;
+            $url = $fileOrUrl;
         } else {
-            $type = "'file'";
-            $file = "'" . $this->getActualStoragePath($fileOrUrl, $temporaryStoragePath, $targetBaseDir) . "'";
-            $url = 'null';
+            $type = "file";
+            $file = $this->getActualStoragePath($fileOrUrl, $temporaryStoragePath, $targetBaseDir);
+            $url = null;
         }
 
         return [$url, $file, $type];

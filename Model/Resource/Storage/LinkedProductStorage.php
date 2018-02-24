@@ -102,20 +102,10 @@ class LinkedProductStorage
      */
     protected function removeProductLinks(string $linkType, array $products)
     {
-        if (empty($products)) {
-            return;
-        }
-
         $productIds = array_column($products, 'id');
-
         $linkInfo = $this->metaData->linkInfo[$linkType];
 
-        $this->db->execute("
-            DELETE FROM `{$this->metaData->linkTable}`
-            WHERE 
-                `product_id` IN (" . implode(', ', $productIds) . ") AND
-                `link_type_id` = {$linkInfo->typeId}
-        ");
+        $this->db->deleteMultipleWithWhere($this->metaData->linkTable, 'product_id', $productIds, "`link_type_id` = {$linkInfo->typeId}");
     }
 
     /**
@@ -140,20 +130,28 @@ class LinkedProductStorage
                 $this->db->execute("
                     INSERT INTO `{$this->metaData->linkTable}`
                     SET 
-                        `product_id` = {$product->id},
-                        `linked_product_id` = {$linkedId},
-                        `link_type_id` = {$linkInfo->typeId}
-                ");
+                        `product_id` = ?,
+                        `linked_product_id` = ?,
+                        `link_type_id` = ?
+                ", [
+                    $product->id,
+                    $linkedId,
+                    $linkInfo->typeId
+                ]);
 
                 $linkId = $this->db->getLastInsertId();
 
                 $this->db->execute("
                     INSERT INTO `{$this->metaData->linkAttributeIntTable}`
                     SET
-                        `product_link_attribute_id` = {$linkInfo->positionAttributeId},
-                        `link_id` = {$linkId},
-                        `value` = {$position}
-                ");
+                        `product_link_attribute_id` = ?,
+                        `link_id` = ?,
+                        `value` = ?
+                ", [
+                    $linkInfo->positionAttributeId,
+                    $linkId,
+                    $position
+                ]);
 
                 $position++;
             }

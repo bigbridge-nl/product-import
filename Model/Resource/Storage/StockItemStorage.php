@@ -53,6 +53,7 @@ class StockItemStorage
                 $attributes =  $stockItem->getAttributes();
                 if (!empty($attributes)) {
 
+                    $attributeNames = [];
                     $attributeValues = [];
 
                     foreach ($attributes as $name => $value) {
@@ -61,31 +62,28 @@ class StockItemStorage
                         } elseif ($value === true) {
                             $text = '1';
                         } else {
-                            $text = "'{$value}'";
+                            $text = $value;
                         }
-                        $attributeValues[] = "{$name} = {$text}";
+                        $attributeNames[] = "{$name} = ?";
+                        $attributeValues[] = $text;
                     }
 
                     if (!array_key_exists($product->id, $stockItems)) {
 
-                        $sql = "
+                        $this->db->execute("
                             INSERT INTO `{$this->metaData->stockItemTable}`
-                            SET `stock_id` = {$stockId}, `product_id` = {$product->id}, `website_id` = {$websiteId}, " . implode(',', $attributeValues) . "
-                        ";
-
-                        $this->db->execute($sql);
+                            SET `stock_id` = ?, `product_id` = ?, `website_id` = ?, " . implode(',', $attributeNames) . "
+                        ", array_merge([$stockId, $product->id, $websiteId], $attributeValues));
 
                     } else {
 
                         $itemId = $stockItems[$product->id];
 
-                        $sql = "
+                        $this->db->execute("
                             UPDATE `{$this->metaData->stockItemTable}`
-                            SET " . implode(',', $attributeValues) . "
-                            WHERE `item_id` = {$itemId}
-                        ";
-
-                        $this->db->execute($sql);
+                            SET " . implode(',', $attributeNames) . "
+                            WHERE `item_id` = ?
+                        ", array_merge($attributeValues, [$itemId]));
 
                     }
 

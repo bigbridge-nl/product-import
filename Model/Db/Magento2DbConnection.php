@@ -41,12 +41,13 @@ class Magento2DbConnection
      *
      * @param string $query
      */
-    public function execute(string $query)
+    public function execute(string $query, $values = [])
     {
         $a = microtime(true);
 
 #echo $query . "\n";
-        $this->pdo->exec($query);
+        $st = $this->pdo->prepare($query);
+        $st->execute($values);
 
         if ($this->echoSlowQueries) {
             $b = microtime(true);
@@ -54,6 +55,78 @@ class Magento2DbConnection
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
             }
         }
+    }
+
+    protected function getMarks(array $columns, $values)
+    {
+        $columnCount = count($columns);
+        $template = "(?" . str_repeat(", ?", $columnCount - 1) . ")";
+        $rowCount = count($values) / $columnCount;
+        $followingTemplate = ", " . $template;
+        $valuesClause = $template . str_repeat($followingTemplate, ($rowCount - 1));
+
+        return $valuesClause;
+    }
+
+    public function insertMultiple(string $table, array $columns, array $values)
+    {
+        if (empty($values)) {
+            return;
+        }
+
+        $this->execute("
+            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            VALUES " . $this->getMarks($columns, $values), $values);
+    }
+
+    public function insertMultipleWithUpdate(string $table, array $columns, array $values, string $updateClause)
+    {
+        if (empty($values)) {
+            return;
+        }
+
+        $this->execute("
+            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            VALUES " . $this->getMarks($columns, $values) . "
+            ON DUPLICATE KEY UPDATE {$updateClause}",
+            $values);
+    }
+
+
+    public function insertMultipleWithIgnore(string $table, array $columns, array $values)
+    {
+        if (empty($values)) {
+            return;
+        }
+
+        $this->execute("
+            INSERT IGNORE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            VALUES " . $this->getMarks($columns, $values),
+            $values);
+    }
+
+    public function deleteMultiple(string $table, string $keyColumn, array $keys)
+    {
+        if (empty($keys)) {
+            return;
+        }
+
+        $this->execute("
+            DELETE FROM`{$table}`  
+            WHERE `{$keyColumn}` IN (?" . str_repeat(',?', count($keys) - 1) . ")",
+            $keys);
+    }
+
+    public function deleteMultipleWithWhere(string $table, string $keyColumn, array $keys, string $whereClause)
+    {
+        if (empty($keys)) {
+            return;
+        }
+
+        $this->execute("
+            DELETE FROM`{$table}`  
+            WHERE `{$keyColumn}` IN (?" . str_repeat(',?', count($keys) - 1) . ") AND {$whereClause}",
+            $keys);
     }
 
     /**

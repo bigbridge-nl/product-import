@@ -71,21 +71,22 @@ class ConfigurableStorage extends ProductStorage
         foreach ($products as $product) {
             foreach ($product->getSuperAttributeCodes() as $i => $attributeCode) {
 
-                $attributeId = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
-
                 $this->db->execute("
                     INSERT INTO {$this->metaData->superAttributeTable}
-                    SET product_id = {$product->id}, attribute_id = {$attributeId}, position = {$i}
-                ");
-
-                $superAttributeId = $this->db->getLastInsertId();
-
-                $attributeName = $this->db->quote(ucwords(str_replace('_', ' ', $attributeCode)));
+                    SET product_id = ?, attribute_id = ?, position = ?
+                ", [
+                    $product->id,
+                    $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId,
+                    $i
+                ]);
 
                 $this->db->execute("
                     INSERT INTO {$this->metaData->superAttributeLabelTable}
-                    SET product_super_attribute_id = {$superAttributeId}, store_id = 0, use_default = 0, value = {$attributeName}
-                ");
+                    SET product_super_attribute_id = ?, store_id = 0, use_default = 0, value = ?
+                ", [
+                    $this->db->getLastInsertId(),
+                    ucwords(str_replace('_', ' ', $attributeCode))
+                ]);
             }
         }
     }
@@ -99,16 +100,12 @@ class ConfigurableStorage extends ProductStorage
 
         foreach ($products as $product) {
             foreach ($product->getVariants() as $variant) {
-                $values[] = "({$variant->id}, {$product->id})";
+                $values[] = $variant->id;
+                $values[] = $product->id;
             }
         }
 
-        if (!empty($values)) {
-            $this->db->execute("
-                INSERT INTO {$this->metaData->superLinkTable} (product_id, parent_id)
-                VALUES " . implode(", ", $values) . "
-            ");
-        }
+        $this->db->insertMultiple($this->metaData->superLinkTable, ['product_id', 'parent_id'], $values);
     }
 
     /**
@@ -120,16 +117,12 @@ class ConfigurableStorage extends ProductStorage
 
         foreach ($products as $product) {
             foreach ($product->getVariants() as $variant) {
-                $values[] = "({$product->id}, {$variant->id})";
+                $values[] = $product->id;
+                $values[] = $variant->id;
             }
         }
 
-        if (!empty($values)) {
-            $this->db->execute("
-                INSERT INTO {$this->metaData->relationTable} (parent_id, child_id)
-                VALUES " . implode(", ", $values) . "
-            ");
-        }
+        $this->db->insertMultiple($this->metaData->relationTable, ['parent_id', 'child_id'], $values);
     }
 
     /**
@@ -178,16 +171,9 @@ class ConfigurableStorage extends ProductStorage
      */
     protected function removeSuperAttributes(array $products)
     {
-        if (empty($products)) {
-            return;
-        }
-
         $productIds = array_column($products, 'id');
 
-        $this->db->execute("
-            DELETE FROM {$this->metaData->superAttributeTable}
-            WHERE product_id IN (" . implode(", ", $productIds) . ")
-        ");
+        $this->db->deleteMultiple($this->metaData->superAttributeTable, 'product_id', $productIds);
     }
 
     /**
@@ -233,15 +219,21 @@ class ConfigurableStorage extends ProductStorage
             foreach ($added as $variantId) {
                 $this->db->execute("
                     INSERT INTO {$this->metaData->superLinkTable} 
-                    SET product_id = {$variantId}, parent_id = {$configurableId}
-                ");
+                    SET product_id = ?, parent_id = ?
+                ", [
+                    $variantId,
+                    $configurableId
+                ]);
             }
 
             foreach ($removed as $variantId) {
                 $this->db->execute("
                     DELETE FROM {$this->metaData->superLinkTable} 
-                    WHERE product_id = {$variantId} AND parent_id = {$configurableId}
-                ");
+                    WHERE product_id = ? AND parent_id = ?
+                ", [
+                    $variantId,
+                    $configurableId
+                ]);
             }
         }
     }
@@ -290,15 +282,21 @@ class ConfigurableStorage extends ProductStorage
             foreach ($added as $variantId) {
                 $this->db->execute("
                     INSERT INTO {$this->metaData->relationTable} 
-                    SET child_id = {$variantId}, parent_id = {$configurableId}
-                ");
+                    SET child_id = ?, parent_id = ?
+                ", [
+                    $variantId,
+                    $configurableId
+                ]);
             }
 
             foreach ($removed as $variantId) {
                 $this->db->execute("
                     DELETE FROM {$this->metaData->relationTable} 
-                    WHERE child_id = {$variantId} AND parent_id = {$configurableId}
-                ");
+                    WHERE child_id = ? AND parent_id = ?
+                ", [
+                    $variantId,
+                    $configurableId
+                ]);
             }
         }
     }

@@ -58,61 +58,62 @@ class BundleStorage extends ProductStorage
 
             foreach ($product->getOptions() as $i => $option) {
 
-                $required = (int)$option->isRequired();
-                $position = $i + 1;
-                $type = $this->db->quote($option->getInputType());
-
                 $this->db->execute("
                     INSERT INTO `{$this->metaData->bundleOptionTable}`
                     SET 
-                        `parent_id` = {$product->id},
-                        `required` = {$required},
-                        `position` = {$position},
-                        `type` = {$type}
-                ");
+                        `parent_id` = ?,
+                        `required` = ?,
+                        `position` = ?,
+                        `type` = ?
+                ", [
+                    $product->id,
+                    (int)$option->isRequired(),
+                    $i + 1,
+                    $option->getInputType()]);
 
                 $option->id = $this->db->getLastInsertId();
 
                 foreach ($option->getSelections() as $j => $selection) {
 
-                    $selectionProductId = $selection->getProductId();
-                    $selectionPosition = $j + 1;
-                    $default = (int)$selection->isDefault();
-                    $selectionPriceType = $selection->getPriceType();
-                    $selectionPriceValue = $this->db->quote($selection->getPriceValue());
-                    $selectionQuantity = $selection->getQuantity();
-                    $selectionCanChangeQuantity = (int)$selection->isCanChangeQuantity();
-
                     $this->db->execute("
                         INSERT INTO `{$this->metaData->bundleSelectionTable}`
                         SET
-                            `option_id` = {$option->id},
-                            `parent_product_id` = {$product->id},
-                            `product_id` = {$selectionProductId},
-                            `position` = {$selectionPosition},
-                            `is_default` = {$default},
-                            `selection_price_type` = {$selectionPriceType},
-                            `selection_price_value` = {$selectionPriceValue},
-                            `selection_qty` = {$selectionQuantity},
-                            `selection_can_change_qty` = {$selectionCanChangeQuantity}
-                    ");
+                            `option_id` = ?,
+                            `parent_product_id` = ?,
+                            `product_id` = ?,
+                            `position` = ?,
+                            `is_default` = ?,
+                            `selection_price_type` = ?,
+                            `selection_price_value` = ?,
+                            `selection_qty` = ?,
+                            `selection_can_change_qty` = ?
+                    ", [
+                        $option->id,
+                        $product->id,
+                        $selection->getProductId(),
+                        $j + 1,
+                        (int)$selection->isDefault(),
+                        $selection->getPriceType(),
+                        $selection->getPriceValue(),
+                        $selection->getQuantity(),
+                        (int)$selection->isCanChangeQuantity()]);
                 }
             }
 
             foreach ($product->getStoreViews() as $storeView) {
                 foreach ($storeView->getOptionInformations() as $optionInformation) {
 
-                    $optionInfoOptionId = $optionInformation->getOption()->id;
-                    $storeId = $storeView->getStoreViewId();
-                    $title = $this->db->quote($optionInformation->getTitle());
-
                     $this->db->execute("
                         INSERT INTO `{$this->metaData->bundleOptionValueTable}`
                         SET
-                            `option_id` = {$optionInfoOptionId},
-                            `store_id` = {$storeId},
-                            `title` = {$title} 
-                    ");
+                            `option_id` = ?,
+                            `store_id` = ?,
+                            `title` = ? 
+                    ", [
+                        $optionInformation->getOption()->id,
+                        $storeView->getStoreViewId(),
+                        $optionInformation->getTitle()
+                    ]);
                 }
             }
         }
@@ -125,14 +126,7 @@ class BundleStorage extends ProductStorage
     {
         $productIds = array_column($products, 'id');
 
-        if (empty($productIds)) {
-            return;
-        }
-
-        $this->db->execute("
-            DELETE FROM `{$this->metaData->bundleOptionTable}`
-            WHERE `parent_id` IN (" . implode(', ', $productIds) . ")
-        ");
+        $this->db->deleteMultiple($this->metaData->bundleOptionTable, 'parent_id', $productIds);
     }
 
     /**

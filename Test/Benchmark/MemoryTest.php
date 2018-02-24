@@ -92,7 +92,7 @@ class MemoryTest extends \PHPUnit_Framework_TestCase
         echo "Inserts: " . sprintf('%.1f', $time) . " seconds; " . $memory . " kB \n";
 
         $this->assertSame([], $lastErrors);
-        $this->assertLessThan(570, $memory); // the size of the last $product
+        $this->assertLessThan(640, $memory); // the size of the last $product
 
         // ----------------------------------------------------
 
@@ -117,7 +117,7 @@ class MemoryTest extends \PHPUnit_Framework_TestCase
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000000);
-        $this->assertLessThan(17, $peakMemory);
+        $this->assertLessThan(24, $peakMemory);
 
         echo "Peak mem: " . $peakMemory . " MB \n";
     }

@@ -70,32 +70,31 @@ class ProductEntityStorage
      */
     public function insertMainTable(array $products)
     {
-        $values = [];
         $skus = [];
+        $vals = [];
 
         foreach ($products as $product) {
 
+            $sku = $product->getSku();
+
             // index with sku to prevent creation of multiple products with the same sku
             // (this happens when products with different store views are inserted at once)
-            if (array_key_exists($product->getSku(), $skus)) {
+            if (array_key_exists($sku, $skus)) {
                 continue;
             }
-            $skus[$product->getSku()] = $product->getSku();
 
-            $sku = $this->db->quote($product->getSku());
-            $attributeSetId = $product->getAttributeSetId();
-            $type = $product->getType();
-            $hasOptions = $product->getHasOptions();
-            $requiredOptions = $product->getRequiredOptions();
-            $values[] = "({$attributeSetId}, '{$type}', {$sku}, {$hasOptions}, {$requiredOptions})";
+            $skus[$sku] = $sku;
+
+            $vals[] = $product->getAttributeSetId();
+            $vals[] = $product->getType();
+            $vals[] = $sku;
+            $vals[] = $product->getHasOptions();
+            $vals[] = $product->getRequiredOptions();
         }
 
-        if (count($values) > 0) {
+        if (count($vals) > 0) {
 
-            $sql = "INSERT INTO `{$this->metaData->productEntityTable}` (`attribute_set_id`, `type_id`, `sku`, `has_options`, `required_options`) VALUES " .
-                implode(',', $values);
-
-            $this->db->execute($sql);
+            $this->db->insertMultiple($this->metaData->productEntityTable, ['attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options'], $vals);
 
             // store the new ids with the products
             $serialized = $this->db->quoteSet($skus);
@@ -122,30 +121,21 @@ class ProductEntityStorage
             $sku = $product->getSku();
             $attributeSetId = $product->getAttributeSetId();
             if ($attributeSetId !== null) {
-                $attributeSetUpdates[] = "({$product->id}, '{$sku}', {$attributeSetId}, '{$dateTime}')";
+                $attributeSetUpdates[] = $product->id;
+                $attributeSetUpdates[] = $sku;
+                $attributeSetUpdates[] = $attributeSetId;
+                $attributeSetUpdates[] = $dateTime;
             } else {
-                $otherUpdates[] = "({$product->id}, '{$sku}', '{$dateTime}')";
+                $otherUpdates[] = $product->id;
+                $otherUpdates[] = $sku;
+                $otherUpdates[] = $dateTime;
             }
         }
 
-        if (count($attributeSetUpdates) > 0) {
+        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'sku', 'attribute_set_id', 'updated_at'], $attributeSetUpdates,
+            "`sku` = VALUES(`sku`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)");
 
-            $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-                " (`entity_id`, `sku`, `attribute_set_id`, `updated_at`) " .
-                " VALUES " . implode(', ', $attributeSetUpdates) .
-                " ON DUPLICATE KEY UPDATE `sku` = VALUES(`sku`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)";
-
-            $this->db->execute($sql);
-        }
-
-        if (count($otherUpdates) > 0) {
-
-            $sql = "INSERT INTO `{$this->metaData->productEntityTable}`" .
-                " (`entity_id`, `sku`, `updated_at`) " .
-                " VALUES " . implode(', ', $otherUpdates) .
-                " ON DUPLICATE KEY UPDATE `sku` = VALUES(`sku`), `updated_at`= VALUES(`updated_at`)";
-
-            $this->db->execute($sql);
-        }
+        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'sku', 'updated_at'], $otherUpdates,
+            "`sku` = VALUES(`sku`), `updated_at`= VALUES(`updated_at`)");
     }
 }

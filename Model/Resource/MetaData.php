@@ -462,20 +462,24 @@ class MetaData
 
         $this->db->execute("
             INSERT INTO {$this->attributeOptionTable}
-            SET attribute_id = $attributeId, sort_order = $sortOrder
-        ");
+            SET attribute_id = ?, sort_order = ?
+        ", [
+            $attributeId,
+            $sortOrder
+        ]);
 
         $optionId = $this->db->getLastInsertId();
 
         // update cached values
         $this->productEavAttributeInfo[$attributeCode]->optionValues[$optionName] = $optionId;
 
-        $dbValue = $this->db->quote($optionName);
-
         $this->db->execute("
             INSERT INTO {$this->attributeOptionValueTable}
-            SET option_id = $optionId, store_id = 0, value = {$dbValue}
-        ");
+            SET option_id = ?, store_id = 0, value = ?
+        ", [
+            $optionId,
+            $optionName
+        ]);
 
         return $optionId;
     }

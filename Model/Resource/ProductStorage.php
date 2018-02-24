@@ -403,19 +403,15 @@ abstract class ProductStorage
         $attributeId = $attributeInfo->attributeId;
 
         $values = [];
-        foreach ($storeViews as $storeView) {
 
-            $entityId = $storeView->parent->id;
-            $value = $this->db->quote($storeView->getAttribute($eavAttribute));
-            $storeViewId = $storeView->getStoreViewId();
-            $values[] = "({$entityId},{$attributeId},{$storeViewId},{$value})";
+        foreach ($storeViews as $storeView) {
+            $values[] = $storeView->parent->id;
+            $values[] = $attributeId;
+            $values[] = $storeView->getStoreViewId();
+            $values[] = $storeView->getAttribute($eavAttribute);
         }
 
-        $sql = "INSERT INTO `{$tableName}` (`entity_id`, `attribute_id`, `store_id`, `value`)" .
-            " VALUES " . implode(', ', $values) .
-            " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
-
-        $this->db->execute($sql);
+        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values, "`value` = VALUES(`value`)");
     }
 
     /**
@@ -427,22 +423,16 @@ abstract class ProductStorage
 
         foreach ($products as $product) {
             foreach ($product->getCategoryIds() as $categoryId) {
-                $values[] = "({$categoryId}, {$product->id})";
+                $values[] = $categoryId;
+                $values[] = $product->id;
             }
         }
 
-        if (count($values) > 0) {
+        // IGNORE serves two purposes:
+        // 1. do not fail if the product-category link already existed
+        // 2. do not fail if the category does not exist
 
-            // IGNORE serves two purposes:
-            // 1. do not fail if the product-category link already existed
-            // 2. do not fail if the category does not exist
-
-            $sql = "
-                INSERT IGNORE INTO `{$this->metaData->categoryProductTable}` (`category_id`, `product_id`) 
-                VALUES " . implode(', ', $values);
-
-            $this->db->execute($sql);
-        }
+        $this->db->insertMultipleWithIgnore($this->metaData->categoryProductTable, ['category_id', 'product_id'], $values);
     }
 
     /**
@@ -454,21 +444,15 @@ abstract class ProductStorage
 
         foreach ($products as $product) {
             foreach ($product->getWebsiteIds() as $websiteId) {
-                $values[] = "({$product->id}, {$websiteId})";
+                $values[] = $product->id;
+                $values[] = $websiteId;
             }
         }
 
-        if (count($values) > 0) {
+        // IGNORE serves two purposes:
+        // 1. do not fail if the product-website link already existed
+        // 2. do not fail if the website does not exist
 
-            // IGNORE serves two purposes:
-            // 1. do not fail if the product-website link already existed
-            // 2. do not fail if the website does not exist
-
-            $sql = "
-                INSERT IGNORE INTO `{$this->metaData->productWebsiteTable}` (`product_id`, `website_id`) 
-                VALUES " . implode(', ', $values);
-
-            $this->db->execute($sql);
-        }
+        $this->db->insertMultipleWithIgnore($this->metaData->productWebsiteTable, ['product_id', 'website_id'], $values);
     }
 }

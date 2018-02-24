@@ -106,23 +106,18 @@ class TierPriceStorage
                 $entityId = $product->id;
 
                 foreach ($tierPrices as $tierPrice) {
-                    $allGroups = (int)($tierPrice->getCustomerGroupId() === null);
-                    $customerGroupId = (int)$tierPrice->getCustomerGroupId();
-                    $qty = $tierPrice->getQuantity();
-                    $value = $tierPrice->getValue();
-                    $websiteId = $tierPrice->getWebsiteId();
-                    $values[] = "({$entityId}, {$allGroups}, {$customerGroupId}, {$qty}, '{$value}', {$websiteId})";
+                    $values[] = $entityId;
+                    $values[] = (int)($tierPrice->getCustomerGroupId() === null);
+                    $values[] = (int)$tierPrice->getCustomerGroupId();
+                    $values[] = $tierPrice->getQuantity();
+                    $values[] = $tierPrice->getValue();
+                    $values[] = $tierPrice->getWebsiteId();
                 }
             }
         }
 
-        if (!empty($values)) {
-            $this->db->execute("
-                INSERT INTO `{$this->metaData->tierPriceTable}` (`entity_id`, `all_groups`, `customer_group_id`, `qty`, `value`, `website_id`)
-                VALUES " . implode(', ', $values) . "
-                ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)
-            ");
-        }
+        $this->db->insertMultipleWithUpdate($this->metaData->tierPriceTable, ['entity_id', 'all_groups', 'customer_group_id', 'qty', 'value', 'website_id'], $values, "
+            `value` = VALUES(`value`)");
     }
 
     /**
@@ -172,11 +167,6 @@ class TierPriceStorage
         }
 
         // remove the outdated tier prices
-        if (!empty($removableValueIds)) {
-            $this->db->execute("
-                DELETE FROM `{$this->metaData->tierPriceTable}`
-                WHERE `value_id` IN (" . implode(',', $removableValueIds) . ")
-            ");
-        }
+        $this->db->deleteMultiple($this->metaData->tierPriceTable, 'value_id', $removableValueIds);
     }
 }
