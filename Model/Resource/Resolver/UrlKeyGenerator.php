@@ -348,10 +348,11 @@ class UrlKeyGenerator
             FROM `{$this->metaData->productEntityTable}_varchar`
             WHERE 
                 `attribute_id` = ? AND
-                `store_id` = $storeViewId AND
+                `store_id` = ? AND
                 `value` LIKE ?
         ", [
             $attributeId,
+            $storeViewId,
             $urlKey . '-%'
         ]);
 
