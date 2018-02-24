@@ -308,23 +308,27 @@ class UrlKeyGenerator
 
         $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
 
+        $values = [$attributeId];
+
         if ($duplicateUrlKeyStrategy === ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL) {
             $entries = [];
             foreach (array_unique($urlKeys) as $urlKey) {
-                $entries[] = "(`value` LIKE " . $this->db->quote($urlKey) . ")";
+                $entries[] = "(`value` LIKE ?)";
+                $values[] = $urlKey;
             }
             $keyClause = implode(" OR ", $entries);
         } else {
-            $keyClause = "`value` IN (" . $this->db->quoteSet($urlKeys) . ")";
+            $keyClause = "`value` IN (" . $this->db->getMarks($urlKeys) . ")";
+            $values = array_merge($values, $urlKeys);
         }
 
         $results = $this->db->fetchAllAssoc("
             SELECT `entity_id`, `store_id`, `value`
             FROM `{$this->metaData->productEntityTable}_varchar`
             WHERE 
-                `attribute_id` = $attributeId AND
+                `attribute_id` = ? AND
                 {$keyClause}
-        ");
+        ", $values);
 
         $map = [];
 
@@ -343,10 +347,13 @@ class UrlKeyGenerator
             SELECT `value`
             FROM `{$this->metaData->productEntityTable}_varchar`
             WHERE 
-                `attribute_id` = $attributeId AND
+                `attribute_id` = ? AND
                 `store_id` = $storeViewId AND
-                `value` LIKE " . $this->db->quote($urlKey . '-%') . "
-        ");
+                `value` LIKE ?
+        ", [
+            $attributeId,
+            $urlKey . '-%'
+        ]);
 
         $max = 0;
         $exp = '/^' . $urlKey . '-(\d+)$/';

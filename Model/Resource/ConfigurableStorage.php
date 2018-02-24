@@ -142,9 +142,9 @@ class ConfigurableStorage extends ProductStorage
         $storedAttributes = $this->db->fetchMap("
             SELECT product_id, GROUP_CONCAT(attribute_id ORDER BY attribute_id ASC SEPARATOR ' ')
             FROM {$this->metaData->superAttributeTable}
-            WHERE product_id IN (" . implode(", ", $productIds) . ")
+            WHERE product_id IN (" . $this->db->getMarks($productIds) . ")
             GROUP BY product_id
-        ");
+        ", $productIds);
 
         foreach ($products as $product) {
 
@@ -190,8 +190,8 @@ class ConfigurableStorage extends ProductStorage
         $rows = $this->db->fetchAllNonAssoc("
             SELECT parent_id, product_id 
             FROM {$this->metaData->superLinkTable}
-            WHERE parent_id in (" . implode(", ", $configurableIds) . ")
-        ");
+            WHERE parent_id in (" . $this->db->getMarks($configurableIds) . ")
+        ", $configurableIds);
 
         $existingVariantIds = [];
 
@@ -253,8 +253,8 @@ class ConfigurableStorage extends ProductStorage
         $rows = $this->db->fetchAllNonAssoc("
             SELECT parent_id, child_id 
             FROM {$this->metaData->relationTable}
-            WHERE parent_id in (" . implode(", ", $configurableIds) . ")
-        ");
+            WHERE parent_id in (" . $this->db->getMarks($configurableIds) . ")
+        ", $configurableIds);
 
         $existingVariantIds = [];
 

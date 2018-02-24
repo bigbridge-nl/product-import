@@ -44,8 +44,11 @@ class StockItemStorage
         $stockItems = $this->db->fetchMap("
             SELECT `product_id`, `item_id`
             FROM `{$this->metaData->stockItemTable}`
-            WHERE `stock_id` = {$stockId} AND `website_id` = {$websiteId} AND `product_id` IN (" . implode(', ', $productIds) . ")
-        ");
+            WHERE `stock_id` = ? AND `website_id` = ? AND `product_id` IN (" . $this->db->getMarks($productIds) . ")
+        ", array_merge([
+            $stockId,
+            $websiteId
+        ], $productIds));
 
         foreach ($products as $product) {
             foreach ($product->getStockItems() as $stockItem) {

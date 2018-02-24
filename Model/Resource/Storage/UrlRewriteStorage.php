@@ -100,8 +100,10 @@ class UrlRewriteStorage
                 SELECT `url_rewrite_id`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `metadata`
                 FROM `{$this->metaData->urlRewriteTable}`
                 WHERE
-                    store_id = $storeId AND `entity_id` IN (" . implode(',', $ids) . ")
-            ");
+                    store_id = ? AND `entity_id` IN (" . $this->db->getMarks($ids) . ")
+            ", array_merge([
+                $storeId
+            ], $ids));
 
             foreach ($oldUrlRewrites as $oldUrlRewrite) {
 
@@ -131,9 +133,9 @@ class UrlRewriteStorage
             SELECT `entity_id`, `store_id`, `value` AS `url_key`
             FROM `{$this->metaData->productEntityTable}_varchar`
             WHERE
-                `attribute_id` = {$attributeId} AND
-                `entity_id` IN (" . implode(',', $productIds) . ")
-        ");
+                `attribute_id` = ? AND
+                `entity_id` IN (" . $this->db->getMarks($productIds) . ")
+        ", array_merge([$attributeId], $productIds));
 
         $urlKeys = [];
         foreach ($results as $result) {
@@ -160,8 +162,8 @@ class UrlRewriteStorage
             SELECT `product_id`, `category_id`
             FROM `{$this->metaData->categoryProductTable}`
             WHERE
-                `product_id` IN (" . implode(',', $productIds) .")
-        ");
+                `product_id` IN (" . $this->db->getMarks($productIds) .")
+        ", $productIds);
 
         $rewriteValues = [];
         foreach ($results as $result) {

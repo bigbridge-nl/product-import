@@ -70,15 +70,16 @@ class ImageStorage
 
     public function splitNewAndExistingImages(Product $product)
     {
-        $attributeId = $this->metaData->mediaGalleryAttributeId;
-
         // get data from existing product images
         $imageData = $this->db->fetchAllAssoc("
             SELECT M.`value_id`, M.`value`, M.`disabled` 
             FROM {$this->metaData->mediaGalleryTable} M
             INNER JOIN {$this->metaData->mediaGalleryValueToEntityTable} E ON E.`value_id` = M.`value_id`
-            WHERE E.`entity_id` = {$product->id} AND M.`attribute_id` = {$attributeId} 
-        ");
+            WHERE E.`entity_id` = ? AND M.`attribute_id` = ? 
+        ", [
+            $product->id,
+            $this->metaData->mediaGalleryAttributeId
+        ]);
 
         $existingImages = [];
         $newImages = [];
@@ -212,8 +213,12 @@ class ImageStorage
         $recordId = $this->db->fetchSingleCell("
             SELECT `record_id`
             FROM {$this->metaData->mediaGalleryValueTable}
-            WHERE `value_id` = {$image->valueId} AND `entity_id` = {$productId} AND `store_id` = {$storeViewId}
-        ");
+            WHERE `value_id` = ? AND `entity_id` = ? AND `store_id` = ?
+        ", [
+            $image->valueId,
+            $productId,
+            $storeViewId
+        ]);
 
         $label = $imageGalleryInformation->getLabel();
         $position = $imageGalleryInformation->getPosition();

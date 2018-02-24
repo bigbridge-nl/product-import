@@ -146,9 +146,9 @@ class BundleStorage extends ProductStorage
         $optionInfo = $this->db->fetchAllAssoc("
             SELECT `option_id`, `parent_id`, `required`, `type`
             FROM `{$this->metaData->bundleOptionTable}` 
-            WHERE `parent_id` IN (" . implode(', ', $productIds) . ")
+            WHERE `parent_id` IN (" . $this->db->getMarks($productIds) . ")
             ORDER BY `position`
-        ");
+        ", $productIds);
 
         $optionIds = array_column($optionInfo, 'option_id');
 
@@ -160,16 +160,16 @@ class BundleStorage extends ProductStorage
         $selectionInfo = $this->db->fetchAllAssoc("
             SELECT `parent_product_id`, `product_id`, `is_default`, `selection_price_type`, `selection_price_value`, `selection_qty`, `selection_can_change_qty`
             FROM `{$this->metaData->bundleSelectionTable}`
-            WHERE `option_id` IN (" . implode(', ', $optionIds) . ")
+            WHERE `option_id` IN (" . $this->db->getMarks($optionIds) . ")
             ORDER BY `selection_id`
-        ");
+        ", $optionIds);
 
         $titleInfo = $this->db->fetchAllAssoc("
             SELECT `option_id`, `title`
             FROM `{$this->metaData->bundleOptionValueTable}` 
-            WHERE `option_id` IN (" . implode(', ', $optionIds) . ")
+            WHERE `option_id` IN (" . $this->db->getMarks($optionIds) . ")
             ORDER BY `value_id`
-        ");
+        ", $optionIds);
 
         // create a string with all option fields, per product id
 

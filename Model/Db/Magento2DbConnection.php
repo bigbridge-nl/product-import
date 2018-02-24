@@ -37,27 +37,44 @@ class Magento2DbConnection
     }
 
     /**
-     * Performs an insert query
+     * Prepares and executes an SQL query or statement
      *
      * @param string $query
+     * @param array $values
+     * @return \PDOStatement
      */
     public function execute(string $query, $values = [])
     {
-        $a = microtime(true);
-
 #echo $query . "\n";
-        $st = $this->pdo->prepare($query);
-        $st->execute($values);
 
         if ($this->echoSlowQueries) {
+
+            $a = microtime(true);
+
+            $st = $this->pdo->prepare($query);
+            $st->execute($values);
+
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
                 echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
             }
+
+        } else {
+
+            $st = $this->pdo->prepare($query);
+            $st->execute($values);
+
         }
+
+        return $st;
     }
 
-    protected function getMarks(array $columns, $values)
+    public function getMarks($values)
+    {
+        return '?' . str_repeat(',?', count($values) - 1);
+    }
+
+    protected function getMarkGroups(array $columns, $values)
     {
         $columnCount = count($columns);
         $template = "(?" . str_repeat(", ?", $columnCount - 1) . ")";
@@ -76,7 +93,7 @@ class Magento2DbConnection
 
         $this->execute("
             INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
-            VALUES " . $this->getMarks($columns, $values), $values);
+            VALUES " . $this->getMarkGroups($columns, $values), $values);
     }
 
     public function insertMultipleWithUpdate(string $table, array $columns, array $values, string $updateClause)
@@ -87,7 +104,7 @@ class Magento2DbConnection
 
         $this->execute("
             INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
-            VALUES " . $this->getMarks($columns, $values) . "
+            VALUES " . $this->getMarkGroups($columns, $values) . "
             ON DUPLICATE KEY UPDATE {$updateClause}",
             $values);
     }
@@ -101,7 +118,7 @@ class Magento2DbConnection
 
         $this->execute("
             INSERT IGNORE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
-            VALUES " . $this->getMarks($columns, $values),
+            VALUES " . $this->getMarkGroups($columns, $values),
             $values);
     }
 
@@ -113,7 +130,7 @@ class Magento2DbConnection
 
         $this->execute("
             DELETE FROM`{$table}`  
-            WHERE `{$keyColumn}` IN (?" . str_repeat(',?', count($keys) - 1) . ")",
+            WHERE `{$keyColumn}` IN (" . $this->getMarks($keys)  . ")",
             $keys);
     }
 
@@ -141,20 +158,12 @@ class Magento2DbConnection
      * Returns the first cell of the first result of $query.
      *
      * @param string $query
+     * @param array $params
      * @return string|null
      */
-    public function fetchSingleCell(string $query)
+    public function fetchSingleCell(string $query, array $params = [])
     {
-        $a = microtime(true);
-
-        $column = $this->pdo->query($query)->fetchColumn(0);
-
-        if ($this->echoSlowQueries) {
-            $b = microtime(true);
-            if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-            }
-        }
+        $column = $this->execute($query, $params)->fetchColumn(0);
 
         return $column === false ? null : $column;
     }
@@ -163,22 +172,15 @@ class Magento2DbConnection
      * Returns an array containing the first cells of each result of $query.
      *
      * @param string $query
+     * @param array $params
      * @return array
      */
-    public function fetchSingleColumn(string $query)
+    public function fetchSingleColumn(string $query, array $params = [])
     {
-        $a = microtime(true);
-
         $map = [];
-        foreach ($this->pdo->query($query)->fetchAll() as $row) {
-            $map[] = $row[0];
-        }
 
-        if ($this->echoSlowQueries) {
-            $b = microtime(true);
-            if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-            }
+        foreach ($this->execute($query, $params)->fetchAll() as $row) {
+            $map[] = $row[0];
         }
 
         return $map;
@@ -188,23 +190,15 @@ class Magento2DbConnection
      * Returns a key => value array based on the first two select fields of $query.
      *
      * @param string $query
+     * @param array $params
      * @return array
      */
-    public function fetchMap(string $query)
+    public function fetchMap(string $query, array $params = [])
     {
-        $a = microtime(true);
-
         $map = [];
-#echo $query . "\n";
-        foreach ($this->pdo->query($query)->fetchAll() as $row) {
-            $map[$row[0]] = $row[1];
-        }
 
-        if ($this->echoSlowQueries) {
-            $b = microtime(true);
-            if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-            }
+        foreach ($this->execute($query, $params)->fetchAll() as $row) {
+            $map[$row[0]] = $row[1];
         }
 
         return $map;
@@ -212,91 +206,32 @@ class Magento2DbConnection
 
     /**
      * @param string $query
+     * @param array $params
      * @return array
      */
-    public function fetchRow(string $query)
+    public function fetchRow(string $query, array $params = [])
     {
-        $a = microtime(true);
-
-        $row = $this->pdo->query($query)->fetch(PDO::FETCH_ASSOC);
-
-        if ($this->echoSlowQueries) {
-            $b = microtime(true);
-            if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-            }
-        }
-
-        return $row;
+        return $this->execute($query, $params)->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
      * @param string $query
+     * @param array $params
      * @return array
      */
-    public function fetchAllAssoc(string $query)
+    public function fetchAllAssoc(string $query, array $params = [])
     {
-        $a = microtime(true);
-#echo $query . "\n";
-        $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_ASSOC);
-
-        if ($this->echoSlowQueries) {
-            $b = microtime(true);
-            if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-            }
-        }
-
-        return $result;
+        return $this->execute($query, $params)->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
      * @param string $query
+     * @param array $params
      * @return array
      */
-    public function fetchAllNonAssoc(string $query)
+    public function fetchAllNonAssoc(string $query, array $params = [])
     {
-#echo $query . "\n";
-        $a = microtime(true);
-
-        $result = $this->pdo->query($query)->fetchAll(PDO::FETCH_NUM);
-
-        if ($this->echoSlowQueries) {
-            $b = microtime(true);
-            if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Escapes $value for use in a query. Adds quotes.
-     *
-     * @param string $value
-     * @return string
-     */
-    public function quote(string $value)
-    {
-        return $this->pdo->quote($value);
-    }
-
-    /**
-     * Escapes a set of values for IN
-     *
-     * @param array $set
-     * @return string
-     */
-    public function quoteSet(array $set)
-    {
-        $esc = [];
-
-        foreach ($set as $value) {
-            $esc[] = $this->pdo->quote($value);
-        }
-
-        return implode(",", $esc);
+        return $this->execute($query, $params)->fetchAll(PDO::FETCH_NUM);
     }
 
     /**

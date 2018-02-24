@@ -67,9 +67,9 @@ class TierPriceStorage
         // count the number of stored tier prices per product
         $counts = $this->db->fetchMap("
             SELECT `entity_id`, COUNT(*) FROM `{$this->metaData->tierPriceTable}`
-            WHERE `entity_id` IN (" . implode(', ', $productIds) . ")
+            WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ")
             GROUP BY `entity_id`
-        ");
+        ", $productIds);
 
         // the products whose outdated tier prices must be removed from the database
         $resultProducts = [];
@@ -136,8 +136,8 @@ class TierPriceStorage
             SELECT `value_id`, `entity_id`, `all_groups`, `customer_group_id`, `qty`, `value`, `website_id`,
                 CONCAT_WS(' ', `entity_id`, `all_groups`, `customer_group_id`, `qty`, `value`, `website_id`) as serialized
             FROM `{$this->metaData->tierPriceTable}`
-            WHERE `entity_id` IN (" . implode(', ', $productIds) . ")
-        ");
+            WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ")
+        ", $productIds);
 
         // serialize current tier prices
         $activeTierPriceData = [];

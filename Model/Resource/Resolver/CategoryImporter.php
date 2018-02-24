@@ -117,9 +117,13 @@ class CategoryImporter
         $childCategoryId = $this->db->fetchSingleCell("
             SELECT E.`entity_id`
             FROM `{$categoryEntityTable}` E
-            INNER JOIN `{$categoryEntityTable}_varchar` A ON A.`entity_id` = E.`entity_id` AND A.`attribute_id` = {$nameAttributeId} AND A.`store_id` = 0 
-            WHERE `parent_id` = {$parentId} AND A.`value` = " . $this->db->quote($categoryName) . "
-        ");
+            INNER JOIN `{$categoryEntityTable}_varchar` A ON A.`entity_id` = E.`entity_id` AND A.`attribute_id` = ? AND A.`store_id` = 0 
+            WHERE `parent_id` = ? AND A.`value` = ?
+        ", [
+            $nameAttributeId,
+            $parentId,
+            $categoryName
+        ]);
 
         return is_null($childCategoryId) ? null : (int)$childCategoryId;
     }
@@ -152,8 +156,11 @@ class CategoryImporter
         $position = $this->db->fetchSingleCell("
             SELECT MAX(`position`)
             FROM `{$categoryEntityTable}`
-            WHERE `path` LIKE '{$parentPath}/%' AND level = {$parentLevel}
-        ");
+            WHERE `path` LIKE ? AND level = ?
+        ", [
+            "{$parentPath}/%",
+            $parentLevel
+        ]);
         $nextPosition = is_null($position) ? 1 : $position + 1;
 
         // write child data
@@ -247,10 +254,13 @@ class CategoryImporter
             SELECT `value`
             FROM `{$this->metaData->categoryEntityTable}_varchar`
             WHERE 
-                `entity_id` = $parentId AND
-                `attribute_id` = $attributeId AND
+                `entity_id` = ? AND
+                `attribute_id` = ? AND
                 `store_id` = 0
-        ");
+        ", [
+            $parentId,
+            $attributeId
+        ]);
 
         return $urlPath;
     }

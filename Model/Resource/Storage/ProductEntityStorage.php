@@ -34,8 +34,11 @@ class ProductEntityStorage
             return [];
         }
 
-        $serialized = $this->db->quoteSet($skus);
-        return $this->db->fetchMap("SELECT `sku`, `entity_id` FROM {$this->metaData->productEntityTable} WHERE `sku` in ({$serialized})");
+        return $this->db->fetchMap("
+            SELECT `sku`, `entity_id` 
+            FROM `{$this->metaData->productEntityTable}`
+            WHERE `sku` IN (" . $this->db->getMarks($skus) . ")
+        ", array_values($skus));
     }
 
     /**
@@ -52,8 +55,8 @@ class ProductEntityStorage
         $exists = $this->db->fetchMap("
             SELECT `entity_id`, `entity_id`
             FROM {$this->metaData->productEntityTable}
-            WHERE `entity_id` IN (" . implode(', ', $productIds) . ")
-        ");
+            WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ")
+        ", $productIds);
 
         foreach ($products as $product) {
             if (!array_key_exists($product->id, $exists)) {
@@ -97,9 +100,11 @@ class ProductEntityStorage
             $this->db->insertMultiple($this->metaData->productEntityTable, ['attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options'], $vals);
 
             // store the new ids with the products
-            $serialized = $this->db->quoteSet($skus);
-            $sql = "SELECT `sku`, `entity_id` FROM `{$this->metaData->productEntityTable}` WHERE `sku` IN ({$serialized})";
-            $sku2id = $this->db->fetchMap($sql);
+            $sku2id = $this->db->fetchMap("
+                SELECT `sku`, `entity_id` 
+                FROM `{$this->metaData->productEntityTable}` 
+                WHERE `sku` IN (" . $this->db->getMarks($skus) . ")
+            ", array_values($skus));
 
             foreach ($products as $product) {
                 $product->id = $sku2id[$product->getSku()];

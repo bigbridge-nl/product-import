@@ -70,10 +70,12 @@ class LinkedProductStorage
             FROM `{$this->metaData->linkTable}` L
             INNER JOIN `{$this->metaData->linkAttributeIntTable}` P ON P.`link_id` = L.`link_id` AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
             WHERE 
-                L.`link_type_id` = {$linkInfo->typeId} AND
-                L.`product_id` IN (" . implode(', ', $productIds) . ")                 
+                L.`link_type_id` = ? AND
+                L.`product_id` IN (" . $this->db->getMarks($productIds) . ")                 
             GROUP by L.`product_id`
-        ");
+        ", array_merge([
+            $linkInfo->typeId
+        ], $productIds));
 
         $changed = [];
 

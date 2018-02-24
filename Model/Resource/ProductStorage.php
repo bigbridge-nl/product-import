@@ -375,10 +375,12 @@ abstract class ProductStorage
             FROM `{$this->metaData->productEntityTable}_varchar` URL_KEY
             LEFT JOIN `{$this->metaData->urlRewriteProductCategoryTable}` PG ON PG.`product_id` = URL_KEY.`entity_id`
             WHERE 
-                URL_KEY.`attribute_id` = $attributeId AND
-                URL_KEY.`entity_id` IN (" . implode(', ', $productIds) . ")
+                URL_KEY.`attribute_id` = ? AND
+                URL_KEY.`entity_id` IN (" . $this->db->getMarks($productIds) . ")
             GROUP BY URL_KEY.`entity_id`, URL_KEY.`store_id` 
-        ");
+        ", array_merge([
+            $attributeId
+        ], $productIds));
 
         $data = [];
         foreach ($existingData as $existingDatum) {

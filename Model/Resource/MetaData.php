@@ -307,8 +307,7 @@ class MetaData
      */
     protected function getDefaultCategoryAttributeSetId()
     {
-        $attributeSetId = $this->db->fetchSingleCell("SELECT `default_attribute_set_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
-        return $attributeSetId;
+        return $this->db->fetchSingleCell("SELECT `default_attribute_set_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
     }
 
     /**
@@ -318,8 +317,7 @@ class MetaData
      */
     protected function getProductEntityTypeId()
     {
-        $productEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_product'");
-        return $productEntityTypeId;
+        return $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_product'");
     }
 
     /**
@@ -329,8 +327,7 @@ class MetaData
      */
     protected function getCategoryEntityTypeId()
     {
-        $categoryEntityTypeId = $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
-        return $categoryEntityTypeId;
+        return $this->db->fetchSingleCell("SELECT `entity_type_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
     }
 
     /**
@@ -340,8 +337,11 @@ class MetaData
      */
     protected function getProductAttributeSetMap()
     {
-        $map = $this->db->fetchMap("SELECT `attribute_set_name`, `attribute_set_id` FROM {$this->attributeSetTable} WHERE `entity_type_id` = {$this->productEntityTypeId}");
-        return $map;
+        return $this->db->fetchMap(
+            "SELECT `attribute_set_name`, `attribute_set_id` FROM {$this->attributeSetTable} WHERE `entity_type_id` = ?
+        ", [
+                $this->productEntityTypeId
+        ]);
     }
 
     /**
@@ -351,14 +351,12 @@ class MetaData
      */
     protected function getStoreViewMap()
     {
-        $map = $this->db->fetchMap("SELECT `code`, `store_id` FROM {$this->storeTable}");
-        return $map;
+        return $this->db->fetchMap("SELECT `code`, `store_id` FROM {$this->storeTable}");
     }
 
     protected function getStoreViewWebsiteMap()
     {
-        $map = $this->db->fetchMap("SELECT `store_id`, `website_id` FROM {$this->storeTable}");
-        return $map;
+        return $this->db->fetchMap("SELECT `store_id`, `website_id` FROM {$this->storeTable}");
     }
 
     /**
@@ -368,8 +366,7 @@ class MetaData
      */
     protected function getWebsiteMap()
     {
-        $map = $this->db->fetchMap("SELECT `code`, `website_id` FROM {$this->websiteTable}");
-        return $map;
+        return $this->db->fetchMap("SELECT `code`, `website_id` FROM {$this->websiteTable}");
     }
 
     /**
@@ -379,8 +376,7 @@ class MetaData
      */
     protected function getTaxClassMap()
     {
-        $map = $this->db->fetchMap("SELECT `class_name`, `class_id` FROM {$this->taxClassTable}");
-        return $map;
+        return $this->db->fetchMap("SELECT `class_name`, `class_id` FROM {$this->taxClassTable}");
     }
 
     /**
@@ -390,8 +386,7 @@ class MetaData
      */
     protected function getCustomerGroupMap()
     {
-        $map = $this->db->fetchMap("SELECT `customer_group_code`, `customer_group_id` FROM {$this->customerGroupTable}");
-        return $map;
+        return $this->db->fetchMap("SELECT `customer_group_code`, `customer_group_id` FROM {$this->customerGroupTable}");
     }
 
     /**
@@ -401,8 +396,11 @@ class MetaData
      */
     protected function getCategoryAttributeMap()
     {
-        $map = $this->db->fetchMap("SELECT `attribute_code`, `attribute_id` FROM {$this->attributeTable} WHERE `entity_type_id` = {$this->categoryEntityTypeId}");
-        return $map;
+        return $this->db->fetchMap(
+            "SELECT `attribute_code`, `attribute_id` FROM {$this->attributeTable} WHERE `entity_type_id` = ?
+        ", [
+            $this->categoryEntityTypeId
+        ]);
     }
     
     /**
@@ -415,8 +413,10 @@ class MetaData
             FROM {$this->attributeTable} A
             INNER JOIN {$this->attributeOptionTable} O ON O.attribute_id = A.attribute_id
             INNER JOIN {$this->attributeOptionValueTable} V ON V.option_id = O.option_id
-            WHERE A.`entity_type_id` = {$this->productEntityTypeId} AND A.frontend_input IN ('select', 'multiselect') AND V.store_id = 0
-        ");
+            WHERE A.`entity_type_id` = ? AND A.frontend_input IN ('select', 'multiselect') AND V.store_id = 0
+        ", [
+            $this->productEntityTypeId
+        ]);
 
         $allOptionValues = [];
         foreach ($optionValueRows as $row) {
@@ -427,7 +427,10 @@ class MetaData
             SELECT A.`attribute_id`, A.`attribute_code`, A.`is_required`, A.`backend_type`, A.`frontend_input`, C.`is_global` 
             FROM {$this->attributeTable} A
             INNER JOIN {$this->catalogAttributeTable} C ON C.`attribute_id` = A.`attribute_id`
-            WHERE A.`entity_type_id` = {$this->productEntityTypeId} AND A.backend_type != 'static'");
+            WHERE A.`entity_type_id` = ? AND A.backend_type != 'static'
+         ", [
+            $this->productEntityTypeId
+        ]);
 
         $info = [];
         foreach ($rows as $row) {
@@ -491,7 +494,10 @@ class MetaData
         return $this->db->fetchSingleCell("
             SELECT `attribute_id` 
             FROM {$attributeTable} 
-            WHERE `entity_type_id` = {$this->productEntityTypeId} AND attribute_code = 'media_gallery'");
+            WHERE `entity_type_id` = ? AND attribute_code = 'media_gallery'
+        ", [
+            $this->productEntityTypeId
+        ]);
 
     }
 
@@ -548,8 +554,10 @@ class MetaData
             SELECT E.`entity_id`, E.`path`, URL_KEY.`value` as url_key, URL_KEY.`store_id`
             FROM `{$this->categoryEntityTable}` E
             LEFT JOIN `{$this->categoryEntityTable}_varchar` URL_KEY ON URL_KEY.`entity_id` = E.`entity_id` 
-                AND URL_KEY.`attribute_id` = {$urlKeyAttributeId} 
-        ");
+                AND URL_KEY.`attribute_id` = ? 
+        ", [
+            $urlKeyAttributeId
+        ]);
 
         /** @var CategoryInfo[] $categories */
         $categories = [];
