@@ -17,6 +17,8 @@ class Magento2DbConnection
 {
     const SLOW = 0.1;
 
+    const CHUNK_SIZE = 1000;
+
     /** @var ResourceConnection $connection */
     protected $connection;
 
@@ -58,7 +60,7 @@ class Magento2DbConnection
 
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
+                echo ($b - $a) . ": " . substr($query, 0, self::CHUNK_SIZE) . "\n";
             }
 
         } else {
@@ -71,6 +73,100 @@ class Magento2DbConnection
         return $st;
     }
 
+    /**
+     * Insert multiple rows at once, passing a single 1 dimensional array of $values
+     *
+     * @param string $table
+     * @param array $columns
+     * @param array $values
+     */
+    public function insertMultiple(string $table, array $columns, array $values)
+    {
+        $this->chunkedGroupExecute("
+            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            VALUES {{marks}}",
+            $columns, $values
+        );
+    }
+
+    /**
+     * Insert multiple rows at once, passing a single 1 dimensional array of $values
+     * Performs an ON DUPLICATE KEY UPDATE with $updateClause
+     *
+     * @param string $table
+     * @param array $columns
+     * @param array $values
+     * @param string $updateClause
+     */
+    public function insertMultipleWithUpdate(string $table, array $columns, array $values, string $updateClause)
+    {
+        $this->chunkedGroupExecute("
+            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            VALUES {{marks}}
+            ON DUPLICATE KEY UPDATE {$updateClause}",
+            $columns, $values
+        );
+    }
+
+    /**
+     * Insert multiple rows at once, passing a single 1 dimensional array of $values
+     * Adds IGNORE to INSERT
+     *
+     * @param string $table
+     * @param array $columns
+     * @param array $values
+     */
+    public function insertMultipleWithIgnore(string $table, array $columns, array $values)
+    {
+        $this->chunkedGroupExecute("
+            INSERT IGNORE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            VALUES {{marks}}",
+            $columns, $values
+        );
+    }
+
+    /**
+     * Deletes multiple rows at once, using primary $keys
+     *
+     * @param string $table
+     * @param string $keyColumn
+     * @param array $keys
+     */
+    public function deleteMultiple(string $table, string $keyColumn, array $keys)
+    {
+        foreach (array_chunk($keys, self::CHUNK_SIZE) as $chunk) {
+            $this->execute("
+                DELETE FROM`{$table}`  
+                WHERE `{$keyColumn}` IN (" . $this->getMarks($chunk) . ")",
+                $chunk);
+        }
+    }
+
+    /**
+     * Deletes multiple rows at once, using primary $keys
+     * Adds an extra WHERE $whereClause
+     *
+     * @param string $table
+     * @param string $keyColumn
+     * @param array $keys
+     * @param string $whereClause
+     */
+    public function deleteMultipleWithWhere(string $table, string $keyColumn, array $keys, string $whereClause)
+    {
+        foreach (array_chunk($keys, self::CHUNK_SIZE) as $chunk) {
+            $this->execute("
+                DELETE FROM`{$table}`  
+                WHERE `{$keyColumn}` IN (?" . str_repeat(',?', count($chunk) - 1) . ") AND {$whereClause}",
+                $chunk);
+        }
+    }
+
+    /**
+     * Returns a comma separated string of question marks ?,?,?,?
+     *
+     * @param array $values Must have at least 1 value
+     * @return string
+     */
     public function getMarks($values)
     {
         return '?' . str_repeat(',?', count($values) - 1);
@@ -79,7 +175,7 @@ class Magento2DbConnection
     protected function getMarkGroups(array $columns, $values)
     {
         $columnCount = count($columns);
-        $template = "(?" . str_repeat(", ?", $columnCount - 1) . ")";
+        $template = "(?" . str_repeat(",?", $columnCount - 1) . ")";
         $rowCount = count($values) / $columnCount;
         $followingTemplate = ", " . $template;
         $valuesClause = $template . str_repeat($followingTemplate, ($rowCount - 1));
@@ -87,65 +183,20 @@ class Magento2DbConnection
         return $valuesClause;
     }
 
-    public function insertMultiple(string $table, array $columns, array $values)
+    /**
+     * Executes a grouped query in chunks, to avoid the max_allowed_packet constraint
+     *
+     * @param string $query
+     * @param $columns
+     * @param $values
+     */
+    protected function chunkedGroupExecute(string $query, $columns, $values)
     {
-        if (empty($values)) {
-            return;
+        foreach (array_chunk($values, self::CHUNK_SIZE * count($columns)) as $chunk) {
+            $marks = $this->getMarkGroups($columns, $chunk);
+            $plainQuery = str_replace('{{marks}}', $marks, $query);
+            $this->execute($plainQuery, $chunk);
         }
-
-        $this->execute("
-            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
-            VALUES " . $this->getMarkGroups($columns, $values), $values);
-    }
-
-    public function insertMultipleWithUpdate(string $table, array $columns, array $values, string $updateClause)
-    {
-        if (empty($values)) {
-            return;
-        }
-
-        $this->execute("
-            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
-            VALUES " . $this->getMarkGroups($columns, $values) . "
-            ON DUPLICATE KEY UPDATE {$updateClause}",
-            $values);
-    }
-
-
-    public function insertMultipleWithIgnore(string $table, array $columns, array $values)
-    {
-        if (empty($values)) {
-            return;
-        }
-
-        $this->execute("
-            INSERT IGNORE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
-            VALUES " . $this->getMarkGroups($columns, $values),
-            $values);
-    }
-
-    public function deleteMultiple(string $table, string $keyColumn, array $keys)
-    {
-        if (empty($keys)) {
-            return;
-        }
-
-        $this->execute("
-            DELETE FROM`{$table}`  
-            WHERE `{$keyColumn}` IN (" . $this->getMarks($keys)  . ")",
-            $keys);
-    }
-
-    public function deleteMultipleWithWhere(string $table, string $keyColumn, array $keys, string $whereClause)
-    {
-        if (empty($keys)) {
-            return;
-        }
-
-        $this->execute("
-            DELETE FROM`{$table}`  
-            WHERE `{$keyColumn}` IN (?" . str_repeat(',?', count($keys) - 1) . ") AND {$whereClause}",
-            $keys);
     }
 
     /**

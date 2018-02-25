@@ -82,7 +82,9 @@ I try to keep the memory footprint of the importer small and of constant size. T
 
 ### Maximum query size
 
-This library creates long queries. This reduces the overhead of query transportation, interpretation and execution. We must take care that the query does not become too large. Each query must not exceed 1 MB, a standard MySQL maximum query size.
+This library creates long queries. This reduces the overhead of query transportation, interpretation and execution. Each query must not exceed 16 MB, a standard MySQL maximum query size.
+
+I avoid this limit by batching inserts (and deletes) with batch sizes of 1000. Each batch must not exceed 16 MB, so the _average_ insert in a batch must not exceed 16 Kb.
 
 ### Nice to know
 
