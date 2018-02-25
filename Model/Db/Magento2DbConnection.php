@@ -9,6 +9,8 @@ use PDO;
 /**
  * Wrapper class for the PDO object that Magento 2 uses.
  *
+ * Check for information https://phpdelusions.net/pdo
+ *
  * @author Patrick van Bergen
  */
 class Magento2DbConnection
@@ -177,13 +179,7 @@ class Magento2DbConnection
      */
     public function fetchSingleColumn(string $query, array $params = [])
     {
-        $map = [];
-
-        foreach ($this->execute($query, $params)->fetchAll() as $row) {
-            $map[] = $row[0];
-        }
-
-        return $map;
+        return $this->execute($query, $params)->fetchAll(PDO::FETCH_COLUMN);
     }
 
     /**
@@ -195,13 +191,7 @@ class Magento2DbConnection
      */
     public function fetchMap(string $query, array $params = [])
     {
-        $map = [];
-
-        foreach ($this->execute($query, $params)->fetchAll() as $row) {
-            $map[$row[0]] = $row[1];
-        }
-
-        return $map;
+        return $this->execute($query, $params)->fetchAll(PDO::FETCH_KEY_PAIR);
     }
 
     /**
