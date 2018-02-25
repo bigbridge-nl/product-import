@@ -105,7 +105,7 @@ class ConfigurableStorage extends ProductStorage
             }
         }
 
-        $this->db->insertMultiple($this->metaData->superLinkTable, ['product_id', 'parent_id'], $values);
+        $this->db->insertMultiple($this->metaData->superLinkTable, ['product_id', 'parent_id'], $values, Magento2DbConnection::_1_KB);
     }
 
     /**
@@ -122,7 +122,7 @@ class ConfigurableStorage extends ProductStorage
             }
         }
 
-        $this->db->insertMultiple($this->metaData->relationTable, ['parent_id', 'child_id'], $values);
+        $this->db->insertMultiple($this->metaData->relationTable, ['parent_id', 'child_id'], $values, Magento2DbConnection::_1_KB);
     }
 
     /**

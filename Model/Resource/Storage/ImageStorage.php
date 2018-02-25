@@ -281,7 +281,8 @@ class ImageStorage
             }
         }
 
-        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values, "`value` = VALUES(`value`)");
+        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values,
+            Magento2DbConnection::_1_KB, "`value` = VALUES(`value`)");
     }
 
     /**

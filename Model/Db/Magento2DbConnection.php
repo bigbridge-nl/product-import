@@ -17,7 +17,17 @@ class Magento2DbConnection
 {
     const SLOW = 0.1;
 
-    const CHUNK_SIZE = 1000;
+    const kB = 1024;
+    const kB_max = 16384;
+
+    // magnitudes as powers of two
+    const _1_KB = 1;
+    const _2_KB = 2;
+    const _16_KB = 16;
+    const _128_KB = 128;
+
+    // 1 MB (smallest packet size) / 16 (bytes per id)
+    const DELETES_PER_CHUNK = 65536;
 
     /** @var ResourceConnection $connection */
     protected $connection;
@@ -25,7 +35,11 @@ class Magento2DbConnection
     /** @var  PDO */
     protected $pdo;
 
+    /** @var bool Debug option: print slow queries */
     protected $echoSlowQueries = false;
+
+    /** @var int MySQL maximum allowed packet (in kB) */
+    protected $maxAllowedPacket;
 
     public function __construct(ResourceConnection $connection)
     {
@@ -38,6 +52,20 @@ class Magento2DbConnection
         $this->pdo = $mysql->getConnection();
 
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $this->maxAllowedPacket = $this->calculateMaxAllowedPacket();
+    }
+
+    protected function calculateMaxAllowedPacket()
+    {
+        // ask MySQL server about its biggest allowed packet (convert to kB)
+        $maxAllowedPacket = (int)floor($this->fetchSingleCell("SELECT @@max_allowed_packet")  / self::kB);
+
+        // between 1024 kB and 16384 kB
+        $maxAllowedPacket = max(self::kB, $maxAllowedPacket);
+        $maxAllowedPacket = min($maxAllowedPacket, self::kB_max);
+
+        return $maxAllowedPacket;
     }
 
     /**
@@ -60,7 +88,7 @@ class Magento2DbConnection
 
             $b = microtime(true);
             if ($b - $a > self::SLOW) {
-                echo ($b - $a) . ": " . substr($query, 0, self::CHUNK_SIZE) . "\n";
+                echo ($b - $a) . ": " . substr($query, 0, 1000) . "\n";
             }
 
         } else {
@@ -80,12 +108,12 @@ class Magento2DbConnection
      * @param array $columns
      * @param array $values
      */
-    public function insertMultiple(string $table, array $columns, array $values)
+    public function insertMultiple(string $table, array $columns, array $values, int $magnitude)
     {
         $this->chunkedGroupExecute("
             INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
             VALUES {{marks}}",
-            $columns, $values
+            $columns, $values, $magnitude
         );
     }
 
@@ -98,13 +126,13 @@ class Magento2DbConnection
      * @param array $values
      * @param string $updateClause
      */
-    public function insertMultipleWithUpdate(string $table, array $columns, array $values, string $updateClause)
+    public function insertMultipleWithUpdate(string $table, array $columns, array $values, int $magnitude, string $updateClause)
     {
         $this->chunkedGroupExecute("
             INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
             VALUES {{marks}}
             ON DUPLICATE KEY UPDATE {$updateClause}",
-            $columns, $values
+            $columns, $values, $magnitude
         );
     }
 
@@ -116,12 +144,12 @@ class Magento2DbConnection
      * @param array $columns
      * @param array $values
      */
-    public function insertMultipleWithIgnore(string $table, array $columns, array $values)
+    public function insertMultipleWithIgnore(string $table, array $columns, array $values, int $magnitude)
     {
         $this->chunkedGroupExecute("
             INSERT IGNORE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
             VALUES {{marks}}",
-            $columns, $values
+            $columns, $values, $magnitude
         );
     }
 
@@ -134,7 +162,7 @@ class Magento2DbConnection
      */
     public function deleteMultiple(string $table, string $keyColumn, array $keys)
     {
-        foreach (array_chunk($keys, self::CHUNK_SIZE) as $chunk) {
+        foreach (array_chunk($keys, self::DELETES_PER_CHUNK) as $chunk) {
             $this->execute("
                 DELETE FROM`{$table}`  
                 WHERE `{$keyColumn}` IN (" . $this->getMarks($chunk) . ")",
@@ -153,7 +181,7 @@ class Magento2DbConnection
      */
     public function deleteMultipleWithWhere(string $table, string $keyColumn, array $keys, string $whereClause)
     {
-        foreach (array_chunk($keys, self::CHUNK_SIZE) as $chunk) {
+        foreach (array_chunk($keys, self::DELETES_PER_CHUNK) as $chunk) {
             $this->execute("
                 DELETE FROM`{$table}`  
                 WHERE `{$keyColumn}` IN (?" . str_repeat(',?', count($chunk) - 1) . ") AND {$whereClause}",
@@ -190,9 +218,12 @@ class Magento2DbConnection
      * @param $columns
      * @param $values
      */
-    protected function chunkedGroupExecute(string $query, $columns, $values)
+    protected function chunkedGroupExecute(string $query, $columns, $values, $magnitude)
     {
-        foreach (array_chunk($values, self::CHUNK_SIZE * count($columns)) as $chunk) {
+        // number of inserts per batch = max available kB per MySQL packet / size of single insert in kB
+        $chunkSize = $this->maxAllowedPacket / $magnitude;
+
+        foreach (array_chunk($values, $chunkSize * count($columns)) as $chunk) {
             $marks = $this->getMarkGroups($columns, $chunk);
             $plainQuery = str_replace('{{marks}}', $marks, $query);
             $this->execute($plainQuery, $chunk);

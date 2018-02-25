@@ -529,7 +529,7 @@ The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to
 * For Magento 2.1+ Opensource Edition
 * Requires >= PHP 7.0
 * Input in UTF-8 (Magento standard)
-* MySQL max_packet_size on both MySQL client and MySQL server must be at least 16MB (Which is the default value)
+* MySQL max_packet_size on both MySQL client and MySQL server must be at least 1 MB (Which will be the case if the value wasn't deliberately lowered from the default)
 
 ## On empty values
 

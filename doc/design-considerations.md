@@ -82,9 +82,19 @@ I try to keep the memory footprint of the importer small and of constant size. T
 
 ### Maximum query size
 
-This library creates long queries. This reduces the overhead of query transportation, interpretation and execution. Each query must not exceed 16 MB, a standard MySQL maximum query size.
+This library creates long queries. This reduces the overhead of query transportation, interpretation and execution.
 
-I avoid this limit by batching inserts (and deletes) with batch sizes of 1000. Each batch must not exceed 16 MB, so the _average_ insert in a batch must not exceed 16 Kb.
+Each query must not exceed the "max_allowed_packet" settings of MySQL client and server since this is the maximum size of a query. Crossing it can kill the server.
+This setting varies per MySQL version and can be changed in config file. The library presumes a minimum size of 1 MB, a very small default available since MySQL 5.5.
+
+The number of inserts per query ($chunkSize) is determined by
+
+$chunkSize = $maxAllowedPacket / $magnitude;
+
+where $maxAllowedPacket is the MySQL constant (in kB) and $magnitude is the maximum size of each insert (in order of magnitude, as a power of two).
+It must be explicitly specified per query by the developer.
+
+This allows me to use the allowed packet size efficiently while not straining the developer much (is each insert max 1 kB, 2 kB , or 128 kB?)
 
 ### Nice to know
 

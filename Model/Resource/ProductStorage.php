@@ -404,6 +404,12 @@ abstract class ProductStorage
         $tableName = $attributeInfo->tableName;
         $attributeId = $attributeInfo->attributeId;
 
+        if ($attributeInfo->backendType == MetaData::TYPE_TEXT) {
+            $magnitude = Magento2DbConnection::_128_KB;
+        } else {
+            $magnitude = Magento2DbConnection::_1_KB;
+        }
+
         $values = [];
 
         foreach ($storeViews as $storeView) {
@@ -413,7 +419,8 @@ abstract class ProductStorage
             $values[] = $storeView->getAttribute($eavAttribute);
         }
 
-        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values, "`value` = VALUES(`value`)");
+        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values,
+            $magnitude, "`value` = VALUES(`value`)");
     }
 
     /**
@@ -434,7 +441,7 @@ abstract class ProductStorage
         // 1. do not fail if the product-category link already existed
         // 2. do not fail if the category does not exist
 
-        $this->db->insertMultipleWithIgnore($this->metaData->categoryProductTable, ['category_id', 'product_id'], $values);
+        $this->db->insertMultipleWithIgnore($this->metaData->categoryProductTable, ['category_id', 'product_id'], $values, Magento2DbConnection::_1_KB);
     }
 
     /**
@@ -455,6 +462,6 @@ abstract class ProductStorage
         // 1. do not fail if the product-website link already existed
         // 2. do not fail if the website does not exist
 
-        $this->db->insertMultipleWithIgnore($this->metaData->productWebsiteTable, ['product_id', 'website_id'], $values);
+        $this->db->insertMultipleWithIgnore($this->metaData->productWebsiteTable, ['product_id', 'website_id'], $values, Magento2DbConnection::_1_KB);
     }
 }

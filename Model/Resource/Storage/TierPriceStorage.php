@@ -116,8 +116,8 @@ class TierPriceStorage
             }
         }
 
-        $this->db->insertMultipleWithUpdate($this->metaData->tierPriceTable, ['entity_id', 'all_groups', 'customer_group_id', 'qty', 'value', 'website_id'], $values, "
-            `value` = VALUES(`value`)");
+        $this->db->insertMultipleWithUpdate($this->metaData->tierPriceTable, ['entity_id', 'all_groups', 'customer_group_id', 'qty', 'value', 'website_id'], $values,
+            Magento2DbConnection::_1_KB, "`value` = VALUES(`value`)");
     }
 
     /**

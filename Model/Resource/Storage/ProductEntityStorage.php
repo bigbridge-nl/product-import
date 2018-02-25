@@ -97,7 +97,8 @@ class ProductEntityStorage
 
         if (count($vals) > 0) {
 
-            $this->db->insertMultiple($this->metaData->productEntityTable, ['attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options'], $vals);
+            $this->db->insertMultiple($this->metaData->productEntityTable, ['attribute_set_id', 'type_id', 'sku', 'has_options', 'required_options'], $vals,
+                Magento2DbConnection::_1_KB);
 
             // store the new ids with the products
             $sku2id = $this->db->fetchMap("
@@ -138,9 +139,9 @@ class ProductEntityStorage
         }
 
         $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'sku', 'attribute_set_id', 'updated_at'], $attributeSetUpdates,
-            "`sku` = VALUES(`sku`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)");
+            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)");
 
         $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'sku', 'updated_at'], $otherUpdates,
-            "`sku` = VALUES(`sku`), `updated_at`= VALUES(`updated_at`)");
+            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `updated_at`= VALUES(`updated_at`)");
     }
 }
