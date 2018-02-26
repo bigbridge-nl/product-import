@@ -82,19 +82,32 @@ I try to keep the memory footprint of the importer small and of constant size. T
 
 ### Maximum query size
 
-This library creates long queries. This reduces the overhead of query transportation, interpretation and execution.
+This library creates long queries. This reduces the overhead of query transportation, interpretation and execution considerably.
 
-Each query must not exceed the "max_allowed_packet" settings of MySQL client and server since this is the maximum size of a query. Crossing it can kill the server.
-This setting varies per MySQL version and can be changed in config file. The library presumes a minimum size of 1 MB, a very small default available since MySQL 5.5.
+Each query must not exceed the "max_allowed_packet" settings of MySQL since this is the maximum size of a query. Crossing it causes an error:
+
+    Got a packet bigger than 'max_allowed_packet' bytes
+
+This setting's default varies per MySQL version. It can also be changed on the server by adding this setting to the config file (i.e. /etc/mysql/my.cnf)
+
+    [mysqld]
+    max_allowed_packet=16M
+
+The library does not try to change the set limit. It requires a minimum size of 1 MB, a very small default available since MySQL 5.5.
+In any case it limits its queries to 16 MB max. No use making the max_allowed_packet larger.
+
+The library reads the server value using "SELECT @@max_allowed_packet".
+I have not found a way to inspect the client value of the variable. I read it defaults to 16 MB, so this should be fine.
 
 The number of inserts per query ($chunkSize) is determined by
 
 $chunkSize = $maxAllowedPacket / $magnitude;
 
-where $maxAllowedPacket is the MySQL constant (in kB) and $magnitude is the maximum size of each insert (in order of magnitude, as a power of two).
-It must be explicitly specified per query by the developer.
+$maxAllowedPacket is the MySQL constant (in kB).
+$magnitude is the maximum size of each insert in kB (in order of magnitude, as a power of two). It must be explicitly specified per query by the library developer.
+(He/she needs to specify that each multiple insert is max 1 kB, 2 kB, or 128 kB)
 
-This allows me to use the allowed packet size efficiently while not straining the developer much (is each insert max 1 kB, 2 kB , or 128 kB?)
+This allows me to use the allowed packet size efficiently while not straining the library developer much.
 
 ### Nice to know
 
@@ -170,3 +183,13 @@ I tried concatenation in stead of array implode
         " ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)";
 
 it made not difference in speed.
+
+Quite late in the process I started using PDO binding of values (using the ?,?,?,? notation). It escapes all input, which makes the library less vulnerable to sql-injection
+and there is no performance penalty (which I expected).
+
+Collecting values like this proved fastest
+
+    $values[] = $product->id;
+    $values[] = $variant->id;
+
+It is faster than array_push() and much faster than array_merge().

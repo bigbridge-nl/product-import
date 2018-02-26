@@ -295,9 +295,7 @@ class UrlRewriteStorage
 
         $this->writeUrlRewrites($urlRewrites, $valueSerializer, true);
 
-        foreach (array_chunk($updatedRewrites, 1000) as $updatedRewritesBatch) {
-            $this->writeUrlRewrites($updatedRewritesBatch, $valueSerializer, false);
-        }
+        $this->writeUrlRewrites($updatedRewrites, $valueSerializer, false);
     }
 
     /**
