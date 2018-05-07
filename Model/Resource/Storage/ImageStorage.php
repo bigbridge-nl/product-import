@@ -165,7 +165,7 @@ class ImageStorage
         $targetPath = self::PRODUCT_IMAGE_PATH . $image->getActualStoragePath();
 
         // only if the file is different in content will the old file be removed
-        if (!$this->filesAreEqual($targetPath, $image->getImagePath())) {
+        if (!$this->filesAreEqual($targetPath, $image->getTemporaryStoragePath())) {
 
             unlink($targetPath);
 
