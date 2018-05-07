@@ -21,7 +21,7 @@ use BigBridge\ProductImport\Model\Resource\MetaData;
  *
  * @author Patrick van Bergen
  */
-class UrlKeyTest extends \PHPUnit_Framework_TestCase
+class UrlKeyTest extends \PHPUnit\Framework\TestCase
 {
     /** @var  ImporterFactory */
     private static $factory;

@@ -8,7 +8,7 @@ use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
 /**
  * @author Patrick van Bergen
  */
-class ValueSerializerTest extends \PHPUnit_Framework_TestCase
+class ValueSerializerTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass()
     {

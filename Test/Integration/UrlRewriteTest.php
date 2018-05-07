@@ -16,7 +16,7 @@ use BigBridge\ProductImport\Api\ImporterFactory;
 /**
  * @author Patrick van Bergen
  */
-class UrlRewriteTest extends \PHPUnit_Framework_TestCase
+class UrlRewriteTest extends \PHPUnit\Framework\TestCase
 {
     /** @var  ImporterFactory */
     private static $factory;

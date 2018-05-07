@@ -32,7 +32,7 @@ use BigBridge\ProductImport\Api\Data\GroupedProductMember;
  *
  * @author Patrick van Bergen
  */
-class ImportTest extends \PHPUnit_Framework_TestCase
+class ImportTest extends \PHPUnit\Framework\TestCase
 {
     /** @var  ImporterFactory */
     private static $factory;

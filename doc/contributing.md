@@ -4,6 +4,10 @@ If you want to help to maintain this library, great!
 
 Please read the text below if you do.
 
+### Unit tests
+
+Unit tests require PHPUnit 7 with namespaces.
+
 ### Speed benchmark
 
 The speed benchmark is important, because speed is one of the main targets of this library. The class MemoryTest is the benchmark.

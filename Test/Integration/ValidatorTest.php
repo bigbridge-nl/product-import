@@ -15,7 +15,7 @@ use BigBridge\ProductImport\Api\ImporterFactory;
 /**
  * @author Patrick van Bergen
  */
-class ValidatorTest extends \PHPUnit_Framework_TestCase
+class ValidatorTest extends \PHPUnit\Framework\TestCase
 {
     /** @var  ImporterFactory */
     private static $factory;

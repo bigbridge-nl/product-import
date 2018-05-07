@@ -8,7 +8,7 @@ use BigBridge\ProductImport\Model\Resource\Reference\References;
 /**
  * @author Patrick van Bergen
  */
-class ReferenceTest extends \PHPUnit_Framework_TestCase
+class ReferenceTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass()
     {

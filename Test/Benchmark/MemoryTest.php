@@ -18,7 +18,7 @@ use BigBridge\ProductImport\Api\ImporterFactory;
  *
  * @author Patrick van Bergen
  */
-class MemoryTest extends \PHPUnit_Framework_TestCase
+class MemoryTest extends \PHPUnit\Framework\TestCase
 {
     const PRODUCT_COUNT = 2500;
 

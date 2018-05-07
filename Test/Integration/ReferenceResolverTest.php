@@ -12,7 +12,7 @@ use Magento\Framework\App\ObjectManager;
 /**
  * @author Patrick van Bergen
  */
-class ReferenceResolverTest extends \PHPUnit_Framework_TestCase
+class ReferenceResolverTest extends \PHPUnit\Framework\TestCase
 {
     /** @var  ImporterFactory */
     private static $factory;

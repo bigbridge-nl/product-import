@@ -13,7 +13,7 @@ use Magento\Framework\App\ObjectManager;
 /**
  * @author Patrick van Bergen
  */
-class IdTest extends \PHPUnit_Framework_TestCase
+class IdTest extends \PHPUnit\Framework\TestCase
 {
     /** @var  ImporterFactory */
     private static $factory;
