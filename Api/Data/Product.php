@@ -235,7 +235,7 @@ abstract class Product
 
     public function removeWebsiteIds()
     {
-        $this->website_ids = null;
+        $this->website_ids = [];
     }
 
     /**
