@@ -86,6 +86,7 @@ class Validator
         // images
         $this->imageValidator->validateImages($product);
 
+        // other attributes
         foreach ($storeViews as $storeViewCode => $storeView) {
 
             foreach ($storeView->getAttributes() as $eavAttribute => $value) {

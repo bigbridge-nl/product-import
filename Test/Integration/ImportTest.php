@@ -1036,7 +1036,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setName("Christmas tree");
         $global->setPrice('98.00');
         $global->setSelectAttribute('color', 'grey');
-        $global->setMultipleSelectAttribute('color_group_product_importer', ['red', 'blue']);
+        // note: empty value
+        $global->setMultipleSelectAttribute('color_group_product_importer', ['red', 'blue', '']);
 
         $importer->importSimpleProduct($product1);
         $importer->flush();
