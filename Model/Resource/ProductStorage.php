@@ -2,9 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
-use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
-use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProductStoreView;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
@@ -138,7 +136,7 @@ abstract class ProductStorage
         // set default values for new products
         $this->setDefaultValues($insertProducts);
 
-        // replace Reference(s) with ids, changes $product->errors
+        // replace reference(s) with ids, changes $product->errors
         $this->referenceResolver->resolveIds($products, $config);
 
         // create url keys based on name and id
@@ -228,13 +226,16 @@ abstract class ProductStorage
     {
         foreach ($insertProducts as $product) {
 
-            // attribute set: Default
-            if ($product->getAttributeSetId() === null) {
-                $product->setAttributeSetByName("Default");
-            }
-
             $global = $product->global();
             $attributes = $global->getAttributes();
+            $unresolvedProductAttributes = $product->getUnresolvedAttributes();
+            $unresolvedGlobalAttributes = $global->getUnresolvedAttributes();
+
+            // attribute set: Default
+            if ($product->getAttributeSetId() === null &&
+                !array_key_exists(Product::ATTRIBUTE_SET_ID, $unresolvedProductAttributes)) {
+                $product->setAttributeSetByName("Default");
+            }
 
             // visibility: both
             if (!array_key_exists(ProductStoreView::ATTR_VISIBILITY, $attributes)) {
@@ -245,7 +246,8 @@ abstract class ProductStorage
                 $global->setStatus(ProductStoreView::STATUS_DISABLED);
             }
             // tax class: Taxable Goods
-            if (!array_key_exists(ProductStoreView::ATTR_TAX_CLASS_ID, $attributes)) {
+            if (!array_key_exists(ProductStoreView::ATTR_TAX_CLASS_ID, $attributes) &&
+                !array_key_exists(ProductStoreView::ATTR_TAX_CLASS_ID, $unresolvedGlobalAttributes)) {
                 $global->setTaxClassName("Taxable Goods");
             }
 

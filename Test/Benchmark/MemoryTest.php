@@ -117,7 +117,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000000);
-        $this->assertLessThan(25, $peakMemory);
+        $this->assertLessThan(27, $peakMemory);
 
         echo "Peak mem: " . $peakMemory . " MB \n";
     }

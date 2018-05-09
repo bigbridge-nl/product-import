@@ -3,12 +3,11 @@
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\ImportConfig;
-use BigBridge\ProductImport\Model\Resource\Reference\Reference;
-use BigBridge\ProductImport\Model\Resource\Reference\References;
 
 /**
- * Replaces all Reference(s) values of a product with database ids.
+ * Replaces all reference(s) values of a product with database ids.
  *
  * @author Patrick van Bergen
  */
@@ -72,39 +71,40 @@ class ReferenceResolver
         $this->tierPriceResolver->resolveReferences($products);
 
         foreach ($products as $product) {
-            if ($product->getCategoryIds() instanceof References) {
-                list($ids, $error) = $this->categoryImporter->importCategoryPaths($product->getCategoryIds()->names,
-                    $config->autoCreateCategories, $config->categoryNamePathSeparator);
-                $product->setCategoryIds($ids);
-                if ($error !== "") {
-                    $product->addError($error);
-                    $product->setCategoryIds([]);
-                }
-            }
 
-            if ($product->getWebsiteIds() instanceof References) {
-                list($ids, $error) = $this->websiteResolver->resolveCodes($product->getWebsiteIds()->names);
-                if ($error === "") {
-                    $product->setWebsitesIds($ids);
-                } else {
-                    $product->addError($error);
-                    $product->removeWebsiteIds();
-                }
-            }
-
-            if ($product->getAttributeSetId() instanceof Reference) {
-                list($id, $error) = $this->attributeSetResolver->resolveName($product->getAttributeSetId()->name);
-                if ($error === "") {
-                    $product->setAttributeSetId($id);
-                } else {
-                    $product->addError($error);
-                    $product->removeAttributeSetId();
+            foreach ($product->getUnresolvedAttributes() as $attribute => $value) {
+                switch ($attribute) {
+                    case Product::ATTRIBUTE_SET_ID:
+                        list($id, $error) = $this->attributeSetResolver->resolveName($value);
+                        if ($error === "") {
+                            $product->setAttributeSetId($id);
+                        } else {
+                            $product->addError($error);
+                            $product->removeAttributeSetId();
+                        }
+                        break;
+                    case Product::CATEGORY_IDS:
+                        list($ids, $error) = $this->categoryImporter->importCategoryPaths($value,
+                            $config->autoCreateCategories, $config->categoryNamePathSeparator);
+                        $product->setCategoryIds($ids);
+                        if ($error !== "") {
+                            $product->addError($error);
+                            $product->setCategoryIds([]);
+                        }
+                        break;
+                    case Product::WEBSITE_IDS:
+                        list($ids, $error) = $this->websiteResolver->resolveCodes($value);
+                        if ($error === "") {
+                            $product->setWebsitesIds($ids);
+                        } else {
+                            $product->addError($error);
+                            $product->removeWebsiteIds();
+                        }
+                        break;
                 }
             }
 
             foreach ($product->getStoreViews() as $storeViewCode => $storeView) {
-
-                $attributes = $storeView->getAttributes();
 
                 list($id, $error) = $this->storeViewResolver->resolveName($storeViewCode);
                 if ($error === "") {
@@ -114,13 +114,19 @@ class ReferenceResolver
                     $storeView->removeStoreViewId();
                 }
 
-                if (array_key_exists('tax_class_id', $attributes) && $attributes['tax_class_id'] instanceof Reference) {
-                    list($id, $error) = $this->taxClassResolver->resolveName($attributes['tax_class_id']->name);
-                    if ($error === "") {
-                        $storeView->setTaxClassId($id);
-                    } else {
-                        $product->addError($error);
-                        $storeView->removeAttribute('tax_class_id');
+                foreach ($storeView->getUnresolvedAttributes() as $attribute => $value) {
+                    switch ($attribute) {
+                        case ProductStoreView::ATTR_TAX_CLASS_ID:
+                            list($id, $error) = $this->taxClassResolver->resolveName($value);
+                            if ($error === "") {
+                                $storeView->setTaxClassId($id);
+                            } else {
+                                $product->addError($error);
+                                $storeView->removeAttribute(ProductStoreView::ATTR_TAX_CLASS_ID);
+                            }
+                            break;
+                        default:
+                            throw new \Exception("Unknown unresolved attribute: " . $attribute);
                     }
                 }
 

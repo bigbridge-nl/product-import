@@ -354,6 +354,10 @@ class Importer
         }
     }
 
+    /**
+     * @param BundleProduct $product
+     * @throws \Exception
+     */
     protected function ensureThatSelectionProductsExist(BundleProduct $product)
     {
         // make sure bundle product selection products exist, by creating placeholders for non-existing products

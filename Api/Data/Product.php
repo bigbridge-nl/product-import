@@ -4,8 +4,6 @@ namespace BigBridge\ProductImport\Api\Data;
 
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
-use BigBridge\ProductImport\Model\Resource\Reference\Reference;
-use BigBridge\ProductImport\Model\Resource\Reference\References;
 
 /**
  * Product fields.
@@ -22,16 +20,20 @@ abstract class Product
     const PLACEHOLDER_NAME = 'Product Placeholder';
     const PLACEHOLDER_PRICE = '123456.78';
 
+    const CATEGORY_IDS = 'category_ids';
+    const ATTRIBUTE_SET_ID = 'attribute_set_id';
+    const WEBSITE_IDS = 'website_ids';
+
     /** @var  int */
     public $id;
 
-    /** @var  string|Reference */
+    /** @var  int */
     protected $attribute_set_id;
 
     /** @var  string 64 character */
     protected $sku;
 
-    /** @var int[]|References */
+    /** @var int[] */
     protected $category_ids = [];
 
     /** @var array  */
@@ -54,6 +56,9 @@ abstract class Product
 
     /** @var TierPrice[]|null An array of tier prices. null means: not used in this import */
     protected $tierPrices = null;
+
+    /** @var array  */
+    protected $unresolvedAttributes = [];
 
     // =========================================
     // importer data
@@ -171,7 +176,7 @@ abstract class Product
     }
 
     /**
-     * @return References|int[]
+     * @return int[]
      */
     public function getCategoryIds()
     {
@@ -183,7 +188,7 @@ abstract class Product
      */
     public function setCategoriesByGlobalName(array $categoryNames)
     {
-        $this->category_ids = new References($categoryNames);
+        $this->unresolvedAttributes[self::CATEGORY_IDS] = $categoryNames;
     }
 
     public function setAttributeSetId(int $attributeSetId)
@@ -192,7 +197,7 @@ abstract class Product
     }
 
     /**
-     * @return Reference|int|null
+     * @return int|null
      */
     public function getAttributeSetId()
     {
@@ -209,12 +214,12 @@ abstract class Product
      */
     public function setAttributeSetByName(string $attributeSetName)
     {
-        $this->attribute_set_id = new Reference($attributeSetName);
+        $this->unresolvedAttributes[self::ATTRIBUTE_SET_ID] = $attributeSetName;
     }
 
     public function setWebsitesByCode(array $websiteCodes)
     {
-        $this->website_ids = new References($websiteCodes);
+        $this->unresolvedAttributes[self::WEBSITE_IDS] = $websiteCodes;
     }
 
     /**
@@ -226,7 +231,7 @@ abstract class Product
     }
 
     /**
-     * @return int[]|References
+     * @return int[]
      */
     public function getWebsiteIds()
     {
@@ -318,5 +323,13 @@ abstract class Product
     public function getTierPrices()
     {
         return $this->tierPrices;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUnresolvedAttributes()
+    {
+        return $this->unresolvedAttributes;
     }
 }

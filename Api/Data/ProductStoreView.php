@@ -5,8 +5,6 @@ namespace BigBridge\ProductImport\Api\Data;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
 use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
-use BigBridge\ProductImport\Model\Resource\Reference\Reference;
-use BigBridge\ProductImport\Model\Resource\Reference\References;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 
@@ -78,11 +76,14 @@ class ProductStoreView
     /** @var array  */
     protected $attributes = [];
 
-    /** @var Reference[]  */
+    /** @var array  */
     protected $unresolvedSelects = [];
 
-    /** @var References[]  */
+    /** @var array  */
     protected $unresolvedMultipleSelects = [];
+
+    /** @var array  */
+    protected $unresolvedAttributes = [];
 
     public function setName(string $name)
     {
@@ -193,7 +194,7 @@ class ProductStoreView
 
     public function setTaxClassName(string $taxClassName)
     {
-        $this->attributes[self::ATTR_TAX_CLASS_ID] = new Reference(trim($taxClassName));
+        $this->unresolvedAttributes[self::ATTR_TAX_CLASS_ID] = trim($taxClassName);
     }
 
     public function setUrlKey(string $urlKey)
@@ -312,6 +313,14 @@ class ProductStoreView
     public function getAttributes()
     {
         return $this->attributes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getUnresolvedAttributes()
+    {
+        return $this->unresolvedAttributes;
     }
 
     /**
