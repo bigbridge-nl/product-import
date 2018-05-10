@@ -35,10 +35,10 @@ class MetaData
     const MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE = 'catalog_product_entity_media_gallery_value_to_entity';
     const MEDIA_GALLERY_VALUE_TABLE = 'catalog_product_entity_media_gallery_value';
     const STOCK_ITEM_TABLE = 'cataloginventory_stock_item';
-    const CATALOG_PRODUCT_SUPER_ATTRIBUTE_TABLE = 'catalog_product_super_attribute';
-    const CATALOG_PRODUCT_SUPER_ATTRIBUTE_LABEL_TABLE = 'catalog_product_super_attribute_label';
-    const CATALOG_PRODUCT_SUPER_LINK_TABLE = 'catalog_product_super_link';
-    const CATALOG_PRODUCT_RELATION_TABLE = 'catalog_product_relation';
+    const SUPER_ATTRIBUTE_TABLE = 'catalog_product_super_attribute';
+    const SUPER_ATTRIBUTE_LABEL_TABLE = 'catalog_product_super_attribute_label';
+    const SUPER_LINK_TABLE = 'catalog_product_super_link';
+    const RELATION_TABLE = 'catalog_product_relation';
     const LINK_TABLE = 'catalog_product_link';
     const LINK_ATTRIBUTE_TABLE = 'catalog_product_link_attribute';
     const LINK_ATTRIBUTE_INT_TABLE = 'catalog_product_link_attribute_int';
@@ -53,6 +53,12 @@ class MetaData
     const BUNDLE_OPTION_TABLE = 'catalog_product_bundle_option';
     const BUNDLE_OPTION_VALUE_TABLE = 'catalog_product_bundle_option_value';
     const BUNDLE_SELECTION_TABLE = 'catalog_product_bundle_selection';
+    const CUSTOM_OPTION_TABLE = 'catalog_product_option';
+    const CUSTOM_OPTION_PRICE_TABLE = 'catalog_product_option_price';
+    const CUSTOM_OPTION_TITLE_TABLE = 'catalog_product_option_title';
+    const CUSTOM_OPTION_TYPE_PRICE_TABLE = 'catalog_product_option_type_price';
+    const CUSTOM_OPTION_TYPE_TITLE_TABLE = 'catalog_product_option_type_title';
+    const CUSTOM_OPTION_TYPE_VALUE_TABLE = 'catalog_product_option_type_value';
 
     const TYPE_DATETIME = 'datetime';
     const TYPE_DECIMAL = 'decimal';
@@ -180,6 +186,24 @@ class MetaData
     /** @var string */
     public $bundleSelectionTable;
 
+    /** @var string */
+    public $customOptionTable;
+
+    /** @var string */
+    public $customOptionPriceTable;
+
+    /** @var string */
+    public $customOptionTitleTable;
+
+    /** @var string */
+    public $customOptionTypePriceTable;
+
+    /** @var string */
+    public $customOptionTypeTitleTable;
+
+    /** @var string */
+    public $customOptionTypeValueTable;
+
     /** @var  int */
     public $defaultCategoryAttributeSetId;
 
@@ -247,10 +271,10 @@ class MetaData
         $this->mediaGalleryValueToEntityTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE);
         $this->mediaGalleryValueTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TABLE);
         $this->stockItemTable = $db->getFullTableName(self::STOCK_ITEM_TABLE);
-        $this->superAttributeTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_ATTRIBUTE_TABLE);
-        $this->superAttributeLabelTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_ATTRIBUTE_LABEL_TABLE);
-        $this->superLinkTable = $db->getFullTableName(self::CATALOG_PRODUCT_SUPER_LINK_TABLE);
-        $this->relationTable = $db->getFullTableName(self::CATALOG_PRODUCT_RELATION_TABLE);
+        $this->superAttributeTable = $db->getFullTableName(self::SUPER_ATTRIBUTE_TABLE);
+        $this->superAttributeLabelTable = $db->getFullTableName(self::SUPER_ATTRIBUTE_LABEL_TABLE);
+        $this->superLinkTable = $db->getFullTableName(self::SUPER_LINK_TABLE);
+        $this->relationTable = $db->getFullTableName(self::RELATION_TABLE);
         $this->attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
         $this->catalogAttributeTable = $this->db->getFullTableName(self::CATALOG_ATTRIBUTE_TABLE);
         $this->attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);
@@ -274,6 +298,12 @@ class MetaData
         $this->bundleOptionTable = $this->db->getFullTableName(self::BUNDLE_OPTION_TABLE);
         $this->bundleOptionValueTable = $this->db->getFullTableName(self::BUNDLE_OPTION_VALUE_TABLE);
         $this->bundleSelectionTable = $this->db->getFullTableName(self::BUNDLE_SELECTION_TABLE);
+        $this->customOptionTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TABLE);
+        $this->customOptionTitleTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TITLE_TABLE);
+        $this->customOptionPriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_PRICE_TABLE);
+        $this->customOptionTypeTitleTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_TITLE_TABLE);
+        $this->customOptionTypePriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_PRICE_TABLE);
+        $this->customOptionValuePriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_VALUE_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();

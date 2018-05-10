@@ -2,8 +2,6 @@
 
 Imports product data into Magento 2 via direct database access.
 
-Hallo Martijn! :)
-
 ## Warning!
 
 This is a new library. It has not been used except by its own tests. The chance you find a bug is big. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will help you as fast as I can.
@@ -499,6 +497,46 @@ or you can add the sku (transformed to url)
 The url will then look something like this
 
     https://myshop.com/synthetisch-kinderdekbed-4-seizoenen-kdb-18004.html
+
+## Custom options
+
+Magento allows you to specify unique "attributes" that are applicable to a single product. These are called custom options.
+
+The sku of a product with custom options is formed by concatenating the product sku with the sku's of the custom options.
+For example: the sku of a product "oak-door" that has custom options "delivery-date" (a date, with sku "date") and "size" (a multiple select, with sku's "large", "medium") will be formed as "oak-door-date-medium" in the customers shopping cart.
+
+Each type of custom option has its own fields, so there is one method for each type:
+
+    $option1 = $product->addCustomOptionTextField("inscription", true, 40);
+    $option2 = $product->addCustomOptionTextArea("note", true, 250);
+    $option3 = $product->addCustomOptionFile("note", true, ".jpg .jpeg", 5000, 7000);
+
+    $option4 = $product->addCustomOptionDropDown(true);
+    $option5 = $product->addCustomOptionRadioButtons(true);
+    $option6 = $product->addCustomOptionCheckboxGroup(true);
+    $option7 = $product->addCustomOptionMultipleSelect(true);
+
+    $option8 = $product->addCustomOptionDate("date", true);
+    $option9 = $product->addCustomOptionDateTime("datetime", true);
+    $option10 = $product->addCustomOptionTime("time", true);
+
+The title is specified globally, or per store view:
+
+    $product->global()->setCustomOptionTitle($option1, "Inscription");
+
+Note! Magento has a long standing bug that does not allow you to specify title and price per store view, at least not via the backend. See [https://github.com/magento/magento2/issues/6165] This means that only global() is supported for the moment, not storeView().
+
+For the rest of this section I want you to distinguish between custom options with multiple values (dropdown, radio buttons, check box group, multiple select) and custom options without values.
+
+For custom options without values, set the price like this:
+
+    $product->global()->setCustomOptionPrice($option1, "0.50", Product::PRICE_TYPE_FIXED);
+
+For custom options with multiple values, set the price, the title, and the sku-extension like this:
+
+    $product->global()->setCustomOptionValues($option1, [
+        new CustomOptionValue("red", "1.00", Product::PRICE_TYPE_FIXED)
+    ]);
 
 ## Import by ID
 

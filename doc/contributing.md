@@ -41,7 +41,7 @@ For each supported product property
 
 ## Naming
 
-* An id is an integer, mostoften a primary key
+* An id is an integer, most often a primary key
 * A code is system string for an entity. It may be created by the user, but it cannot be changed by the user.
 * A name is human-readable string for an entity. It can be created and changed by the user.
 

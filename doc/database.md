@@ -76,9 +76,19 @@ Tables that will be changed by the importer (insert, update)
 
 * catalog_product_website
 
+### Custom options
+
+* catalog_product_option
+* catalog_product_option_price
+* catalog_product_option_title
+* catalog_product_option_type_price
+* catalog_product_option_type_title
+* catalog_product_option_type_value
+
 ## Remarks
 
 * The fields 'deferred_stock_update' and 'use_config_deferred_stock_update' that are available in the ui of 'Advanced Inventory' are not stored and not used by Magento [https://community.magento.com/t5/Admin-Configuration-Questions/Use-Deferred-Stock-Update/td-p/67547]
 * The eav attribute 'quantity_and_stock_status' is unofficially deprecated and not used [https://magento.stackexchange.com/questions/139840/what-is-the-real-usage-of-product-attribute-quantity-and-stock-status]
 * There is an attribute "minimal_price", but I don't think it is actually used. There is confusion about the use of minimum advised price (MAP) and manufacturer's suggested retail price (MSRP). Check [https://github.com/magento/magento2/issues/5662]
 * Configurables require a price, but once set, cannot be changed. It is used to default price the variants. Grouped products have no price. For bundle products a price is shown in the backend, but it cannot be set, nor edited (?)
+* The database structure of custom options is prepared for different titles and prices per store view. However, when you edit custom options via the backend, they are always stored on the global level. This is either a bug, or an incomplete feature. See [https://github.com/magento/magento2/issues/6165]

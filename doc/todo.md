@@ -2,7 +2,7 @@
 
 ## Several todo
 
-* uniformization of the API
+* uniformization of the API; (no more: add, just set)
 * make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
 * all attributes in an array: collect products per attribute to save time
 * url_key is a default attribute?
@@ -68,6 +68,5 @@ product_options_container
 
 ## Ever?
 
-* product options
 * allow access to low level functions to plugin that performs custom database queries
 * trim: none, all except text fields
