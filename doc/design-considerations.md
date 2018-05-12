@@ -17,6 +17,49 @@ The developer may consider the importer as a queue, that is flushed to the datab
 
 For each product user defined "result callbacks" are called. This allows you to handle the new ids, and process errors.
 
+## Add, update, delete
+
+Simple databases actions are INSERT, UPDATE and DELETE. For products, things are a bit more complicated.
+
+On complete products these types of actions are common:
+
+* INSERT-ONLY (only allow new products)
+* UPDATE-ONLY (only update existing products)
+* DELETE-ONLY (delete products)
+* UPSERT (both insert and update, but not delete)
+* SYNC (insert, update and remove)
+* REPLACE (remove and re-insert products)
+
+UPSERT is what I currently implemented in this library. It is safe, but not complete.
+Magento standard offers UPSERT, REPLACE and DELETE-ONLY. Implementing the other two is simple, but I know of no use cases, so I will wait until I do.
+
+On the attribute level we can distinguish other actions:
+
+For simple attributes:
+
+* INSERT
+* UPDATE
+* DELETE
+* REPLACE
+
+I use INSERT and UPDATE.
+
+For complex attributes (like category-ids, images, etc)
+
+* INSERT
+* UPDATE (update based on keys, do not remove other elements)
+* SYNC (insert, update and remove)
+* REPLACE
+* DELETE
+
+Currently I have used several types of mutations, depending on what fitted best in each case. I have documented the choice in the readme.
+INSERT is always available.
+UPDATE is used for categories and images, because these tend to be modified even when a sync is in place.
+SYNC is used when the user is not likely to change this structure, and calculating a diff is not too complicated.
+REPLACE is used when the user is not likely to change this structure, and calculating a diff is quite complicated.
+
+Eventually I would like the user of the library to be able to choose the type of mutation she wants, but this is quite a lot of work still.
+
 ## Conflicting url_keys: why not just add id?
 
 A url key must be unique. It is also commonly based on the name of the product, which is often not unique. This problem is commonly solved by adding the product id to
