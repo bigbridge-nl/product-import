@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Model\Data\CustomOptionPrice;
+use BigBridge\ProductImport\Model\Data\CustomOptionTitle;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
 use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
@@ -84,6 +86,15 @@ class ProductStoreView
 
     /** @var array  */
     protected $unresolvedAttributes = [];
+
+    /** @var CustomOptionTitle[] */
+    protected $customOptionTitles = [];
+
+    /** @var CustomOptionPrice[] */
+    protected $customOptionPrices = [];
+
+    /** @var CustomOptionValue[] */
+    protected $customOptionValues = [];
 
     public function setName(string $name)
     {
@@ -175,7 +186,7 @@ class ProductStoreView
     /**
      * Check "MSRP" class constants for values.
      *
-     * @param string $int
+     * @param int $type
      */
     public function setMsrpDisplayActualPriceType(int $type)
     {
@@ -409,5 +420,56 @@ class ProductStoreView
     public function setMultiSelectAttributeOptionIds(string $attributeCode, array $optionIds)
     {
         $this->attributes[$attributeCode] = implode(',', array_map('trim', $optionIds));
+    }
+
+    /**
+     * @param CustomOption $customOption
+     * @param string $title
+     */
+    public function setCustomOptionTitle(CustomOption $customOption, string $title)
+    {
+        $this->customOptionTitles[] = new CustomOptionTitle($customOption, $title);
+    }
+
+    /**
+     * @param CustomOption $customOption
+     * @param string $price
+     */
+    public function setCustomOptionPrice(CustomOption $customOption, string $price, string $priceType)
+    {
+        $this->customOptionPrices[] = new CustomOptionPrice($customOption, $price, $priceType);
+    }
+
+    /**
+     * @param CustomOption $customOption
+     * @param CustomOptionValue[] $values
+     */
+    public function setCustomOptionValue(CustomOption $customOption, string $sku, string $price, string $priceType, string $title)
+    {
+        $this->customOptionValues[] = new CustomOptionValue($customOption, $sku, $price, $priceType, $title);
+    }
+
+    /**
+     * @return CustomOptionTitle[]
+     */
+    public function getCustomOptionTitles(): array
+    {
+        return $this->customOptionTitles;
+    }
+
+    /**
+     * @return CustomOptionPrice[]
+     */
+    public function getCustomOptionPrices(): array
+    {
+        return $this->customOptionPrices;
+    }
+
+    /**
+     * @return CustomOptionValue[]
+     */
+    public function getCustomOptionValues(): array
+    {
+        return $this->customOptionValues;
     }
 }

@@ -11,6 +11,7 @@ use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
+use BigBridge\ProductImport\Model\Resource\Storage\CustomOptionStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
@@ -58,6 +59,9 @@ abstract class ProductStorage
     /** @var StockItemStorage */
     protected $stockItemStorage;
 
+    /** @var CustomOptionStorage */
+    protected $customOptionStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
@@ -69,7 +73,8 @@ abstract class ProductStorage
         ImageStorage $imageStorage,
         LinkedProductStorage $linkedProductStorage,
         TierPriceStorage $tierPriceStorage,
-        StockItemStorage $stockItemStorage)
+        StockItemStorage $stockItemStorage,
+        CustomOptionStorage $customOptionStorage)
     {
         $this->db = $db;
         $this->metaData = $metaData;
@@ -82,6 +87,7 @@ abstract class ProductStorage
         $this->linkedProductStorage = $linkedProductStorage;
         $this->tierPriceStorage = $tierPriceStorage;
         $this->stockItemStorage = $stockItemStorage;
+        $this->customOptionStorage = $customOptionStorage;
     }
 
     /**
@@ -292,14 +298,26 @@ abstract class ProductStorage
         $productsByAttribute = [];
         $productsWithCategories = [];
         $productsWithWebsites = [];
+        $insertsWithOptions = [];
+        $updatesWithOptions = [];
 
         foreach ($validProducts as $product) {
 
             // collect valid new and existing products
             if ($product->id !== null) {
                 $validUpdateProducts[] = $product;
+
+                if ($product->getCustomOptions() !== null) {
+                    $updatesWithOptions[] = $product;
+                }
+
             } else {
                 $validInsertProducts[] = $product;
+
+                if ($product->getCustomOptions() !== null) {
+                    $insertsWithOptions[] = $product;
+                }
+
             }
 
             if ($product->getCategoryIds() !== []) {
@@ -330,6 +348,9 @@ abstract class ProductStorage
             foreach ($productsByAttribute as $eavAttribute => $products) {
                 $this->insertEavAttribute($products, $eavAttribute);
             }
+
+            $this->customOptionStorage->insertCustomOptions($insertsWithOptions);
+            $this->customOptionStorage->updateCustomOptions($updatesWithOptions);
 
             $this->insertCategoryIds($productsWithCategories);
             $this->insertWebsiteIds($productsWithWebsites);

@@ -7,6 +7,7 @@ use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
+use BigBridge\ProductImport\Model\Resource\Storage\CustomOptionStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
@@ -35,9 +36,10 @@ class DownloadableStorage extends ProductStorage
         ImageStorage $imageStorage,
         LinkedProductStorage $linkedProductStorage,
         TierPriceStorage $tierPriceStorage,
-        StockItemStorage $stockItemStorage)
+        StockItemStorage $stockItemStorage,
+        CustomOptionStorage $customOptionStorage)
     {
-        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage, $stockItemStorage);
+        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage, $stockItemStorage, $customOptionStorage);
         $this->imageStorage = $imageStorage;
     }
 

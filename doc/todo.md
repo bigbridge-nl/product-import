@@ -2,7 +2,7 @@
 
 ## Several todo
 
-* uniformization of the API; (no more: add, just set)
+* uniformization of the API; (add / set)
 * make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
 * all attributes in an array: collect products per attribute to save time
 * url_key is a default attribute?

@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
+use BigBridge\ProductImport\Api\Data\CustomOption;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -1701,5 +1702,39 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         ], $titleResults);
 
         return min($optionIds);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testCustomOptions()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $product = new SimpleProduct('fine-pen-product-import');
+        $product->setAttributeSetByName("Default");
+
+        $global = $product->global();
+        $global->setName("Fine pen");
+        $global->setPrice('14.95');
+
+        $inscription = CustomOption::createCustomOptionTextField('inscription', true, 20);
+        $product->global()->setCustomOptionTitle($inscription, "Inscription");
+        $product->global()->setCustomOptionPrice($inscription, "0.50", Product::PRICE_TYPE_FIXED);
+
+        $product->setCustomOptions([$inscription]);
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
     }
 }

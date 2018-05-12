@@ -429,7 +429,7 @@ It is also possible to use local files (these will be hard linked to their desti
 
 This will attach the image to the product and it will show up in the backend section "Images and Videos" of the product.
 
-About naming conflicts for image files:
+How the library deals with existing images:
 
 * if Magento already contained an image with this name, for another product, the image will get a serial number suffix (i.e _1)
 * if Magento already contained an image with this name, for the same product, and it is the same image, nothing happens
@@ -507,7 +507,9 @@ Some custom options have multiple values (dropdown, radio buttons, check box gro
 The sku of a product with custom options is formed by concatenating the product sku with the sku's of the custom options.
 For example: the sku of a product "oak-door" that has custom options "delivery-date" (a date, with sku "date") and "size" (a multiple select, with sku's "large", "medium") will be formed as "oak-door-date-medium" in the customers shopping cart.
 
-Note! Magento has a long standing bug that does not allow you to specify title and price per store view, at least not via the backend. See [https://github.com/magento/magento2/issues/6165] This means that only global() is supported for the moment, not storeView().
+Note 1: Magento has a long standing bug that does not allow you to specify title and price per store view, at least not via the backend. See [https://github.com/magento/magento2/issues/6165] This means that only global() is supported for the moment, not storeView().
+
+Note 2: Existing custom options will be replaced with these new ones.
 
 I will treat the simple and multiple value custom options separately.
 
@@ -515,12 +517,12 @@ I will treat the simple and multiple value custom options separately.
 
 Create the option. Here are are examples with all possible simple types:
 
-    $option1 = $product->addCustomOptionTextField("inscription", true, 40);
-    $option2 = $product->addCustomOptionTextArea("note", true, 250);
-    $option3 = $product->addCustomOptionFile("note", true, ".jpg .jpeg", 5000, 7000);
-    $option4 = $product->addCustomOptionDate("date", true);
-    $option5 = $product->addCustomOptionDateTime("datetime", true);
-    $option6 = $product->addCustomOptionTime("time", true);
+    $option1 = CustomOption::createCustomOptionTextField("inscription", true, 40);
+    $option2 = CustomOption::createCustomOptionTextArea("note", true, 250);
+    $option3 = CustomOption::createCustomOptionFile("note", true, ".jpg .jpeg", 5000, 7000);
+    $option4 = CustomOption::createCustomOptionDate("date", true);
+    $option5 = CustomOption::createCustomOptionDateTime("datetime", true);
+    $option6 = CustomOption::createCustomOptionTime("time", true);
 
 Set the title
 
@@ -534,20 +536,21 @@ Set the price and the price type (fixed or a percentage)
 
 Create the option. Here are are examples with all possible multiple value types:
 
-    $option1 = $product->addCustomOptionDropDown(true);
-    $option2 = $product->addCustomOptionRadioButtons(true);
-    $option3 = $product->addCustomOptionCheckboxGroup(true);
-    $option4 = $product->addCustomOptionMultipleSelect(true);
+    $option1 = CustomOption::createCustomOptionDropDown(true, ["red", "green"]);
+    $option2 = CustomOption::createustomOptionRadioButtons(true, ["red", "green"]);
+    $option3 = CustomOption::createCustomOptionCheckboxGroup(true, ["red", "green"]);
+    $option4 = CustomOption::createCustomOptionMultipleSelect(true, ["red", "green"]);
 
 Set the title
 
     $product->global()->setCustomOptionTitle($option1, "Color");
 
-Set the the price, the price type, and the sku per value like this:
+Set the the sku, the price, the price type, and the title per value like this:
 
-    $product->global()->setCustomOptionValues($option1, [
-        new CustomOptionValue("red", "1.00", Product::PRICE_TYPE_FIXED)
-    ]);
+    $product->global()->setCustomOptionValue($option1, "red", "1.00", Product::PRICE_TYPE_FIXED, 'Red');
+    $product->global()->setCustomOptionValue($option1, "green", "1.20", Product::PRICE_TYPE_FIXED, 'Green');
+
+Note that each of the value's sku's (here: red, green) must have a custom option value.
 
 ### Add to the product
 

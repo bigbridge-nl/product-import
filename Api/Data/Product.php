@@ -6,9 +6,6 @@ use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 
 /**
- * Product fields.
- * Use underscores, not camelcase, to keep close to import columns.
- *
  * @author Patrick van Bergen
  */
 abstract class Product
@@ -23,6 +20,9 @@ abstract class Product
     const CATEGORY_IDS = 'category_ids';
     const ATTRIBUTE_SET_ID = 'attribute_set_id';
     const WEBSITE_IDS = 'website_ids';
+
+    const PRICE_TYPE_FIXED = 'fixed';
+    const PRICE_TYPE_PERCENT = 'percent';
 
     /** @var  int */
     public $id;
@@ -56,6 +56,9 @@ abstract class Product
 
     /** @var TierPrice[]|null An array of tier prices. null means: not used in this import */
     protected $tierPrices = null;
+
+    /** @var CustomOption[]|null */
+    protected $customOptions = null;
 
     /** @var array  */
     protected $unresolvedAttributes = [];
@@ -331,5 +334,21 @@ abstract class Product
     public function getUnresolvedAttributes()
     {
         return $this->unresolvedAttributes;
+    }
+
+    /**
+     * @param array $customOptions
+     */
+    public function setCustomOptions(array $customOptions)
+    {
+        $this->customOptions = $customOptions;
+    }
+
+    /**
+     * @return CustomOption[]|null
+     */
+    public function getCustomOptions()
+    {
+        return $this->customOptions;
     }
 }
