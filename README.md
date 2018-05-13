@@ -21,6 +21,7 @@ This library just helps you to get products into Magento's database quickly, low
 * automatic category generation (no updates of categories)
 * automatic select and multiselect attribute option creation
 * import of images from file or url
+* custom options
 * unique url_key generation
 * dry run (no writes to the database)
 * trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
@@ -509,13 +510,11 @@ For example: the sku of a product "oak-door" that has custom options "delivery-d
 
 Note 1: Magento has a long standing bug that does not allow you to specify title and price per store view, at least not via the backend. See [https://github.com/magento/magento2/issues/6165] This means that only global() is supported for the moment, not storeView().
 
-Note 2: Existing custom options will be replaced with these new ones.
-
 I will treat the simple and multiple value custom options separately.
 
 ### Simple
 
-Create the option. Here are are examples with all possible simple types:
+Create the options. Here are are examples with all possible simple types:
 
     $option1 = CustomOption::createCustomOptionTextField("inscription", true, 40);
     $option2 = CustomOption::createCustomOptionTextArea("note", true, 250);
@@ -524,11 +523,15 @@ Create the option. Here are are examples with all possible simple types:
     $option5 = CustomOption::createCustomOptionDateTime("datetime", true);
     $option6 = CustomOption::createCustomOptionTime("time", true);
 
-Set the title
+    $product->setCustomOptions([$option1, $option2, $option3, $option4, $option5, $option6]);
+
+Note: setCustomOptions replaces any existing custom options with these new ones.
+
+Set the titles (I will just give one example)
 
     $product->global()->setCustomOptionTitle($option1, "Inscription");
 
-Set the price and the price type (fixed or a percentage)
+Set the prices and the prices type (fixed or a percentage)
 
     $product->global()->setCustomOptionPrice($option1, "0.50", Product::PRICE_TYPE_FIXED);
 
@@ -541,6 +544,8 @@ Create the option. Here are are examples with all possible multiple value types:
     $option3 = CustomOption::createCustomOptionCheckboxGroup(true, ["red", "green"]);
     $option4 = CustomOption::createCustomOptionMultipleSelect(true, ["red", "green"]);
 
+    $product->setCustomOptions([$option1, $option2, $option3, $option4]);
+
 Set the title
 
     $product->global()->setCustomOptionTitle($option1, "Color");
@@ -551,14 +556,6 @@ Set the the sku, the price, the price type, and the title per value like this:
     $product->global()->setCustomOptionValue($option1, "green", "1.20", Product::PRICE_TYPE_FIXED, 'Green');
 
 Note that each of the value's sku's (here: red, green) must have a custom option value.
-
-### Add to the product
-
-Once the options are specified you add them to the product like this
-
-    $product->setCustomOptions([$optionA, $optionB, $optionC]);
-
-Existing custom options will be replaced with these new ones.
 
 ## Import by ID
 

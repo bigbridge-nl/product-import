@@ -89,7 +89,7 @@ class CustomOptionStorage
 
                     // option price and price type
                     foreach ($storeView->getCustomOptionPrices() as $priceStruct) {
-                        if ($priceStruct->getCustomOption()->getOptionId() === $optionId) {
+                        if ($priceStruct->getCustomOption() === $customOption) {
                             $this->db->execute("
                                 INSERT INTO `{$this->metaData->customOptionPriceTable}`
                                 SET 
@@ -109,7 +109,7 @@ class CustomOptionStorage
 
                     // option title
                     foreach ($storeView->getCustomOptionTitles() as $titleStruct) {
-                        if ($titleStruct->getCustomOption()->getOptionId() === $optionId) {
+                        if ($titleStruct->getCustomOption() === $customOption) {
                             $this->db->execute("
                                 INSERT INTO `{$this->metaData->customOptionTitleTable}`
                                 SET 
@@ -128,7 +128,7 @@ class CustomOptionStorage
                     // option values per store view
                     foreach ($valueSkus as $valueSku => $optionTypeId) {
                         foreach ($storeView->getCustomOptionValues() as $value) {
-                            if ($value->getCustomOption()->getOptionId() === $optionId && $value->getSku() === $valueSku) {
+                            if ($value->getCustomOption() === $customOption && $value->getSku() === $valueSku) {
                                 $this->db->execute("
                                     INSERT INTO `{$this->metaData->customOptionTypeTitleTable}`
                                     SET 

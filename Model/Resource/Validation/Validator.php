@@ -24,10 +24,15 @@ class Validator
     /** @var ImageValidator */
     protected $imageValidator;
 
-    public function __construct(MetaData $metaData, ImageValidator $imageValidator)
+    /** @var CustomOptionsValidator */
+    protected $customOptionsValidator;
+
+
+    public function __construct(MetaData $metaData, ImageValidator $imageValidator, CustomOptionsValidator $customOptionsValidator)
     {
         $this->metaData = $metaData;
         $this->imageValidator = $imageValidator;
+        $this->customOptionsValidator = $customOptionsValidator;
     }
 
     /**
@@ -85,6 +90,9 @@ class Validator
 
         // images
         $this->imageValidator->validateImages($product);
+
+        // custom options
+        $this->customOptionsValidator->validateCustomOptions($product);
 
         // other attributes
         foreach ($storeViews as $storeViewCode => $storeView) {

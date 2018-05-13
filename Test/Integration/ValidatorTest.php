@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\Data\CustomOption;
+use BigBridge\ProductImport\Api\Data\Product;
 use IntlChar;
 use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
@@ -332,5 +334,31 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
         $validator->validate($product);
 
         $this->assertSame(["tierprices should be an array of TierPrice"], $product->getErrors());
+    }
+
+    public function testCustomOptions()
+    {
+        $product = new SimpleProduct('big-blue-box');
+        $product->setAttributeSetId(4);
+
+        $global = $product->global();
+        $global->setName("Big Blue Box");
+        $global->setPrice("123.00");
+
+        $product->setCustomOptions([
+            $color = CustomOption::createCustomOptionDropDown(true, ["red", "green", "blue"]),
+        ]);
+
+        $product->global()->setCustomOptionTitle($color, "Color");
+        $product->global()->setCustomOptionValue($color, "red", "0.10", Product::PRICE_TYPE_FIXED, 'Red');
+        $product->global()->setCustomOptionValue($color, "green", "0.15", Product::PRICE_TYPE_FIXED, 'Green');
+
+        /** @var Validator $validator */
+        $validator = ObjectManager::getInstance()->get(Validator::class);
+
+        $validator->validate($product);
+
+        $this->assertSame(["Custom option with values [red, green, blue] has an incorrect number of values in store view 'global'"], $product->getErrors());
+
     }
 }
