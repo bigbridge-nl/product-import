@@ -153,8 +153,8 @@ class CustomOptionStorage
                                     $value->getPrice(),
                                     $value->getPriceType()
                                 ]);
+                                break;
                             }
-                            break;
                         }
                     }
 

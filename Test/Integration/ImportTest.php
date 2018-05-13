@@ -1725,11 +1725,55 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setName("Fine pen");
         $global->setPrice('14.95');
 
-        $inscription = CustomOption::createCustomOptionTextField('inscription', true, 20);
+        $product->setCustomOptions([
+            $inscription = CustomOption::createCustomOptionTextField('inscription', true, 21),
+            $note = CustomOption::createCustomOptionTextField('note', true, 255),
+            $idCard = CustomOption::createCustomOptionFile("id-card", false, ".jpg .jpeg", 5000, 7000),
+            $date = CustomOption::createCustomOptionDate("date", true),
+            $dateTime = CustomOption::createCustomOptionDateTime("datetime", true),
+            $time = CustomOption::createCustomOptionTime("time", true),
+            $color = CustomOption::createCustomOptionDropDown(true, ["red", "green", "blue"]),
+            $frame = CustomOption::createCustomOptionRadioButtons(true, ["wood", "iron"]),
+            $extras = CustomOption::createCustomOptionCheckboxGroup(true, ["mayonaise", "ketchup", "mosterd"]),
+            $toppings = CustomOption::createCustomOptionMultipleSelect(true, ["nuts", "syrup", "m-and-ms"])
+        ]);
+
         $product->global()->setCustomOptionTitle($inscription, "Inscription");
         $product->global()->setCustomOptionPrice($inscription, "0.50", Product::PRICE_TYPE_FIXED);
 
-        $product->setCustomOptions([$inscription]);
+        $product->global()->setCustomOptionTitle($note, "Note");
+        $product->global()->setCustomOptionPrice($note, "0.10", Product::PRICE_TYPE_FIXED);
+
+        $product->global()->setCustomOptionTitle($idCard, "Id card");
+        $product->global()->setCustomOptionPrice($idCard, "0", Product::PRICE_TYPE_FIXED);
+
+        $product->global()->setCustomOptionTitle($date, "Date");
+        $product->global()->setCustomOptionPrice($date, "10", Product::PRICE_TYPE_PERCENT);
+
+        $product->global()->setCustomOptionTitle($dateTime, "Date and time");
+        $product->global()->setCustomOptionPrice($dateTime, "20", Product::PRICE_TYPE_PERCENT);
+
+        $product->global()->setCustomOptionTitle($dateTime, "Time");
+        $product->global()->setCustomOptionPrice($dateTime, "30", Product::PRICE_TYPE_PERCENT);
+
+        $product->global()->setCustomOptionTitle($color, "Color");
+        $product->global()->setCustomOptionValue($color, "red", "0.10", Product::PRICE_TYPE_FIXED, 'Red');
+        $product->global()->setCustomOptionValue($color, "green", "0.15", Product::PRICE_TYPE_FIXED, 'Green');
+        $product->global()->setCustomOptionValue($color, "blue", "0.25", Product::PRICE_TYPE_FIXED, 'Blue');
+
+        $product->global()->setCustomOptionTitle($frame, "Frame");
+        $product->global()->setCustomOptionValue($frame, "wood", "18.45", Product::PRICE_TYPE_FIXED, 'Wood');
+        $product->global()->setCustomOptionValue($frame, "iron", "25.95", Product::PRICE_TYPE_FIXED, 'Iron');
+
+        $product->global()->setCustomOptionTitle($extras, "Extras");
+        $product->global()->setCustomOptionValue($extras, "mayonaise", "0.05", Product::PRICE_TYPE_FIXED, 'Mayonaise');
+        $product->global()->setCustomOptionValue($extras, "ketchup", "0.05", Product::PRICE_TYPE_FIXED, 'Ketchup');
+        $product->global()->setCustomOptionValue($extras, "mosterd", "0.10", Product::PRICE_TYPE_FIXED, 'Mosterd');
+
+        $product->global()->setCustomOptionTitle($toppings, "Toppings");
+        $product->global()->setCustomOptionValue($toppings, "nuts", "0.10", Product::PRICE_TYPE_FIXED, 'Nuts');
+        $product->global()->setCustomOptionValue($toppings, "syrup", "0.10", Product::PRICE_TYPE_FIXED, 'Syrup');
+        $product->global()->setCustomOptionValue($toppings, "m-and-ms", "0.10", Product::PRICE_TYPE_FIXED, "M & M's");
 
         $importer->importSimpleProduct($product);
         $importer->flush();

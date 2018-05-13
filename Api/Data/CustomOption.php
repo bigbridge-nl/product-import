@@ -13,7 +13,7 @@ class CustomOption
     /** @var bool */
     protected $required;
 
-    /** @var string */
+    /** @var string|null */
     protected $sku;
 
     /** @var int */
@@ -28,13 +28,13 @@ class CustomOption
     /** @var int */
     protected $imageSizeY;
 
-    /** @var int */
-    protected $optionId;
-
     /** @var string[] */
     protected $valueSkus;
 
-    public function __construct(string $type, bool $required, string $sku, int $maxCharacters, $fileExtensions, int $imageSizeX, int $imageSizeY, array $valueSkus)
+    /** @var int|null */
+    protected $optionId;
+
+    public function __construct(string $type, bool $required, $sku, int $maxCharacters, $fileExtensions, int $imageSizeX, int $imageSizeY, array $valueSkus)
     {
         $this->type = $type;
         $this->required = $required;
@@ -63,9 +63,9 @@ class CustomOption
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getSku(): string
+    public function getSku()
     {
         return $this->sku;
     }
@@ -161,9 +161,9 @@ class CustomOption
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    public function getOptionId(): int
+    public function getOptionId()
     {
         return $this->optionId;
     }

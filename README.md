@@ -519,7 +519,7 @@ Create the option. Here are are examples with all possible simple types:
 
     $option1 = CustomOption::createCustomOptionTextField("inscription", true, 40);
     $option2 = CustomOption::createCustomOptionTextArea("note", true, 250);
-    $option3 = CustomOption::createCustomOptionFile("note", true, ".jpg .jpeg", 5000, 7000);
+    $option3 = CustomOption::createCustomOptionFile("id-card", true, ".jpg .jpeg", 5000, 7000);
     $option4 = CustomOption::createCustomOptionDate("date", true);
     $option5 = CustomOption::createCustomOptionDateTime("datetime", true);
     $option6 = CustomOption::createCustomOptionTime("time", true);
@@ -537,7 +537,7 @@ Set the price and the price type (fixed or a percentage)
 Create the option. Here are are examples with all possible multiple value types:
 
     $option1 = CustomOption::createCustomOptionDropDown(true, ["red", "green"]);
-    $option2 = CustomOption::createustomOptionRadioButtons(true, ["red", "green"]);
+    $option2 = CustomOption::createCustomOptionRadioButtons(true, ["red", "green"]);
     $option3 = CustomOption::createCustomOptionCheckboxGroup(true, ["red", "green"]);
     $option4 = CustomOption::createCustomOptionMultipleSelect(true, ["red", "green"]);
 

@@ -303,7 +303,7 @@ class MetaData
         $this->customOptionPriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_PRICE_TABLE);
         $this->customOptionTypeTitleTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_TITLE_TABLE);
         $this->customOptionTypePriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_PRICE_TABLE);
-        $this->customOptionValuePriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_VALUE_TABLE);
+        $this->customOptionTypeValueTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_VALUE_TABLE);
 
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
