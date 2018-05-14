@@ -57,8 +57,6 @@ The library only supports the insert/update mode. It does not remove attributes 
 
 ## Example Code
 
-### Basic
-
 The following example shows you a simple case of importing a simple product
 
     // load the import factory (preferably via DI)
@@ -385,7 +383,7 @@ A virtual product is exactly like a simple product. The only difference is the t
 
     $importer->importVirtualProduct($product);
 
-### Categories
+## Categories
 
 Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials". Separate category names with "/".
 
@@ -406,7 +404,7 @@ Make sure to update the imported category paths when you do.
 
     $config->categoryNamePathSeparator = "$";
 
-### Websites
+## Websites
 
 You can specify on which websites a product is used, by specifying their codes
 
@@ -416,7 +414,7 @@ or their ids
 
     $product->setWebsiteIds([1, 3, 4]);
 
-### Images
+## Images
 
 To import images, use this syntax
 
@@ -454,7 +452,23 @@ Again, this can be store on the store view level:
 
     $product->storeView('store_nl')->setImageGalleryInformation($image, "Grote pot pindakaas", 2, true);
 
-### Tier prices
+### Image caching
+
+Downloading images can be a slow process. That's why the library offers different strategies of dealing with images.
+
+The default strategy is to download all images.
+
+Before storing the product, each image is stored in a temporary location (pub/media/import) under a name that is the md5 hash of the source path, concatenated with the base name. For example
+
+    9c4b8815ec803006ec1fd691501ae3a4-duck1.jpg
+
+If the contents of your images never changes (i.e. different contents, but same name), you can use the strongest form of caching:
+
+    $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR;
+
+It checks if the file is in the temporary location, and if so, uses this one. The source location of the image is only checked if the image is not cached.
+
+## Tier prices
 
 Import all tier prices of a product with
 
@@ -467,7 +481,7 @@ The first tier price in this example contains a minimum quantity, a price, the n
 
 The second tier price does not contain a customer group and no website code. This signifies that all customer groups and all websites are affected by this tier price.
 
-### URL keys
+## URL keys
 
 The url_key of a product is used by Magento to create the url of the product page. The url_key is not added to a product automatically by the library. You must do so explicitly with
 

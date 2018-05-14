@@ -151,7 +151,7 @@ abstract class ProductStorage
         $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
 
         // create an array of products without errors
-        $validProducts = $this->collectValidProducts($products);
+        $validProducts = $this->collectValidProducts($products, $config);
 
         // in a "dry run" no actual imports to the database are done
         if (!$config->dryRun) {
@@ -206,11 +206,13 @@ abstract class ProductStorage
      * @param array $products
      * @return array
      */
-    public function collectValidProducts(array $products): array
+    public function collectValidProducts(array $products, ImportConfig $config): array
     {
         $validProducts = [];
 
         foreach ($products as $product) {
+
+            $this->imageStorage->moveImagesToTemporaryLocation($product, $config);
 
             // checks all attributes, changes $product->errors
             $this->validator->validate($product);

@@ -523,6 +523,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $config = new ImportConfig();
 
+# $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR;
+
         $config->resultCallbacks[] = function(Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };

@@ -91,4 +91,16 @@ class ImportConfig
      * @var string
      */
     public $categoryNamePathSeparator = '/';
+
+    /**
+     * Downloading images can be slow. Choose your image strategy:
+     * - force download: (default), images are downloaded over and over again
+     * - check import dir: checks the directory where images are cached, pub/media/import first
+     *
+     * @var string
+     */
+    public $existingImageStrategy = self::EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD;
+
+    const EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD = 'force-download';
+    const EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR = 'check-import-dir';
 }
