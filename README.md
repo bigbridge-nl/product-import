@@ -506,7 +506,7 @@ Magento allows you to specify unique "attributes" to a product that are applicab
 Some custom options have multiple values (dropdown, radio buttons, check box group, multiple select), others are simple.
 
 The sku of a product with custom options is formed by concatenating the product sku with the sku's of the custom options.
-For example: the sku of a product "oak-door" that has custom options "delivery-date" (a date, with sku "date") and "size" (a multiple select, with sku's "large", "medium") will be formed as "oak-door-date-medium" in the customers shopping cart.
+For example: the sku of a product "oak-door" that has two custom options: Delivery date (a date, with option sku "date") and "size" (a multiple select, with option sku's "large", "medium") will be formed as "oak-door-date-medium" in the customers shopping cart.
 
 Note 1: Magento has a long standing bug that does not allow you to specify title and price per store view, at least not via the backend. See [https://github.com/magento/magento2/issues/6165] This means that only global() is supported for the moment, not storeView().
 
@@ -550,7 +550,7 @@ Set the title
 
     $product->global()->setCustomOptionTitle($option1, "Color");
 
-Set the the sku, the price, the price type, and the title per value like this:
+Set the the option sku, the price, the price type, and the title per value like this:
 
     $product->global()->setCustomOptionValue($option1, "red", "1.00", Product::PRICE_TYPE_FIXED, 'Red');
     $product->global()->setCustomOptionValue($option1, "green", "1.20", Product::PRICE_TYPE_FIXED, 'Green');
