@@ -45,9 +45,14 @@ class ImageStorage
 
             $temporaryStoragePath = self::TEMP_PRODUCT_IMAGE_PATH . '/' . md5($image->getImagePath()) . '-' . basename($image->getImagePath());
 
-            if ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR) {
-                if (file_exists($temporaryStoragePath)) {
+
+            // temporary file exists?
+            if (file_exists($temporaryStoragePath)) {
+                if ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR) {
                     goto end;
+                } else {
+                    // contents of new file may be different, remove old file
+                    unlink($temporaryStoragePath);
                 }
             }
 
