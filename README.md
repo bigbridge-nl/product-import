@@ -84,7 +84,7 @@ The following example shows you a simple case of importing a simple product
 
     try {
 
-        $importer = $factory->create($config);
+        $importer = $factory->createImporter($config);
 
         foreach ($lines as $i => $line) {
 
