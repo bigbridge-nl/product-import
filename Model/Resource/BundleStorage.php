@@ -58,9 +58,10 @@ class BundleStorage extends ProductStorage
     {
         foreach ($products as $product) {
 
-            foreach ($product->getOptions() as $i => $option) {
+            if (($options = $product->getOptions()) !== null) {
+                foreach ($options as $i => $option) {
 
-                $this->db->execute("
+                    $this->db->execute("
                     INSERT INTO `{$this->metaData->bundleOptionTable}`
                     SET 
                         `parent_id` = ?,
@@ -68,16 +69,16 @@ class BundleStorage extends ProductStorage
                         `position` = ?,
                         `type` = ?
                 ", [
-                    $product->id,
-                    (int)$option->isRequired(),
-                    $i + 1,
-                    $option->getInputType()]);
+                        $product->id,
+                        (int)$option->isRequired(),
+                        $i + 1,
+                        $option->getInputType()]);
 
-                $option->id = $this->db->getLastInsertId();
+                    $option->id = $this->db->getLastInsertId();
 
-                foreach ($option->getSelections() as $j => $selection) {
+                    foreach ($option->getSelections() as $j => $selection) {
 
-                    $this->db->execute("
+                        $this->db->execute("
                         INSERT INTO `{$this->metaData->bundleSelectionTable}`
                         SET
                             `option_id` = ?,
@@ -90,15 +91,16 @@ class BundleStorage extends ProductStorage
                             `selection_qty` = ?,
                             `selection_can_change_qty` = ?
                     ", [
-                        $option->id,
-                        $product->id,
-                        $selection->getProductId(),
-                        $j + 1,
-                        (int)$selection->isDefault(),
-                        $selection->getPriceType(),
-                        $selection->getPriceValue(),
-                        $selection->getQuantity(),
-                        (int)$selection->isCanChangeQuantity()]);
+                            $option->id,
+                            $product->id,
+                            $selection->getProductId(),
+                            $j + 1,
+                            (int)$selection->isDefault(),
+                            $selection->getPriceType(),
+                            $selection->getPriceValue(),
+                            $selection->getQuantity(),
+                            (int)$selection->isCanChangeQuantity()]);
+                    }
                 }
             }
 
@@ -202,29 +204,31 @@ class BundleStorage extends ProductStorage
 
         foreach ($products as $product) {
 
-            $serialized = '';
+            if (($options = $product->getOptions()) !== null) {
 
-            foreach ($product->getOptions() as $option) {
-                $serialized .= '*' . (int)$option->isRequired() . '-' . $option->getInputType();
-            }
-            foreach ($product->getOptions() as $option) {
-                foreach ($option->getSelections() as $selection) {
-                    $serialized .= '*' . $selection->getProductId() .
-                        '-' . (int)$selection->isDefault() .
-                        '-' . $selection->getPriceType() .
-                        '-' . sprintf('%.4f', $selection->getPriceValue()) .
-                        '-' . sprintf('%.4f', $selection->getQuantity()) . '-' .
-                        (int)$selection->isCanChangeQuantity();
+                $serialized = '';
+                foreach ($options as $option) {
+                    $serialized .= '*' . (int)$option->isRequired() . '-' . $option->getInputType();
                 }
-            }
-            foreach ($product->getStoreViews() as $storeView) {
-                foreach ($storeView->getOptionInformations() as $optionInformation) {
-                    $serialized .= '*' . $optionInformation->getTitle();
+                foreach ($options as $option) {
+                    foreach ($option->getSelections() as $selection) {
+                        $serialized .= '*' . $selection->getProductId() .
+                            '-' . (int)$selection->isDefault() .
+                            '-' . $selection->getPriceType() .
+                            '-' . sprintf('%.4f', $selection->getPriceValue()) .
+                            '-' . sprintf('%.4f', $selection->getQuantity()) . '-' .
+                            (int)$selection->isCanChangeQuantity();
+                    }
                 }
-            }
+                foreach ($product->getStoreViews() as $storeView) {
+                    foreach ($storeView->getOptionInformations() as $optionInformation) {
+                        $serialized .= '*' . $optionInformation->getTitle();
+                    }
+                }
 
-            if ($productInfo[$product->id] !== $serialized) {
-                $changed[] = $product;
+                if ($productInfo[$product->id] !== $serialized) {
+                    $changed[] = $product;
+                }
             }
         }
 

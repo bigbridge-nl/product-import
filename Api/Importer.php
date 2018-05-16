@@ -412,9 +412,11 @@ class Importer
     protected function createBundleProductPlaceholders(BundleProduct $product): array
     {
         $selectionSkus = [];
-        foreach ($product->getOptions() as $option) {
-            foreach ($option->getSelections() as $selection) {
-                $selectionSkus[] = $selection->getSku();
+        if (($options = $product->getOptions()) !== null) {
+            foreach ($options as $option) {
+                foreach ($option->getSelections() as $selection) {
+                    $selectionSkus[] = $selection->getSku();
+                }
             }
         }
 

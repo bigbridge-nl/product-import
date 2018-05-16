@@ -12,8 +12,8 @@ class BundleProduct extends Product
     const INPUT_TYPE_CHECKBOX = 'checkbox';
     const INPUT_TYPE_MULTIPLE_SELECT = 'multi';
 
-    /** @var BundleProductOption[] */
-    protected $options = [];
+    /** @var BundleProductOption[]|null */
+    protected $options = null;
 
     public function getType()
     {
@@ -71,21 +71,17 @@ class BundleProduct extends Product
     }
 
     /**
-     * @param string $inputType Use the INPUT_TYPE constants of this class
-     * @param bool $required
-     * @return BundleProductOption
+     * @param BundleProductOption[] $options
      */
-    public function addOption(string $inputType, bool $required)
+    public function setOptions(array $options)
     {
-        $option = new BundleProductOption($inputType, $required);
-        $this->options[] = $option;
-        return $option;
+        $this->options = $options;
     }
 
     /**
-     * @return BundleProductOption[]
+     * @return BundleProductOption[]|null
      */
-    public function getOptions(): array
+    public function getOptions()
     {
         return $this->options;
     }

@@ -307,7 +307,9 @@ The values used here are also the defaults that will be used if no values are se
 
 Add some options with
 
-    $option = $bundle->addOption(BundleProduct::INPUT_TYPE_DROP_DOWN, true);
+    $bundle->setOptions([
+        $option = new BundleProductOption(BundleProduct::INPUT_TYPE_DROP_DOWN, true)
+    ]);
 
 Note that an option object is returned. Use this object to add products to the option:
 

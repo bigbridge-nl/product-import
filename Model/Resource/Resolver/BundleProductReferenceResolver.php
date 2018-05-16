@@ -43,11 +43,13 @@ class BundleProductReferenceResolver extends ReferenceResolver
         // collect all selection skus
         $selectionSkus = [];
         foreach ($products as $product) {
-            foreach ($product->getOptions() as $option) {
-                foreach ($option->getSelections() as $selection) {
-                    $selectionSkus[] = $selection->getSku();
-                }
+            if (($options = $product->getOptions()) !== null) {
+                foreach ($options as $option) {
+                    foreach ($option->getSelections() as $selection) {
+                        $selectionSkus[] = $selection->getSku();
+                    }
 
+                }
             }
         }
 
@@ -58,15 +60,17 @@ class BundleProductReferenceResolver extends ReferenceResolver
 
         // assign these ids
         foreach ($products as $product) {
-            foreach ($product->getOptions() as $option) {
-                foreach ($option->getSelections() as $selection) {
+            if (($options = $product->getOptions()) !== null) {
+                foreach ($options as $option) {
+                    foreach ($option->getSelections() as $selection) {
 
-                    $sku = $selection->getSku();
+                        $sku = $selection->getSku();
 
-                    if (array_key_exists($sku, $sku2id)) {
-                        $selection->setProductId($sku2id[$sku]);
-                    } else {
-                        throw new Exception("Bundle product selection with sku " . $sku . " should have been created before, but it cannot be found");
+                        if (array_key_exists($sku, $sku2id)) {
+                            $selection->setProductId($sku2id[$sku]);
+                        } else {
+                            throw new Exception("Bundle product selection with sku " . $sku . " should have been created before, but it cannot be found");
+                        }
                     }
                 }
             }

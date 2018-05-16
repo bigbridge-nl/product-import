@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\BundleProductOption;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\CustomOption;
 use BigBridge\ProductImport\Api\Data\DownloadLink;
@@ -1607,18 +1608,21 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setPriceView(BundleProductStoreView::PRICE_VIEW_PRICE_RANGE);
         $global->setShipmentType(BundleProductStoreView::SHIPMENT_TYPE_TOGETHER);
 
-        $option = $bundle->addOption(BundleProduct::INPUT_TYPE_DROP_DOWN, true);
-        $option->addProductSelection('monitor1-product-import', true, 1, '25.00', '1', false);
-        $option->addProductSelection('monitor2-product-import', false, 0, '300.00', '2', true);
+        $bundle->setOptions([
+            $option1 = new BundleProductOption(BundleProduct::INPUT_TYPE_DROP_DOWN, true),
+            $option2 = new BundleProductOption(BundleProduct::INPUT_TYPE_MULTIPLE_SELECT, false)
+        ]);
 
-        $global->setOptionTitle($option, 'Monitor');
-        $bundle->storeView('default')->setOptionTitle($option, 'Monitor A');
+        $option1->addProductSelection('monitor1-product-import', true, 1, '25.00', '1', false);
+        $option1->addProductSelection('monitor2-product-import', false, 0, '300.00', '2', true);
 
-        $option = $bundle->addOption(BundleProduct::INPUT_TYPE_MULTIPLE_SELECT, false);
-        $option->addProductSelection('keyboard-product-import', false, 2, '200.00', '2', true);
+        $global->setOptionTitle($option1, 'Monitor');
+        $bundle->storeView('default')->setOptionTitle($option1, 'Monitor A');
 
-        $global->setOptionTitle($option, 'Keyboard');
-        $bundle->storeView('default')->setOptionTitle($option, 'Keyboard A');
+        $option2->addProductSelection('keyboard-product-import', false, 2, '200.00', '2', true);
+
+        $global->setOptionTitle($option2, 'Keyboard');
+        $bundle->storeView('default')->setOptionTitle($option2, 'Keyboard A');
 
         $importer->importBundleProduct($bundle);
         $importer->flush();
@@ -1640,7 +1644,11 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         // update with change
 
-        $bundle->addOption(BundleProduct::INPUT_TYPE_RADIO_BUTTONS, false);
+        $bundle->setOptions([
+            $option1,
+            $option2,
+            new BundleProductOption(BundleProduct::INPUT_TYPE_RADIO_BUTTONS, false)
+        ]);
 
         $importer->importBundleProduct($bundle);
         $importer->flush();
