@@ -2,11 +2,11 @@
 
 Imports product data into Magento 2 via direct database access.
 
+My name is Patrick van Bergen, I created this library because I needed product import to be fast.
+
 ## Warning!
 
-This is a new library. It has not been used except by its own tests. The chance you find a bug is big. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will help you as fast as I can.
-
-My name is Patrick van Bergen, I created this library because I needed product import to be fast. I am from the Magento 2 age. I have not done much Magento 1 programming so I am taking a new approach to importing, but missing a lot of the Magento 1 era common knowledge. This means that I am reinventing the wheel at many points.
+This is a new library. It has not been used except by its own tests. The chance you find bugs is real. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will try to help you out.
 
 ## Important
 
@@ -408,6 +408,8 @@ Make sure to update the imported category paths when you do.
 
     $config->categoryNamePathSeparator = "$";
 
+Note: the library only adds and updates categories. It does not remove categories that are not mentioned in the set call.
+
 ## Websites
 
 You can specify on which websites a product is used, by specifying their codes
@@ -455,6 +457,8 @@ If you want to add a label, specify the gallery position, and show/hide it on th
 Again, this can be store on the store view level:
 
     $product->storeView('store_nl')->setImageGalleryInformation($image, "Grote pot pindakaas", 2, true);
+
+Note: the library does not remove existing images that are not mentioned by any of your addImage calls.
 
 ### Image caching
 
