@@ -7,11 +7,11 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class DownloadableProduct extends SimpleProduct
 {
-    /** @var DownloadLink[] */
-    protected $downloadLinks = [];
+    /** @var DownloadLink[]|null */
+    protected $downloadLinks = null;
 
-    /** @var DownloadSample[] */
-    protected $downloadSamples = [];
+    /** @var DownloadSample[]|null */
+    protected $downloadSamples = null;
 
     public function getType()
     {
@@ -58,32 +58,34 @@ class DownloadableProduct extends SimpleProduct
         return $this->storeViews;
     }
 
-    public function addDownloadLink(string $fileOrUrl, int $numberOfDownloads, bool $isShareable, string $sampleLink = '')
+    /**
+     * @param DownloadLink[] $links
+     */
+    public function setDownloadLinks(array $links)
     {
-        $link = new DownloadLink($fileOrUrl, $numberOfDownloads, $isShareable, $sampleLink);
-        $this->downloadLinks[] = $link;
-        return $link;
-    }
-
-    public function addDownloadSample(string $fileOrUrl)
-    {
-        $sample = new DownloadSample($fileOrUrl);
-        $this->downloadSamples[] = $sample;
-        return $sample;
+        $this->downloadLinks = $links;
     }
 
     /**
-     * @return DownloadLink[]
+     * @param DownloadSample[] $samples
      */
-    public function getDownloadLinks(): array
+    public function setDownloadSamples(array $samples)
+    {
+        $this->downloadSamples = $samples;
+    }
+
+    /**
+     * @return DownloadLink[]|null
+     */
+    public function getDownloadLinks()
     {
         return $this->downloadLinks;
     }
 
     /**
-     * @return DownloadSample[]
+     * @return DownloadSample[]|null
      */
-    public function getDownloadSamples(): array
+    public function getDownloadSamples()
     {
         return $this->downloadSamples;
     }

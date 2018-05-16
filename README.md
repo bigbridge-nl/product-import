@@ -340,7 +340,9 @@ Add a link (or several links). Add a url or a file, specify the number of downlo
 
 If a file or url starts with "http://", "https://" or "//:" (case insensitive) it is considered a url. This type is stored in the database.
 
-    $link1 = $downloadable->addDownloadLink('http://download-resources.net/morlord-setup.exe', 0, true, "morlord sample.jpg");
+    $downloadable->setDownloadLinks([
+        $link1 = new DownloadLink('http://download-resources.net/morlord-setup.exe', 0, true, "morlord sample.jpg")
+    ]);
 
 Create a global title and price for the link. Use the link object just created.
 
@@ -357,7 +359,9 @@ The "sort order" of the links is determined by the order in which you add the li
 
 Create a sample with a file or a url:
 
-    $sample1 = $downloadable->addDownloadSample("morlord sample 2.jpg");
+    $downloadable->setDownloadSamples([
+        $sample1 =  new DownloadSample("morlord sample 2.jpg")
+    ]);
 
 Add a global title for the sample
 
@@ -372,8 +376,6 @@ The "sort order" of the samples is determined by the order in which you add the 
 Import the downloadable product
 
     $importer->importDownloadableProduct($downloadable);
-
-Note: Links and samples of downloadable products are fully removed and re-added on each update.
 
 ## Virtual products
 

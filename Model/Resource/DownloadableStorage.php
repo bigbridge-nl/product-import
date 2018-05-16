@@ -57,12 +57,24 @@ class DownloadableStorage extends ProductStorage
         $this->insertLinksAndSamples($updateProducts);
     }
 
+    /**
+     * @param DownloadableProduct[] $products
+     */
     protected function removeLinksAndSamples(array $products)
     {
-        $productIds = array_column($products, 'id');
+        $linkProductIds = [];
+        $sampleProductIds = [];
+        foreach ($products as $product) {
+            if ($product->getDownloadLinks() !== null) {
+                $linkProductIds[] = $product->id;
+            }
+            if ($product->getDownloadSamples() !== null) {
+                $sampleProductIds[] = $product->id;
+            }
+        }
 
-        $this->db->deleteMultiple($this->metaData->downloadableLinkTable, 'product_id', $productIds);
-        $this->db->deleteMultiple($this->metaData->downloadableSampleTable, 'product_id', $productIds);
+        $this->db->deleteMultiple($this->metaData->downloadableLinkTable, 'product_id', $linkProductIds);
+        $this->db->deleteMultiple($this->metaData->downloadableSampleTable, 'product_id', $sampleProductIds);
     }
 
     /**
@@ -76,69 +88,76 @@ class DownloadableStorage extends ProductStorage
 
         // insert links and samples
         foreach ($products as $product) {
-            foreach ($product->getDownloadLinks() as $i => $downloadLink) {
 
-                $order = $i + 1;
-                $isShareable = (int)$downloadLink->isShareable();
-                $numberOfDownloads = $downloadLink->getNumberOfDownloads();
+            if (($links = $product->getDownloadLinks()) !== null) {
 
-                list($linkUrl, $linkFile, $linkType) = $this->interpretFileOrUrl(
-                    $downloadLink->getFileOrUrl(), $downloadLink->getTemporaryStoragePathLink(), self::LINKS_PATH);
+                foreach ($links as $i => $downloadLink) {
 
-                list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
-                    $downloadLink->getSampleFileOrUrl(), $downloadLink->getTemporaryStoragePathSample(), self::LINK_SAMPLES_PATH);
+                    $order = $i + 1;
+                    $isShareable = (int)$downloadLink->isShareable();
+                    $numberOfDownloads = $downloadLink->getNumberOfDownloads();
 
-                $this->db->execute("
-                    INSERT INTO `" . $this->metaData->downloadableLinkTable . "`
-                    SET 
-                        `product_id` = ?, 
-                        `sort_order` = ?, 
-                        `number_of_downloads` = ?, 
-                        `is_shareable` = ?, 
-                        `link_url` = ?, 
-                        `link_file` = ?,
-                        `link_type` = ?, 
-                        `sample_url` = ?, 
-                        `sample_file` = ?,
-                        `sample_type` = ?
-                ", [
-                    $product->id,
-                    $order,
-                    $numberOfDownloads,
-                    $isShareable,
-                    $linkUrl,
-                    $linkFile,
-                    $linkType,
-                    $sampleUrl,
-                    $sampleFile,
-                    $sampleType
-                ]);
+                    list($linkUrl, $linkFile, $linkType) = $this->interpretFileOrUrl(
+                        $downloadLink->getFileOrUrl(), $downloadLink->getTemporaryStoragePathLink(), self::LINKS_PATH);
 
-                $downloadLink->setId($this->db->getLastInsertId());
+                    list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
+                        $downloadLink->getSampleFileOrUrl(), $downloadLink->getTemporaryStoragePathSample(), self::LINK_SAMPLES_PATH);
+
+                    $this->db->execute("
+                        INSERT INTO `" . $this->metaData->downloadableLinkTable . "`
+                        SET 
+                            `product_id` = ?, 
+                            `sort_order` = ?, 
+                            `number_of_downloads` = ?, 
+                            `is_shareable` = ?, 
+                            `link_url` = ?, 
+                            `link_file` = ?,
+                            `link_type` = ?, 
+                            `sample_url` = ?, 
+                            `sample_file` = ?,
+                            `sample_type` = ?
+                    ", [
+                        $product->id,
+                        $order,
+                        $numberOfDownloads,
+                        $isShareable,
+                        $linkUrl,
+                        $linkFile,
+                        $linkType,
+                        $sampleUrl,
+                        $sampleFile,
+                        $sampleType
+                    ]);
+
+                    $downloadLink->setId($this->db->getLastInsertId());
+                }
             }
 
-            foreach ($product->getDownloadSamples() as $i => $downloadSample) {
+            if (($samples = $product->getDownloadSamples()) !== null) {
 
-                list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
-                    $downloadSample->getFileOrUrl(), $downloadSample->getTemporaryStoragePathSample(), self::SAMPLES_PATH);
+                foreach ($samples as $i => $downloadSample) {
 
-                $this->db->execute("
-                    INSERT INTO `" . $this->metaData->downloadableSampleTable . "`
-                    SET 
-                        `product_id` = ?, 
-                        `sort_order` = ?, 
-                        `sample_url` = ?, 
-                        `sample_file` = ?,
-                        `sample_type` = ?
-                ", [
-                    $product->id,
-                    $i + 1,
-                    $sampleUrl,
-                    $sampleFile,
-                    $sampleType
-                ]);
+                    list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
+                        $downloadSample->getFileOrUrl(), $downloadSample->getTemporaryStoragePathSample(), self::SAMPLES_PATH);
 
-                $downloadSample->setId($this->db->getLastInsertId());
+                    $this->db->execute("
+                        INSERT INTO `" . $this->metaData->downloadableSampleTable . "`
+                        SET 
+                            `product_id` = ?, 
+                            `sort_order` = ?, 
+                            `sample_url` = ?, 
+                            `sample_file` = ?,
+                            `sample_type` = ?
+                    ", [
+                        $product->id,
+                        $i + 1,
+                        $sampleUrl,
+                        $sampleFile,
+                        $sampleType
+                    ]);
+
+                    $downloadSample->setId($this->db->getLastInsertId());
+                }
             }
         }
 

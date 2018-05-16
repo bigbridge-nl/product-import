@@ -5,6 +5,8 @@ namespace BigBridge\ProductImport\Test\Integration;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\CustomOption;
+use BigBridge\ProductImport\Api\Data\DownloadLink;
+use BigBridge\ProductImport\Api\Data\DownloadSample;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -1464,19 +1466,25 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $downloadable->global()->setLinksTitle("Links");
         $downloadable->global()->setSamplesTitle("Samples");
 
-        $link1 = $downloadable->addDownloadLink('http://download-resources.net/morlord-setup.exe', 0, true);
+        $downloadable->setDownloadLinks([
+            $link1 = new DownloadLink('http://download-resources.net/morlord-setup.exe', 0, true),
+            $link2 = new DownloadLink(__DIR__ . '/../images/duck1.jpg', 10, false, __DIR__ . '/../images/duck2.png')
+        ]);
+
         $downloadable->global()->setDownloadLinkInformation($link1, "Morlord The Game", "12.95");
         $downloadable->storeView('default')->setDownloadLinkInformation($link1, "Morlord Het Spel", "13.45");
 
-        $link2 = $downloadable->addDownloadLink(__DIR__ . '/../images/duck1.jpg', 10, false, __DIR__ . '/../images/duck2.png');
         $downloadable->global()->setDownloadLinkInformation($link2, "Morlord The Game 2", "22.95");
         $downloadable->storeView('default')->setDownloadLinkInformation($link2, "Morlord Het Spel 2", "23.45");
 
-        $sample1 = $downloadable->addDownloadSample(__DIR__ . '/../images/duck3.png');
+        $downloadable->setDownloadSamples([
+            $sample1 = new DownloadSample(__DIR__ . '/../images/duck3.png'),
+            $sample2 = new DownloadSample('https://download-resources.net/morlord-sample.pdf')
+        ]);
+
         $downloadable->global()->setDownloadSampleInformation($sample1, "Morlord The Game - Example");
         $downloadable->storeView('default')->setDownloadSampleInformation($sample1, "Morlord Het Spel - Voorbeeld");
 
-        $sample2 = $downloadable->addDownloadSample('https://download-resources.net/morlord-sample.pdf');
         $downloadable->global()->setDownloadSampleInformation($sample2, "Morlord The Game - Example 2");
         $downloadable->storeView('default')->setDownloadSampleInformation($sample2, "Morlord Het Spel - Voorbeeld 2");
 

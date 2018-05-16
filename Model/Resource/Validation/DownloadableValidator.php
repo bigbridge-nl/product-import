@@ -22,17 +22,21 @@ class DownloadableValidator extends Validator
 
     protected function validateLinkImages(DownloadableProduct $product)
     {
-        foreach ($product->getDownloadLinks() as $downloadLink) {
-            $fileOrUrl = $downloadLink->getFileOrUrl();
-            $downloadLink->setTemporaryStoragePathLink($this->getTemporaryStoragePath($product, $fileOrUrl));
+        if (($links = $product->getDownloadLinks()) !== null) {
+            foreach ($links as $downloadLink) {
+                $fileOrUrl = $downloadLink->getFileOrUrl();
+                $downloadLink->setTemporaryStoragePathLink($this->getTemporaryStoragePath($product, $fileOrUrl));
 
-            $sampleFileOrUrl = $downloadLink->getSampleFileOrUrl();
-            $downloadLink->setTemporaryStoragePathSample($this->getTemporaryStoragePath($product, $sampleFileOrUrl));
+                $sampleFileOrUrl = $downloadLink->getSampleFileOrUrl();
+                $downloadLink->setTemporaryStoragePathSample($this->getTemporaryStoragePath($product, $sampleFileOrUrl));
+            }
         }
 
-        foreach ($product->getDownloadSamples() as $downloadSample) {
-            $sampleFileOrUrl = $downloadSample->getFileOrUrl();
-            $downloadSample->setTemporaryStoragePathSample($this->getTemporaryStoragePath($product, $sampleFileOrUrl));
+        if (($samples = $product->getDownloadSamples()) !== null) {
+            foreach ($samples as $downloadSample) {
+                $sampleFileOrUrl = $downloadSample->getFileOrUrl();
+                $downloadSample->setTemporaryStoragePathSample($this->getTemporaryStoragePath($product, $sampleFileOrUrl));
+            }
         }
     }
 

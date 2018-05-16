@@ -171,6 +171,10 @@ https://sourceforge.net/p/magmi/patches/23/
 All images are places in a temporary location in the validation phase, before being processed  further. This ensures that all images are valid when being processed.
 Make sure to remove all images from their temporary location later.
 
+### Configurable variants
+
+Configurable variants are specified as complete products, not just sku's, even though that would be more flexible. The variant products are used in the validation process.
+
 ### Query speed
 
 I use queries with many inserts / updates at once, because this is faster than individual queries.
