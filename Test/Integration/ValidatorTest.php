@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\CustomOption;
 use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\ImportConfig;
 use IntlChar;
 use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
@@ -164,10 +165,15 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testImageValidation()
     {
-        /** @var Validator $validator */
-        $validator = ObjectManager::getInstance()->get(Validator::class);
+        /** @var ImporterFactory $factory */
+        $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        $config = new ImportConfig();
+        $importer = $factory->createImporter($config);
 
         $tests = [
             [__DIR__ . "/../images/duck1.jpg", ""],
@@ -188,7 +194,9 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
             $global->setPrice("123.00");
             $product->addImage($test[0]);
 
-            $validator->validate($product);
+            $importer->importSimpleProduct($product);
+            $importer->flush();
+
             $this->assertEquals($test[1], implode('; ', $product->getErrors()));
         }
     }
@@ -358,7 +366,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
 
         $validator->validate($product);
 
-        $this->assertSame(["Custom option with values [red, green, blue] has an incorrect number of values in store view 'global'"], $product->getErrors());
+        $this->assertSame(["Custom option with values [red, green, blue] has an incorrect number of values in store view 'admin'"], $product->getErrors());
 
     }
 }
