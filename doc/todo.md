@@ -1,52 +1,55 @@
 # Todo
 
-## Several todo
+## Functionality
 
-* uniformization of the API; (add / set)
-* make explicit and/or optional which properties are add-only and which are rewritten (category-ids, for example)
-* all attributes in an array: collect products per attribute to save time
-* url_key is a default attribute?
+* deleting attribute values
+* allow delete products
 * are there attributes with site-scope? how to import / update?
-* Solve todo's in code
-* use var/import as temporary image directory, not /etc
-* downloading http images: perform a HEAD request to check if the image size (or hash?) has changed (config option)
+* allow change type of updated product (needed for placeholders!)
 * url_rewrite: make sure the translated url_keys of the categories are used
+* import configurables: variants don't need to be simples
+* Solve todo's in code
+
+## Speed
+
+* downloading http images: perform a HEAD request to check if the image size (or hash?) has changed (config option)
+* all attributes in an array: collect products per attribute to save time
+
+# Validation
+
+* create unresolved attributes for all
+* check attribute value uniqueness
+* check if reference ids exist
+* check for tierprice duplicates and make sure the import still works
+* some decimal numbers may not be negative
+* import category-ids: check if the ids exist
+
+# Defaults
+
+* url_key is a default attribute?
+* by default add to all websites?
 
 ## CSV import
 
 * Support import of Magento export csv
 * Update table import_history
-
-## To be supported
-
 * csv import
 * xlsx import
 * rest request
-* allow delete products
-* deleting attribute values
-* by default add to all websites?
-* speed test calibration tool
-* create unresolved attributes for all
-* check attribute value uniqueness
-* check if reference ids exist
-* check for tierprice duplicates and make sure the import still works
-* allow change type of updated product (needed for placeholders!)
-* some decimal numbers may not be negative
-* import category-ids: check if the ids exist
+
+## Extra
+
 * an url-rewrite tool
 
 ## Testing
 
+* speed test calibration tool
 - test with minimal products should be very fast (is a check that no unnecessary code is executed)
 * tests may only be run in a special shop (not production)
 - remove created test-records
 - test with 500.000 records in the database
 
 ## Notes
-
-Check ho_import, for compatibility
-
-Check other importers for features and code
 
 * If category_ids contains an id that does not belong to a category, it is discarded without an error message
 * Think about very long field values (not crossing default 1MB query size?)
