@@ -328,11 +328,19 @@ class ProductStorage
         $insertsWithOptions = [];
         $updatesWithOptions = [];
 
+        $insertsByType = $updatesByType = [
+            DownloadableProduct::TYPE_DOWNLOADABLE => [],
+            GroupedProduct::TYPE_GROUPED => [],
+            BundleProduct::TYPE_BUNDLE => [],
+            ConfigurableProduct::TYPE_CONFIGURABLE => [],
+        ];
+
         foreach ($validProducts as $product) {
 
             // collect valid new and existing products
             if ($product->id !== null) {
                 $validUpdateProducts[] = $product;
+                $updatesByType[$product->getType()][] = $product;
 
                 if ($product->getCustomOptions() !== null) {
                     $updatesWithOptions[] = $product;
@@ -340,6 +348,7 @@ class ProductStorage
 
             } else {
                 $validInsertProducts[] = $product;
+                $insertsByType[$product->getType()][] = $product;
 
                 if ($product->getCustomOptions() !== null) {
                     $insertsWithOptions[] = $product;
@@ -376,14 +385,14 @@ class ProductStorage
             $this->referenceResolver->resolveProductReferences($validUpdateProducts, $config);
 
             foreach ($productsByAttribute as $eavAttribute => $products) {
-                $this->insertEavAttribute($products, $eavAttribute);
+                $this->productEntityStorage->insertEavAttribute($products, $eavAttribute);
             }
 
             $this->customOptionStorage->insertCustomOptions($insertsWithOptions);
             $this->customOptionStorage->updateCustomOptions($updatesWithOptions);
 
-            $this->insertCategoryIds($productsWithCategories);
-            $this->insertWebsiteIds($productsWithWebsites);
+            $this->productEntityStorage->insertCategoryIds($productsWithCategories);
+            $this->productEntityStorage->insertWebsiteIds($productsWithWebsites);
 
             $this->stockItemStorage->storeStockItems($validProducts);
 
@@ -399,7 +408,10 @@ class ProductStorage
             $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);
             $this->urlRewriteStorage->updateRewrites($validUpdateProducts, $existingValues, $valueSerializer);
 
-            $this->performTypeSpecificStorage($validInsertProducts, $validUpdateProducts);
+            $this->downloadableStorage->performTypeSpecificStorage($insertsByType[DownloadableProduct::TYPE_DOWNLOADABLE], $updatesByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
+            $this->groupedStorage->performTypeSpecificStorage($insertsByType[GroupedProduct::TYPE_GROUPED], $updatesByType[GroupedProduct::TYPE_GROUPED]);
+            $this->bundleStorage->performTypeSpecificStorage($insertsByType[BundleProduct::TYPE_BUNDLE], $updatesByType[BundleProduct::TYPE_BUNDLE]);
+            $this->configurableStorage->performTypeSpecificStorage($insertsByType[ConfigurableProduct::TYPE_CONFIGURABLE], $updatesByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
 
             $this->db->execute("COMMIT");
 
@@ -411,33 +423,6 @@ class ProductStorage
             // let the application handle the exception
             throw $e;
         }
-    }
-
-    /**
-     * @param Product[] $insertProducts
-     * @param Product[] $updateProducts
-     */
-    public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
-    {
-        $insertsByType = $updatesByType = [
-            DownloadableProduct::TYPE_DOWNLOADABLE => [],
-            GroupedProduct::TYPE_GROUPED => [],
-            BundleProduct::TYPE_BUNDLE => [],
-            ConfigurableProduct::TYPE_CONFIGURABLE => [],
-        ];
-
-        foreach ($insertProducts as $product) {
-           $insertsByType[$product->getType()][] = $product;
-        }
-
-        foreach ($updateProducts as $product) {
-            $updatesByType[$product->getType()][] = $product;
-        }
-
-        $this->downloadableStorage->performTypeSpecificStorage($insertsByType[DownloadableProduct::TYPE_DOWNLOADABLE], $updatesByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
-        $this->groupedStorage->performTypeSpecificStorage($insertsByType[GroupedProduct::TYPE_GROUPED], $updatesByType[GroupedProduct::TYPE_GROUPED]);
-        $this->bundleStorage->performTypeSpecificStorage($insertsByType[BundleProduct::TYPE_BUNDLE], $updatesByType[BundleProduct::TYPE_BUNDLE]);
-        $this->configurableStorage->performTypeSpecificStorage($insertsByType[ConfigurableProduct::TYPE_CONFIGURABLE], $updatesByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
     }
 
     protected function getExistingProductValues(array $products)
@@ -472,76 +457,5 @@ class ProductStorage
         }
 
         return $data;
-    }
-
-    /**
-     * @param ProductStoreView[] $storeViews
-     * @param string $eavAttribute
-     */
-    protected function insertEavAttribute(array $storeViews, string $eavAttribute)
-    {
-        $attributeInfo = $this->metaData->productEavAttributeInfo[$eavAttribute];
-        $tableName = $attributeInfo->tableName;
-        $attributeId = $attributeInfo->attributeId;
-
-        if ($attributeInfo->backendType == MetaData::TYPE_TEXT) {
-            $magnitude = Magento2DbConnection::_128_KB;
-        } else {
-            $magnitude = Magento2DbConnection::_1_KB;
-        }
-
-        $values = [];
-
-        foreach ($storeViews as $storeView) {
-            $values[] = $storeView->parent->id;
-            $values[] = $attributeId;
-            $values[] = $storeView->getStoreViewId();
-            $values[] = $storeView->getAttribute($eavAttribute);
-        }
-
-        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values,
-            $magnitude, "`value` = VALUES(`value`)");
-    }
-
-    /**
-     * @param Product[] $products
-     */
-    protected function insertCategoryIds(array $products)
-    {
-        $values = [];
-
-        foreach ($products as $product) {
-            foreach ($product->getCategoryIds() as $categoryId) {
-                $values[] = $categoryId;
-                $values[] = $product->id;
-            }
-        }
-
-        // IGNORE serves two purposes:
-        // 1. do not fail if the product-category link already existed
-        // 2. do not fail if the category does not exist
-
-        $this->db->insertMultipleWithIgnore($this->metaData->categoryProductTable, ['category_id', 'product_id'], $values, Magento2DbConnection::_1_KB);
-    }
-
-    /**
-     * @param Product[] $products
-     */
-    protected function insertWebsiteIds(array $products)
-    {
-        $values = [];
-
-        foreach ($products as $product) {
-            foreach ($product->getWebsiteIds() as $websiteId) {
-                $values[] = $product->id;
-                $values[] = $websiteId;
-            }
-        }
-
-        // IGNORE serves two purposes:
-        // 1. do not fail if the product-website link already existed
-        // 2. do not fail if the website does not exist
-
-        $this->db->insertMultipleWithIgnore($this->metaData->productWebsiteTable, ['product_id', 'website_id'], $values, Magento2DbConnection::_1_KB);
     }
 }

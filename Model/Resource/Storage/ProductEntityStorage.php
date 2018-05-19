@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -67,9 +68,6 @@ class ProductEntityStorage
 
     /**
      * @param Product[] $products
-     * @param string $type
-     * @param bool $hasOptions
-     * @param bool $requiredOptions
      */
     public function insertMainTable(array $products)
     {
@@ -143,5 +141,76 @@ class ProductEntityStorage
 
         $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'sku', 'updated_at'], $otherUpdates,
             Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `updated_at`= VALUES(`updated_at`)");
+    }
+
+    /**
+     * @param ProductStoreView[] $storeViews
+     * @param string $eavAttribute
+     */
+    public function insertEavAttribute(array $storeViews, string $eavAttribute)
+    {
+        $attributeInfo = $this->metaData->productEavAttributeInfo[$eavAttribute];
+        $tableName = $attributeInfo->tableName;
+        $attributeId = $attributeInfo->attributeId;
+
+        if ($attributeInfo->backendType == MetaData::TYPE_TEXT) {
+            $magnitude = Magento2DbConnection::_128_KB;
+        } else {
+            $magnitude = Magento2DbConnection::_1_KB;
+        }
+
+        $values = [];
+
+        foreach ($storeViews as $storeView) {
+            $values[] = $storeView->parent->id;
+            $values[] = $attributeId;
+            $values[] = $storeView->getStoreViewId();
+            $values[] = $storeView->getAttribute($eavAttribute);
+        }
+
+        $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values,
+            $magnitude, "`value` = VALUES(`value`)");
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    public function insertCategoryIds(array $products)
+    {
+        $values = [];
+
+        foreach ($products as $product) {
+            foreach ($product->getCategoryIds() as $categoryId) {
+                $values[] = $categoryId;
+                $values[] = $product->id;
+            }
+        }
+
+        // IGNORE serves two purposes:
+        // 1. do not fail if the product-category link already existed
+        // 2. do not fail if the category does not exist
+
+        $this->db->insertMultipleWithIgnore($this->metaData->categoryProductTable, ['category_id', 'product_id'], $values, Magento2DbConnection::_1_KB);
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    public function insertWebsiteIds(array $products)
+    {
+        $values = [];
+
+        foreach ($products as $product) {
+            foreach ($product->getWebsiteIds() as $websiteId) {
+                $values[] = $product->id;
+                $values[] = $websiteId;
+            }
+        }
+
+        // IGNORE serves two purposes:
+        // 1. do not fail if the product-website link already existed
+        // 2. do not fail if the website does not exist
+
+        $this->db->insertMultipleWithIgnore($this->metaData->productWebsiteTable, ['product_id', 'website_id'], $values, Magento2DbConnection::_1_KB);
     }
 }
