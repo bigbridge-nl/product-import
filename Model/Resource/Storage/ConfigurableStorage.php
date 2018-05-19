@@ -26,15 +26,10 @@ class ConfigurableStorage
     }
 
     /**
-     * @param ConfigurableProduct[] $insertProducts
      * @param ConfigurableProduct[] $updateProducts
      */
-    public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
+    public function performTypeSpecificStorage(array $updateProducts)
     {
-        $this->createSuperAttributes($insertProducts);
-        $this->createLinks($insertProducts);
-        $this->createRelations($insertProducts);
-
         $this->updateSuperAttributes($updateProducts);
         $this->updateLinks($updateProducts);
         $this->updateRelations($updateProducts);

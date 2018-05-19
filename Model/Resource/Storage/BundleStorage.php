@@ -27,13 +27,10 @@ class BundleStorage
     }
 
     /**
-     * @param Product[] $insertProducts
      * @param Product[] $updateProducts
      */
-    public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
+    public function performTypeSpecificStorage(array $updateProducts)
     {
-        $this->createOptions($insertProducts);
-
         $changedProducts = $this->detectChangedProducts($updateProducts);
         $this->removeOptions($changedProducts);
         $this->createOptions($changedProducts);
@@ -142,26 +139,35 @@ class BundleStorage
             ORDER BY `position`
         ", $productIds);
 
-        $optionIds = array_column($optionInfo, 'option_id');
+        if (empty($optionInfo)) {
 
-        $option2product = [];
-        foreach ($optionInfo as $optionData) {
-            $option2product[$optionData['option_id']] = $optionData['parent_id'];
+            $option2product = [];
+            $selectionInfo = [];
+            $titleInfo = [];
+
+        } else {
+
+            $optionIds = array_column($optionInfo, 'option_id');
+
+            $option2product = [];
+            foreach ($optionInfo as $optionData) {
+                $option2product[$optionData['option_id']] = $optionData['parent_id'];
+            }
+
+            $selectionInfo = $this->db->fetchAllAssoc("
+                SELECT `parent_product_id`, `product_id`, `is_default`, `selection_price_type`, `selection_price_value`, `selection_qty`, `selection_can_change_qty`
+                FROM `{$this->metaData->bundleSelectionTable}`
+                WHERE `option_id` IN (" . $this->db->getMarks($optionIds) . ")
+                ORDER BY `selection_id`
+            ", $optionIds);
+
+            $titleInfo = $this->db->fetchAllAssoc("
+                SELECT `option_id`, `title`
+                FROM `{$this->metaData->bundleOptionValueTable}` 
+                WHERE `option_id` IN (" . $this->db->getMarks($optionIds) . ")
+                ORDER BY `value_id`
+            ", $optionIds);
         }
-
-        $selectionInfo = $this->db->fetchAllAssoc("
-            SELECT `parent_product_id`, `product_id`, `is_default`, `selection_price_type`, `selection_price_value`, `selection_qty`, `selection_can_change_qty`
-            FROM `{$this->metaData->bundleSelectionTable}`
-            WHERE `option_id` IN (" . $this->db->getMarks($optionIds) . ")
-            ORDER BY `selection_id`
-        ", $optionIds);
-
-        $titleInfo = $this->db->fetchAllAssoc("
-            SELECT `option_id`, `title`
-            FROM `{$this->metaData->bundleOptionValueTable}` 
-            WHERE `option_id` IN (" . $this->db->getMarks($optionIds) . ")
-            ORDER BY `value_id`
-        ", $optionIds);
 
         // create a string with all option fields, per product id
 

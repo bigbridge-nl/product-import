@@ -28,12 +28,10 @@ class GroupedStorage
     }
 
     /**
-     * @param GroupedProduct[] $insertProducts
      * @param GroupedProduct[] $updateProducts
      */
-    public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
+    public function performTypeSpecificStorage(array $updateProducts)
     {
-        $this->insertLinkedProducts($insertProducts);
         $this->updateLinkedProducts($updateProducts);
     }
 

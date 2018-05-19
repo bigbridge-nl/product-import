@@ -36,14 +36,10 @@ class DownloadableStorage
     }
 
     /**
-     * @param DownloadableProduct[] $insertProducts
      * @param DownloadableProduct[] $updateProducts
      */
-    public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
+    public function performTypeSpecificStorage(array $updateProducts)
     {
-        // new products: insert
-        $this->insertLinksAndSamples($insertProducts);
-
         // updated products: remove and reinsert links and samples
         $this->removeLinksAndSamples($updateProducts);
         $this->insertLinksAndSamples($updateProducts);

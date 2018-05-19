@@ -325,10 +325,9 @@ class ProductStorage
         $productsByAttribute = [];
         $productsWithCategories = [];
         $productsWithWebsites = [];
-        $insertsWithOptions = [];
-        $updatesWithOptions = [];
+        $productsWithOptions = [];
 
-        $insertsByType = $updatesByType = [
+        $productsByType = [
             DownloadableProduct::TYPE_DOWNLOADABLE => [],
             GroupedProduct::TYPE_GROUPED => [],
             BundleProduct::TYPE_BUNDLE => [],
@@ -337,23 +336,17 @@ class ProductStorage
 
         foreach ($validProducts as $product) {
 
+            $productsByType[$product->getType()][] = $product;
+
+            if ($product->getCustomOptions() !== null) {
+                $productsWithOptions[] = $product;
+            }
+
             // collect valid new and existing products
             if ($product->id !== null) {
                 $validUpdateProducts[] = $product;
-                $updatesByType[$product->getType()][] = $product;
-
-                if ($product->getCustomOptions() !== null) {
-                    $updatesWithOptions[] = $product;
-                }
-
             } else {
                 $validInsertProducts[] = $product;
-                $insertsByType[$product->getType()][] = $product;
-
-                if ($product->getCustomOptions() !== null) {
-                    $insertsWithOptions[] = $product;
-                }
-
             }
 
             if ($product->getCategoryIds() !== []) {
@@ -381,37 +374,27 @@ class ProductStorage
             $this->productEntityStorage->insertMainTable($validInsertProducts);
             $this->productEntityStorage->updateMainTable($validUpdateProducts);
 
-            $this->referenceResolver->resolveProductReferences($validInsertProducts, $config);
-            $this->referenceResolver->resolveProductReferences($validUpdateProducts, $config);
+            $this->referenceResolver->resolveProductReferences($validProducts, $config);
 
             foreach ($productsByAttribute as $eavAttribute => $products) {
                 $this->productEntityStorage->insertEavAttribute($products, $eavAttribute);
             }
 
-            $this->customOptionStorage->insertCustomOptions($insertsWithOptions);
-            $this->customOptionStorage->updateCustomOptions($updatesWithOptions);
-
+            $this->customOptionStorage->updateCustomOptions($productsWithOptions);
             $this->productEntityStorage->insertCategoryIds($productsWithCategories);
             $this->productEntityStorage->insertWebsiteIds($productsWithWebsites);
-
             $this->stockItemStorage->storeStockItems($validProducts);
-
-            $this->linkedProductStorage->insertLinkedProducts($validInsertProducts);
-            $this->linkedProductStorage->updateLinkedProducts($validUpdateProducts);
-
+            $this->linkedProductStorage->updateLinkedProducts($validProducts);
             $this->imageStorage->storeProductImages($validProducts);
-
-            $this->tierPriceStorage->insertTierPrices($validInsertProducts);
-            $this->tierPriceStorage->updateTierPrices($validUpdateProducts);
+            $this->tierPriceStorage->updateTierPrices($validProducts);
 
             // url_rewrite (must be done after url_key and category_id)
-            $this->urlRewriteStorage->insertRewrites($validInsertProducts, $valueSerializer);
-            $this->urlRewriteStorage->updateRewrites($validUpdateProducts, $existingValues, $valueSerializer);
+            $this->urlRewriteStorage->updateRewrites($validProducts, $existingValues, $valueSerializer);
 
-            $this->downloadableStorage->performTypeSpecificStorage($insertsByType[DownloadableProduct::TYPE_DOWNLOADABLE], $updatesByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
-            $this->groupedStorage->performTypeSpecificStorage($insertsByType[GroupedProduct::TYPE_GROUPED], $updatesByType[GroupedProduct::TYPE_GROUPED]);
-            $this->bundleStorage->performTypeSpecificStorage($insertsByType[BundleProduct::TYPE_BUNDLE], $updatesByType[BundleProduct::TYPE_BUNDLE]);
-            $this->configurableStorage->performTypeSpecificStorage($insertsByType[ConfigurableProduct::TYPE_CONFIGURABLE], $updatesByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
+            $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
+            $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);
+            $this->bundleStorage->performTypeSpecificStorage($productsByType[BundleProduct::TYPE_BUNDLE]);
+            $this->configurableStorage->performTypeSpecificStorage($productsByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
 
             $this->db->execute("COMMIT");
 
