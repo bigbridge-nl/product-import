@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\ImportConfig;
@@ -37,6 +39,12 @@ class ReferenceResolver
     /** @var TierPriceResolver */
     protected $tierPriceResolver;
 
+    /** @var BundleProductReferenceResolver */
+    protected $bundleProductReferenceResolver;
+
+    /** @var GroupedProductReferenceResolver */
+    protected $groupedProductReferenceResolver;
+
     public function __construct(
         CategoryImporter $categoryImporter,
         TaxClassResolver $taxClassResolver,
@@ -45,7 +53,10 @@ class ReferenceResolver
         WebsiteResolver $websiteResolver,
         OptionResolver $optionResolver,
         LinkedProductReferenceResolver $linkedProductReferenceResolver,
-        TierPriceResolver $tierPriceResolver)
+        TierPriceResolver $tierPriceResolver,
+        BundleProductReferenceResolver $bundleProductReferenceResolver,
+        GroupedProductReferenceResolver $groupedProductReferenceResolver
+    )
     {
         $this->categoryImporter = $categoryImporter;
         $this->taxClassResolver = $taxClassResolver;
@@ -55,6 +66,8 @@ class ReferenceResolver
         $this->optionResolver = $optionResolver;
         $this->linkedProductReferenceResolver = $linkedProductReferenceResolver;
         $this->tierPriceResolver = $tierPriceResolver;
+        $this->bundleProductReferenceResolver = $bundleProductReferenceResolver;
+        $this->groupedProductReferenceResolver = $groupedProductReferenceResolver;
     }
 
     /**
@@ -62,15 +75,16 @@ class ReferenceResolver
      * @param ImportConfig $config
      * @throws \Exception
      */
-    public function resolveIds(array $products, ImportConfig $config)
+    public function resolveExternalReferences(array $products, ImportConfig $config)
     {
-        // linked product references (related, up sell, cross sell
-        $this->linkedProductReferenceResolver->resolveLinkedProductReferences($products);
-
         // resolve customer groups and websites in tier prices
         $this->tierPriceResolver->resolveReferences($products);
 
+        $productsByType = [];
+
         foreach ($products as $product) {
+
+            $productsByType[$product->getType()][] = $product;
 
             foreach ($product->getUnresolvedAttributes() as $attribute => $value) {
                 switch ($attribute) {
@@ -157,6 +171,31 @@ class ReferenceResolver
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * @param array $products
+     * @param ImportConfig $config
+     * @throws \Exception
+     */
+    public function resolveProductReferences(array $products, ImportConfig $config)
+    {
+        // linked product references (related, up sell, cross sell
+        $this->linkedProductReferenceResolver->resolveLinkedProductReferences($products);
+
+        $productsByType = [];
+
+        foreach ($products as $product) {
+            $productsByType[$product->getType()][] = $product;
+        }
+
+        if (!empty($productsByType[BundleProduct::TYPE_BUNDLE])) {
+            $this->bundleProductReferenceResolver->resolveIds($productsByType[BundleProduct::TYPE_BUNDLE], $config);
+        }
+
+        if (!empty($productsByType[GroupedProduct::TYPE_GROUPED])) {
+            $this->groupedProductReferenceResolver->resolveIds($productsByType[GroupedProduct::TYPE_GROUPED]);
         }
     }
 }

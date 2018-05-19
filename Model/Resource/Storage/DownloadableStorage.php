@@ -1,45 +1,37 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
-use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
-use BigBridge\ProductImport\Model\Resource\Storage\CustomOptionStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\StockItemStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
-use BigBridge\ProductImport\Model\Resource\Validation\DownloadableValidator;
+use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
  * @author Patrick van Bergen
  */
-class DownloadableStorage extends ProductStorage
+class DownloadableStorage
 {
     const LINKS_PATH = BP . "/pub/media/downloadable/files/links";
     const LINK_SAMPLES_PATH = BP . "/pub/media/downloadable/files/link_samples";
     const SAMPLES_PATH = BP . "/pub/media/downloadable/files/samples";
 
+    /** @var  Magento2DbConnection */
+    protected $db;
+
+    /** @var  MetaData */
+    protected $metaData;
+
+    /** @var ImageStorage  */
+    protected $imageStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
-        DownloadableValidator $validator,
-        ReferenceResolver $referenceResolver,
-        UrlKeyGenerator $urlKeyGenerator,
-        UrlRewriteStorage $urlRewriteStorage,
-        ProductEntityStorage $productEntityStorage,
-        ImageStorage $imageStorage,
-        LinkedProductStorage $linkedProductStorage,
-        TierPriceStorage $tierPriceStorage,
-        StockItemStorage $stockItemStorage,
-        CustomOptionStorage $customOptionStorage)
+        ImageStorage $imageStorage)
     {
-        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage, $stockItemStorage, $customOptionStorage);
+        $this->db = $db;
+        $this->metaData = $metaData;
         $this->imageStorage = $imageStorage;
     }
 

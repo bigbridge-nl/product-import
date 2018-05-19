@@ -1,41 +1,30 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Resource\Resolver\GroupedProductReferenceResolver;
-use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
-use BigBridge\ProductImport\Model\Resource\Storage\CustomOptionStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\StockItemStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
-use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
-use BigBridge\ProductImport\Model\Resource\Validation\Validator;
+use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
  * @author Patrick van Bergen
  */
-class GroupedStorage extends ProductStorage
+class GroupedStorage
 {
+    /** @var  Magento2DbConnection */
+    protected $db;
+
+    /** @var  MetaData */
+    protected $metaData;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
-        Validator $validator,
-        GroupedProductReferenceResolver $referenceResolver,
-        UrlKeyGenerator $urlKeyGenerator,
-        UrlRewriteStorage $urlRewriteStorage,
-        ProductEntityStorage $productEntityStorage,
-        ImageStorage $imageStorage,
-        LinkedProductStorage $linkedProductStorage,
-        TierPriceStorage $tierPriceStorage,
-        StockItemStorage $stockItemStorage,
-        CustomOptionStorage $customOptionStorage)
+        ImageStorage $imageStorage)
     {
-        parent::__construct($db, $metaData, $validator, $referenceResolver, $urlKeyGenerator, $urlRewriteStorage, $productEntityStorage, $imageStorage, $linkedProductStorage, $tierPriceStorage, $stockItemStorage, $customOptionStorage);
+        $this->db = $db;
+        $this->metaData = $metaData;
     }
 
     /**

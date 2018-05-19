@@ -3,21 +3,28 @@
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
-use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
+use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
  * @author Patrick van Bergen
  */
-class ConfigurableValidator extends Validator
+class ConfigurableValidator
 {
+    /** @var  MetaData */
+    protected $metaData;
+
+    public function __construct(
+        MetaData $metaData)
+    {
+        $this->metaData = $metaData;
+    }
+
     /**
      * @param ConfigurableProduct $product
      */
-    public function validate(Product $product)
+    public function validate(ConfigurableProduct $product)
     {
-        parent::validate($product);
-
         $this->validateSuperAttributes($product);
         $this->validateVariants($product);
         $this->validateVariantSuperAttributeValues($product);
@@ -26,7 +33,7 @@ class ConfigurableValidator extends Validator
     /**
      * @param ConfigurableProduct $product
      */
-    protected function validateSuperAttributes(Product $product)
+    protected function validateSuperAttributes(ConfigurableProduct $product)
     {
         if (empty($product->getSuperAttributeCodes())) {
             $product->addError("Specify at least 1 super attribute");
@@ -52,7 +59,7 @@ class ConfigurableValidator extends Validator
     /**
      * @param ConfigurableProduct $product
      */
-    protected function validateVariants(Product $product)
+    protected function validateVariants(ConfigurableProduct $product)
     {
         if (empty($product->getVariants())) {
             $product->addError("Specify at least 1 variant");
@@ -74,7 +81,7 @@ class ConfigurableValidator extends Validator
     /**
      * @param ConfigurableProduct $product
      */
-    protected function validateVariantSuperAttributeValues(Product $product)
+    protected function validateVariantSuperAttributeValues(ConfigurableProduct $product)
     {
         $configurations = [];
 

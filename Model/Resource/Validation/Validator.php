@@ -3,6 +3,8 @@
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
@@ -27,12 +29,24 @@ class Validator
     /** @var CustomOptionsValidator */
     protected $customOptionsValidator;
 
+    /** @var ConfigurableValidator */
+    protected $configurableValidator;
 
-    public function __construct(MetaData $metaData, ImageValidator $imageValidator, CustomOptionsValidator $customOptionsValidator)
+    /** @var DownloadableValidator */
+    protected $downloadableValidator;
+
+    public function __construct(
+        MetaData $metaData,
+        ImageValidator $imageValidator,
+        CustomOptionsValidator $customOptionsValidator,
+        ConfigurableValidator $configurableValidator,
+        DownloadableValidator $downloadableValidator)
     {
         $this->metaData = $metaData;
         $this->imageValidator = $imageValidator;
         $this->customOptionsValidator = $customOptionsValidator;
+        $this->configurableValidator = $configurableValidator;
+        $this->downloadableValidator = $downloadableValidator;
     }
 
     /**
@@ -191,6 +205,17 @@ class Validator
                     $product->addError("missing " . 'price');
                 }
             }
+        }
+
+        switch ($product->getType()) {
+            case DownloadableProduct::TYPE_DOWNLOADABLE:
+                /** @var DownloadableProduct $product */
+                $this->downloadableValidator->validate($product);
+                break;
+            case ConfigurableProduct::TYPE_CONFIGURABLE:
+                /** @var ConfigurableProduct $product */
+                $this->configurableValidator->validate($product);
+                break;
         }
     }
 }

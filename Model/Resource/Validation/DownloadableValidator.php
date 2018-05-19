@@ -3,20 +3,17 @@
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
-use BigBridge\ProductImport\Api\Data\Product;
 
 /**
  * @author Patrick van Bergen
  */
-class DownloadableValidator extends Validator
+class DownloadableValidator
 {
     /**
      * @param DownloadableProduct $product
      */
-    public function validate(Product $product)
+    public function validate(DownloadableProduct $product)
     {
-        parent::validate($product);
-
         $this->validateLinkImages($product);
     }
 

@@ -7,6 +7,8 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class DownloadableProduct extends SimpleProduct
 {
+    const TYPE_DOWNLOADABLE = 'downloadable';
+
     /** @var DownloadLink[]|null */
     protected $downloadLinks = null;
 
@@ -15,7 +17,7 @@ class DownloadableProduct extends SimpleProduct
 
     public function getType()
     {
-        return 'downloadable';
+        return self::TYPE_DOWNLOADABLE;
     }
 
     /**

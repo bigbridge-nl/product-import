@@ -7,6 +7,8 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class BundleProduct extends Product
 {
+    const TYPE_BUNDLE = 'bundle';
+
     const INPUT_TYPE_DROP_DOWN = 'select';
     const INPUT_TYPE_RADIO_BUTTONS = 'radio';
     const INPUT_TYPE_CHECKBOX = 'checkbox';
@@ -17,7 +19,7 @@ class BundleProduct extends Product
 
     public function getType()
     {
-        return 'bundle';
+        return self::TYPE_BUNDLE;
     }
 
     public function getHasOptions()

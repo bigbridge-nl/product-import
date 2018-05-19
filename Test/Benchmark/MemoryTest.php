@@ -111,7 +111,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
         $this->assertSame([], $lastErrors);
         // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
         // try running updateProducts twice, the memory consumed does not accumulate
-        $this->assertLessThan(66, $memory);
+        $this->assertLessThan(132, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 

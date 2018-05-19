@@ -10,24 +10,14 @@ use Exception;
 /**
  * @author Patrick van Bergen
  */
-class BundleProductReferenceResolver extends ReferenceResolver
+class BundleProductReferenceResolver
 {
     /** @var ProductEntityStorage */
     protected $productEntityStorage;
 
     public function __construct(
-        CategoryImporter $categoryImporter,
-        TaxClassResolver $taxClassResolver,
-        AttributeSetResolver $attributeSetResolver,
-        StoreViewResolver $storeViewResolver,
-        WebsiteResolver $websiteResolver,
-        OptionResolver $optionResolver,
-        LinkedProductReferenceResolver $linkedProductReferenceResolver,
-        TierPriceResolver $tierPriceResolver,
         ProductEntityStorage $productEntityStorage)
     {
-        parent::__construct($categoryImporter, $taxClassResolver, $attributeSetResolver, $storeViewResolver, $websiteResolver, $optionResolver, $linkedProductReferenceResolver, $tierPriceResolver);
-
         $this->productEntityStorage = $productEntityStorage;
     }
 
@@ -38,8 +28,6 @@ class BundleProductReferenceResolver extends ReferenceResolver
      */
     public function resolveIds(array $products, ImportConfig $config)
     {
-        parent::resolveIds($products, $config);
-
         // collect all selection skus
         $selectionSkus = [];
         foreach ($products as $product) {

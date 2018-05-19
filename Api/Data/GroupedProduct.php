@@ -7,6 +7,8 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class GroupedProduct extends Product
 {
+    const TYPE_GROUPED = "grouped";
+
     /** @var GroupedProductMember[]  */
     protected $members;
 
@@ -28,7 +30,7 @@ class GroupedProduct extends Product
      */
     public function getType()
     {
-        return "grouped";
+        return self::TYPE_GROUPED;
     }
 
     /**

@@ -2,8 +2,12 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProductStoreView;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
@@ -11,7 +15,11 @@ use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
+use BigBridge\ProductImport\Model\Resource\Storage\BundleStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\CustomOptionStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\DownloadableStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\GroupedStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
@@ -24,7 +32,7 @@ use Exception;
 /**
  * @author Patrick van Bergen
  */
-abstract class ProductStorage
+class ProductStorage
 {
     /** @var  Magento2DbConnection */
     protected $db;
@@ -62,6 +70,18 @@ abstract class ProductStorage
     /** @var CustomOptionStorage */
     protected $customOptionStorage;
 
+    /** @var DownloadableStorage */
+    protected $downloadableStorage;
+
+    /** @var ConfigurableStorage */
+    protected $configurableStorage;
+
+    /** @var BundleStorage */
+    protected $bundleStorage;
+
+    /** @var GroupedStorage */
+    protected $groupedStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
@@ -74,7 +94,12 @@ abstract class ProductStorage
         LinkedProductStorage $linkedProductStorage,
         TierPriceStorage $tierPriceStorage,
         StockItemStorage $stockItemStorage,
-        CustomOptionStorage $customOptionStorage)
+        CustomOptionStorage $customOptionStorage,
+        DownloadableStorage $downloadableStorage,
+        ConfigurableStorage $configurableStorage,
+        BundleStorage $bundleStorage,
+        GroupedStorage $groupedStorage
+)
     {
         $this->db = $db;
         $this->metaData = $metaData;
@@ -88,13 +113,11 @@ abstract class ProductStorage
         $this->tierPriceStorage = $tierPriceStorage;
         $this->stockItemStorage = $stockItemStorage;
         $this->customOptionStorage = $customOptionStorage;
+        $this->downloadableStorage = $downloadableStorage;
+        $this->configurableStorage = $configurableStorage;
+        $this->bundleStorage = $bundleStorage;
+        $this->groupedStorage = $groupedStorage;
     }
-
-    /**
-     * @param Product[] $insertProducts
-     * @param Product[] $updateProducts
-     */
-    public abstract function performTypeSpecificStorage(array $insertProducts, array $updateProducts);
 
     /**
      * @param Product[] $products Sku-indexed products of various product types
@@ -143,7 +166,7 @@ abstract class ProductStorage
         $this->setDefaultValues($insertProducts);
 
         // replace reference(s) with ids, changes $product->errors
-        $this->referenceResolver->resolveIds($products, $config);
+        $this->referenceResolver->resolveExternalReferences($products, $config);
 
         // create url keys based on name and id
         // changes $product->errors
@@ -157,7 +180,7 @@ abstract class ProductStorage
         if (!$config->dryRun) {
 
             // store the products in the database
-            $this->saveProducts($validProducts, $valueSerializer);
+            $this->saveProducts($validProducts, $valueSerializer, $config);
         }
 
         // call user defined functions to let them process the results
@@ -204,6 +227,7 @@ abstract class ProductStorage
 
     /**
      * @param array $products
+     * @param ImportConfig $config
      * @return array
      */
     public function collectValidProducts(array $products, ImportConfig $config): array
@@ -292,9 +316,10 @@ abstract class ProductStorage
     /**
      * @param Product[] $validProducts
      * @param ValueSerializer $valueSerializer
+     * @param ImportConfig $config
      * @throws Exception
      */
-    protected function saveProducts(array $validProducts, ValueSerializer $valueSerializer)
+    protected function saveProducts(array $validProducts, ValueSerializer $valueSerializer, ImportConfig $config)
     {
         $validUpdateProducts = $validInsertProducts = [];
         $productsByAttribute = [];
@@ -347,6 +372,9 @@ abstract class ProductStorage
             $this->productEntityStorage->insertMainTable($validInsertProducts);
             $this->productEntityStorage->updateMainTable($validUpdateProducts);
 
+            $this->referenceResolver->resolveProductReferences($validInsertProducts, $config);
+            $this->referenceResolver->resolveProductReferences($validUpdateProducts, $config);
+
             foreach ($productsByAttribute as $eavAttribute => $products) {
                 $this->insertEavAttribute($products, $eavAttribute);
             }
@@ -383,6 +411,33 @@ abstract class ProductStorage
             // let the application handle the exception
             throw $e;
         }
+    }
+
+    /**
+     * @param Product[] $insertProducts
+     * @param Product[] $updateProducts
+     */
+    public function performTypeSpecificStorage(array $insertProducts, array $updateProducts)
+    {
+        $insertsByType = $updatesByType = [
+            DownloadableProduct::TYPE_DOWNLOADABLE => [],
+            GroupedProduct::TYPE_GROUPED => [],
+            BundleProduct::TYPE_BUNDLE => [],
+            ConfigurableProduct::TYPE_CONFIGURABLE => [],
+        ];
+
+        foreach ($insertProducts as $product) {
+           $insertsByType[$product->getType()][] = $product;
+        }
+
+        foreach ($updateProducts as $product) {
+            $updatesByType[$product->getType()][] = $product;
+        }
+
+        $this->downloadableStorage->performTypeSpecificStorage($insertsByType[DownloadableProduct::TYPE_DOWNLOADABLE], $updatesByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
+        $this->groupedStorage->performTypeSpecificStorage($insertsByType[GroupedProduct::TYPE_GROUPED], $updatesByType[GroupedProduct::TYPE_GROUPED]);
+        $this->bundleStorage->performTypeSpecificStorage($insertsByType[BundleProduct::TYPE_BUNDLE], $updatesByType[BundleProduct::TYPE_BUNDLE]);
+        $this->configurableStorage->performTypeSpecificStorage($insertsByType[ConfigurableProduct::TYPE_CONFIGURABLE], $updatesByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
     }
 
     protected function getExistingProductValues(array $products)

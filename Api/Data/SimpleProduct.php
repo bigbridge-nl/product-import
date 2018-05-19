@@ -7,8 +7,10 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class SimpleProduct extends Product
 {
+    const TYPE_SIMPLE = 'simple';
+
     public function getType()
     {
-        return 'simple';
+        return self::TYPE_SIMPLE;
     }
 }

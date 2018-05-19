@@ -7,6 +7,8 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class ConfigurableProduct extends Product
 {
+    const TYPE_CONFIGURABLE = 'configurable';
+
     /** @var array  */
     protected $superAttributeCodes = [];
 
@@ -28,7 +30,7 @@ class ConfigurableProduct extends Product
 
     public function getType()
     {
-        return 'configurable';
+        return self::TYPE_CONFIGURABLE;
     }
 
     public function getHasOptions()

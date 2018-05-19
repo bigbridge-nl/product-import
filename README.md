@@ -23,7 +23,7 @@ This library just helps you to get products into Magento's database quickly, low
 * import of images from file or url
 * custom options
 * unique url_key generation
-* dry run (no writes to the database)
+* dry run (no products are written to the database)
 * trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
 * input is validated on data type, requiredness,  and length restrictions
 * result callback, a function that is called with the results of each imported product (id, error)
@@ -598,6 +598,8 @@ Import by id always concerns updates, not inserts. When a non-existing id is use
 If you want to see what errors an import produces without actually adding products to the database, set the config to "dry run"
 
     $config->dryRun = true;
+
+Note that dry run does not imply that no changes are made to the database in a dry run. Categories may be added and attribute options may be created.
 
 ## Changes to Magento
 

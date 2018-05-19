@@ -7,8 +7,10 @@ namespace BigBridge\ProductImport\Api\Data;
  */
 class VirtualProduct extends SimpleProduct
 {
+    const TYPE_VIRTUAL = 'virtual';
+
     public function getType()
     {
-        return 'virtual';
+        return self::TYPE_VIRTUAL;
     }
 }

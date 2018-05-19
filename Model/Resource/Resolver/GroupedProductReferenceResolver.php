@@ -3,43 +3,29 @@
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
-use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 use Exception;
 
 /**
  * @author Patrick van Bergen
  */
-class GroupedProductReferenceResolver extends ReferenceResolver
+class GroupedProductReferenceResolver
 {
     /** @var ProductEntityStorage */
     protected $productEntityStorage;
 
     public function __construct(
-        CategoryImporter $categoryImporter,
-        TaxClassResolver $taxClassResolver,
-        AttributeSetResolver $attributeSetResolver,
-        StoreViewResolver $storeViewResolver,
-        WebsiteResolver $websiteResolver,
-        OptionResolver $optionResolver,
-        LinkedProductReferenceResolver $linkedProductReferenceResolver,
-        TierPriceResolver $tierPriceResolver,
         ProductEntityStorage $productEntityStorage)
     {
-        parent::__construct($categoryImporter, $taxClassResolver, $attributeSetResolver, $storeViewResolver, $websiteResolver, $optionResolver, $linkedProductReferenceResolver, $tierPriceResolver);
-
         $this->productEntityStorage = $productEntityStorage;
     }
 
     /**
      * @param GroupedProduct[] $products
-     * @param ImportConfig $config
      * @throws \Exception
      */
-    public function resolveIds(array $products, ImportConfig $config)
+    public function resolveIds(array $products)
     {
-        parent::resolveIds($products, $config);
-
         // collect all member skus
         $memberSkus = [];
         foreach ($products as $product) {

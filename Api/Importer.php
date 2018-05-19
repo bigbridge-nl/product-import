@@ -10,13 +10,9 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
-use BigBridge\ProductImport\Model\Resource\BundleStorage;
-use BigBridge\ProductImport\Model\Resource\ConfigurableStorage;
-use BigBridge\ProductImport\Model\Resource\DownloadableStorage;
-use BigBridge\ProductImport\Model\Resource\GroupedStorage;
+use BigBridge\ProductImport\Model\Resource\ProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
-use BigBridge\ProductImport\Model\Resource\SimpleStorage;
 
 /**
  * This is the main class for API based imports.
@@ -31,23 +27,8 @@ use BigBridge\ProductImport\Model\Resource\SimpleStorage;
  */
 class Importer
 {
-    /** @var SimpleProduct[] */
-    protected $placeholderProducts = [];
-
-    /** @var SimpleProduct[] */
-    protected $simpleProducts = [];
-
-    /** @var DownloadableProduct[] */
-    protected $downloadableProducts = [];
-
-    /** @var ConfigurableProduct[] */
-    protected $configurableProducts = [];
-
-    /** @var GroupedProduct[] */
-    protected $groupedProducts = [];
-
-    /** @var BundleProduct[] */
-    protected $bundleProducts = [];
+    /** @var Product[] */
+    protected $products = [];
 
     /** @var  ImportConfig */
     protected $config;
@@ -55,42 +36,22 @@ class Importer
     /** @var  ValueSerializer */
     protected $valueSerializer;
 
-    /** @var  SimpleStorage */
-    protected $simpleStorage;
-
-    /** @var  ConfigurableStorage */
-    protected $configurableStorage;
-
     /** @var ProductEntityStorage */
     protected $productEntityStorage;
 
-    /** @var GroupedStorage */
-    protected $groupedStorage;
-
-    /** @var DownloadableStorage */
-    protected $downloadableStorage;
-    
-    /** @var BundleStorage */
-    protected $bundleStorage;
+    /** @var ProductStorage */
+    protected $productStorage;
 
     public function __construct(
         ImportConfig $config,
         ValueSerializer $valueSerializer,
-        SimpleStorage $simpleStorage,
-        ConfigurableStorage $configurableStorage,
-        GroupedStorage $groupedStorage,
         ProductEntityStorage $productEntityStorage,
-        DownloadableStorage $downloadableStorage,
-        BundleStorage $bundleStorage)
+        ProductStorage $productStorage)
     {
         $this->config = $config;
         $this->valueSerializer = $valueSerializer;
-        $this->simpleStorage = $simpleStorage;
-        $this->configurableStorage = $configurableStorage;
         $this->productEntityStorage = $productEntityStorage;
-        $this->groupedStorage = $groupedStorage;
-        $this->downloadableStorage = $downloadableStorage;
-        $this->bundleStorage = $bundleStorage;
+        $this->productStorage = $productStorage;
     }
 
     /**
@@ -100,14 +61,13 @@ class Importer
     public function importSimpleProduct(SimpleProduct $product)
     {
         // create placeholders for non-existing linked products
-        $this->ensureThatLinkedProductsExist($product);
+        $this->createLinkedProductPlaceholders($product);
 
         // the sku key is necessary: later products in this batch with the same sku will overwrite former products
-        $this->simpleProducts[$product->getSku()] = $product;
+        $this->products[$product->getSku()] = $product;
 
-        if (count($this->simpleProducts) == $this->config->batchSize) {
-            $this->flushPlaceholderProducts();
-            $this->flushSimpleProducts();
+        if (count($this->products) >= $this->config->batchSize) {
+            $this->flush();
         }
     }
 
@@ -127,14 +87,13 @@ class Importer
     public function importDownloadableProduct(DownloadableProduct $product)
     {
         // create placeholders for non-existing linked products
-        $this->ensureThatLinkedProductsExist($product);
+        $this->createLinkedProductPlaceholders($product);
 
         // the sku key is necessary: later products in this batch with the same sku will overwrite former products
-        $this->downloadableProducts[$product->getSku()] = $product;
+        $this->products[$product->getSku()] = $product;
 
-        if (count($this->downloadableProducts) == $this->config->batchSize) {
-            $this->flushPlaceholderProducts();
-            $this->flushDownloadableProducts();
+        if (count($this->products) >= $this->config->batchSize) {
+            $this->flush();
         }
     }
 
@@ -145,23 +104,20 @@ class Importer
     public function importConfigurableProduct(ConfigurableProduct $product)
     {
         // variants must be done first, their id is needed by the configurable
-        foreach ($product->getVariants() as $simple) {
-            $this->importSimpleProduct($simple);
+        foreach ($product->getVariants() as $variant) {
+            $this->importAnyProduct($variant);
         }
 
         // create placeholders for non-existing linked products
-        $this->ensureThatLinkedProductsExist($product);
+        $this->createLinkedProductPlaceholders($product);
 
         // the sku key is necessary: later products in this batch with the same sku will overwrite former products
-        $this->configurableProducts[$product->getSku()] = $product;
+        $this->products[$product->getSku()] = $product;
 
-        if (count($this->configurableProducts) == $this->config->batchSize) {
-            $this->flushPlaceholderProducts();
-            $this->flushSimpleProducts();
-            $this->flushConfigurableProducts();
+        if (count($this->products) >= $this->config->batchSize) {
+            $this->flush();
         }
     }
-
 
     /**
      * @param BundleProduct $product
@@ -170,18 +126,16 @@ class Importer
     public function importBundleProduct(BundleProduct $product)
     {
         // create placeholders for non-existing selection products
-        $this->ensureThatSelectionProductsExist($product);
+        $this->createBundleProductPlaceholders($product);
 
         // create placeholders for non-existing linked products
-        $this->ensureThatLinkedProductsExist($product);
+        $this->createLinkedProductPlaceholders($product);
 
         // the sku key is necessary: later products in this batch with the same sku will overwrite former products
-        $this->bundleProducts[$product->getSku()] = $product;
+        $this->products[$product->getSku()] = $product;
 
-        if (count($this->bundleProducts) == $this->config->batchSize) {
-            $this->flushPlaceholderProducts();
-            $this->flushSimpleProducts();
-            $this->flushBundleProducts();
+        if (count($this->products) >= $this->config->batchSize) {
+            $this->flush();
         }
     }
     
@@ -192,18 +146,16 @@ class Importer
     public function importGroupedProduct(GroupedProduct $product)
     {
         // create placeholders for non-existing member products
-        $this->ensureThatMemberProductsExist($product);
+        $this->createGroupedProductPlaceholders($product);
 
         // create placeholders for non-existing linked products
-        $this->ensureThatLinkedProductsExist($product);
+        $this->createLinkedProductPlaceholders($product);
 
         // the sku key is necessary: later products in this batch with the same sku will overwrite former products
-        $this->groupedProducts[$product->getSku()] = $product;
+        $this->products[$product->getSku()] = $product;
 
-        if (count($this->groupedProducts) == $this->config->batchSize) {
-            $this->flushPlaceholderProducts();
-            $this->flushSimpleProducts();
-            $this->flushGroupedProducts();
+        if (count($this->products) >= $this->config->batchSize) {
+            $this->flush();
         }
     }
 
@@ -214,202 +166,82 @@ class Importer
      */
     public function flush()
     {
-        $this->flushPlaceholderProducts();
-
-        $this->flushSimpleProducts();
-        $this->flushDownloadableProducts();
-        $this->flushConfigurableProducts();
-        $this->flushBundleProducts();
-        $this->flushGroupedProducts();
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function flushPlaceholderProducts()
-    {
-        $this->simpleStorage->storeProducts($this->placeholderProducts, $this->config, $this->valueSerializer, false);
-        $this->placeholderProducts = [];
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function flushSimpleProducts()
-    {
-        $this->simpleStorage->storeProducts($this->simpleProducts, $this->config, $this->valueSerializer, true);
-        $this->simpleProducts = [];
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function flushDownloadableProducts()
-    {
-        $this->downloadableStorage->storeProducts($this->downloadableProducts, $this->config, $this->valueSerializer, true);
-        $this->downloadableProducts = [];
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function flushConfigurableProducts()
-    {
-        $this->configurableStorage->storeProducts($this->configurableProducts, $this->config, $this->valueSerializer, true);
-        $this->configurableProducts = [];
-    }
-
-    /**
-     * @throws \Exception
-     */
-    protected function flushBundleProducts()
-    {
-        $this->bundleStorage->storeProducts($this->bundleProducts, $this->config, $this->valueSerializer, true);
-        $this->bundleProducts = [];
-    }
-    
-    /**
-     * @throws \Exception
-     */
-    protected function flushGroupedProducts()
-    {
-        $this->groupedStorage->storeProducts($this->groupedProducts, $this->config, $this->valueSerializer, true);
-        $this->groupedProducts = [];
-    }
-
-    /**
-     * @param Product $placeholder
-     * @throws \Exception
-     */
-    protected function importPlaceholder(Product $placeholder)
-    {
-        $this->placeholderProducts[$placeholder->getSku()] = $placeholder;
-
-        if (count($this->placeholderProducts) == $this->config->batchSize) {
-            $this->flushPlaceholderProducts();
-        }
+        $this->productStorage->storeProducts($this->products, $this->config, $this->valueSerializer, true);
+        $this->products = [];
     }
 
     /**
      * @param Product $product
      * @throws \Exception
      */
-    protected function ensureThatLinkedProductsExist(Product $product)
+    protected function importAnyProduct(Product $product)
     {
-        // make sure linked products exist, by creating placeholders for non-existing linked products
-        foreach ($this->createLinkedProductPlaceholders($product) as $placeholder) {
-            $this->importPlaceholder($placeholder);
+        switch ($product->getType()) {
+            case SimpleProduct::TYPE_SIMPLE:
+                /** @var SimpleProduct $product */
+                $this->importSimpleProduct($product);
+                break;
+            case VirtualProduct::TYPE_VIRTUAL:
+                /** @var VirtualProduct $product */
+                $this->importVirtualProduct($product);
+                break;
+            case DownloadableProduct::TYPE_DOWNLOADABLE:
+                /** @var DownloadableProduct $product */
+                $this->importDownloadableProduct($product);
+                break;
+            case ConfigurableProduct::TYPE_CONFIGURABLE:
+                /** @var ConfigurableProduct $product */
+                $this->importConfigurableProduct($product);
+                break;
+            case BundleProduct::TYPE_BUNDLE:
+                /** @var BundleProduct $product */
+                $this->importBundleProduct($product);
+                break;
+            case GroupedProduct::TYPE_GROUPED:
+                /** @var GroupedProduct $product */
+                $this->importGroupedProduct($product);
+                break;
         }
     }
 
     /**
      * @param Product $product
-     * @return Product[] An sku indexed array of placeholders
      */
-    protected function createLinkedProductPlaceholders(Product $product): array
+    protected function createLinkedProductPlaceholders(Product $product)
     {
         $linkedSkus = $product->getLinkedProductSkus();
 
         // quick check if linked products were used here at all
         if (empty($linkedSkus)) {
-            return [];
+            return;
         }
-
-        $placeholders = [];
 
         // collect all linked product skus
         $allLinkedSkus = [];
         foreach ($linkedSkus as $skuArray) {
             $allLinkedSkus = array_merge($allLinkedSkus, $skuArray);
         }
-        $allLinkedSkus = array_unique($allLinkedSkus);
 
-        $sku2id = $this->productEntityStorage->getExistingSkus($allLinkedSkus);
-
-        foreach ($allLinkedSkus as $sku) {
-            if (!array_key_exists($sku, $sku2id)) {
-
-                $placeholder = new SimpleProduct($sku);
-
-                $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
-                $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
-                $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
-
-                $placeholders[$sku] = $placeholder;
-            }
-        }
-
-        return $placeholders;
+        $this->createPlaceholders($allLinkedSkus);
     }
 
     /**
      * @param GroupedProduct $product
-     * @throws \Exception
      */
-    protected function ensureThatMemberProductsExist(GroupedProduct $product)
-    {
-        // make sure grouped product members exist, by creating placeholders for non-existing products
-        foreach ($this->createGroupedProductPlaceholders($product) as $placeholder) {
-            $this->importPlaceholder($placeholder);
-        }
-    }
-
-    /**
-     * @param BundleProduct $product
-     * @throws \Exception
-     */
-    protected function ensureThatSelectionProductsExist(BundleProduct $product)
-    {
-        // make sure bundle product selection products exist, by creating placeholders for non-existing products
-        foreach ($this->createBundleProductPlaceholders($product) as $placeholder) {
-            $this->importPlaceholder($placeholder);
-        }
-    }
-
-    /**
-     * @param GroupedProduct $product
-     * @return Product[] An sku indexed array of placeholders
-     */
-    protected function createGroupedProductPlaceholders(GroupedProduct $product): array
+    protected function createGroupedProductPlaceholders(GroupedProduct $product)
     {
         $memberSkus = [];
         foreach ($product->getMembers() as $member) {
             $memberSkus[] = $member->getSku();
         }
 
-        // quick check if member products were used here at all
-        if (empty($memberSkus)) {
-            return [];
-        }
-
-        $placeholders = [];
-
-        $memberSkus = array_unique($memberSkus);
-
-        $sku2id = $this->productEntityStorage->getExistingSkus($memberSkus);
-
-        foreach ($memberSkus as $sku) {
-            if (!array_key_exists($sku, $sku2id)) {
-
-                $placeholder = new SimpleProduct($sku);
-
-                $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
-                $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
-                $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
-
-                $placeholders[$sku] = $placeholder;
-            }
-        }
-
-        return $placeholders;
+        $this->createPlaceholders($memberSkus);
     }
-
 
     /**
      * @param BundleProduct $product
-     * @return Product[] An sku indexed array of placeholders
      */
-    protected function createBundleProductPlaceholders(BundleProduct $product): array
+    protected function createBundleProductPlaceholders(BundleProduct $product)
     {
         $selectionSkus = [];
         if (($options = $product->getOptions()) !== null) {
@@ -420,18 +252,29 @@ class Importer
             }
         }
 
-        // quick check if member products were used here at all
-        if (empty($selectionSkus)) {
-            return [];
+        $this->createPlaceholders($selectionSkus);
+    }
+
+    /**
+     * @param array $skus
+     */
+    protected function createPlaceholders(array $skus)
+    {
+        if (empty($skus)) {
+            return;
         }
 
-        $placeholders = [];
+        // collect sku's not in this batch
+        $absentSkus = [];
+        foreach ($skus as $sku) {
+            if (!array_key_exists($sku, $this->products)) {
+                $absentSkus[] = $sku;
+            }
+        }
 
-        $selectionSkus = array_unique($selectionSkus);
+        $sku2id = $this->productEntityStorage->getExistingSkus($absentSkus);
 
-        $sku2id = $this->productEntityStorage->getExistingSkus($selectionSkus);
-
-        foreach ($selectionSkus as $sku) {
+        foreach ($absentSkus as $sku) {
             if (!array_key_exists($sku, $sku2id)) {
 
                 $placeholder = new SimpleProduct($sku);
@@ -440,10 +283,8 @@ class Importer
                 $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
                 $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
 
-                $placeholders[$sku] = $placeholder;
+                $this->products[$sku] = $placeholder;
             }
         }
-
-        return $placeholders;
     }
 }
