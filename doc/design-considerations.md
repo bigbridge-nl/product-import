@@ -156,6 +156,8 @@ This allows me to use the allowed packet size efficiently while not straining th
 
 * When concatenating sets of values "(a, b, c)" "(d, e, f)" etc, implode(", ", $values) is faster than just string concatenation, even though an array of 1000 items needs to be created
 
+* I used to distinguish between inserted products and updated products. But a quick test showed that the speed difference between inserts and inserts-as-update is very small (a few percents) and it reduces complexity quite a bit if you don't need to consider inserts anymore.
+
 ### The slowness of the unique url_key constraint
 
 To check the uniqueness of url_keys, it is necessary to query catalog_product_entity_varchar for specific values. Magento has no key for it.

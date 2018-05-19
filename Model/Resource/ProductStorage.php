@@ -326,6 +326,7 @@ class ProductStorage
         $productsWithCategories = [];
         $productsWithWebsites = [];
         $productsWithOptions = [];
+        $productsWithStockItems = [];
 
         $productsByType = [
             DownloadableProduct::TYPE_DOWNLOADABLE => [],
@@ -334,6 +335,7 @@ class ProductStorage
             ConfigurableProduct::TYPE_CONFIGURABLE => [],
         ];
 
+        // collect products by aspect that needs to be updated
         foreach ($validProducts as $product) {
 
             $productsByType[$product->getType()][] = $product;
@@ -355,6 +357,10 @@ class ProductStorage
 
             if ($product->getWebsiteIds() !== []) {
                 $productsWithWebsites[] = $product;
+            }
+
+            if ($product->getStockItems() !== []) {
+                $productsWithStockItems[] = $product;
             }
 
             foreach ($product->getStoreViews() as $storeView) {
@@ -383,7 +389,7 @@ class ProductStorage
             $this->customOptionStorage->updateCustomOptions($productsWithOptions);
             $this->productEntityStorage->insertCategoryIds($productsWithCategories);
             $this->productEntityStorage->insertWebsiteIds($productsWithWebsites);
-            $this->stockItemStorage->storeStockItems($validProducts);
+            $this->stockItemStorage->storeStockItems($productsWithStockItems);
             $this->linkedProductStorage->updateLinkedProducts($validProducts);
             $this->imageStorage->storeProductImages($validProducts);
             $this->tierPriceStorage->updateTierPrices($validProducts);

@@ -76,7 +76,6 @@ abstract class Product
     public function __construct(string $sku)
     {
         $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView();
-        $this->stockItems[self::DEFAULT_STOCK_NAME] = new ProductStockItem();
         $this->sku = trim($sku);
     }
 
@@ -162,6 +161,9 @@ abstract class Product
      */
     public function defaultStockItem()
     {
+        if (!array_key_exists(self::DEFAULT_STOCK_NAME, $this->stockItems)) {
+            $this->stockItems[self::DEFAULT_STOCK_NAME] = new ProductStockItem();
+        }
         return $this->stockItems[self::DEFAULT_STOCK_NAME];
     }
 
