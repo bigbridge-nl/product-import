@@ -1799,4 +1799,51 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals([], $errors);
 
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testChangeProductType()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct('type-transformer-product-import');
+        $product1->setAttributeSetByName("Default");
+
+        $global = $product1->global();
+        $global->setName("Type Transformer");
+        $global->setPrice('6.75');
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $product2 = new VirtualProduct('type-transformer-product-import');
+
+        $importer->importVirtualProduct($product2);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        $type = self::$db->fetchSingleCell("
+            SELECT `type_id`
+            FROM " . self::$metaData->productEntityTable . "
+            WHERE entity_id = " . $product1->id . "
+        ");
+
+        $this->assertSame("virtual", $type);
+
+        $product2 = new SimpleProduct('type-transformer-product-import');
+
+        $importer->importSimpleProduct($product2);
+        $importer->flush();
+
+        $this->assertEquals(['Type conversion from virtual to simple is not supported'], $errors);
+    }
 }

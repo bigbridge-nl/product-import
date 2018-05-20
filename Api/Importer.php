@@ -161,7 +161,7 @@ class Importer
      */
     public function flush()
     {
-        $this->productStorage->storeProducts($this->products, $this->config, $this->valueSerializer, true);
+        $this->productStorage->storeProducts($this->products, $this->config, $this->valueSerializer);
         $this->products = [];
     }
 
@@ -273,6 +273,7 @@ class Importer
             if (!array_key_exists($sku, $sku2id)) {
 
                 $placeholder = new SimpleProduct($sku);
+                $placeholder->lineNumber = Product::PLACEHOLDER_LINE_NUMBER;
 
                 $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
                 $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);

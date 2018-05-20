@@ -10,6 +10,8 @@ use BigBridge\ProductImport\Model\Data\LinkInfo;
  */
 abstract class Product
 {
+    const PLACEHOLDER_LINE_NUMBER = "-1";
+
     const GLOBAL_STORE_VIEW_CODE = 'admin';
 
     const DEFAULT_STOCK_NAME = 'Default';

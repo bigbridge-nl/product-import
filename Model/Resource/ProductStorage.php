@@ -82,6 +82,9 @@ class ProductStorage
     /** @var GroupedStorage */
     protected $groupedStorage;
 
+    /** @var ProductTypeChanger */
+    protected $productTypeChanger;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
@@ -98,8 +101,8 @@ class ProductStorage
         DownloadableStorage $downloadableStorage,
         ConfigurableStorage $configurableStorage,
         BundleStorage $bundleStorage,
-        GroupedStorage $groupedStorage
-)
+        GroupedStorage $groupedStorage,
+        ProductTypeChanger $productTypeChanger)
     {
         $this->db = $db;
         $this->metaData = $metaData;
@@ -117,16 +120,16 @@ class ProductStorage
         $this->configurableStorage = $configurableStorage;
         $this->bundleStorage = $bundleStorage;
         $this->groupedStorage = $groupedStorage;
+        $this->productTypeChanger = $productTypeChanger;
     }
 
     /**
      * @param Product[] $products Sku-indexed products of various product types
      * @param ImportConfig $config
      * @param ValueSerializer $valueSerializer
-     * @param bool $useCallbacks
      * @throws Exception
      */
-    public function storeProducts(array $products, ImportConfig $config, ValueSerializer $valueSerializer, bool $useCallbacks)
+    public function storeProducts(array $products, ImportConfig $config, ValueSerializer $valueSerializer)
     {
         if (empty($products)) {
             return;
@@ -173,6 +176,9 @@ class ProductStorage
         $this->urlKeyGenerator->createUrlKeysForNewProducts($insertProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
         $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
 
+        // handle products that changed type
+        $this->productTypeChanger->handleTypeChanges($updateProducts);
+
         // create an array of products without errors
         $validProducts = $this->collectValidProducts($products, $config);
 
@@ -184,11 +190,12 @@ class ProductStorage
         }
 
         // call user defined functions to let them process the results
-        if ($useCallbacks) {
-            foreach ($config->resultCallbacks as $callback) {
-                foreach ($products as $product) {
-                    call_user_func($callback, $product);
+        foreach ($config->resultCallbacks as $callback) {
+            foreach ($products as $product) {
+                if ($product->lineNumber === Product::PLACEHOLDER_LINE_NUMBER) {
+                    continue;
                 }
+                call_user_func($callback, $product);
             }
         }
 
@@ -241,13 +248,11 @@ class ProductStorage
             // checks all attributes, changes $product->errors
             $this->validator->validate($product);
 
-            if (!$product->isOk()) {
-                continue;
+            if ($product->isOk()) {
+                $validProducts[] = $product;
             }
-
-            // collect valid products
-            $validProducts[] = $product;
         }
+
         return $validProducts;
     }
 

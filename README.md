@@ -6,7 +6,7 @@ My name is Patrick van Bergen, I created this library because I needed product i
 
 ## Warning!
 
-This is a new library. It has not been used except by its own tests. The chance you find bugs is real. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will try to help you out.
+This is a new library. The chance you find bugs is real. Use it only for new projects and make sure to create a database backup before you start to experiment with it. I hope to change this status soon, but this is how it is. Let me know if you run into trouble, and I will try to help you out.
 
 ## Important
 
@@ -172,6 +172,8 @@ The library makes this distinction explicit with these constructs:
 Where storeView accepts a store view code.
 
 In the code below I will give examples using global() and storeView(). When I do, remember that both levels are available to you at all times.
+
+Attributes with site-scope will need to be imported for each store individually (the way it is stored in the database).
 
 ## EAV attributes
 
@@ -386,6 +388,12 @@ A virtual product is exactly like a simple product. The only difference is the t
     $product = new VirtualProduct("single-consult");
 
     $importer->importVirtualProduct($product);
+
+## Changing product type
+
+You can change a product type at any time. When a product was imported as a SimpleProduct before, it may be stored later as a ConfigurableProduct, for instance.
+
+Currently only changes from simple to another type are supported. Other changes report an error.
 
 ## Categories
 

@@ -4,11 +4,9 @@
 
 * deleting attribute values
 * allow delete products
-* are there attributes with site-scope? how to import / update?
-* allow change type of updated product (needed for placeholders!)
 * url_rewrite: make sure the translated url_keys of the categories are used
-* import configurables: variants don't need to be simples
 * Solve todo's in code
+* convert non-simple product types to other types
 
 ## Speed
 

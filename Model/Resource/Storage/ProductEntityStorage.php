@@ -23,6 +23,7 @@ class ProductEntityStorage
         $this->db = $db;
         $this->metaData = $metaData;
     }
+
     /**
      * Returns an sku => id map for all existing skus.
      *
@@ -116,31 +117,33 @@ class ProductEntityStorage
      */
     public function updateMainTable(array $products)
     {
-
         $dateTime = date('Y-m-d H:i:s');
 
         $attributeSetUpdates = [];
         $otherUpdates = [];
         foreach ($products as $product) {
             $sku = $product->getSku();
+            $type = $product->getType();
             $attributeSetId = $product->getAttributeSetId();
             if ($attributeSetId !== null) {
                 $attributeSetUpdates[] = $product->id;
+                $attributeSetUpdates[] = $type;
                 $attributeSetUpdates[] = $sku;
                 $attributeSetUpdates[] = $attributeSetId;
                 $attributeSetUpdates[] = $dateTime;
             } else {
                 $otherUpdates[] = $product->id;
+                $otherUpdates[] = $type;
                 $otherUpdates[] = $sku;
                 $otherUpdates[] = $dateTime;
             }
         }
 
-        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'sku', 'attribute_set_id', 'updated_at'], $attributeSetUpdates,
-            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)");
+        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'type_id', 'sku', 'attribute_set_id', 'updated_at'], $attributeSetUpdates,
+            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `type_id` = VALUES(`type_id`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)");
 
-        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'sku', 'updated_at'], $otherUpdates,
-            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `updated_at`= VALUES(`updated_at`)");
+        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'type_id', 'sku', 'updated_at'], $otherUpdates,
+            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `type_id` = VALUES(`type_id`), `updated_at`= VALUES(`updated_at`)");
     }
 
     /**
