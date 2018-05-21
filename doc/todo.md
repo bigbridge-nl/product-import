@@ -8,11 +8,6 @@
 * Solve todo's in code
 * convert non-simple product types to other types
 
-## Speed
-
-* downloading http images: perform a HEAD request to check if the image size (or hash?) has changed (config option)
-* all attributes in an array: collect products per attribute to save time
-
 # Validation
 
 * create unresolved attributes for all
