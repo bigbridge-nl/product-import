@@ -484,9 +484,11 @@ If the contents of your images never changes (i.e. different contents, but same 
 
 It checks if the file is in the temporary location, and if so, uses this one. The source location of the image is only checked if the image is not cached.
 
-If you want to cache images just like a browser does (HTTP cache), choose:
+If you want to cache images just with HTTP cache (like a browser), choose:
 
     $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
+
+The caching strategy is very cautious. Every header that might signify that the cache to be stale is used.
 
 ## Tier prices
 

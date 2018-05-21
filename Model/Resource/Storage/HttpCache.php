@@ -12,19 +12,24 @@ class HttpCache
     const CACHE_CONTROL = 'cache-control';
     const EXPIRES = 'expires';
     const E_TAG = 'etag';
+    const LAST_MODIFIED = 'last-modified';
+
     const IF_NONE_MATCH = 'if-none-match';
+    const IF_MODIFIED_SINCE = 'if-modified-since';
 
     const NO_CACHE = '/no-cache/';
+    const MUST_REVALIDATE = '/must-revalidate/';
     const NO_STORE = '/no-store/';
     const MAX_AGE = '/max-age=(\d+)/';
 
     const UNIX_TIME = 'unix-time';
 
+
     public function fetchFromUrl(string $imagePath, string $temporaryStoragePath, ImportConfig $config): string
     {
         $useHttpCache = $config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
         $headerFile = $temporaryStoragePath . ".json";
-        $eTag = null;
+        $conditions = [];
 
         if ($useHttpCache) {
 
@@ -43,16 +48,16 @@ class HttpCache
                         return "";
                     } elseif ($useCache !== false) {
                         // use an e-tag while fetching image
-                        $eTag = $useCache;
+                        $conditions = $useCache;
                     }
                 }
             }
         }
 
-        list($error, $responseHeaders) = $this->downloadFromUrl($imagePath, $temporaryStoragePath, $eTag);
+        list($error, $responseHeaders) = $this->downloadFromUrl($imagePath, $temporaryStoragePath, $conditions);
 
         if ($useHttpCache && ($error === "")) {
-            file_put_contents($headerFile, json_encode($responseHeaders));
+            file_put_contents($headerFile, json_encode($responseHeaders, JSON_PRETTY_PRINT));
         }
 
         return $error;
@@ -62,11 +67,11 @@ class HttpCache
      * Can we use the cache?
      *
      * Returns true or false,
-     * or an e-tag that needs to be passed to the server.
+     * or an array of extra conditions
      *
      * @param array $headers
      * @param int $now
-     * @return true|false|e-tag
+     * @return true|false|array
      */
     public function useCache(array $headers, int $now)
     {
@@ -74,50 +79,66 @@ class HttpCache
         $cacheControl = $headers[self::CACHE_CONTROL];
         $expires = $headers[self::EXPIRES] ? strtotime($headers[self::EXPIRES]) : 0;
         $eTag = $headers[self::E_TAG];
+        $lastModified = $headers[self::LAST_MODIFIED];
+
+        $conditions = [];
 
         if (preg_match(self::NO_STORE, $cacheControl)) {
             // cache should not be used; the image should not have been downloaded in the first place (but we do it because it is easier to treat all images alike)
             return false;
 
-        } else if (!preg_match(self::NO_CACHE, $cacheControl)) {
-            // only if no cache is not present
+        } else if (preg_match(self::MUST_REVALIDATE, $cacheControl)) {
+            // cache is stale right away
+        } else if (preg_match(self::NO_CACHE, $cacheControl)) {
+            // cache is stale right away
+        } else {
 
             // max-age
             if (preg_match(self::MAX_AGE, $cacheControl, $matches)) {
                 $maxAge = $matches[1];
-                if ($requestUnixTime + $maxAge > $now) {
-                    return true;
+                if ($requestUnixTime + $maxAge < $now) {
+                    return false;
                 }
             }
 
             // expires
-            if ($expires && strtotime($expires) > $now) {
-                return true;
+            if ($expires && $expires < $now) {
+                return false;
             }
         }
 
         // e-tag / if-none-match
         if ($eTag) {
-            return $eTag;
+            $conditions[] = self::IF_NONE_MATCH . ':' . $eTag;
+        }
+
+        // last-modified / if-modified-since
+        if ($lastModified) {
+            $conditions[] = self::IF_MODIFIED_SINCE . ':' . $lastModified;
+        }
+
+        if ($conditions) {
+            return $conditions;
         }
 
         return false;
     }
 
-    public function downloadFromUrl(string $url, string $localTargetFile, string $eTag = null)
+    public function downloadFromUrl(string $url, string $localTargetFile, array $conditions = null)
     {
         $responseHeaders = [
             self::UNIX_TIME => time(),
             self::CACHE_CONTROL => '',
             self::EXPIRES => null,
             self::E_TAG => null,
+            self::LAST_MODIFIED => null,
         ];
 
         $tempFile = $localTargetFile . '.tmp';
 
-        // etag temp file: if e-tag matches, the file used will become empty during the request
-        // this would destroy the cache
-        if ($eTag) {
+        // temp file: if "if-none-match" or "if-modified-since" don't match, the file used will become empty during the request
+        // this would create an empty cache file
+        if ($conditions) {
             $fp = fopen($tempFile, 'w+');
         } else {
             $fp = fopen($localTargetFile, 'w+');
@@ -133,15 +154,15 @@ class HttpCache
             if (preg_match('/^([^:]+):(.*)/', $header, $matches)) {
                 $key = trim(strtolower($matches[1]));
                 $value = trim($matches[2]);
-                if (in_array($key, [self::CACHE_CONTROL, self::EXPIRES, self::E_TAG])) {
+                if (array_key_exists($key, $responseHeaders)) {
                     $responseHeaders[$key] = $value;
                 }
             }
             return strlen($header);
         });
 
-        if ($eTag) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [self::IF_NONE_MATCH . ':' . $eTag]);
+        if ($conditions) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $conditions);
         }
 
         // the actual request
@@ -153,7 +174,7 @@ class HttpCache
         curl_close($ch);
         fclose($fp);
 
-        if ($eTag) {
+        if ($conditions) {
             // file changed
             if (filesize($tempFile) > 0) {
                 if (file_exists($localTargetFile)) {
