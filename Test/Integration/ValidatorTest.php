@@ -173,6 +173,9 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
         /** @var ImporterFactory $factory */
         $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
         $config = new ImportConfig();
+
+#$config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
+
         $importer = $factory->createImporter($config);
 
         $tests = [

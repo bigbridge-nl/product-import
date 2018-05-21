@@ -20,7 +20,7 @@ This library just helps you to get products into Magento's database quickly, low
 * support for all product types: simple products, configurable products, grouped products, bundle products, downloadable products, and virtual products
 * automatic category generation (no updates of categories)
 * automatic select and multiselect attribute option creation
-* import of images from file or url
+* import of images from file or url, with optional caching
 * custom options
 * unique url_key generation
 * dry run (no products are written to the database)
@@ -28,7 +28,7 @@ This library just helps you to get products into Magento's database quickly, low
 * input is validated on data type, requiredness,  and length restrictions
 * result callback, a function that is called with the results of each imported product (id, error)
 * information is only added and overwritten, never removed; the import is not considered to be the only source of information of the shop
-* it has a solution for the problem that the other products that a product depends on have not been imported yet
+* a solution for the problem that the other products that a product depends on have not been imported yet
 
 ## Indexing
 
@@ -483,6 +483,10 @@ If the contents of your images never changes (i.e. different contents, but same 
     $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR;
 
 It checks if the file is in the temporary location, and if so, uses this one. The source location of the image is only checked if the image is not cached.
+
+If you want to cache images just like a browser does (HTTP cache), choose:
+
+    $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
 
 ## Tier prices
 

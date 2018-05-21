@@ -103,4 +103,5 @@ class ImportConfig
 
     const EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD = 'force-download';
     const EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR = 'check-import-dir';
+    const EXISTING_IMAGE_STRATEGY_HTTP_CACHING = 'http-caching';
 }
