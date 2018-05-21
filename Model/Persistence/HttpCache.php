@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource\Storage;
+namespace BigBridge\ProductImport\Model\Persistence;
 
 use BigBridge\ProductImport\Api\ImportConfig;
 
@@ -23,7 +23,6 @@ class HttpCache
     const MAX_AGE = '/max-age=(\d+)/';
 
     const UNIX_TIME = 'unix-time';
-
 
     public function fetchFromUrl(string $imagePath, string $temporaryStoragePath, ImportConfig $config): string
     {
@@ -118,6 +117,9 @@ class HttpCache
         }
 
         if ($conditions) {
+            // The "max-age" request directive indicates that the client is unwilling to accept a response whose age is greater than the specified number of seconds.
+            // https://tools.ietf.org/html/rfc7234#section-5.2.1
+            $conditions[] = self::CACHE_CONTROL . ':max-age=0';
             return $conditions;
         }
 

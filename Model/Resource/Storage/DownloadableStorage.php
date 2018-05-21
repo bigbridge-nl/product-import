@@ -4,7 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Model\Data\Image;
-use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**

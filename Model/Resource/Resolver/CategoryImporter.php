@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
-use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use Magento\Catalog\Model\Category;
 

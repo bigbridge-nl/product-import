@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Db;
+namespace BigBridge\ProductImport\Model\Persistence;
 
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Adapter\Pdo\Mysql;
@@ -107,6 +107,7 @@ class Magento2DbConnection
      * @param string $table
      * @param array $columns
      * @param array $values
+     * @param int $magnitude
      */
     public function insertMultiple(string $table, array $columns, array $values, int $magnitude)
     {
@@ -124,6 +125,7 @@ class Magento2DbConnection
      * @param string $table
      * @param array $columns
      * @param array $values
+     * @param int $magnitude
      * @param string $updateClause
      */
     public function insertMultipleWithUpdate(string $table, array $columns, array $values, int $magnitude, string $updateClause)
@@ -143,6 +145,7 @@ class Magento2DbConnection
      * @param string $table
      * @param array $columns
      * @param array $values
+     * @param int $magnitude
      */
     public function insertMultipleWithIgnore(string $table, array $columns, array $values, int $magnitude)
     {
@@ -217,6 +220,7 @@ class Magento2DbConnection
      * @param string $query
      * @param $columns
      * @param $values
+     * @param $magnitude
      */
     protected function chunkedGroupExecute(string $query, $columns, $values, $magnitude)
     {

@@ -5,7 +5,7 @@ namespace BigBridge\ProductImport\Model\Resource;
 use BigBridge\ProductImport\Model\Data\CategoryInfo;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
-use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 
 /**
  * Pre-loads all meta data needed for the core processes once.

@@ -488,7 +488,8 @@ If you want to cache images just with HTTP cache (like a browser), choose:
 
     $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
 
-The caching strategy is very cautious. Every header that might signify that the cache to be stale is used.
+The HTTP caching strategy is very cautious, because you choose this strategy when you want an image to be reloaded when its contents changes.
+Every header that might signify that the cache is stale is used.
 
 ## Tier prices
 

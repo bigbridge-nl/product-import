@@ -6,7 +6,8 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
-use BigBridge\ProductImport\Model\Db\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Persistence\HttpCache;
+use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
