@@ -5,6 +5,11 @@ namespace BigBridge\ProductImport\Model\Persistence;
 use BigBridge\ProductImport\Api\ImportConfig;
 
 /**
+ * See
+ *  https://tools.ietf.org/html/rfc7234
+ *  https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching
+ *  https://serverfault.com/questions/130466/http-caching-headers-how-should-must-revalidate-work
+ *
  * @author Patrick van Bergen
  */
 class HttpCache
@@ -55,8 +60,10 @@ class HttpCache
 
         list($error, $responseHeaders) = $this->downloadFromUrl($imagePath, $temporaryStoragePath, $conditions);
 
-        if ($useHttpCache && ($error === "")) {
-            file_put_contents($headerFile, json_encode($responseHeaders, JSON_PRETTY_PRINT));
+        if ($useHttpCache) {
+            if ($error === "") {
+                file_put_contents($headerFile, json_encode($responseHeaders, JSON_PRETTY_PRINT));
+            }
         }
 
         return $error;
@@ -83,6 +90,7 @@ class HttpCache
         $conditions = [];
 
         if (preg_match(self::NO_STORE, $cacheControl)) {
+
             // cache should not be used; the image should not have been downloaded in the first place (but we do it because it is easier to treat all images alike)
             return false;
 
@@ -95,14 +103,14 @@ class HttpCache
             // max-age
             if (preg_match(self::MAX_AGE, $cacheControl, $matches)) {
                 $maxAge = $matches[1];
-                if ($requestUnixTime + $maxAge < $now) {
-                    return false;
+                if ($requestUnixTime + $maxAge > $now) {
+                    return true;
                 }
             }
 
             // expires
-            if ($expires && $expires < $now) {
-                return false;
+            if ($expires && $expires > $now) {
+                return true;
             }
         }
 
@@ -117,9 +125,6 @@ class HttpCache
         }
 
         if ($conditions) {
-            // The "max-age" request directive indicates that the client is unwilling to accept a response whose age is greater than the specified number of seconds.
-            // https://tools.ietf.org/html/rfc7234#section-5.2.1
-            $conditions[] = self::CACHE_CONTROL . ':max-age=0';
             return $conditions;
         }
 

@@ -179,11 +179,11 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
         $importer = $factory->createImporter($config);
 
         $tests = [
-//            [__DIR__ . "/../images/duck1.jpg", ""],
-//            [__DIR__ . "/../images/sloth1.jpg", "File not found: " . __DIR__ . "/../images/sloth1.jpg"],
-//            [__DIR__ . "/../images/empty.jpg", "File is empty: " . __DIR__ . "/../images/empty.jpg"],
-//            [__DIR__ . "/../images/no-image.txt", "Filetype not allowed (use .jpg, .png or .gif): " . __DIR__ . "/../images/no-image.txt"],
-//            ["https://en.wikipedia.org/static/images/project-logos/not-enwiki.png", "Image url returned 404 (Not Found): https://en.wikipedia.org/static/images/project-logos/not-enwiki.png"],
+            [__DIR__ . "/../images/duck1.jpg", ""],
+            [__DIR__ . "/../images/sloth1.jpg", "File not found: " . __DIR__ . "/../images/sloth1.jpg"],
+            [__DIR__ . "/../images/empty.jpg", "File is empty: " . __DIR__ . "/../images/empty.jpg"],
+            [__DIR__ . "/../images/no-image.txt", "Filetype not allowed (use .jpg, .png or .gif): " . __DIR__ . "/../images/no-image.txt"],
+            ["https://en.wikipedia.org/static/images/project-logos/not-enwiki.png", "Image url returned 404 (Not Found): https://en.wikipedia.org/static/images/project-logos/not-enwiki.png"],
             ["https://en.wikipedia.org/static/images/project-logos/enwiki.png", ""],
         ];
 

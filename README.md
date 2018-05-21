@@ -488,8 +488,7 @@ If you want to cache images just with HTTP cache (like a browser), choose:
 
     $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
 
-The HTTP caching strategy is very cautious, because you choose this strategy when you want an image to be reloaded when its contents changes.
-Every header that might signify that the cache is stale is used.
+The headers of the cached file are stored along with the image as a JSON file in the pub/media/import directory.
 
 ## Tier prices
 
