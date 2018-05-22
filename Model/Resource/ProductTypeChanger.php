@@ -39,6 +39,10 @@ class ProductTypeChanger
 
         foreach ($updatedProducts as $product) {
 
+            if (!array_key_exists($product->id, $oldTypes)) {
+                continue;
+            }
+
             $oldType = $oldTypes[$product->id];
             $newType = $product->getType();
 

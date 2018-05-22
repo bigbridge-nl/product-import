@@ -70,290 +70,276 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
         return $product1;
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDuplicateUrlKeyOnDefaultStrategyCreateError()
     {
-        try {
-            $config = new ImportConfig();
+        $config = new ImportConfig();
 
-            $importer = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
-            $product1 = $this->createProduct('product-import-1#a');
-            $product1->storeView('default')->setName("Summer Flora");
-            $product1->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product1);
+        $product1 = $this->createProduct('product-import-1#a');
+        $product1->storeView('default')->setName("Summer Flora");
+        $product1->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product1);
 
-            $product2 = $this->createProduct('product-import-1#b');
-            $product2->storeView('default')->setName("Summer Flora");
-            $product2->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product2);
+        $product2 = $this->createProduct('product-import-1#b');
+        $product2->storeView('default')->setName("Summer Flora");
+        $product2->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product2);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals(["Generated url key already exists: summer-flora"], $product2->getErrors());
+        $this->assertEquals(["Generated url key already exists: summer-flora"], $product2->getErrors());
 
-            $product3 = $this->createProduct('product-import-1#c');
-            $product3->storeView('default')->setName("Summer Flora");
-            $product3->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product3);
+        $product3 = $this->createProduct('product-import-1#c');
+        $product3->storeView('default')->setName("Summer Flora");
+        $product3->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product3);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals(["Generated url key already exists: summer-flora"], $product3->getErrors());
-
-        } catch (Exception $e) {
-            $this->assertTrue(false);
-        }
-
+        $this->assertEquals(["Generated url key already exists: summer-flora"], $product3->getErrors());
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDuplicateExplicitUrlKeyCreateError()
     {
-        try {
-            $config = new ImportConfig();
+        $config = new ImportConfig();
 
-            $importer = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
-            $product1 = $this->createProduct('product-import-6#a');
-            $product1->storeView('default')->setName("Flowers All Year");
-            $product1->storeView('default')->setUrlKey('product-import-6');
-            $importer->importSimpleProduct($product1);
+        $product1 = $this->createProduct('product-import-6#a');
+        $product1->storeView('default')->setName("Flowers All Year");
+        $product1->storeView('default')->setUrlKey('product-import-6');
+        $importer->importSimpleProduct($product1);
 
-            $product2 = $this->createProduct('product-import-6#b');
-            $product2->storeView('default')->setName("Flowers All Year");
-            $product2->storeView('default')->setUrlKey('product-import-6');
-            $importer->importSimpleProduct($product2);
+        $product2 = $this->createProduct('product-import-6#b');
+        $product2->storeView('default')->setName("Flowers All Year");
+        $product2->storeView('default')->setUrlKey('product-import-6');
+        $importer->importSimpleProduct($product2);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals(["Url key already exists: product-import-6"], $product2->getErrors());
+        $this->assertEquals(["Url key already exists: product-import-6"], $product2->getErrors());
 
-            $product3 = $this->createProduct('product-import-6#c');
-            $product3->storeView('default')->setName("Flowers All Year");
-            $product3->storeView('default')->setUrlKey('product-import-6');
-            $importer->importSimpleProduct($product3);
+        $product3 = $this->createProduct('product-import-6#c');
+        $product3->storeView('default')->setName("Flowers All Year");
+        $product3->storeView('default')->setUrlKey('product-import-6');
+        $importer->importSimpleProduct($product3);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals(["Url key already exists: product-import-6"], $product3->getErrors());
-
-        } catch (Exception $e) {
-            $this->assertTrue(false);
-        }
+        $this->assertEquals(["Url key already exists: product-import-6"], $product3->getErrors());
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDuplicateUrlKeyOnAddSkuStrategy()
     {
-        try {
-            $config = new ImportConfig();
-            $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU;
+        $config = new ImportConfig();
+        $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SKU;
 
-            $importer = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
-            $product1 = $this->createProduct('product-import-2#a');
-            $product1->storeView('default')->setName("Winter Woozling");
-            $product1->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product1);
+        $product1 = $this->createProduct('product-import-2#a');
+        $product1->storeView('default')->setName("Winter Woozling");
+        $product1->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product1);
 
-            $product2 = $this->createProduct('product-import-2#b');
-            $product2->storeView('default')->setName("Winter Woozling");
-            $product2->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product2);
+        $product2 = $this->createProduct('product-import-2#b');
+        $product2->storeView('default')->setName("Winter Woozling");
+        $product2->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product2);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product2->getErrors());
-            $this->assertEquals("winter-woozling-product-import-2-b", $product2->storeView('default')->getUrlKey());
+        $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals("winter-woozling-product-import-2-b", $product2->storeView('default')->getUrlKey());
 
-            $product3 = $this->createProduct('product-import-2#c');
-            $product3->storeView('default')->setName("Winter Woozling");
-            $product3->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product3);
+        $product3 = $this->createProduct('product-import-2#c');
+        $product3->storeView('default')->setName("Winter Woozling");
+        $product3->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product3);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product3->getErrors());
-            $this->assertEquals('winter-woozling-product-import-2-c', $product3->storeView('default')->getUrlKey());
+        $this->assertEquals([], $product3->getErrors());
+        $this->assertEquals('winter-woozling-product-import-2-c', $product3->storeView('default')->getUrlKey());
 
-            // resave product
-    //        $product2->global()->generateUrlKey();
-            $importer->importSimpleProduct($product2);
+        // resave product
+//        $product2->global()->generateUrlKey();
+        $importer->importSimpleProduct($product2);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product2->getErrors());
-            $this->assertEquals('winter-woozling-product-import-2-b', $product2->storeView('default')->getUrlKey());
-
-        } catch (Exception $e) {
-            $this->assertTrue(false);
-        }
+        $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals('winter-woozling-product-import-2-b', $product2->storeView('default')->getUrlKey());
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDuplicateUrlKeyOnAddSerialStrategy()
     {
-        try {
-            $config = new ImportConfig();
-            $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
+        $config = new ImportConfig();
+        $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
 
-            $importer = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
-            // original
-            $product1 = $this->createProduct('product-import-3#a');
-            $product1->storeView('default')->setName("Autumn Flowers");
-            $product1->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product1);
+        // original
+        $product1 = $this->createProduct('product-import-3#a');
+        $product1->storeView('default')->setName("Autumn Flowers");
+        $product1->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product1);
 
-            // conflicting key
-            $product2 = $this->createProduct('product-import-3#b');
-            $product2->storeView('default')->setName("Autumn Flowers");
-            $product2->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product2);
+        // conflicting key
+        $product2 = $this->createProduct('product-import-3#b');
+        $product2->storeView('default')->setName("Autumn Flowers");
+        $product2->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product2);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product2->getErrors());
-            $this->assertEquals("autumn-flowers-1", $product2->storeView('default')->getUrlKey());
+        $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals("autumn-flowers-1", $product2->storeView('default')->getUrlKey());
 
-            // conflicting key - different batch
-            $product3 = $this->createProduct('product-import-3#c');
-            $product3->storeView('default')->setName("Autumn Flowers");
-            $product3->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product3);
+        // conflicting key - different batch
+        $product3 = $this->createProduct('product-import-3#c');
+        $product3->storeView('default')->setName("Autumn Flowers");
+        $product3->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product3);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product3->getErrors());
-            $this->assertEquals('autumn-flowers-2', $product3->storeView('default')->getUrlKey());
-
-        } catch (Exception $e) {
-            $this->assertTrue(false);
-        }
+        $this->assertEquals([], $product3->getErrors());
+        $this->assertEquals('autumn-flowers-2', $product3->storeView('default')->getUrlKey());
     }
 
+    /**
+     * @throws Exception
+     */
     public function testSkuSchemeDuplicateUrlKeyOnAddSerialStrategy()
     {
-        try {
-            $config = new ImportConfig();
-            $config->urlKeyScheme = ImportConfig::URL_KEY_SCHEME_FROM_SKU;
-            $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
+        $config = new ImportConfig();
+        $config->urlKeyScheme = ImportConfig::URL_KEY_SCHEME_FROM_SKU;
+        $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
 
-            $importer = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
-            // original
-            $product1 = $this->createProduct('product-import-5#a');
-            $product1->storeView('default')->setName("Sunshine Every Day");
-            $product1->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product1);
+        // original
+        $product1 = $this->createProduct('product-import-5#a');
+        $product1->storeView('default')->setName("Sunshine Every Day");
+        $product1->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product1);
 
-            // conflicting key
-            $product2 = $this->createProduct('product-import-5@a');
-            $product2->storeView('default')->setName("Moonlight Every Day");
-            $product2->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product2);
+        // conflicting key
+        $product2 = $this->createProduct('product-import-5@a');
+        $product2->storeView('default')->setName("Moonlight Every Day");
+        $product2->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product2);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product2->getErrors());
-            $this->assertEquals("product-import-5-a-1", $product2->storeView('default')->getUrlKey());
+        $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals("product-import-5-a-1", $product2->storeView('default')->getUrlKey());
 
-            // conflicting key - different batch
-            $product3 = $this->createProduct('product-import-5#a');
-            $product3->storeView('default')->setName("Starlight Every Day");
-            $product3->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product3);
+        // conflicting key - different batch
+        $product3 = $this->createProduct('product-import-5#a');
+        $product3->storeView('default')->setName("Starlight Every Day");
+        $product3->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product3);
 
-            $product4 = $this->createProduct('product-import-5*a');
-            $product4->storeView('default')->setName("Planet Light Every Day");
-            $product4->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($product4);
+        $product4 = $this->createProduct('product-import-5*a');
+        $product4->storeView('default')->setName("Planet Light Every Day");
+        $product4->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product4);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product3->getErrors());
-            $this->assertEquals([], $product4->getErrors());
-            $this->assertEquals('product-import-5-a', $product3->storeView('default')->getUrlKey());
-            $this->assertEquals('product-import-5-a-2', $product4->storeView('default')->getUrlKey());
-
-        } catch (Exception $e) {
-            $this->assertTrue(false);
-        }
-
+        $this->assertEquals([], $product3->getErrors());
+        $this->assertEquals([], $product4->getErrors());
+        $this->assertEquals('product-import-5-a', $product3->storeView('default')->getUrlKey());
+        $this->assertEquals('product-import-5-a-2', $product4->storeView('default')->getUrlKey());
     }
 
+    /**
+     * @throws Exception
+     */
     public function testDifferentStoreViews()
     {
-        try {
-            $config = new ImportConfig();
-            $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
+        $config = new ImportConfig();
+        $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ADD_SERIAL;
 
-            $importer = self::$factory->createImporter($config);
+        $importer = self::$factory->createImporter($config);
 
-            // original
-            $product1 = $this->createProduct('product-import-4#a');
-            $product1->global()->setName("Spring Leaves");
-            $product1->global()->generateUrlKey();
+        // original
+        $product1 = $this->createProduct('product-import-4#a');
+        $product1->global()->setName("Spring Leaves");
+        $product1->global()->generateUrlKey();
 
-            // conflicting key
-            $product2 = $this->createProduct('product-import-4#b');
-            $product2->global()->setName("Spring Leaves");
-            $product2->global()->generateUrlKey();
+        // conflicting key
+        $product2 = $this->createProduct('product-import-4#b');
+        $product2->global()->setName("Spring Leaves");
+        $product2->global()->generateUrlKey();
 
-            $product1s1 = $product1->storeView('default');
-            $product1s1->setName("Spring Leaves");
-            $product1s1->generateUrlKey();
+        $product1s1 = $product1->storeView('default');
+        $product1s1->setName("Spring Leaves");
+        $product1s1->generateUrlKey();
 
-            $product2s1 = $product2->storeView('default');
-            $product2s1->setName("Spring Leaves");
-            $product2s1->generateUrlKey();
+        $product2s1 = $product2->storeView('default');
+        $product2s1->setName("Spring Leaves");
+        $product2s1->generateUrlKey();
 
-            $importer->importSimpleProduct($product1);
-            $importer->importSimpleProduct($product2);
+        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product2);
 
-            $importer->flush();
+        $importer->flush();
 
-            // resave products
-            $product1c = clone $product1;
-            $product1c->global()->generateUrlKey();
+        // resave products
+        $product1c = clone $product1;
+        $product1c->global()->generateUrlKey();
 
-            $product2c = clone $product2;
-            $product2c->global()->generateUrlKey();
+        $product2c = clone $product2;
+        $product2c->global()->generateUrlKey();
 
-            $product1s1c = $product1c->storeView('default');
-            $product1s1c->setName("Spring Leaves");
-            $product1s1c->generateUrlKey();
+        $product1s1c = $product1c->storeView('default');
+        $product1s1c->setName("Spring Leaves");
+        $product1s1c->generateUrlKey();
 
-            $product2s1c = $product2c->storeView('default');
-            $product2s1c->setName("Spring Leaves");
-            $product2s1c->generateUrlKey();
+        $product2s1c = $product2c->storeView('default');
+        $product2s1c->setName("Spring Leaves");
+        $product2s1c->generateUrlKey();
 
-            $importer->importSimpleProduct($product1c);
-            $importer->importSimpleProduct($product2c);
+        $importer->importSimpleProduct($product1c);
+        $importer->importSimpleProduct($product2c);
 
-            // same product same store view same batch
+        // same product same store view same batch
 
-            $productJoker = clone $product2;
-            $productJoker->storeView('default')->setName("Spring Leaves");
-            $productJoker->storeView('default')->generateUrlKey();
-            $importer->importSimpleProduct($productJoker);
+        $productJoker = clone $product2;
+        $productJoker->storeView('default')->setName("Spring Leaves");
+        $productJoker->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($productJoker);
 
-            $importer->flush();
+        $importer->flush();
 
-            $this->assertEquals([], $product1->getErrors());
-            $this->assertEquals('spring-leaves', $product1->global()->getUrlKey());
-            $this->assertEquals([], $product2->getErrors());
-            $this->assertEquals('spring-leaves-1', $product2->global()->getUrlKey());
-            $this->assertEquals('spring-leaves', $product1->storeView('default')->getUrlKey());
-            $this->assertEquals('spring-leaves-1', $product2->storeView('default')->getUrlKey());
-            $this->assertEquals([], $product1c->getErrors());
-            $this->assertEquals('spring-leaves', $product1c->global()->getUrlKey());
-            $this->assertEquals([], $product2c->getErrors());
-            $this->assertEquals('spring-leaves-1', $product2c->global()->getUrlKey());
-            $this->assertEquals('spring-leaves', $product1c->storeView('default')->getUrlKey());
-            $this->assertEquals('spring-leaves-1', $product2c->storeView('default')->getUrlKey());
-            $this->assertEquals([], $productJoker->getErrors());
-            $this->assertEquals('spring-leaves-1', $productJoker->storeView('default')->getUrlKey());
-
-        } catch (Exception $e) {
-            $this->assertTrue(false);
-        }
+        $this->assertEquals([], $product1->getErrors());
+        $this->assertEquals('spring-leaves', $product1->global()->getUrlKey());
+        $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals('spring-leaves-1', $product2->global()->getUrlKey());
+        $this->assertEquals('spring-leaves', $product1->storeView('default')->getUrlKey());
+        $this->assertEquals('spring-leaves-1', $product2->storeView('default')->getUrlKey());
+        $this->assertEquals([], $product1c->getErrors());
+        $this->assertEquals('spring-leaves', $product1c->global()->getUrlKey());
+        $this->assertEquals([], $product2c->getErrors());
+        $this->assertEquals('spring-leaves-1', $product2c->global()->getUrlKey());
+        $this->assertEquals('spring-leaves', $product1c->storeView('default')->getUrlKey());
+        $this->assertEquals('spring-leaves-1', $product2c->storeView('default')->getUrlKey());
+        $this->assertEquals([], $productJoker->getErrors());
+        $this->assertEquals('spring-leaves-1', $productJoker->storeView('default')->getUrlKey());
     }
 }
