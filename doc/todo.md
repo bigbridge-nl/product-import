@@ -4,7 +4,6 @@
 
 * deleting attribute values
 * allow delete products
-* url_rewrite: make sure the translated url_keys of the categories are used
 * Solve todo's in code
 * convert non-simple product types to other types
 

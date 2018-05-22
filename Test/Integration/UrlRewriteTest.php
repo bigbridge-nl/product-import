@@ -120,6 +120,20 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
 
         $importer = self::$factory->createImporter($config);
 
+        // create a product just for the category
+        $productX = new SimpleProduct('cat-product-import');
+        $productX->setAttributeSetByName("Default");
+        $productX->setCategoriesByGlobalName(["Boxes"]);
+        $productX->global()->setName("Category dummy");
+        $productX->global()->setPrice("0");
+        $importer->importSimpleProduct($productX);
+        $importer->flush();
+
+        $categoryId = $productX->getCategoryIds()[0];
+
+        // give this category a Dutch name
+        self::$metadata->allCategoryInfo[$categoryId]->urlKeys[1] = 'dozen';
+
         // product
         $product1 = new SimpleProduct('1-product-import');
         $product1->setAttributeSetByName("Default");
@@ -145,20 +159,18 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
 
         $importer->importSimpleProduct($product3);
 
-        $importer->flush();
 
-        $categoryId = $product1->getCategoryIds()[0];
+        $importer->flush();
 
         // insert
 
         $expectedRewrites = [
-#todo "dozen"
             ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
             ["product", "big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
         ];
 
@@ -188,17 +200,16 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $importer->flush();
 
         $expectedRewrites = [
-#todo "dozen"
             ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
             ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
             ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "0",
+            ["product", "dozen/big-grass-green-box-product-import.html", "dozen/a-big-grass-green-box-product-import.html", "301", "1", "0",
                 serialize(['category_id' => (string)$categoryId])],
         ];
 
@@ -216,19 +227,18 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $newCategoryId = $product3->getCategoryIds()[0];
 
         $expectedRewrites = [
-#todo "dozen"
             ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
             ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
             ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$newCategoryId])],
 
             ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-            ["product", "boxes/big-grass-green-box-product-import.html", "boxes/a-big-grass-green-box-product-import.html", "301", "1", "0",
+            ["product", "dozen/big-grass-green-box-product-import.html", "dozen/a-big-grass-green-box-product-import.html", "301", "1", "0",
                 serialize(['category_id' => (string)$categoryId])],
         ];
 
@@ -250,6 +260,20 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $config->magentoVersion = "2.2.1";
 
         $importer = self::$factory->createImporter($config);
+
+        // create a product just for the category
+        $productX = new SimpleProduct('cat-product-import');
+        $productX->setAttributeSetByName("Default");
+        $productX->setCategoriesByGlobalName(["Boxes"]);
+        $productX->global()->setName("Category dummy");
+        $productX->global()->setPrice("0");
+        $importer->importSimpleProduct($productX);
+        $importer->flush();
+
+        $categoryId = $productX->getCategoryIds()[0];
+
+        // give this category a Dutch name
+        self::$metadata->allCategoryInfo[$categoryId]->urlKeys[1] = 'dozen';
 
         // product
         $product1 = new SimpleProduct('3-product-import');
@@ -277,8 +301,6 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
 
         $importer->flush();
 
-        $categoryId = $product1->getCategoryIds()[0];
-
         // change url_key
 
         $product3->global()->setUrlKey("a-" . $product3->global()->getUrlKey());
@@ -300,19 +322,18 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $newCategoryId = $product3->getCategoryIds()[0];
 
         $expectedRewrites = [
-#todo "dozen"
             ["product", "grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "boxes/grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 json_encode(['category_id' => (string)$categoryId])],
 
             ["product", "a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "boxes/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+            ["product", "dozen/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
                 json_encode(['category_id' => (string)$categoryId])],
             ["product", "containers/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
                 json_encode(['category_id' => (string)$newCategoryId])],
 
             ["product", "big-grass-yellow-box-product-import.html", "a-big-grass-yellow-box-product-import.html", "301", "1", "0", json_encode([])],
-            ["product", "boxes/big-grass-yellow-box-product-import.html", "boxes/a-big-grass-yellow-box-product-import.html", "301", "1", "0",
+            ["product", "dozen/big-grass-yellow-box-product-import.html", "dozen/a-big-grass-yellow-box-product-import.html", "301", "1", "0",
                 json_encode(['category_id' => (string)$categoryId])],
         ];
 
