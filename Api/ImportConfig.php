@@ -8,7 +8,7 @@ namespace BigBridge\ProductImport\Api;
 class ImportConfig
 {
     /**
-     * When set to true, no database changes are done
+     * When set to true, no products are saved to the database
      *
      * @var bool
      */
@@ -17,7 +17,7 @@ class ImportConfig
     /**
      * @var int The number of products sent to the database at once
      *      The number is a tested optimal balance between speed and database load.
-     *      If you enlarge the number, make sure the queries do not exceed your maximum query length (max_allowed_packet)
+     *      Making the number larger will speed up import only marginally, and will create large transactions.
      */
     public $batchSize = 1000;
 
@@ -33,7 +33,7 @@ class ImportConfig
     public $resultCallbacks = [];
 
     /**
-     * Create categories that are passed as References, if they do not exist.
+     * Create categories if they do not exist.
      *
      * true: creates categories
      * false: does not create categories, adds an error to the product
@@ -48,6 +48,27 @@ class ImportConfig
      * @var array
      */
     public $autoCreateOptionAttributes = [];
+
+    /**
+     * How to handle varchar and text fields with value ""?
+     *
+     * @var string
+     */
+    public $emptyTextValueStrategy = self::EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE;
+
+    const EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE = "ignore"; // skip it in the import
+    const EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT = "import"; // import as is, as ""
+    const EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE = "remove"; // remove the value from the product
+
+    /**
+     * How to handle datetime, decimal and integer fields with value ""?
+     *
+     * @var string
+     */
+    public $emptyNonTextValueStrategy = self::EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE;
+
+    const EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE = "ignore"; // skip it in the import
+    const EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE = "remove"; // remove the value from the product
 
     /**
      * Create url keys based on name or sku?

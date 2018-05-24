@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
+use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use Magento\Catalog\Model\Category;
@@ -226,17 +227,17 @@ class CategoryImporter
             $targetPath
         ]);
 
-        $this->importEavAttribute($categoryId, 'name', $categoryName, MetaData::TYPE_VARCHAR, 0);
-        $this->importEavAttribute($categoryId, 'display_mode', "PRODUCTS", MetaData::TYPE_VARCHAR, 0);
+        $this->importEavAttribute($categoryId, 'name', $categoryName, EavAttributeInfo::TYPE_VARCHAR, 0);
+        $this->importEavAttribute($categoryId, 'display_mode', "PRODUCTS", EavAttributeInfo::TYPE_VARCHAR, 0);
 #todo make url key unique
-        $this->importEavAttribute($categoryId, 'url_key', $urlKey, MetaData::TYPE_VARCHAR, 0);
-        $this->importEavAttribute($categoryId, 'url_path', $urlPath, MetaData::TYPE_VARCHAR, 0);
+        $this->importEavAttribute($categoryId, 'url_key', $urlKey, EavAttributeInfo::TYPE_VARCHAR, 0);
+        $this->importEavAttribute($categoryId, 'url_path', $urlPath, EavAttributeInfo::TYPE_VARCHAR, 0);
 
-        $this->importEavAttribute($categoryId, 'is_active', 1, MetaData::TYPE_INTEGER, 0);
-        $this->importEavAttribute($categoryId, 'is_anchor', 1, MetaData::TYPE_INTEGER, 0);
-        $this->importEavAttribute($categoryId, 'include_in_menu', 1, MetaData::TYPE_INTEGER, 0);
-        $this->importEavAttribute($categoryId, 'custom_use_parent_settings', 0, MetaData::TYPE_INTEGER, 0);
-        $this->importEavAttribute($categoryId, 'custom_apply_to_products', 0, MetaData::TYPE_INTEGER, 0);
+        $this->importEavAttribute($categoryId, 'is_active', 1, EavAttributeInfo::TYPE_INTEGER, 0);
+        $this->importEavAttribute($categoryId, 'is_anchor', 1, EavAttributeInfo::TYPE_INTEGER, 0);
+        $this->importEavAttribute($categoryId, 'include_in_menu', 1, EavAttributeInfo::TYPE_INTEGER, 0);
+        $this->importEavAttribute($categoryId, 'custom_use_parent_settings', 0, EavAttributeInfo::TYPE_INTEGER, 0);
+        $this->importEavAttribute($categoryId, 'custom_apply_to_products', 0, EavAttributeInfo::TYPE_INTEGER, 0);
 
         // !important: add this new category to the metadata collected
         $newIdPath = $idPath;

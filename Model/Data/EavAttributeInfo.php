@@ -16,6 +16,12 @@ class EavAttributeInfo
     const FRONTEND_SELECT = 'select';
     const FRONTEND_MEDIA_IMAGE = 'media_image';
 
+    const TYPE_DATETIME = 'datetime';
+    const TYPE_DECIMAL = 'decimal';
+    const TYPE_INTEGER = 'int';
+    const TYPE_VARCHAR = 'varchar';
+    const TYPE_TEXT = 'text';
+
     /** @var  string */
     public $attributeCode;
 
@@ -50,5 +56,10 @@ class EavAttributeInfo
         $this->frontendInput = $frontendInput;
         $this->optionValues = $optionValues;
         $this->scope = $scope;
+    }
+
+    public function isTextual()
+    {
+        return in_array($this->backendType, [self::TYPE_TEXT, self::TYPE_VARCHAR]);
     }
 }

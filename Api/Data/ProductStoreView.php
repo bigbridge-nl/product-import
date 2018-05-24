@@ -20,6 +20,9 @@ class ProductStoreView
     const STATUS_ENABLED = Status::STATUS_ENABLED;
     const STATUS_DISABLED = Status::STATUS_DISABLED;
 
+    const NOT_AVAILABLE = 0;
+    const AVAILABLE = 1;
+
     const MSRP_USE_CONFIG = 0;
     const MSRP_ON_GESTURE = 1;
     const MSRP_IN_CART = 2;
@@ -96,9 +99,9 @@ class ProductStoreView
     /** @var CustomOptionValue[] */
     protected $customOptionValues = [];
 
-    public function setName(string $name)
+    public function setName(string $name = null)
     {
-        $this->attributes[self::ATTR_NAME] = trim($name);
+        $this->attributes[self::ATTR_NAME] = ($name === null) ? null : trim($name);
     }
 
     /**
@@ -124,93 +127,112 @@ class ProductStoreView
         $this->store_view_id = null;
     }
 
-    public function setStatus(int $status)
+    /**
+     * Use the STATUS_ constants in this class.
+     *
+     * @param int|null $status
+     */
+    public function setStatus(int $status = null)
     {
         $this->attributes[self::ATTR_STATUS] = $status;
     }
 
-    public function setGiftMessageAvailable(bool $available)
+    /**
+     * Use the AVAILABLE or NOT_AVAILABLE constants in this class.
+     *
+     * @param int|null $available
+     */
+    public function setGiftMessageAvailable(int $available = null)
     {
-        $this->attributes[self::ATTR_GIFT_MESSAGE_AVAILABLE] = (int)$available;
+        $this->attributes[self::ATTR_GIFT_MESSAGE_AVAILABLE] = $available;
     }
 
-    public function setDescription(string $description)
+    public function setDescription(string $description = null)
     {
-        $this->attributes[self::ATTR_DESCRIPTION] = trim($description);
+        // textarea input: not trimmed
+        $this->attributes[self::ATTR_DESCRIPTION] = $description;
     }
 
-    public function setShortDescription(string $shortDescription)
+    public function setShortDescription(string $shortDescription = null)
     {
-        $this->attributes[self::ATTR_SHORT_DESCRIPTION] = trim($shortDescription);
+        // textarea input: not trimmed
+        $this->attributes[self::ATTR_SHORT_DESCRIPTION] = $shortDescription;
     }
 
-    public function setMetaTitle(string $metaTitle)
+    public function setMetaTitle(string $metaTitle = null)
     {
-        $this->attributes[self::ATTR_META_TITLE] = trim($metaTitle);
+        $this->attributes[self::ATTR_META_TITLE] = ($metaTitle === null) ? null : trim($metaTitle);
     }
 
-    public function setMetaDescription(string $metaDescription)
+    public function setMetaDescription(string $metaDescription = null)
     {
-        $this->attributes[self::ATTR_META_DESCRIPTION] = trim($metaDescription);
+        // textarea input: not trimmed
+        $this->attributes[self::ATTR_META_DESCRIPTION] = $metaDescription;
     }
 
-    public function setMetaKeywords(string $metaKeywords)
+    public function setMetaKeywords(string $metaKeywords = null)
     {
-        $this->attributes[self::ATTR_META_KEYWORDS] = trim($metaKeywords);
+        // textarea input: not trimmed
+        $this->attributes[self::ATTR_META_KEYWORDS] = $metaKeywords;
     }
 
     /**
-     * @param string $price A 12.4 decimal field
+     * @param string|null $price A 12.4 decimal field
      */
-    public function setPrice(string $price)
+    public function setPrice(string $price = null)
     {
-        $this->attributes[self::ATTR_PRICE] = trim($price);
+        $this->attributes[self::ATTR_PRICE] = ($price === null) ? null : trim($price);
     }
 
     /**
-     * @param string $cost A 12.4 decimal field
+     * @param string|null $cost A 12.4 decimal field
      */
-    public function setCost(string $cost)
+    public function setCost(string $cost = null)
     {
-        $this->attributes[self::ATTR_COST] = trim($cost);
+        $this->attributes[self::ATTR_COST] = ($cost === null) ? null : trim($cost);
     }
 
     /**
-     * @param string $msrp Manufacturer Suggested Retail Price. A 12.4 decimal field
+     * @param string|null $msrp Manufacturer Suggested Retail Price. A 12.4 decimal field
      */
-    public function setMsrp(string $msrp)
+    public function setMsrp(string $msrp = null)
     {
-        $this->attributes[self::ATTR_MSRP] = trim($msrp);
+        $this->attributes[self::ATTR_MSRP] = ($msrp === null) ? null : trim($msrp);
     }
 
     /**
      * Check "MSRP" class constants for values.
      *
-     * @param int $type
+     * @param int|null $type
      */
-    public function setMsrpDisplayActualPriceType(int $type)
+    public function setMsrpDisplayActualPriceType(int $type = null)
     {
         $this->attributes[self::ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE] = $type;
     }
 
-    public function setVisibility(int $visibility)
+    /**
+     * Use one of the VISIBILITY_ constants of this class.
+     *
+     * @param int|null $visibility
+     */
+    public function setVisibility(int $visibility = null)
     {
         $this->attributes[self::ATTR_VISIBILITY] = $visibility;
     }
 
-    public function setTaxClassId(int $taxClassId)
+    public function setTaxClassId(int $taxClassId = null)
     {
         $this->attributes[self::ATTR_TAX_CLASS_ID] = $taxClassId;
     }
 
-    public function setTaxClassName(string $taxClassName)
+    public function setTaxClassName(string $taxClassName = null)
     {
-        $this->unresolvedAttributes[self::ATTR_TAX_CLASS_ID] = trim($taxClassName);
+        $this->unresolvedAttributes[self::ATTR_TAX_CLASS_ID] = ($taxClassName=== null) ? null : trim($taxClassName);
     }
 
-    public function setUrlKey(string $urlKey)
+    public function setUrlKey(string $urlKey = null)
     {
-        $this->attributes[self::ATTR_URL_KEY] = trim($urlKey);
+        $this->attributes[self::ATTR_URL_KEY] = ($urlKey === null) ? null : trim($urlKey);
     }
 
     /**
@@ -227,86 +249,88 @@ class ProductStoreView
     }
 
     /**
-     * @param string $weight A 12.4 decimal field
+     * @param string|null $weight A 12.4 decimal field
      */
-    public function setWeight(string $weight)
+    public function setWeight(string $weight = null)
     {
-        $this->attributes[self::ATTR_WEIGHT] = trim($weight);
+        $this->attributes[self::ATTR_WEIGHT] = ($weight === null) ? null : trim($weight);
     }
 
     /**
-     * @param string $specialPrice A 12.4 decimal field
+     * @param string|null $specialPrice A 12.4 decimal field
      */
-    public function setSpecialPrice(string $specialPrice)
+    public function setSpecialPrice(string $specialPrice = null)
     {
-        $this->attributes[self::ATTR_SPECIAL_PRICE] = trim($specialPrice);
+        $this->attributes[self::ATTR_SPECIAL_PRICE] = ($specialPrice === null) ? null : trim($specialPrice);
     }
 
     /**
-     * @param string $specialPriceFromDate A y-m-d MySql date
+     * @param string|null $specialPriceFromDate A y-m-d MySql date
      */
-    public function setSpecialFromDate(string $specialPriceFromDate)
+    public function setSpecialFromDate(string $specialPriceFromDate = null)
     {
-        $this->attributes[self::ATTR_SPECIAL_FROM_DATE] = trim($specialPriceFromDate);
+        $this->attributes[self::ATTR_SPECIAL_FROM_DATE] = ($specialPriceFromDate === null) ? null : trim($specialPriceFromDate);
     }
 
     /**
-     * @param string $specialPriceToDate A y-m-d MySql date
+     * @param string|null $specialPriceToDate A y-m-d MySql date
      */
-    public function setSpecialToDate(string $specialPriceToDate)
+    public function setSpecialToDate(string $specialPriceToDate = null)
     {
-        $this->attributes[self::ATTR_SPECIAL_TO_DATE] = trim($specialPriceToDate);
+        $this->attributes[self::ATTR_SPECIAL_TO_DATE] = ($specialPriceToDate === null) ? null : trim($specialPriceToDate);
     }
 
     /**
-     * @param string $newsFromDate A y-m-d MySql date
+     * @param string|null $newsFromDate A y-m-d MySql date
      */
-    public function setNewsFromDate(string $newsFromDate)
+    public function setNewsFromDate(string $newsFromDate = null)
     {
-        $this->attributes[self::ATTR_NEWS_FROM_DATE] = trim($newsFromDate);
+        $this->attributes[self::ATTR_NEWS_FROM_DATE] = ($newsFromDate === null) ? null : trim($newsFromDate);
     }
 
     /**
-     * @param string $newsToDate A y-m-d MySql date
+     * @param string|null $newsToDate A y-m-d MySql date
      */
-    public function setNewsToDate(string $newsToDate)
+    public function setNewsToDate(string $newsToDate = null)
     {
-        $this->attributes[self::ATTR_NEWS_TO_DATE] = trim($newsToDate);
+        $this->attributes[self::ATTR_NEWS_TO_DATE] = ($newsToDate === null) ? null : trim($newsToDate);
     }
 
     /**
-     * @param string $option The admin name of the manufacturer attribute option
+     * @param string|null $option The admin name of the manufacturer attribute option
      */
-    public function setManufacturer(string $option)
+    public function setManufacturer(string $option = null)
     {
-        $this->unresolvedSelects[self::ATTR_MANUFACTURER] = trim($option);
+        $this->unresolvedSelects[self::ATTR_MANUFACTURER] = ($option === null) ? null : trim($option);
     }
 
     /**
-     * @param string $countryCode 2 characters, uppercase
+     * @param string|null $countryCode 2 characters, uppercase
      */
-    public function setCountryOfManufacture(string $countryCode)
+    public function setCountryOfManufacture(string $countryCode = null)
     {
-        $this->attributes[self::ATTR_COUNTRY_OF_MANUFACTURE] = trim($countryCode);
+        $this->attributes[self::ATTR_COUNTRY_OF_MANUFACTURE] = ($countryCode === null) ? null : trim($countryCode);
     }
 
     /**
-     * @param string $option The admin name of the color attribute option
+     * @param string|null $option The admin name of the color attribute option
      */
-    public function setColor(string $option)
+    public function setColor(string $option = null)
     {
-        $this->unresolvedSelects[self::ATTR_COLOR] = trim($option);
+        $this->unresolvedSelects[self::ATTR_COLOR] = ($option === null) ? null : trim($option);
     }
 
     /**
      * Set the value of a user defined attribute.
+     * Apply trim() to $value before calling this function, if necessary.
      *
      * @param string $name
-     * @param string $value
+     * @param string|null $value
      */
-    public function setCustomAttribute(string $name, string $value)
+    public function setCustomAttribute(string $name, string $value = null)
     {
-        $this->attributes[trim($name)] = trim($value);
+        // not trimmed, because it may have textarea as input
+        $this->attributes[trim($name)] = $value;
     }
 
     /**
@@ -351,7 +375,7 @@ class ProductStoreView
     }
 
     /**
-     * Removes an attribute
+     * Removes an attribute from the import (not from the database).
      * @param string $name
      */
     public function removeAttribute(string $name)
@@ -398,9 +422,9 @@ class ProductStoreView
      * @param string $attributeCode
      * @param string $option The admin name of the attribute option
      */
-    public function setSelectAttribute(string $attributeCode, string $option)
+    public function setSelectAttribute(string $attributeCode, string $option = null)
     {
-        $this->unresolvedSelects[trim($attributeCode)] = trim($option);
+        $this->unresolvedSelects[trim($attributeCode)] = ($option === null) ? null : trim($option);
     }
 
     public function setSelectAttributeOptionId(string $attributeCode, int $optionId)
@@ -434,6 +458,7 @@ class ProductStoreView
     /**
      * @param CustomOption $customOption
      * @param string $price
+     * @param string $priceType
      */
     public function setCustomOptionPrice(CustomOption $customOption, string $price, string $priceType)
     {
@@ -442,7 +467,10 @@ class ProductStoreView
 
     /**
      * @param CustomOption $customOption
-     * @param CustomOptionValue[] $values
+     * @param string $sku
+     * @param string $price
+     * @param string $priceType
+     * @param string $title
      */
     public function setCustomOptionValue(CustomOption $customOption, string $sku, string $price, string $priceType, string $title)
     {

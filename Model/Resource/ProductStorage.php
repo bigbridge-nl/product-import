@@ -332,6 +332,7 @@ class ProductStorage
         $productsWithWebsites = [];
         $productsWithOptions = [];
         $productsWithStockItems = [];
+        $removedAttributes = [];
 
         $productsByType = [
             DownloadableProduct::TYPE_DOWNLOADABLE => [],
@@ -368,9 +369,37 @@ class ProductStorage
                 $productsWithStockItems[] = $product;
             }
 
+            $attributeInfo = $this->metaData->productEavAttributeInfo;
+
             foreach ($product->getStoreViews() as $storeView) {
                 foreach ($storeView->getAttributes() as $key => $value) {
-                    $productsByAttribute[$key][] = $storeView;
+
+                    if ($value === null) {
+                        $removedAttributes[$key][] = $storeView;
+                    } elseif ($value === "") {
+
+                        if ($attributeInfo[$key]->isTextual()) {
+                            if ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE) {
+                                continue;
+                            } elseif ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE) {
+                                $removedAttributes[$key][] = $storeView;
+                                continue;
+                            } else {
+                                $productsByAttribute[$key][] = $storeView;
+                            }
+                        } else {
+                            if ($config->emptyNonTextValueStrategy === ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE) {
+                                $removedAttributes[$key][] = $storeView;
+                                continue;
+                            } else {
+                                continue;
+                            }
+                        }
+
+                    } else {
+                        // a non-empty value
+                        $productsByAttribute[$key][] = $storeView;
+                    }
                 }
             }
         }
@@ -387,8 +416,12 @@ class ProductStorage
 
             $this->referenceResolver->resolveProductReferences($validProducts, $config);
 
-            foreach ($productsByAttribute as $eavAttribute => $products) {
-                $this->productEntityStorage->insertEavAttribute($products, $eavAttribute);
+            foreach ($removedAttributes as $eavAttribute => $storeViews) {
+                $this->productEntityStorage->removeEavAttribute($storeViews, $eavAttribute);
+            }
+
+            foreach ($productsByAttribute as $eavAttribute => $storeViews) {
+                $this->productEntityStorage->insertEavAttribute($storeViews, $eavAttribute);
             }
 
             $this->customOptionStorage->updateCustomOptions($productsWithOptions);

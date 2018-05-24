@@ -8,6 +8,7 @@ use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\CustomOption;
 use BigBridge\ProductImport\Api\Data\DownloadLink;
 use BigBridge\ProductImport\Api\Data\DownloadSample;
+use BigBridge\ProductImport\Api\Importer;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -1843,5 +1844,103 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer->flush();
 
         $this->assertEquals(['Type conversion from virtual to simple is not supported'], $errors);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testEmptyValues()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $product1 = new SimpleProduct('disposable-product-import');
+        $product1->setAttributeSetByName("Default");
+        $global = $product1->global();
+        $global->setName("Disposable");
+        $global->setPrice('0');
+
+        // default values
+        $this->checkEmptyValues($config, $product1,
+            [" disposable ", " Disposable ", " 2.10 "],
+            ["disposable", " Disposable ", "2.1000"]
+        );
+
+        // "" default: ignore (
+        $this->checkEmptyValues($config, $product1,
+            ["", "", ""],
+            ["disposable", " Disposable ", "2.1000"]
+        );
+
+        // null => remove
+        $this->checkEmptyValues($config, $product1,
+            [null, null, null],
+            [null, null, null]
+        );
+
+        // "" => import
+        $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT;
+
+        $this->checkEmptyValues($config, $product1,
+            ["", "", "2.50"],
+            ["", "", "2.5000"]
+        );
+
+        // "" => remove
+        $config->emptyNonTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE;
+        $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE;
+
+        $this->checkEmptyValues($config, $product1,
+            ["", "", ""],
+            [null, null, null]
+        );
+    }
+
+    /**
+     * @param ImportConfig $config
+     * @param Product $product
+     * @param array $set
+     * @param array $expected
+     * @throws Exception
+     */
+    public function checkEmptyValues(ImportConfig $config, SimpleProduct $product, array $set, array $expectedGlobal)
+    {
+        $importer = self::$factory->createImporter($config);
+
+        // trimmed varchar
+        $product->global()->setMetaTitle($set[0]);
+
+        // non-trimmed text
+        $product->global()->setDescription($set[1]);
+
+        // non-textual (price)
+        $product->global()->setMsrp($set[2]);
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertSame([], $product->getErrors());
+
+        foreach (['meta_title', 'description', 'msrp'] as $i => $attributeCode) {
+
+            $attributeId = self::$metaData->productEavAttributeInfo[$attributeCode]->attributeId;
+            $type = self::$metaData->productEavAttributeInfo[$attributeCode]->backendType;
+
+            $value = self::$db->fetchSingleCell("
+                SELECT `value` 
+                FROM `" . self::$metaData->productEntityTable . "_" . $type . "`
+                WHERE entity_id = ? AND attribute_id = ? AND store_id = ? 
+            ", [
+                $product->id,
+                $attributeId,
+                0
+            ]);
+
+            $this->assertSame($expectedGlobal[$i], $value);
+        }
     }
 }

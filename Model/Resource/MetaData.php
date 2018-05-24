@@ -60,12 +60,6 @@ class MetaData
     const CUSTOM_OPTION_TYPE_TITLE_TABLE = 'catalog_product_option_type_title';
     const CUSTOM_OPTION_TYPE_VALUE_TABLE = 'catalog_product_option_type_value';
 
-    const TYPE_DATETIME = 'datetime';
-    const TYPE_DECIMAL = 'decimal';
-    const TYPE_INTEGER = 'int';
-    const TYPE_VARCHAR = 'varchar';
-    const TYPE_TEXT = 'text';
-
     /** @var  Magento2DbConnection */
     protected $db;
 

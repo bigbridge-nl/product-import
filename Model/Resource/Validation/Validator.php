@@ -9,6 +9,7 @@ use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\TierPrice;
+use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
@@ -120,37 +121,34 @@ class Validator
 
                 $info = $attributeInfo[$eavAttribute];
 
-                // remove empty values
-
-                if ($value === "") {
-                    $storeView->removeAttribute($eavAttribute);
+                if ($value === null || $value === "") {
                     continue;
                 }
 
                 // validate value
 
                 switch ($info->backendType) {
-                    case MetaData::TYPE_VARCHAR:
+                    case EavAttributeInfo::TYPE_VARCHAR:
                         if (mb_strlen($value) > 255) {
                             $product->addError($eavAttribute . " has " . mb_strlen($value) . " characters (max 255)");
                         }
                         break;
-                    case MetaData::TYPE_TEXT:
+                    case EavAttributeInfo::TYPE_TEXT:
                         if (strlen($value) > 65536) {
                             $product->addError($eavAttribute . " has " . strlen($value) . " bytes (max 65536)");
                         }
                         break;
-                    case MetaData::TYPE_DECIMAL:
+                    case EavAttributeInfo::TYPE_DECIMAL:
                         if (!preg_match(self::DECIMAL_PATTERN, $value)) {
                             $product->addError($eavAttribute . " is not a decimal number with dot (" . $value . ")");
                         }
                         break;
-                    case MetaData::TYPE_DATETIME:
+                    case EavAttributeInfo::TYPE_DATETIME:
                         if (!preg_match(self::DATE_PATTERN, $value)) {
                             $product->addError($eavAttribute . " is not a MySQL date or date time (" . $value . ")");
                         }
                         break;
-                    case MetaData::TYPE_INTEGER:
+                    case EavAttributeInfo::TYPE_INTEGER:
                         if (!preg_match('/^-?\d+$/', $value)) {
                             $product->addError($eavAttribute . " is not an integer (" . $value . ")");
                         }
@@ -196,13 +194,13 @@ class Validator
             // check required values
             $globalAttributes = $storeViews[Product::GLOBAL_STORE_VIEW_CODE]->getAttributes();
 
-            if (!array_key_exists('name', $globalAttributes)) {
-                $product->addError("missing " . 'name');
+            if (!array_key_exists('name', $globalAttributes) || $globalAttributes['name'] === "") {
+                $product->addError("missing name");
             }
 
             if (!($product instanceof GroupedProduct) && !($product instanceof BundleProduct)) {
                 if (!array_key_exists('price', $globalAttributes)) {
-                    $product->addError("missing " . 'price');
+                    $product->addError("missing price");
                 }
             }
         }

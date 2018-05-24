@@ -24,10 +24,10 @@ This library just helps you to get products into Magento's database quickly, low
 * custom options
 * unique url_key generation
 * dry run (no products are written to the database)
-* trims leading and trailing whitespace (spaces, tabs, newlines) from all fields
+* trims leading and trailing whitespace (spaces, tabs, newlines) from all fields, except free field texts
+* attribute deletion
 * input is validated on data type, requiredness,  and length restrictions
 * result callback, a function that is called with the results of each imported product (id, error)
-* information is only added and overwritten, never removed; the import is not considered to be the only source of information of the shop
 * a solution for the problem that the other products that a product depends on have not been imported yet
 
 ## Indexing
@@ -119,7 +119,7 @@ Here are the possible standard attribute functions, with examples for the global
 
     $global->setName('Colorful cube');
     $global->setStatus(ProductStoreView::STATUS_ENABLED);
-    $global->setGiftMessageAvailable(true);
+    $global->setGiftMessageAvailable(ProductStoreView::AVAILABLE);
     $global->setDescription('A mathematical curiosity that will twist your mind');
     $global->setShortDescription('A twistable colorful cube');
     $global->setMetaTitle('Six sides, twelve edges');
@@ -145,6 +145,35 @@ Here are the possible standard attribute functions, with examples for the global
 An example of the name attribute on the Danish store view 'store_dk':
 
     $product->storeView('store_dk')->setName('Farverige terning');
+
+## Empty values and removing attributes
+
+Any simple (scalar) attribute may be removed from the database (on a global level, or per store view) by setting it to null. For example:
+
+    $global->setMsrp(null);
+
+Attributes with the empty string value ("") are ignored by default. They are not imported. If that's not what you want, you have several options.
+
+For textual attributes (datatype varchar and text):
+
+Import the empty string as empty string:
+
+    $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT;
+
+Remove the attribute value from the database:
+
+    $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE;
+
+For non-textual attributes (datetime, decimal and integer) you have one other option:
+
+    $config->emptyNonTextValueStrategy = ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE;
+
+## Trimming values
+
+All input is trimmed directly, because database corruption based on extra whitespace is common.
+Leading and trailing whitespace is removed from all values.
+
+An exception is made for attributes with textarea as input (description, short_description, meta_keywords, meta_description) and custom attributes. They are not trimmed.
 
 ## Errors
 
@@ -625,10 +654,6 @@ The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to
 * Requires >= PHP 7.0
 * Input in UTF-8 (Magento standard)
 * MySQL max_packet_size on both MySQL client and MySQL server must be at least 1 MB (Which will be the case if the value wasn't deliberately lowered from the default)
-
-## On empty values
-
-* A value of "" will be ignored, it is not imported. The reason is that in imports, an empty value often means unknown, or unimportant, but rarely: to be deleted.
 
 ## Thanks to
 

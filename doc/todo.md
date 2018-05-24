@@ -2,7 +2,6 @@
 
 ## Functionality
 
-* deleting attribute values
 * allow delete products
 * Solve todo's in code
 * convert non-simple product types to other types

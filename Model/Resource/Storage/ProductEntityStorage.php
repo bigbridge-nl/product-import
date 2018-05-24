@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -156,7 +157,7 @@ class ProductEntityStorage
         $tableName = $attributeInfo->tableName;
         $attributeId = $attributeInfo->attributeId;
 
-        if ($attributeInfo->backendType == MetaData::TYPE_TEXT) {
+        if ($attributeInfo->backendType == EavAttributeInfo::TYPE_TEXT) {
             $magnitude = Magento2DbConnection::_128_KB;
         } else {
             $magnitude = Magento2DbConnection::_1_KB;
@@ -173,6 +174,28 @@ class ProductEntityStorage
 
         $this->db->insertMultipleWithUpdate($tableName, ['entity_id', 'attribute_id', 'store_id', 'value'], $values,
             $magnitude, "`value` = VALUES(`value`)");
+    }
+
+    /**
+     * @param array $storeViews
+     * @param string $eavAttribute
+     */
+    public function removeEavAttribute(array $storeViews, string $eavAttribute)
+    {
+        $attributeInfo = $this->metaData->productEavAttributeInfo[$eavAttribute];
+        $tableName = $attributeInfo->tableName;
+        $attributeId = $attributeInfo->attributeId;
+
+        foreach ($storeViews as $storeView) {
+            $this->db->execute("
+                DELETE FROM `" . $tableName . "`
+                WHERE `entity_id` = ? AND `attribute_id` = ? AND `store_id` = ?
+            ", [
+                    $storeView->parent->id,
+                    $attributeId,
+                    $storeView->getStoreViewId()
+            ]);
+        }
     }
 
     /**
