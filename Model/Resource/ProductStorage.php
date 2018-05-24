@@ -379,13 +379,13 @@ class ProductStorage
                     } elseif ($value === "") {
 
                         if ($attributeInfo[$key]->isTextual()) {
-                            if ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE) {
-                                continue;
+                            if ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT) {
+                                $productsByAttribute[$key][] = $storeView;
                             } elseif ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE) {
                                 $removedAttributes[$key][] = $storeView;
                                 continue;
                             } else {
-                                $productsByAttribute[$key][] = $storeView;
+                                continue;
                             }
                         } else {
                             if ($config->emptyNonTextValueStrategy === ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE) {
