@@ -27,13 +27,6 @@ class UrlRewriteStorage
         $this->metaData = $metaData;
     }
 
-    public function insertRewrites(array $products, ValueSerializer $valueSerializer)
-    {
-        $newRewriteValues = $this->getNewRewriteValues($products);
-
-        $this->writeUrlRewrites($newRewriteValues, $valueSerializer, true);
-    }
-
     public function updateRewrites(array $products, array $existingValues, ValueSerializer $valueSerializer)
     {
         $changedProducts = $this->getChangedProducts($products, $existingValues);

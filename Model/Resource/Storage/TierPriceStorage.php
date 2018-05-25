@@ -28,14 +28,6 @@ class TierPriceStorage
     /**
      * @param Product[] $products
      */
-    public function insertTierPrices(array $products)
-    {
-        $this->upsertTierPrices($products);
-    }
-
-    /**
-     * @param Product[] $products
-     */
     public function updateTierPrices(array $products)
     {
         // updating tier prices relies on the unique key (`entity_id`,`all_groups`,`customer_group_id`,`qty`,`website_id`)
