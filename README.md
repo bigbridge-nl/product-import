@@ -1,8 +1,8 @@
-# Product Import
+# BigBridge Product Import
 
 Imports product data into Magento 2 via direct database access.
 
-My name is Patrick van Bergen, I created this library because I needed product import to be fast.
+Hi! My name is Patrick van Bergen. I created this library because I needed product import to be fast.
 
 ## Warning!
 

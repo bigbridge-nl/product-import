@@ -1,6 +1,6 @@
 # Database
 
-Tables that will be changed by the importer (insert, update)
+Tables that will be changed by the importer (insert, update, delete)
 
 ## Magento 2 database tables
 

@@ -53,6 +53,7 @@ For complex attributes (like category-ids, images, etc)
 * DELETE
 
 Currently I have used several types of mutations, depending on what fitted best in each case. I have documented the choice in the readme.
+
 INSERT is always available.
 UPDATE is used for categories and images, because these tend to be modified even when a sync is in place.
 SYNC is used when the user is not likely to change this structure, and calculating a diff is not too complicated.
