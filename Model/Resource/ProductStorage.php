@@ -407,7 +407,7 @@ class ProductStorage
         $this->db->execute("START TRANSACTION");
 
         // existing values must be queried before the product is inserted or updated
-        $existingValues = $this->getExistingProductValues($validUpdateProducts);
+        $existingValues = $this->urlRewriteStorage->getExistingProductValues($validUpdateProducts);
 
         try {
 
@@ -450,39 +450,5 @@ class ProductStorage
             // let the application handle the exception
             throw $e;
         }
-    }
-
-    protected function getExistingProductValues(array $products)
-    {
-        if (empty($products)) {
-            return [];
-        }
-
-        $productIds = array_column($products, 'id');
-
-        $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
-
-        $existingData = $this->db->fetchAllAssoc("
-            SELECT URL_KEY.`entity_id` as product_id, URL_KEY.`value` AS url_key, GROUP_CONCAT(PG.`category_id` SEPARATOR ',') as category_ids, URL_KEY.`store_id`
-            FROM `{$this->metaData->productEntityTable}_varchar` URL_KEY
-            LEFT JOIN `{$this->metaData->urlRewriteProductCategoryTable}` PG ON PG.`product_id` = URL_KEY.`entity_id`
-            WHERE 
-                URL_KEY.`attribute_id` = ? AND
-                URL_KEY.`entity_id` IN (" . $this->db->getMarks($productIds) . ")
-            GROUP BY URL_KEY.`entity_id`, URL_KEY.`store_id` 
-        ", array_merge([
-            $attributeId
-        ], $productIds));
-
-        $data = [];
-        foreach ($existingData as $existingDatum) {
-            $productId = $existingDatum['product_id'];
-            $storeId = $existingDatum['store_id'];
-            $categoryIds = is_null($existingDatum['category_ids']) ? [] : explode(',', $existingDatum['category_ids']);
-            $urlKey = $existingDatum['url_key'];
-            $data[$storeId][$productId] = ['url_key' => $urlKey, 'category_ids' => $categoryIds];
-        }
-
-        return $data;
     }
 }
