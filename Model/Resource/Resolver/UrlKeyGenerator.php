@@ -5,7 +5,7 @@ namespace BigBridge\ProductImport\Model\Resource\Resolver;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
-use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
+use BigBridge\ProductImport\Model\Data\GeneratedUrlKey;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 

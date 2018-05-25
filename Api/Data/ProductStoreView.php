@@ -6,7 +6,7 @@ use BigBridge\ProductImport\Model\Data\CustomOptionPrice;
 use BigBridge\ProductImport\Model\Data\CustomOptionTitle;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\ImageGalleryInformation;
-use BigBridge\ProductImport\Model\Resource\Reference\GeneratedUrlKey;
+use BigBridge\ProductImport\Model\Data\GeneratedUrlKey;
 use Magento\Catalog\Model\Product\Attribute\Source\Status;
 use Magento\Catalog\Model\Product\Visibility;
 
