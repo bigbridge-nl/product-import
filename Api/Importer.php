@@ -161,7 +161,21 @@ class Importer
      */
     public function flush()
     {
+        foreach ($this->products as $product) {
+            foreach ($product->getStoreViews() as $storeView) {
+                $storeView->parent = $product;
+            }
+        }
+
         $this->productStorage->storeProducts($this->products, $this->config, $this->valueSerializer);
+
+        // Help the garbage collector by removing cyclic dependencies
+        foreach ($this->products as $product) {
+            foreach ($product->getStoreViews() as $storeView) {
+                $storeView->parent = null;
+            }
+        }
+
         $this->products = [];
     }
 

@@ -135,9 +135,6 @@ class ProductStorage
             return;
         }
 
-        // connect store view to product
-        $this->setupStoreViewWiring($products);
-
         // collect skus
         $skus = [];
         foreach ($products as $product) {
@@ -196,38 +193,6 @@ class ProductStorage
                     continue;
                 }
                 call_user_func($callback, $product);
-            }
-        }
-
-        // disconnect store view to product
-        // this is done to remove reference cycles that trouble garbage collection
-        $this->tearDownStoreViewWiring($products);
-    }
-
-    /**
-     * Connect product to store view
-     *
-     * @param Product[] $products
-     */
-    protected function setupStoreViewWiring(array $products)
-    {
-        foreach ($products as $product) {
-            foreach ($product->getStoreViews() as $storeView) {
-                $storeView->parent = $product;
-            }
-        }
-    }
-
-    /**
-     * Help the garbage collector by removing cyclic dependencies
-     *
-     * @param Product[] $products
-     */
-    protected function tearDownStoreViewWiring(array $products)
-    {
-        foreach ($products as $product) {
-            foreach ($product->getStoreViews() as $storeView) {
-                $storeView->parent = null;
             }
         }
     }
