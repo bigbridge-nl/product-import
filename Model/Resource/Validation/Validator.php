@@ -194,12 +194,12 @@ class Validator
             // check required values
             $globalAttributes = $storeViews[Product::GLOBAL_STORE_VIEW_CODE]->getAttributes();
 
-            if (!array_key_exists('name', $globalAttributes) || $globalAttributes['name'] === "") {
+            if (!array_key_exists('name', $globalAttributes) || $globalAttributes['name'] === ""  || $globalAttributes['name'] === null) {
                 $product->addError("missing name");
             }
 
             if (!($product instanceof GroupedProduct) && !($product instanceof BundleProduct)) {
-                if (!array_key_exists('price', $globalAttributes)) {
+                if (!array_key_exists('price', $globalAttributes) || $globalAttributes['price'] === ""  || $globalAttributes['price'] === null) {
                     $product->addError("missing price");
                 }
             }
