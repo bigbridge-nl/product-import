@@ -40,17 +40,6 @@ If these indexes are set to "Update by Schedule", a Magento cron job based index
 
 If these indexes are set to "Update on Save", you will need to run the indexers manually after the import is done (bin/magento indexer:reindex). This is less advisable.
 
-## Default values
-
-New products will be given the following default values, if they are not specified:
-
-* attribute set: "Default"
-* visibility: Catalog, Search
-* status: Disabled
-* tax class: "Taxable Goods"
-
-Different product types have different default values. See the respective sections.
-
 ## Mutation mode
 
 The library only supports the insert/update mode. It does not remove attributes or replace products.
@@ -112,6 +101,31 @@ The following example shows you a simple case of importing a simple product
     }
 
 The following code pieces are extensions on this basic code.
+
+## Required attributes
+
+Required attributes for a new product are:
+
+* sku (which is a required parameter of the Product constructor)
+* name (global)
+* price (global; it is not required for bundled and grouped products)
+
+## Important attributes
+
+If you want to make sure the product appears on the store front, specify at least the following attributes.
+
+These attributes are given with example values. You have to change them.
+
+    $product->setAttributeSetByName("Default");
+    $product->setCategoriesByGlobalName(['Default Category/Desks', 'Default Category/Chairs', 'Default Category/Boards']);
+    $product->setWebsitesByCode(['base']);
+
+    $global->setName("My product");
+    $global->setPrice("9.95");
+    $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
+    $global->setStatus(ProductStoreView::STATUS_DISABLED);
+    $global->setTaxClassName("Taxable Goods");
+    $global->generateUrlKey();
 
 ## Standard attributes
 
@@ -325,7 +339,7 @@ Add a bundle product
 
     $bundle = new BundleProduct("ibm-pc");
 
-Add some some specific attributes (global and store view specific)
+Add at least these attributes (global and store view specific)
 
     $global = $bundle->global();
     $global->setPriceType(BundleProductStoreView::PRICE_TYPE_DYNAMIC);
@@ -363,7 +377,7 @@ Create a downloadable product
 
     $downloadable = new DownloadableProduct("morlord-the-game");
 
-Set some product attributes:
+Set at least these product attributes:
 
     $downloadable->global()->setLinksPurchasedSeparately(true);
     $downloadable->global()->setLinksTitle("Links");

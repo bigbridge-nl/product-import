@@ -10,6 +10,7 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
+use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\ProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
@@ -37,16 +38,21 @@ class Importer
     /** @var ProductStorage */
     protected $productStorage;
 
+    /** @var MetaData */
+    protected $metaData;
+
     public function __construct(
         ImportConfig $config,
         ValueSerializer $valueSerializer,
         ProductEntityStorage $productEntityStorage,
-        ProductStorage $productStorage)
+        ProductStorage $productStorage,
+        MetaData $metaData)
     {
         $this->config = $config;
         $this->valueSerializer = $valueSerializer;
         $this->productEntityStorage = $productEntityStorage;
         $this->productStorage = $productStorage;
+        $this->metaData = $metaData;
     }
 
     /**
@@ -287,6 +293,7 @@ class Importer
             if (!array_key_exists($sku, $sku2id)) {
 
                 $placeholder = new SimpleProduct($sku);
+                $placeholder->setAttributeSetId($this->metaData->defaultProductAttributeSetId);
                 $placeholder->lineNumber = Product::PLACEHOLDER_LINE_NUMBER;
 
                 $placeholder->global()->setName(Product::PLACEHOLDER_NAME);

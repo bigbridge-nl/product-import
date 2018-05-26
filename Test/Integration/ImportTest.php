@@ -8,8 +8,6 @@ use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\CustomOption;
 use BigBridge\ProductImport\Api\Data\DownloadLink;
 use BigBridge\ProductImport\Api\Data\DownloadSample;
-use BigBridge\ProductImport\Api\Importer;
-use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -28,6 +26,7 @@ use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProductMember;
+use Exception;
 
 /**
  * Integration test. It can only be executed from within a shop that has
@@ -144,6 +143,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer->importSimpleProduct($product);
 
         $product = new SimpleProduct($sku2);
+        $product->setAttributeSetByName("Default");
 
         $product->setAttributeSetByName("Default");
         $product->setCategoryIds([1, 2, 999]);
@@ -187,6 +187,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         ];
 
         $product = new SimpleProduct($sku1);
+        $product->setAttributeSetByName("Default");
 
         $product->setAttributeSetByName("Default");
         $product->setCategoryIds([1, 2]);
@@ -199,7 +200,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer->importSimpleProduct($product);
 
         $product = new SimpleProduct($sku2);
-
         $product->setAttributeSetByName("Default");
         $product->setCategoryIds([]);
 
@@ -297,7 +297,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         foreach ($lines as $i => $line) {
 
             $product = new SimpleProduct($line[1]);
-
             $product->setAttributeSetByName("Default");
             $product->lineNumber = $i + 1;
 
@@ -424,96 +423,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @throws Exception
-     */
-    public function testDefaults()
-    {
-        $errors = [];
-
-        $config = new ImportConfig();
-
-        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
-            $errors = array_merge($errors, $product->getErrors());
-        };
-
-        $importer = self::$factory->createImporter($config);
-
-        // new
-
-        $product1 = new SimpleProduct("loafers-product-import");
-        $global = $product1->global();
-        $global->setName("Loafers");
-        $global->setPrice('9.19');
-
-        $importer->importSimpleProduct($product1);
-        $importer->flush();
-
-        $this->assertEquals([], $errors);
-
-        $attributeSetId = $product1->getAttributeSetId();
-        $taxClassId = $product1->global()->getAttribute(ProductStoreView::ATTR_TAX_CLASS_ID);
-        $visibility = ProductStoreView::VISIBILITY_BOTH;
-        $status = ProductStoreView::STATUS_DISABLED;
-
-        $this->checkProductValues($attributeSetId, $taxClassId, $visibility, $status);
-
-        // update not changing values
-
-        $product2 = new SimpleProduct("loafers-product-import");
-
-        $importer->importSimpleProduct($product2);
-        $importer->flush();
-
-        $this->assertEquals([], $errors);
-        $this->checkProductValues($attributeSetId, $taxClassId, $visibility, $status);
-
-        // update changing values
-
-        $newVisibility = ProductStoreView::VISIBILITY_IN_SEARCH;
-        $newStatus = ProductStoreView::STATUS_ENABLED;
-
-        $product3 = new SimpleProduct("loafers-product-import");
-        $product3->setAttributeSetId(5);
-        $product3->global()->setTaxClassName("Retail Customer");
-        $product3->global()->setVisibility($newVisibility);
-        $product3->global()->setStatus($newStatus);
-
-        $importer->importSimpleProduct($product3);
-        $importer->flush();
-
-        $newAttributeSetId = $product3->getAttributeSetId();
-        $newTaxClassId = $product3->global()->getAttribute(ProductStoreView::ATTR_TAX_CLASS_ID);
-
-        $this->assertEquals([], $errors);
-        $this->checkProductValues($newAttributeSetId, $newTaxClassId, $newVisibility, $newStatus);
-
-        // update not changing values (check if defaults were not restored)
-
-        $product3 = new SimpleProduct("loafers-product-import");
-
-        $importer->importSimpleProduct($product3);
-        $importer->flush();
-
-        $this->assertEquals([], $errors);
-        $this->checkProductValues($newAttributeSetId, $newTaxClassId, $newVisibility, $newStatus);
-    }
-
-    private function checkProductValues($attributeSetId, $taxClassId, $visibility, $status)
-    {
-        try {
-            $productS = self::$repository->get("loafers-product-import", false, 0, true);
-
-            $this->assertEquals($attributeSetId, $productS->getAttributeSetId());
-            $this->assertEquals($taxClassId, $productS->getTaxClassId());
-            $this->assertEquals($visibility, $productS->getVisibility());
-            $this->assertEquals($status, $productS->getStatus());
-
-        } catch (NoSuchEntityException $e) {
-            $this->assertTrue(false);
-        }
-    }
-
-    /**
-     * @throws Exception
      * @throws NoSuchEntityException
      */
     public function testImages()
@@ -536,6 +445,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // use 2 images with 2 roles
 
         $product1 = new SimpleProduct("ducky1-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Ducky 1");
         $global->setPrice('1.00');
@@ -583,6 +493,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         link(__DIR__ . '/../images/duck3.png', BP . '/pub/media/catalog/product/d/u/duck3.png');
 
         $product2 = new SimpleProduct("ducky1-product-import");
+        $product2->setAttributeSetByName("Default");
         $global = $product2->global();
         $global->setName("Ducky 1");
         $global->setPrice('1.00');
@@ -708,6 +619,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct("snoopy-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Snoopy");
         $global->setPrice('5.95');
@@ -726,6 +638,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // ------------------------------------------
 
         $product2 = new SimpleProduct("woodstock-product-import");
+        $product2->setAttributeSetByName("Default");
         $global = $product2->global();
         $global->setName("Woodstock");
         $global->setPrice('2.95');
@@ -789,6 +702,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // update
 
         $product3 = new SimpleProduct("woodstock-product-import");
+        $product3->setAttributeSetByName("Default");
         $stock = $product3->defaultStockItem();
         $stock->setQuantity('1.4');
 
@@ -849,6 +763,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $simple1 = new SimpleProduct('bricks-red-redweiser-product-import');
+        $simple1->setAttributeSetByName("Default");
         $global = $simple1->global();
         $global->setName("Bricks Red Redweiser");
         $global->setPrice('99.00');
@@ -856,6 +771,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setCustomAttribute('manufacturer', 1);
 
         $simple2 = new SimpleProduct('bricks-red-scotts-product-import');
+        $simple2->setAttributeSetByName("Default");
         $global = $simple2->global();
         $global->setName("Bricks Red Scotts");
         $global->setPrice('89.00');
@@ -863,6 +779,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setCustomAttribute('manufacturer', 1);
 
         $simple3 = new SimpleProduct('bricks-orange-scotts-product-import');
+        $simple3->setAttributeSetByName("Default");
         $global = $simple3->global();
         $global->setName("Bricks Orange Scotts");
         $global->setPrice('90.00');
@@ -874,6 +791,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             $simple2,
             $simple3
         ]);
+        $configurable->setAttributeSetByName("Default");
         $global = $configurable->global();
         $global->setName("Bricks");
         $global->setPrice('90.00');
@@ -940,6 +858,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             $simple1,
             $simple2
         ]);
+        $configurable->setAttributeSetByName("Default");
         $global = $configurable->global();
         $global->setName("Bricks");
         $global->setPrice('90.00');
@@ -1020,6 +939,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct("christmas-tree-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Christmas tree");
         $global->setPrice('98.00');
@@ -1037,6 +957,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct("christmas-tree-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Christmas tree");
         $global->setPrice('98.00');
@@ -1087,6 +1008,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct("christmas-angel-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Christmas angel");
         $global->setPrice('98.00');
@@ -1139,6 +1061,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // do not specify links; they should not be removed
 
         $product1 = new SimpleProduct("christmas-angel-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Christmas angel");
         $global->setPrice('98.00');
@@ -1151,6 +1074,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // change the order of the related products. do not specify the other links: they should not be removed
 
         $product1 = new SimpleProduct("christmas-angel-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Christmas angel");
         $global->setPrice('98.00');
@@ -1173,6 +1097,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // remove links: they should be removed
 
         $product1 = new SimpleProduct("christmas-angel-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Christmas angel");
         $global->setPrice('98.00');
@@ -1235,11 +1160,13 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $simple1 = new SimpleProduct("knife-product-import");
+        $simple1->setAttributeSetByName("Default");
         $global = $simple1->global();
         $global->setName("Knife");
         $global->setPrice('2.25');
 
         $simple2 = new SimpleProduct("fork-product-import");
+        $simple2->setAttributeSetByName("Default");
         $global = $simple2->global();
         $global->setName("Fork");
         $global->setPrice('2.25');
@@ -1250,6 +1177,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             // this one does not exist yet
             new GroupedProductMember("spoon-product-import", 4),
         ]);
+        $group->setAttributeSetByName("Default");
 
         $global = $group->global();
         $global->setName("Cutlery");
@@ -1265,6 +1193,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         // look up id for simple3 that must have been created as a placeholder
         $simple3 = new SimpleProduct("spoon-product-import");
+        $simple3->setAttributeSetByName("Default");
         $importer->importSimpleProduct($simple3);
         $importer->flush();
 
@@ -1285,6 +1214,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             new GroupedProductMember("knife-product-import", 2.5),
             new GroupedProductMember("spoon-product-import", 4),
         ]);
+        $group->setAttributeSetByName("Default");
 
         $importer->importGroupedProduct($group);
         $importer->flush();
@@ -1293,6 +1223,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         // look up id for simple4 that must have been created as a placeholder
         $simple4 = new SimpleProduct("teaspoon-product-import");
+        $simple4->setAttributeSetByName("Default");
         $importer->importSimpleProduct($simple4);
         $importer->flush();
 
@@ -1346,6 +1277,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $product1 = new SimpleProduct("window-sill-modern-product-import");
+        $product1->setAttributeSetByName("Default");
         $global = $product1->global();
         $global->setName("Window sill modern");
         $global->setPrice('225.00');
@@ -1369,6 +1301,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // no tier prices specified: do not remove tier prices
 
         $product1 = new SimpleProduct("window-sill-modern-product-import");
+        $product1->setAttributeSetByName("Default");
 
         $importer->importSimpleProduct($product1);
         $importer->flush();
@@ -1379,6 +1312,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // update: change one entry (causes an insert and a delete) and update a price value (update)
 
         $product1 = new SimpleProduct("window-sill-modern-product-import");
+        $product1->setAttributeSetByName("Default");
 
         $product1->setTierPrices([
             new TierPrice(10, '12.25', 'General', 'base'),
@@ -1459,6 +1393,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $downloadable = new DownloadableProduct("morlord-the-game");
+        $downloadable->setAttributeSetByName("Default");
 
         $downloadable->global()->setName("Morlord the game");
         $downloadable->global()->setPrice("25.95");
@@ -1597,6 +1532,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer = self::$factory->createImporter($config);
 
         $bundle = new BundleProduct("ibm-pc-product-import");
+        $bundle->setAttributeSetByName("Default");
 
         $global = $bundle->global();
         $global->setName("IBM PC");

@@ -14,12 +14,6 @@
 * some decimal numbers may not be negative
 * import category-ids: check if the ids exist
 
-# Defaults
-
-* do I want defaults? or different documentation?
-* url_key is a default attribute?
-* by default add to all websites?
-
 ## CSV import
 
 * csv import
@@ -33,6 +27,7 @@
 ## Extra
 
 * an url-rewrite tool
+* setAllWebsiteIds() adds the product to all websites
 
 ## Testing
 

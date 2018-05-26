@@ -59,6 +59,7 @@ class Validator
     {
         $attributeInfo = $this->metaData->productEavAttributeInfo;
         $storeViews = $product->getStoreViews();
+        $globalAttributes = $storeViews[Product::GLOBAL_STORE_VIEW_CODE]->getAttributes();
 
         // sku
         if ($product->getSku() === "") {
@@ -67,11 +68,26 @@ class Validator
             $product->addError("sku has " . mb_strlen($product->getSku()) . ' characters (max ' . self::SKU_MAX_LENGTH . ")");
         }
 
-        // attribute_set_id
+        // check required values
         if ($product->id === null) {
+
+            // attribute_set_id
             if ($product->getAttributeSetId() === null) {
                 $product->addError("missing attribute set id");
             }
+
+            // name
+            if (!array_key_exists('name', $globalAttributes) || $globalAttributes['name'] === ""  || $globalAttributes['name'] === null) {
+                $product->addError("missing name");
+            }
+
+            // price
+            if (!($product instanceof GroupedProduct) && !($product instanceof BundleProduct)) {
+                if (!array_key_exists('price', $globalAttributes) || $globalAttributes['price'] === ""  || $globalAttributes['price'] === null) {
+                    $product->addError("missing price");
+                }
+            }
+
         }
 
         // category_ids
@@ -181,26 +197,6 @@ class Validator
                     if (!preg_match(self::DECIMAL_PATTERN, $value)) {
                         $product->addError($decimalAttribute . " is not a decimal number with dot (" . $value . ")");
                     }
-                }
-            }
-        }
-
-        // required values
-
-        if ($product->id === null) {
-
-            // new product
-
-            // check required values
-            $globalAttributes = $storeViews[Product::GLOBAL_STORE_VIEW_CODE]->getAttributes();
-
-            if (!array_key_exists('name', $globalAttributes) || $globalAttributes['name'] === ""  || $globalAttributes['name'] === null) {
-                $product->addError("missing name");
-            }
-
-            if (!($product instanceof GroupedProduct) && !($product instanceof BundleProduct)) {
-                if (!array_key_exists('price', $globalAttributes) || $globalAttributes['price'] === ""  || $globalAttributes['price'] === null) {
-                    $product->addError("missing price");
                 }
             }
         }

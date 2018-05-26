@@ -3,13 +3,10 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
-use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
-use BigBridge\ProductImport\Api\Data\DownloadableProductStoreView;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
-use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
@@ -162,9 +159,6 @@ class ProductStorage
         // check if the pre-specified ids exist
         $this->productEntityStorage->checkIfIdsExist($productsWithId);
 
-        // set default values for new products
-        $this->setDefaultValues($insertProducts);
-
         // replace reference(s) with ids, changes $product->errors
         $this->referenceResolver->resolveExternalReferences($products, $config);
 
@@ -219,68 +213,6 @@ class ProductStorage
         }
 
         return $validProducts;
-    }
-
-    /**
-     * @param Product[] $insertProducts
-     */
-    protected function setDefaultValues(array $insertProducts)
-    {
-        foreach ($insertProducts as $product) {
-
-            $global = $product->global();
-            $attributes = $global->getAttributes();
-            $unresolvedProductAttributes = $product->getUnresolvedAttributes();
-            $unresolvedGlobalAttributes = $global->getUnresolvedAttributes();
-
-            // attribute set: Default
-            if ($product->getAttributeSetId() === null &&
-                !array_key_exists(Product::ATTRIBUTE_SET_ID, $unresolvedProductAttributes)) {
-                $product->setAttributeSetByName("Default");
-            }
-
-            // visibility: both
-            if (!array_key_exists(ProductStoreView::ATTR_VISIBILITY, $attributes)) {
-                $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
-            }
-            // status: disabled
-            if (!array_key_exists(ProductStoreView::ATTR_STATUS, $attributes)) {
-                $global->setStatus(ProductStoreView::STATUS_DISABLED);
-            }
-            // tax class: Taxable Goods
-            if (!array_key_exists(ProductStoreView::ATTR_TAX_CLASS_ID, $attributes) &&
-                !array_key_exists(ProductStoreView::ATTR_TAX_CLASS_ID, $unresolvedGlobalAttributes)) {
-                $global->setTaxClassName("Taxable Goods");
-            }
-
-            if ($global instanceof DownloadableProductStoreView) {
-                if (!array_key_exists(DownloadableProductStoreView::ATTR_LINKS_PURCHASED_SEPARATELY, $attributes)) {
-                    $global->setLinksPurchasedSeparately(false);
-                }
-                if (!array_key_exists(DownloadableProductStoreView::ATTR_LINKS_TITLE, $attributes)) {
-                    $global->setLinksTitle("Links");
-                }
-                if (!array_key_exists(DownloadableProductStoreView::ATTR_SAMPLES_TITLE, $attributes)) {
-                    $global->setSamplesTitle("Samples");
-                }
-            } elseif ($global instanceof BundleProductStoreView) {
-                if (!array_key_exists(BundleProductStoreView::ATTR_PRICE_TYPE, $attributes)) {
-                    $global->setPriceType(BundleProductStoreView::PRICE_TYPE_DYNAMIC);
-                }
-                if (!array_key_exists(BundleProductStoreView::ATTR_PRICE_VIEW, $attributes)) {
-                    $global->setPriceView(BundleProductStoreView::PRICE_VIEW_PRICE_RANGE);
-                }
-                if (!array_key_exists(BundleProductStoreView::ATTR_SKU_TYPE, $attributes)) {
-                    $global->setSkuType(BundleProductStoreView::SKU_TYPE_DYNAMIC);
-                }
-                if (!array_key_exists(BundleProductStoreView::ATTR_WEIGHT_TYPE, $attributes)) {
-                    $global->setWeightType(BundleProductStoreView::WEIGHT_TYPE_DYNAMIC);
-                }
-                if (!array_key_exists(BundleProductStoreView::ATTR_SHIPMENT_TYPE, $attributes)) {
-                    $global->setShipmentType(BundleProductStoreView::SHIPMENT_TYPE_TOGETHER);
-                }
-            }
-        }
     }
 
     /**

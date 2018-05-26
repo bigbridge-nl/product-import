@@ -201,6 +201,9 @@ class MetaData
     /** @var  int */
     public $defaultCategoryAttributeSetId;
 
+    /** @var int  */
+    public $defaultProductAttributeSetId;
+
     /** @var array Maps attribute set name to id */
     public $productAttributeSetMap;
 
@@ -303,6 +306,7 @@ class MetaData
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
 
         $this->defaultCategoryAttributeSetId = $this->getDefaultCategoryAttributeSetId();
+        $this->defaultProductAttributeSetId = $this->getDefaultProductAttributeSetId();
 
         $this->categoryAttributeMap = $this->getCategoryAttributeMap();
         $this->productAttributeSetMap = $this->getProductAttributeSetMap();
@@ -332,6 +336,11 @@ class MetaData
     protected function getDefaultCategoryAttributeSetId()
     {
         return $this->db->fetchSingleCell("SELECT `default_attribute_set_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_category'");
+    }
+
+    protected function getDefaultProductAttributeSetId()
+    {
+        return $this->db->fetchSingleCell("SELECT `default_attribute_set_id` FROM {$this->entityTypeTable} WHERE `entity_type_code` = 'catalog_product'");
     }
 
     /**
