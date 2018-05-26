@@ -39,125 +39,126 @@ class CustomOptionStorage
     {
         foreach ($products as $product) {
 
-            foreach ($product->getCustomOptions() as $i => $customOption) {
+            if (($customOptions = $product->getCustomOptions()) !== null) {
+                foreach ($customOptions as $i => $customOption) {
 
-                $this->db->execute("
-                    INSERT INTO `{$this->metaData->customOptionTable}`
-                    SET 
-                        `product_id` = ?,
-                        `type` = ?,
-                        `is_require` = ?,
-                        `sku` = ?,
-                        `max_characters` = ?,
-                        `file_extension` = ?,
-                        `image_size_x` = ?,
-                        `image_size_y` = ?,
-                        `sort_order` = ?
-                ", [
-                    $product->id,
-                    $customOption->getType(),
-                    (int)$customOption->isRequired(),
-                    $customOption->getSku(),
-                    $customOption->getMaxCharacters(),
-                    $customOption->getFileExtensions(),
-                    $customOption->getImageSizeX(),
-                    $customOption->getImageSizeY(),
-                    ($i + 1)
-                ]);
-
-                $optionId = $this->db->getLastInsertId();
-                $customOption->setOptionId($optionId);
-
-                // value sku's
-                $valueSkus = [];
-                foreach ($customOption->getValueSkus() as $j => $valueSku) {
                     $this->db->execute("
-                            INSERT INTO `{$this->metaData->customOptionTypeValueTable}`
-                            SET 
-                                `option_id` = ?,
-                                `sku` = ?,
-                                `sort_order` = ?
-                        ", [
-                        $optionId,
-                        $valueSku,
-                        (int)($j + 1)
+                        INSERT INTO `{$this->metaData->customOptionTable}`
+                        SET 
+                            `product_id` = ?,
+                            `type` = ?,
+                            `is_require` = ?,
+                            `sku` = ?,
+                            `max_characters` = ?,
+                            `file_extension` = ?,
+                            `image_size_x` = ?,
+                            `image_size_y` = ?,
+                            `sort_order` = ?
+                    ", [
+                        $product->id,
+                        $customOption->getType(),
+                        (int)$customOption->isRequired(),
+                        $customOption->getSku(),
+                        $customOption->getMaxCharacters(),
+                        $customOption->getFileExtensions(),
+                        $customOption->getImageSizeX(),
+                        $customOption->getImageSizeY(),
+                        ($i + 1)
                     ]);
-                    $valueSkus[$valueSku] = $this->db->getLastInsertId();
-                }
 
-                foreach ($product->getStoreViews() as $storeView) {
+                    $optionId = $this->db->getLastInsertId();
+                    $customOption->setOptionId($optionId);
 
-                    // option price and price type
-                    foreach ($storeView->getCustomOptionPrices() as $priceStruct) {
-                        if ($priceStruct->getCustomOption() === $customOption) {
-                            $this->db->execute("
-                                INSERT INTO `{$this->metaData->customOptionPriceTable}`
+                    // value sku's
+                    $valueSkus = [];
+                    foreach ($customOption->getValueSkus() as $j => $valueSku) {
+                        $this->db->execute("
+                                INSERT INTO `{$this->metaData->customOptionTypeValueTable}`
                                 SET 
                                     `option_id` = ?,
-                                    `store_id` = ?,
-                                    `price` = ?,
-                                    `price_type` = ?
+                                    `sku` = ?,
+                                    `sort_order` = ?
                             ", [
-                                $optionId,
-                                $storeView->getStoreViewId(),
-                                $priceStruct->getPrice(),
-                                $priceStruct->getPriceType()
-                            ]);
-                            break;
-                        }
+                            $optionId,
+                            $valueSku,
+                            (int)($j + 1)
+                        ]);
+                        $valueSkus[$valueSku] = $this->db->getLastInsertId();
                     }
 
-                    // option title
-                    foreach ($storeView->getCustomOptionTitles() as $titleStruct) {
-                        if ($titleStruct->getCustomOption() === $customOption) {
-                            $this->db->execute("
-                                INSERT INTO `{$this->metaData->customOptionTitleTable}`
-                                SET 
-                                    `option_id` = ?,
-                                    `store_id` = ?,
-                                    `title` = ?
-                            ", [
-                                $optionId,
-                                $storeView->getStoreViewId(),
-                                $titleStruct->getTitle()
-                            ]);
-                            break;
-                        }
-                    }
+                    foreach ($product->getStoreViews() as $storeView) {
 
-                    // option values per store view
-                    foreach ($valueSkus as $valueSku => $optionTypeId) {
-                        foreach ($storeView->getCustomOptionValues() as $value) {
-                            if ($value->getCustomOption() === $customOption && $value->getSku() === $valueSku) {
+                        // option price and price type
+                        foreach ($storeView->getCustomOptionPrices() as $priceStruct) {
+                            if ($priceStruct->getCustomOption() === $customOption) {
                                 $this->db->execute("
-                                    INSERT INTO `{$this->metaData->customOptionTypeTitleTable}`
+                                    INSERT INTO `{$this->metaData->customOptionPriceTable}`
                                     SET 
-                                        `option_type_id` = ?,
-                                        `store_id` = ?,
-                                        `title` = ?
-                                ", [
-                                    $optionTypeId,
-                                    $storeView->getStoreViewId(),
-                                    $value->getTitle()
-                                ]);
-                                $this->db->execute("
-                                    INSERT INTO `{$this->metaData->customOptionTypePriceTable}`
-                                    SET 
-                                        `option_type_id` = ?,
+                                        `option_id` = ?,
                                         `store_id` = ?,
                                         `price` = ?,
                                         `price_type` = ?
                                 ", [
-                                    $optionTypeId,
+                                    $optionId,
                                     $storeView->getStoreViewId(),
-                                    $value->getPrice(),
-                                    $value->getPriceType()
+                                    $priceStruct->getPrice(),
+                                    $priceStruct->getPriceType()
                                 ]);
                                 break;
                             }
                         }
-                    }
 
+                        // option title
+                        foreach ($storeView->getCustomOptionTitles() as $titleStruct) {
+                            if ($titleStruct->getCustomOption() === $customOption) {
+                                $this->db->execute("
+                                    INSERT INTO `{$this->metaData->customOptionTitleTable}`
+                                    SET 
+                                        `option_id` = ?,
+                                        `store_id` = ?,
+                                        `title` = ?
+                                ", [
+                                    $optionId,
+                                    $storeView->getStoreViewId(),
+                                    $titleStruct->getTitle()
+                                ]);
+                                break;
+                            }
+                        }
+
+                        // option values per store view
+                        foreach ($valueSkus as $valueSku => $optionTypeId) {
+                            foreach ($storeView->getCustomOptionValues() as $value) {
+                                if ($value->getCustomOption() === $customOption && $value->getSku() === $valueSku) {
+                                    $this->db->execute("
+                                        INSERT INTO `{$this->metaData->customOptionTypeTitleTable}`
+                                        SET 
+                                            `option_type_id` = ?,
+                                            `store_id` = ?,
+                                            `title` = ?
+                                    ", [
+                                        $optionTypeId,
+                                        $storeView->getStoreViewId(),
+                                        $value->getTitle()
+                                    ]);
+                                    $this->db->execute("
+                                        INSERT INTO `{$this->metaData->customOptionTypePriceTable}`
+                                        SET 
+                                            `option_type_id` = ?,
+                                            `store_id` = ?,
+                                            `price` = ?,
+                                            `price_type` = ?
+                                    ", [
+                                        $optionTypeId,
+                                        $storeView->getStoreViewId(),
+                                        $value->getPrice(),
+                                        $value->getPriceType()
+                                    ]);
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

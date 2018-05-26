@@ -30,7 +30,15 @@ class StockItemStorage
      */
     public function storeStockItems(array $products)
     {
-        if (empty($products)) {
+        /** @var Product[] $productsWithStockItems */
+        $productsWithStockItems = [];
+        foreach ($products as $product) {
+            if ($product->getStockItems() !== []) {
+                $productsWithStockItems[] = $product;
+            }
+        }
+
+        if (empty($productsWithStockItems)) {
             return;
         }
 
@@ -39,7 +47,7 @@ class StockItemStorage
         $stockId = '1';
         $websiteId = '0';
 
-        $productIds = array_column($products, 'id');
+        $productIds = array_column($productsWithStockItems, 'id');
 
         $stockItems = $this->db->fetchMap("
             SELECT `product_id`, `item_id`
@@ -50,7 +58,7 @@ class StockItemStorage
             $websiteId
         ], $productIds));
 
-        foreach ($products as $product) {
+        foreach ($productsWithStockItems as $product) {
             foreach ($product->getStockItems() as $stockItem) {
 
                 $attributes =  $stockItem->getAttributes();
@@ -89,7 +97,6 @@ class StockItemStorage
                         ", array_merge($attributeValues, [$itemId]));
 
                     }
-
                 }
             }
         }

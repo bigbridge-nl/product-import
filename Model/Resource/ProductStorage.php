@@ -232,13 +232,8 @@ class ProductStorage
      */
     protected function saveProducts(array $validProducts, ValueSerializer $valueSerializer, ImportConfig $config)
     {
-        $validUpdateProducts = $validInsertProducts = [];
-        $productsByAttribute = [];
-        $productsWithCategories = [];
-        $productsWithWebsites = [];
-        $productsWithOptions = [];
-        $productsWithStockItems = [];
-        $removedAttributes = [];
+        $validUpdateProducts = [];
+        $validInsertProducts = [];
 
         $productsByType = [
             DownloadableProduct::TYPE_DOWNLOADABLE => [],
@@ -247,14 +242,10 @@ class ProductStorage
             ConfigurableProduct::TYPE_CONFIGURABLE => [],
         ];
 
-        // collect products by aspect that needs to be updated
         foreach ($validProducts as $product) {
 
+            // collect by type
             $productsByType[$product->getType()][] = $product;
-
-            if ($product->getCustomOptions() !== null) {
-                $productsWithOptions[] = $product;
-            }
 
             // collect valid new and existing products
             if ($product->id !== null) {
@@ -262,53 +253,9 @@ class ProductStorage
             } else {
                 $validInsertProducts[] = $product;
             }
-
-            if ($product->getCategoryIds() !== []) {
-                $productsWithCategories[] = $product;
-            }
-
-            if ($product->getWebsiteIds() !== []) {
-                $productsWithWebsites[] = $product;
-            }
-
-            if ($product->getStockItems() !== []) {
-                $productsWithStockItems[] = $product;
-            }
-
-            $attributeInfo = $this->metaData->productEavAttributeInfo;
-
-            foreach ($product->getStoreViews() as $storeView) {
-                foreach ($storeView->getAttributes() as $key => $value) {
-
-                    if ($value === null) {
-                        $removedAttributes[$key][] = $storeView;
-                    } elseif ($value === "") {
-
-                        if ($attributeInfo[$key]->isTextual()) {
-                            if ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT) {
-                                $productsByAttribute[$key][] = $storeView;
-                            } elseif ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE) {
-                                $removedAttributes[$key][] = $storeView;
-                                continue;
-                            } else {
-                                continue;
-                            }
-                        } else {
-                            if ($config->emptyNonTextValueStrategy === ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE) {
-                                $removedAttributes[$key][] = $storeView;
-                                continue;
-                            } else {
-                                continue;
-                            }
-                        }
-
-                    } else {
-                        // a non-empty value
-                        $productsByAttribute[$key][] = $storeView;
-                    }
-                }
-            }
         }
+
+        list($upsertAttributes, $deleteAttributes) = $this->separateUpsertsFromDeletes($validProducts, $config);
 
         $this->db->execute("START TRANSACTION");
 
@@ -322,18 +269,18 @@ class ProductStorage
 
             $this->referenceResolver->resolveProductReferences($validProducts, $config);
 
-            foreach ($removedAttributes as $eavAttribute => $storeViews) {
+            foreach ($deleteAttributes as $eavAttribute => $storeViews) {
                 $this->productEntityStorage->removeEavAttribute($storeViews, $eavAttribute);
             }
 
-            foreach ($productsByAttribute as $eavAttribute => $storeViews) {
+            foreach ($upsertAttributes as $eavAttribute => $storeViews) {
                 $this->productEntityStorage->insertEavAttribute($storeViews, $eavAttribute);
             }
 
-            $this->customOptionStorage->updateCustomOptions($productsWithOptions);
-            $this->productEntityStorage->insertCategoryIds($productsWithCategories);
-            $this->productEntityStorage->insertWebsiteIds($productsWithWebsites);
-            $this->stockItemStorage->storeStockItems($productsWithStockItems);
+            $this->customOptionStorage->updateCustomOptions($validProducts);
+            $this->productEntityStorage->insertCategoryIds($validProducts);
+            $this->productEntityStorage->insertWebsiteIds($validProducts);
+            $this->stockItemStorage->storeStockItems($validProducts);
             $this->linkedProductStorage->updateLinkedProducts($validProducts);
             $this->imageStorage->storeProductImages($validProducts);
             $this->tierPriceStorage->updateTierPrices($validProducts);
@@ -356,5 +303,56 @@ class ProductStorage
             // let the application handle the exception
             throw $e;
         }
+    }
+
+    /**
+     * @param ImportConfig $config
+     * @param Product[] $products
+     * @param $removedAttributes
+     * @param $attributeInfo
+     * @param $productsByAttribute
+     * @return array
+     */
+    protected function separateUpsertsFromDeletes(array $products, ImportConfig $config): array
+    {
+        $attributeInfo = $this->metaData->productEavAttributeInfo;
+
+        $upsertAttributes = [];
+        $deleteAttributes = [];
+
+        foreach ($products as $product) {
+            foreach ($product->getStoreViews() as $storeView) {
+                foreach ($storeView->getAttributes() as $key => $value) {
+
+                    if ($value === null) {
+                        $deleteAttributes[$key][] = $storeView;
+                    } elseif ($value === "") {
+
+                        if ($attributeInfo[$key]->isTextual()) {
+                            if ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT) {
+                                $upsertAttributes[$key][] = $storeView;
+                            } elseif ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE) {
+                                $deleteAttributes[$key][] = $storeView;
+                                continue;
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            if ($config->emptyNonTextValueStrategy === ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE) {
+                                $deleteAttributes[$key][] = $storeView;
+                                continue;
+                            } else {
+                                continue;
+                            }
+                        }
+
+                    } else {
+                        // a non-empty value
+                        $upsertAttributes[$key][] = $storeView;
+                    }
+                }
+            }
+        }
+        return array($upsertAttributes, $deleteAttributes);
     }
 }
