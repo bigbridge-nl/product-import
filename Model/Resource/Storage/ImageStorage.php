@@ -41,64 +41,70 @@ class ImageStorage
         }
     }
 
-    public function moveImagesToTemporaryLocation(Product $product, ImportConfig $config)
+    /**
+     * @param Product[] $products
+     * @param ImportConfig $config
+     */
+    public function moveImagesToTemporaryLocation(array $products, ImportConfig $config)
     {
-        foreach ($product->getImages() as $image) {
+        foreach ($products as $product) {
+            foreach ($product->getImages() as $image) {
 
-            $imagePath = $image->getImagePath();
+                $imagePath = $image->getImagePath();
 
-            if (!preg_match('/\.(png|jpg|jpeg|gif)$/i', $imagePath)) {
-                $product->addError("Filetype not allowed (use .jpg, .png or .gif): " . $imagePath);
-            }
-
-            $temporaryStoragePath = self::TEMP_PRODUCT_IMAGE_PATH . '/' . md5($image->getImagePath()) . '-' . basename($image->getImagePath());
-
-
-            // keep temporary file?
-            if (file_exists($temporaryStoragePath)) {
-                if ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR) {
-                    // yes: use it!
-                    goto end;
-                } elseif ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING) {
-                    // do nothing; it serves as http cache
-                } else {
-                    // no cache: remove it
-                    unlink($temporaryStoragePath);
+                if (!preg_match('/\.(png|jpg|jpeg|gif)$/i', $imagePath)) {
+                    $product->addError("Filetype not allowed (use .jpg, .png or .gif): " . $imagePath);
                 }
-            }
 
-            if (preg_match('#(https?:)?//#i', $imagePath)) {
+                $temporaryStoragePath = self::TEMP_PRODUCT_IMAGE_PATH . '/' . md5($image->getImagePath()) . '-' . basename($image->getImagePath());
 
-                $error = $this->httpCache->fetchFromUrl($imagePath, $temporaryStoragePath, $config);
-                if ($error !== '') {
-                    $product->addError($error);
+
+                // keep temporary file?
+                if (file_exists($temporaryStoragePath)) {
+                    if ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR) {
+                        // yes: use it!
+                        goto end;
+                    } elseif ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING) {
+                        // do nothing; it serves as http cache
+                    } else {
+                        // no cache: remove it
+                        unlink($temporaryStoragePath);
+                    }
+                }
+
+                if (preg_match('#(https?:)?//#i', $imagePath)) {
+
+                    $error = $this->httpCache->fetchFromUrl($imagePath, $temporaryStoragePath, $config);
+                    if ($error !== '') {
+                        $product->addError($error);
+                        continue;
+                    }
+                } elseif (!is_file($imagePath)) {
+                    $product->addError("File not found: " . $imagePath);
+                    continue;
+                } elseif (stat($imagePath)['dev'] !== stat(__FILE__)['dev']) {
+                    // file is on different device
+                    copy($imagePath, $temporaryStoragePath);
+                } elseif (!file_exists($temporaryStoragePath)) {
+                    // file is on same device
+                    link($imagePath, $temporaryStoragePath);
+                }
+
+                if (!file_exists($temporaryStoragePath)) {
+                    $product->addError("File was not copied to temporary storage: " . $imagePath);
                     continue;
                 }
-            } elseif (!is_file($imagePath)) {
-                $product->addError("File not found: " . $imagePath);
-                continue;
-            } elseif (stat($imagePath)['dev'] !== stat(__FILE__)['dev']) {
-                // file is on different device
-                copy($imagePath, $temporaryStoragePath);
-            } elseif (!file_exists($temporaryStoragePath)) {
-                // file is on same device
-                link($imagePath, $temporaryStoragePath);
+
+                if (filesize($temporaryStoragePath) === 0) {
+                    $product->addError("File is empty: " . $imagePath);
+                    unlink($temporaryStoragePath);
+                    continue;
+                }
+
+                end:
+
+                $image->setTemporaryStoragePath($temporaryStoragePath);
             }
-
-            if (!file_exists($temporaryStoragePath)) {
-                $product->addError("File was not copied to temporary storage: " . $imagePath);
-                continue;
-            }
-
-            if (filesize($temporaryStoragePath) === 0) {
-                $product->addError("File is empty: " . $imagePath);
-                unlink($temporaryStoragePath);
-                continue;
-            }
-
-            end:
-
-            $image->setTemporaryStoragePath($temporaryStoragePath);
         }
     }
 

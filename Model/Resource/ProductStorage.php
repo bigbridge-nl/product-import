@@ -132,46 +132,8 @@ class ProductStorage
             return;
         }
 
-        // collect skus
-        $skus = [];
-        foreach ($products as $product) {
-            $skus[] = $product->getSku();
-        }
-
-        // find existing products ids from their skus
-        $sku2id = $this->productEntityStorage->getExistingSkus($skus);
-
-        // separate new products from existing products and assign id
-        $insertProducts = $updateProducts = $productsWithId = [];
-        foreach ($products as $product) {
-
-            if ($product->id) {
-                $updateProducts[] = $product;
-                $productsWithId[] = $product;
-            } else if (array_key_exists($product->getSku(), $sku2id)) {
-                $product->id = $sku2id[$product->getSku()];
-                $updateProducts[] = $product;
-            } else {
-                $insertProducts[] = $product;
-            }
-        }
-
-        // check if the pre-specified ids exist
-        $this->productEntityStorage->checkIfIdsExist($productsWithId);
-
-        // replace reference(s) with ids, changes $product->errors
-        $this->referenceResolver->resolveExternalReferences($products, $config);
-
-        // create url keys based on name and id
-        // changes $product->errors
-        $this->urlKeyGenerator->createUrlKeysForNewProducts($insertProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
-        $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
-
-        // handle products that changed type
-        $this->productTypeChanger->handleTypeChanges($updateProducts);
-
-        // create an array of products without errors
-        $validProducts = $this->collectValidProducts($products, $config);
+        // transform and validate products
+        $validProducts = $this->preProcessProducts($products, $config);
 
         // in a "dry run" no actual imports to the database are done
         if (!$config->dryRun) {
@@ -192,17 +154,38 @@ class ProductStorage
     }
 
     /**
+     * Transforms raw products to fully prepared products.
+     *
+     * Returns all valid (error-free) products.
+     *
      * @param array $products
      * @param ImportConfig $config
      * @return array
+     * @throws Exception
      */
-    public function collectValidProducts(array $products, ImportConfig $config): array
+    public function preProcessProducts(array $products, ImportConfig $config): array
     {
+        // check if the pre-specified ids exist; changes $product->errors
+        $this->productEntityStorage->checkIfIdsExist($products);
+
+        // distinguish between inserts and updates (and assign ids)
+        list($insertProducts, $updateProducts) = $this->separateInsertsFromUpdates($products);
+
+        // replace reference(s) with ids; changes $product->errors
+        $this->referenceResolver->resolveExternalReferences($products, $config);
+
+        // create url keys based on name and id; changes $product->errors
+        $this->urlKeyGenerator->createUrlKeysForNewProducts($insertProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
+        $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
+
+        // handle products that changed type; changes $product->errors
+        $this->productTypeChanger->handleTypeChanges($updateProducts);
+
+        // collect all images in temporary local directory; changes $product->errors
+        $this->imageStorage->moveImagesToTemporaryLocation($products, $config);
+
         $validProducts = [];
-
         foreach ($products as $product) {
-
-            $this->imageStorage->moveImagesToTemporaryLocation($product, $config);
 
             // checks all attributes, changes $product->errors
             $this->validator->validate($product);
@@ -213,6 +196,32 @@ class ProductStorage
         }
 
         return $validProducts;
+    }
+
+    /**
+     * @param Product[] $products
+     * @return array
+     */
+    protected function separateInsertsFromUpdates(array $products)
+    {
+        // find existing products ids from their skus
+        $sku2id = $this->productEntityStorage->getExistingProductIds($products);
+
+        // separate new products from existing products
+        $insertProducts = $updateProducts = [];
+        foreach ($products as $product) {
+
+            if ($product->id) {
+                $updateProducts[] = $product;
+            } else if (array_key_exists($product->getSku(), $sku2id)) {
+                $product->id = $sku2id[$product->getSku()];
+                $updateProducts[] = $product;
+            } else {
+                $insertProducts[] = $product;
+            }
+        }
+
+        return [$insertProducts, $updateProducts];
     }
 
     /**

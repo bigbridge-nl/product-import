@@ -28,12 +28,12 @@ class ProductEntityStorage
     /**
      * Returns an sku => id map for all existing skus.
      *
-     * @param array $skus
+     * @param string[] $skus
      * @return array
      */
     public function getExistingSkus(array $skus)
     {
-        if (count($skus) == 0) {
+        if (empty($skus)) {
             return [];
         }
 
@@ -45,6 +45,23 @@ class ProductEntityStorage
     }
 
     /**
+     * Returns an sku => id map for all existing products.
+     *
+     * @param Product[] $products
+     * @return array
+     */
+    public function getExistingProductIds(array $products)
+    {
+        // collect skus
+        $skus = [];
+        foreach ($products as $product) {
+            $skus[] = $product->getSku();
+        }
+
+        return $this->getExistingSkus($skus);
+    }
+
+    /**
      * @param Product[] $products
      */
     public function checkIfIdsExist(array $products)
@@ -53,7 +70,18 @@ class ProductEntityStorage
             return;
         }
 
-        $productIds = array_column($products, 'id');
+        $productsWithId = [];
+        $productIds = [];
+        foreach ($products as $product) {
+            if ($product->id) {
+                $productsWithId[]= $product;
+                $productIds[] = $product->id;
+            }
+        }
+
+        if (empty($productsWithId)) {
+            return;
+        }
 
         $exists = $this->db->fetchMap("
             SELECT `entity_id`, `entity_id`
@@ -61,7 +89,7 @@ class ProductEntityStorage
             WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ")
         ", $productIds);
 
-        foreach ($products as $product) {
+        foreach ($productsWithId as $product) {
             if (!array_key_exists($product->id, $exists)) {
                 $product->addError("Id does not belong to existing product: " . $product->id);
             }
