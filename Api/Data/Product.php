@@ -10,14 +10,9 @@ use BigBridge\ProductImport\Model\Data\LinkInfo;
  */
 abstract class Product
 {
-    const PLACEHOLDER_LINE_NUMBER = "-1";
-
     const GLOBAL_STORE_VIEW_CODE = 'admin';
 
     const DEFAULT_STOCK_NAME = 'Default';
-
-    const PLACEHOLDER_NAME = 'Product Placeholder';
-    const PLACEHOLDER_PRICE = '123456.78';
 
     const CATEGORY_IDS = 'category_ids';
     const ATTRIBUTE_SET_ID = 'attribute_set_id';
@@ -71,6 +66,9 @@ abstract class Product
 
     /** @var  array */
     protected $errors = [];
+
+    /** @var bool  */
+    protected $placeholder = false;
 
     /** @var string  */
     public $lineNumber = "";
@@ -354,5 +352,15 @@ abstract class Product
     public function getCustomOptions()
     {
         return $this->customOptions;
+    }
+
+    /**
+     * Is this product used temporarily to represent a product that has not been imported yet?
+     *
+     * @return bool
+     */
+    public function usedAsPlaceholder()
+    {
+        return $this->placeholder;
     }
 }

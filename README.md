@@ -16,19 +16,20 @@ This library just helps you to get products into Magento's database quickly, low
 
 ## Features
 
-* import of product data (new and updates, based on sku or id)
+* import of product (insert, updates), based on product sku or id
 * support for all product types: simple products, configurable products, grouped products, bundle products, downloadable products, and virtual products
 * automatic category generation (no updates of categories)
 * automatic select and multiselect attribute option creation
-* import of images from file or url, with optional caching
+* import of images from file or url, with optional caching (local and HTTP cache)
 * custom options
 * unique url_key generation
 * dry run (no products are written to the database)
-* trims leading and trailing whitespace (spaces, tabs, newlines) from all fields, except free field texts
+* whitespace trimming (spaces, tabs, newlines) from all fields, except free field texts
 * attribute deletion
 * input is validated on data type, requiredness,  and length restrictions
 * result callback, a function that is called with the results of each imported product (id, error)
 * a solution for the problem that the other products that a product depends on have not been imported yet
+* product type changes
 
 ## Indexing
 
@@ -434,9 +435,19 @@ A virtual product is exactly like a simple product. The only difference is the t
 
 ## Changing product type
 
-You can change a product type at any time. When a product was imported as a SimpleProduct before, it may be stored later as a ConfigurableProduct, for instance.
+The type of a product may be changed. When a product was imported as a SimpleProduct before, it may be stored later as a ConfigurableProduct, for instance.
 
-Currently only changes from simple to another type are supported. Other changes report an error.
+When the old type contained data structures that the new type no longer needs, these will be deleted (this is called "destructive").
+
+By default, only non-destructive changes are allowed. Virtual to Downloadable is fine. Configurable to Downloadable is not. The parent-child links would be lost.
+
+You can allow both non-destructive and destructive type changes with
+
+    $config->ImportConfig::PRODUCT_TYPE_CHANGE_ALLOWED;
+
+Forbid any kind of type change with
+
+    $config->ImportConfig::PRODUCT_TYPE_CHANGE_FORBIDDEN;
 
 ## Categories
 

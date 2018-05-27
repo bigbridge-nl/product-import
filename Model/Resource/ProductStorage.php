@@ -145,7 +145,7 @@ class ProductStorage
         // call user defined functions to let them process the results
         foreach ($config->resultCallbacks as $callback) {
             foreach ($products as $product) {
-                if ($product->lineNumber === Product::PLACEHOLDER_LINE_NUMBER) {
+                if ($product->usedAsPlaceholder()) {
                     continue;
                 }
                 call_user_func($callback, $product);
@@ -179,7 +179,7 @@ class ProductStorage
         $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
 
         // handle products that changed type; changes $product->errors
-        $this->productTypeChanger->handleTypeChanges($updateProducts);
+        $this->productTypeChanger->handleTypeChanges($updateProducts, $config);
 
         // collect all images in temporary local directory; changes $product->errors
         $this->imageStorage->moveImagesToTemporaryLocation($products, $config);

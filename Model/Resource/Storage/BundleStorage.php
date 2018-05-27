@@ -39,7 +39,7 @@ class BundleStorage
     /**
      * @param BundleProduct[] $products
      */
-    protected function createOptions(array $products)
+    public function createOptions(array $products)
     {
         foreach ($products as $product) {
 
@@ -109,9 +109,9 @@ class BundleStorage
     }
 
     /**
-     * @param BundleProduct[] $products
+     * @param Product[] $products
      */
-    protected function removeOptions(array $products)
+    public function removeOptions(array $products)
     {
         $productIds = array_column($products, 'id');
 

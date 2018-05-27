@@ -292,13 +292,7 @@ class Importer
         foreach ($absentSkus as $sku) {
             if (!array_key_exists($sku, $sku2id)) {
 
-                $placeholder = new SimpleProduct($sku);
-                $placeholder->setAttributeSetId($this->metaData->defaultProductAttributeSetId);
-                $placeholder->lineNumber = Product::PLACEHOLDER_LINE_NUMBER;
-
-                $placeholder->global()->setName(Product::PLACEHOLDER_NAME);
-                $placeholder->global()->setPrice(Product::PLACEHOLDER_PRICE);
-                $placeholder->global()->setStatus(ProductStoreView::STATUS_DISABLED);
+                $placeholder = SimpleProduct::createPlaceholder($sku, $this->metaData->defaultProductAttributeSetId);
 
                 $this->products[$sku] = $placeholder;
             }

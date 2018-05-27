@@ -125,4 +125,10 @@ class ImportConfig
     const EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD = 'force-download';
     const EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR = 'check-import-dir';
     const EXISTING_IMAGE_STRATEGY_HTTP_CACHING = 'http-caching';
+
+    public $productTypeChange = self::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE;
+
+    const PRODUCT_TYPE_CHANGE_ALLOWED = 'allowed'; // allow all product type changes
+    const PRODUCT_TYPE_CHANGE_FORBIDDEN = 'forbidden'; // allow no product type changes
+    const PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE = 'non-destructive'; // allow only product type changes that do not delete data
 }

@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -223,7 +224,6 @@ class ConfigurableStorage
         }
     }
 
-
     /**
      * @param ConfigurableProduct[] $products
      */
@@ -284,5 +284,18 @@ class ConfigurableStorage
                 ]);
             }
         }
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    public  function removeLinkedVariants(array $products)
+    {
+        $productIds = array_column($products, 'id');
+
+        $this->removeSuperAttributes($products);
+
+        $this->db->deleteMultiple($this->metaData->superLinkTable, 'parent_id', $productIds);
+        $this->db->deleteMultiple($this->metaData->relationTable, 'parent_id', $productIds);
     }
 }

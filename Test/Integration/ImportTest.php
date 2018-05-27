@@ -1740,31 +1740,27 @@ class ImportTest extends \PHPUnit\Framework\TestCase
      */
     public function testChangeProductType()
     {
-        $errors = [];
-
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
-            $errors = array_merge($errors, $product->getErrors());
-        };
-
         $importer = self::$factory->createImporter($config);
 
-        $product1 = new SimpleProduct('type-transformer-product-import');
+        $product1 = new VirtualProduct('type-transformer-product-import');
         $product1->setAttributeSetByName("Default");
 
         $global = $product1->global();
         $global->setName("Type Transformer");
         $global->setPrice('6.75');
 
-        $importer->importSimpleProduct($product1);
+        $importer->importVirtualProduct($product1);
         $importer->flush();
 
-        $product2 = new VirtualProduct('type-transformer-product-import');
+        $product2 = new BundleProduct('type-transformer-product-import');
 
-        $importer->importVirtualProduct($product2);
+        $importer->importBundleProduct($product2);
         $importer->flush();
 
-        $this->assertEquals([], $errors);
+        // default: virtual to bundle is ok
+
+        $this->assertEquals([], $product2->getErrors());
 
         $type = self::$db->fetchSingleCell("
             SELECT `type_id`
@@ -1772,14 +1768,36 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             WHERE entity_id = " . $product1->id . "
         ");
 
-        $this->assertSame("virtual", $type);
+        $this->assertSame("bundle", $type);
 
-        $product2 = new SimpleProduct('type-transformer-product-import');
+        $product3 = new SimpleProduct('type-transformer-product-import');
 
-        $importer->importSimpleProduct($product2);
+        $importer->importSimpleProduct($product3);
         $importer->flush();
 
-        $this->assertEquals(['Type conversion from virtual to simple is not supported'], $errors);
+        // default: bundle to simple is not ok
+
+        $this->assertSame(['Type conversion losing data from bundle to simple is not allowed'], $product3->getErrors());
+
+        // forbidden: no conversion is ok
+
+        $config->productTypeChange = ImportConfig::PRODUCT_TYPE_CHANGE_FORBIDDEN;
+        $importer = self::$factory->createImporter($config);
+        $product4 = new SimpleProduct('type-transformer-product-import');
+        $importer->importSimpleProduct($product4);
+        $importer->flush();
+
+        $this->assertEquals(['Type conversion is not allowed'], $product4->getErrors());
+
+        // allowed: bundle to simple is ok
+
+        $config->productTypeChange = ImportConfig::PRODUCT_TYPE_CHANGE_ALLOWED;
+        $importer = self::$factory->createImporter($config);
+        $product5 = new SimpleProduct('type-transformer-product-import');
+        $importer->importSimpleProduct($product5);
+        $importer->flush();
+
+        $this->assertEquals([], $product5->getErrors());
     }
 
     /**
@@ -1838,9 +1856,9 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @param ImportConfig $config
-     * @param Product $product
+     * @param SimpleProduct $product
      * @param array $set
-     * @param array $expected
+     * @param array $expectedGlobal
      * @throws Exception
      */
     public function checkEmptyValues(ImportConfig $config, SimpleProduct $product, array $set, array $expectedGlobal)

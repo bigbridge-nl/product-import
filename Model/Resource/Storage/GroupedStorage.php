@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
+use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
@@ -28,30 +29,14 @@ class GroupedStorage
     }
 
     /**
-     * @param GroupedProduct[] $updateProducts
-     */
-    public function performTypeSpecificStorage(array $updateProducts)
-    {
-        $this->updateLinkedProducts($updateProducts);
-    }
-
-    /**
      * @param GroupedProduct[] $products
      */
-    public function insertLinkedProducts(array $products)
-    {
-        $this->insertGroupMembers($products);
-    }
-
-    /**
-     * @param GroupedProduct[] $products
-     */
-    public function updateLinkedProducts(array $products)
+    public function performTypeSpecificStorage(array $products)
     {
         $changedProducts = $this->findProductsWithChangedGroupMembers($products);
 
-        $this->removeGroupMembers($changedProducts);
-        $this->insertGroupMembers($changedProducts);
+        $this->removeLinkedProducts($changedProducts);
+        $this->insertLinkedProducts($changedProducts);
     }
 
     /**
@@ -110,18 +95,7 @@ class GroupedStorage
     /**
      * @param GroupedProduct[] $products
      */
-    protected function removeGroupMembers(array $products)
-    {
-        $productIds = array_column($products, 'id');
-        $linkInfo = $this->metaData->linkInfo[LinkInfo::SUPER];
-
-        $this->db->deleteMultipleWithWhere($this->metaData->linkTable, 'product_id', $productIds, "`link_type_id` = {$linkInfo->typeId}");
-    }
-
-    /**
-     * @param GroupedProduct[] $products
-     */
-    protected function insertGroupMembers(array $products)
+    public function insertLinkedProducts(array $products)
     {
         $linkInfo = $this->metaData->linkInfo[LinkInfo::SUPER];
 
@@ -170,5 +144,16 @@ class GroupedStorage
                 $position++;
             }
         }
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    public function removeLinkedProducts(array $products)
+    {
+        $productIds = array_column($products, 'id');
+        $linkInfo = $this->metaData->linkInfo[LinkInfo::SUPER];
+
+        $this->db->deleteMultipleWithWhere($this->metaData->linkTable, 'product_id', $productIds, "`link_type_id` = {$linkInfo->typeId}");
     }
 }
