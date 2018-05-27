@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Api;
 
+use BigBridge\Model\Resource\ProductDeleter;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
@@ -38,6 +39,9 @@ class Importer
     /** @var ProductStorage */
     protected $productStorage;
 
+    /** @var ProductDeleter */
+    protected $productDeleter;
+
     /** @var MetaData */
     protected $metaData;
 
@@ -46,6 +50,7 @@ class Importer
         ValueSerializer $valueSerializer,
         ProductEntityStorage $productEntityStorage,
         ProductStorage $productStorage,
+        ProductDeleter $productDeleter,
         MetaData $metaData)
     {
         $this->config = $config;
@@ -53,6 +58,7 @@ class Importer
         $this->productEntityStorage = $productEntityStorage;
         $this->productStorage = $productStorage;
         $this->metaData = $metaData;
+        $this->productDeleter = $productDeleter;
     }
 
     /**
@@ -184,6 +190,26 @@ class Importer
         }
 
         $this->products = [];
+    }
+
+    /**
+     * Delete products specified by id.
+     *
+     * @param array $ids
+     */
+    public function deleteProductsByIds(array $ids)
+    {
+        $this->productDeleter->deleteProductsByIds($ids);
+    }
+
+    /**
+     * Delete products specified by sku.
+     *
+     * @param array $skus
+     */
+    public function deleteProductsBySkus(array $skus)
+    {
+        $this->productDeleter->deleteProductsBySkus($skus);
     }
 
     /**

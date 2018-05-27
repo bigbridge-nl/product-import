@@ -15,9 +15,11 @@ class ImportConfig
     public $dryRun = false;
 
     /**
-     * @var int The number of products sent to the database at once
-     *      The number is a tested optimal balance between speed and database load.
-     *      Making the number larger will speed up import only marginally, and will create large transactions.
+     * The number of products sent to the database at once
+     * The number is a tested optimal balance between speed and database load.
+     * Making the number larger will speed up import only marginally, and will create large transactions.
+     *
+     * @var int
      */
     public $batchSize = 1000;
 

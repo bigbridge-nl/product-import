@@ -157,7 +157,7 @@ class Magento2DbConnection
     }
 
     /**
-     * Deletes multiple rows at once, using primary $keys
+     * Deletes multiple rows at once, using $keys
      *
      * @param string $table
      * @param string $keyColumn

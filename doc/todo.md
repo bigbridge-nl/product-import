@@ -2,7 +2,6 @@
 
 ## Functionality
 
-* allow delete products
 * Solve todo's in code
 
 # Validation
@@ -53,5 +52,5 @@ product_options_container
 ## Ever?
 
 * allow access to low level functions to plugin that performs custom database queries
-* stop importing after x failed products
+* stop importing after x failed products, and not importing any in case of excess
 * replace products (i.e. delete and insert)

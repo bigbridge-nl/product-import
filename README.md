@@ -16,20 +16,21 @@ This library just helps you to get products into Magento's database quickly, low
 
 ## Features
 
-* import of product (insert, updates), based on product sku or id
-* support for all product types: simple products, configurable products, grouped products, bundle products, downloadable products, and virtual products
-* automatic category generation (no updates of categories)
+* insert, update and delete products
+* product identification based on product sku or id
+* all product types (simple, configurable, grouped, bundle, downloadable, and virtual)
+* automatic category generation
 * automatic select and multiselect attribute option creation
-* import of images from file or url, with optional caching (local and HTTP cache)
+* import of images from file or url
+* image caching (local and HTTP cache)
 * custom options
 * unique url_key generation
-* dry run (no products are written to the database)
 * whitespace trimming (spaces, tabs, newlines) from all fields, except free field texts
 * attribute deletion
-* input is validated on data type, requiredness,  and length restrictions
-* result callback, a function that is called with the results of each imported product (id, error)
-* a solution for the problem that the other products that a product depends on have not been imported yet
+* input validation (data type, requiredness,  and length restrictions)
 * product type changes
+* a solution for the problem that linked products have not been imported yet
+* dry run (no products are written to the database)
 
 ## Indexing
 
@@ -40,10 +41,6 @@ Magento supports "Update on Save" and "Update by Schedule". The relevant indexes
 If these indexes are set to "Update by Schedule", a Magento cron job based indexer will update the indexes. This mode works well with this library.
 
 If these indexes are set to "Update on Save", you will need to run the indexers manually after the import is done (bin/magento indexer:reindex). This is less advisable.
-
-## Mutation mode
-
-The library only supports the insert/update mode. It does not remove attributes or replace products.
 
 ## Example Code
 
@@ -656,6 +653,18 @@ Import by ID happens the same as import by sku, except that the ID is specified:
 When the id is specified, it is treated as the identifier of an object. The sku will be updated to match the one given in the import.
 
 Import by id always concerns updates, not inserts. When a non-existing id is used, an error is added to the product.
+
+## Delete products
+
+While the library's main purpose is to import products, it can delete products as well.
+
+Either specify an array of product ids:
+
+    $importer->deleteProductsByIds($ids);
+
+or products skus:
+
+    $importer->deleteProductsBySkus($skus);
 
 ## Dry run
 
