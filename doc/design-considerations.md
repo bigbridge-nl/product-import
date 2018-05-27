@@ -40,9 +40,6 @@ For simple attributes:
 * INSERT
 * UPDATE
 * DELETE
-* REPLACE
-
-I use INSERT and UPDATE.
 
 For complex attributes (like category-ids, images, etc)
 
@@ -97,12 +94,6 @@ The library provides these possibilities for url_keys:
 * based on sku
 * based on sku (on conflict, add a serial number).
 
-### Quote input
-
-The reason for not quoting all input is speed. The little quoting I currently do already takes up 5% of import time. This is because it occurs in the innermost loop of the import.
-
-I quote input only when necessary, that is, for input of string content. All other content is checked by the validator and cannot corrupt the database.
-
 ### Names and ids
 
 For imports and exports it is customary to use human readable names for attributes. "visibility" for example is exported by Magento's exporter as "Catalog, Search". The internal value is 4.
@@ -119,6 +110,22 @@ I chose for the option to have the developer explicitly call convertNameToId() b
 ### Batch processing
 
 I only used batch processing because it is much faster than individual queries per product. For the developer, it is less comfortable, because the importer's process() function doesn't reply with the import results immediately. The resultCallbacks callback array is the only way the developer can get error feedback. It is not ideal, but I could think of no better method.
+
+### Placeholders
+
+In order to import a product that has links to other products that have not yet been imported, the library creates placeholders for these linked products. A placeholder is just a product with some required properties that will be replaced by the real product once it comes in. It is a VirtualProduct because it needs to be converted to anything else.
+
+Distinguish these cases for non-existing linked products:
+
+1. they are added to the same batch _before_ the product
+2. they are added to the same batch _after_ the product
+3. they are added to a later batch
+
+In case of 1 the library needs to check if the linked product is in the batch already, otherwise it would overwrite the linked product. It does this by checking the sku in the $products array.
+
+In case of 2 the library needs to replace the placeholder with the linked product, preventing the creation of the placeholder. It does this by assigning the linked product to the same sku in the $products array.
+
+Only if 1 and 2 do not apply, a placeholder is created. It can be replaced in a later batch, case 3. The library needs to be able to recognize it as a placeholder, in case its type needs to be converted. This conversion must always be allowed. This is already the case for virtual products, but could have been forbidden by a config setting. This is checked in ProductTypeChanger.
 
 ### Memory use
 

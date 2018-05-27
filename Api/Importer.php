@@ -7,9 +7,9 @@ use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
-use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
+use BigBridge\ProductImport\Model\Data\Placeholder;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\ProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
@@ -167,6 +167,7 @@ class Importer
      */
     public function flush()
     {
+        // create child-to-parent links (which causes hard to clean-up cyclic dependencies)
         foreach ($this->products as $product) {
             foreach ($product->getStoreViews() as $storeView) {
                 $storeView->parent = $product;
@@ -175,7 +176,7 @@ class Importer
 
         $this->productStorage->storeProducts($this->products, $this->config, $this->valueSerializer);
 
-        // Help the garbage collector by removing cyclic dependencies
+        // help the garbage collector by removing cyclic dependencies
         foreach ($this->products as $product) {
             foreach ($product->getStoreViews() as $storeView) {
                 $storeView->parent = null;
@@ -189,7 +190,7 @@ class Importer
      * @param Product $product
      * @throws \Exception
      */
-    protected function importAnyProduct(Product $product)
+    public function importAnyProduct(Product $product)
     {
         switch ($product->getType()) {
             case SimpleProduct::TYPE_SIMPLE:
@@ -291,10 +292,7 @@ class Importer
 
         foreach ($absentSkus as $sku) {
             if (!array_key_exists($sku, $sku2id)) {
-
-                $placeholder = SimpleProduct::createPlaceholder($sku, $this->metaData->defaultProductAttributeSetId);
-
-                $this->products[$sku] = $placeholder;
+                $this->products[$sku] = Placeholder::createPlaceholder($sku, $this->metaData->defaultProductAttributeSetId);
             }
         }
     }

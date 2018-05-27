@@ -10,6 +10,7 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
+use BigBridge\ProductImport\Model\Data\Placeholder;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Storage\BundleStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ConfigurableStorage;
@@ -83,8 +84,13 @@ class ProductTypeChanger
         $newType = $product->getType();
 
         if ($config->productTypeChange === ImportConfig::PRODUCT_TYPE_CHANGE_FORBIDDEN) {
-            $product->addError("Type conversion is not allowed");
-            return;
+
+            // if this is a placeholder product, that is only replaced in a later batch, allow it
+            if ($product->global()->getName() !== Placeholder::PLACEHOLDER_NAME) {
+
+                $product->addError("Type conversion is not allowed");
+                return;
+            }
         }
 
         if ($config->productTypeChange === ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE) {
