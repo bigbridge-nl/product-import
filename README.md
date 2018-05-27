@@ -167,19 +167,15 @@ Any simple (scalar) attribute may be removed from the database (on a global leve
 
     $global->setMsrp(null);
 
-Attributes with the empty string value ("") are ignored by default. They are not imported. If that's not what you want, you have several options.
+Attributes with the empty string value ("") are ignored by default. They are not imported.
+
+If that to remove the attribute value, you have two options:
 
 For textual attributes (datatype varchar and text):
 
-Import the empty string as empty string:
-
-    $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT;
-
-Remove the attribute value from the database:
-
     $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE;
 
-For non-textual attributes (datetime, decimal and integer) you have one other option:
+For non-textual attributes (datetime, decimal and integer):
 
     $config->emptyNonTextValueStrategy = ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE;
 

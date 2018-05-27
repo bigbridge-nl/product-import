@@ -182,6 +182,12 @@ Configurable variants are specified as complete products, not just sku's, even t
 
 I came back from the idea of setting default values (attribute_set_id, visibility, etc) for new products. They slow the importer down a bit, they make the system a little less flexible , and they provide a false sense of security. I want to make the user think at least a few minutes about these values. She will have to do this eventually anyway. And they were some attributes that I could not settle on to make them defaults (url_key, website_ids).
 
+### Removing attribute values
+
+Magento 2 usually sets eav attribute values to null, when an attribute is cleared in the admin panel. This is database pollution, and I will not contribute to it, if not necessary.
+
+Note that when a product is first created, these attributes are not set to null. New custom attributes also won't have a value of null in the database. So I think it is fair to assume that Magento's queries won't break if no null value is present, but the attribute value is just missing.
+
 ### Query speed
 
 I use queries with many inserts / updates at once, because this is faster than individual queries.

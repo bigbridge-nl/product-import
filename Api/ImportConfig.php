@@ -57,8 +57,7 @@ class ImportConfig
     public $emptyTextValueStrategy = self::EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE;
 
     const EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE = "ignore"; // skip it in the import
-    const EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT = "import"; // import as is, as ""
-    const EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE = "remove"; // remove the value from the product
+    const EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE = "remove"; // remove the attribute value from the product
 
     /**
      * How to handle datetime, decimal and integer fields with value ""?
@@ -68,7 +67,7 @@ class ImportConfig
     public $emptyNonTextValueStrategy = self::EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE;
 
     const EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE = "ignore"; // skip it in the import
-    const EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE = "remove"; // remove the value from the product
+    const EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE = "remove"; // remove the attribute value from the product
 
     /**
      * Create url keys based on name or sku?

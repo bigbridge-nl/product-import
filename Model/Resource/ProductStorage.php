@@ -329,9 +329,7 @@ class ProductStorage
                     } elseif ($value === "") {
 
                         if ($attributeInfo[$key]->isTextual()) {
-                            if ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT) {
-                                $upsertAttributes[$key][] = $storeView;
-                            } elseif ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE) {
+                            if ($config->emptyTextValueStrategy === ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE) {
                                 $deleteAttributes[$key][] = $storeView;
                                 continue;
                             } else {

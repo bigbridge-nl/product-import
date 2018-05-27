@@ -1836,14 +1836,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             [null, null, null]
         );
 
-        // "" => import
-        $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IMPORT;
-
-        $this->checkEmptyValues($config, $product1,
-            ["", "", "2.50"],
-            ["", "", "2.5000"]
-        );
-
         // "" => remove
         $config->emptyNonTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE;
         $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE;
