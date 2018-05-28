@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\Model\Resource;
+namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
