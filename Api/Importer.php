@@ -2,7 +2,7 @@
 
 namespace BigBridge\ProductImport\Api;
 
-use BigBridge\Model\Resource\ProductDeleter;
+use BigBridge\ProductImport\Model\Resource\ProductDeleter;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
