@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Helper\Decimal;
 use BigBridge\ProductImport\Model\Data\CustomOptionPrice;
 use BigBridge\ProductImport\Model\Data\CustomOptionTitle;
 use BigBridge\ProductImport\Model\Data\Image;
@@ -181,7 +182,7 @@ class ProductStoreView
      */
     public function setPrice(string $price = null)
     {
-        $this->attributes[self::ATTR_PRICE] = ($price === null) ? null : trim($price);
+        $this->attributes[self::ATTR_PRICE] = Decimal::format($price);
     }
 
     /**
@@ -189,7 +190,7 @@ class ProductStoreView
      */
     public function setCost(string $cost = null)
     {
-        $this->attributes[self::ATTR_COST] = ($cost === null) ? null : trim($cost);
+        $this->attributes[self::ATTR_COST] = Decimal::format($cost);
     }
 
     /**
@@ -197,7 +198,7 @@ class ProductStoreView
      */
     public function setMsrp(string $msrp = null)
     {
-        $this->attributes[self::ATTR_MSRP] = ($msrp === null) ? null : trim($msrp);
+        $this->attributes[self::ATTR_MSRP] = Decimal::format($msrp);
     }
 
     /**
@@ -227,7 +228,7 @@ class ProductStoreView
 
     public function setTaxClassName(string $taxClassName = null)
     {
-        $this->unresolvedAttributes[self::ATTR_TAX_CLASS_ID] = ($taxClassName=== null) ? null : trim($taxClassName);
+        $this->unresolvedAttributes[self::ATTR_TAX_CLASS_ID] = ($taxClassName === null) ? null : trim($taxClassName);
     }
 
     public function setUrlKey(string $urlKey = null)
@@ -253,7 +254,7 @@ class ProductStoreView
      */
     public function setWeight(string $weight = null)
     {
-        $this->attributes[self::ATTR_WEIGHT] = ($weight === null) ? null : trim($weight);
+        $this->attributes[self::ATTR_WEIGHT] = Decimal::format($weight);
     }
 
     /**
@@ -261,7 +262,7 @@ class ProductStoreView
      */
     public function setSpecialPrice(string $specialPrice = null)
     {
-        $this->attributes[self::ATTR_SPECIAL_PRICE] = ($specialPrice === null) ? null : trim($specialPrice);
+        $this->attributes[self::ATTR_SPECIAL_PRICE] = Decimal::format($specialPrice);
     }
 
     /**

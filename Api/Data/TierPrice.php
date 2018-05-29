@@ -2,15 +2,17 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Helper\Decimal;
+
 /**
  * @author Patrick van Bergen
  */
 class TierPrice
 {
-    /** @var int */
+    /** @var string A 12.4 decimal */
     protected $quantity;
 
-    /** @var string A 12.4 price */
+    /** @var string A 12.4 decimal */
     protected $value;
 
     /** @var string|null Null means: all customer groups */
@@ -33,10 +35,10 @@ class TierPrice
      * @param string|null $customerGroupName The name (code) of a customer group. Null means: all customer groups
      * @param string|null $websiteCode The code of the website. Null means: all websites
      */
-    public function __construct(int $quantity, string $value, string $customerGroupName = null, string $websiteCode = null)
+    public function __construct(string $quantity, string $value, string $customerGroupName = null, string $websiteCode = null)
     {
-        $this->quantity = $quantity;
-        $this->value = $value;
+        $this->quantity = Decimal::format($quantity);
+        $this->value = Decimal::format($value);
         $this->customerGroupName = $customerGroupName;
         $this->websiteCode = $websiteCode;
     }
@@ -44,7 +46,7 @@ class TierPrice
     /**
      * @return int
      */
-    public function getQuantity(): int
+    public function getQuantity(): string
     {
         return $this->quantity;
     }

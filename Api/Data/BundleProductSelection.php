@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Helper\Decimal;
+
 /**
  * @author Patrick van Bergen
  */
@@ -30,11 +32,11 @@ class BundleProductSelection
 
     public function __construct(string $sku, bool $isDefault, int $priceType, string $priceValue, string $quantity, bool $canChangeQuantity)
     {
-        $this->sku = $sku;
+        $this->sku = trim($sku);
         $this->isDefault = $isDefault;
         $this->priceType = $priceType;
-        $this->priceValue = $priceValue;
-        $this->quantity = $quantity;
+        $this->priceValue = Decimal::format($priceValue);
+        $this->quantity = Decimal::format($quantity);
         $this->canChangeQuantity = $canChangeQuantity;
     }
 

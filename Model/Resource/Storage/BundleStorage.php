@@ -209,8 +209,8 @@ class BundleStorage
                         $serialized .= '*' . $selection->getProductId() .
                             '-' . (int)$selection->isDefault() .
                             '-' . $selection->getPriceType() .
-                            '-' . sprintf('%.4f', $selection->getPriceValue()) .
-                            '-' . sprintf('%.4f', $selection->getQuantity()) . '-' .
+                            '-' . $selection->getPriceValue() .
+                            '-' . $selection->getQuantity() . '-' .
                             (int)$selection->isCanChangeQuantity();
                     }
                 }

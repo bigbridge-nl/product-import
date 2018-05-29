@@ -139,8 +139,8 @@ class TierPriceStorage
                     $product->id,
                     (int)($tierPrice->getCustomerGroupId() === null),
                     (int)$tierPrice->getCustomerGroupId(),
-                    sprintf("%.4f", $tierPrice->getQuantity()),
-                    sprintf("%.4f", $tierPrice->getValue()),
+                    $tierPrice->getQuantity(),
+                    $tierPrice->getValue(),
                     $tierPrice->getWebsiteId()
                 );
                 $activeTierPriceData[$serialized] = true;

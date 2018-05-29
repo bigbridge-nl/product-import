@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Data;
 
 use BigBridge\ProductImport\Api\Data\DownloadLink;
+use BigBridge\ProductImport\Helper\Decimal;
 
 /**
  * @author Patrick van Bergen
@@ -22,7 +23,7 @@ class DownloadLinkInformation
     {
         $this->downloadLink = $downloadLink;
         $this->title = trim($title);
-        $this->price = trim($price);
+        $this->price = Decimal::format($price);
     }
 
     /**

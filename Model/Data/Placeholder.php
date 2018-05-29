@@ -13,7 +13,7 @@ use Exception;
 abstract class Placeholder extends Product
 {
     const PLACEHOLDER_NAME = 'Product Placeholder';
-    const PLACEHOLDER_PRICE = '123456.78';
+    const PLACEHOLDER_PRICE = '123456.7800';
 
     /**
      * @return VirtualProduct

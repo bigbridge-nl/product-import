@@ -9,6 +9,7 @@ use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\TierPrice;
+use BigBridge\ProductImport\Helper\Decimal;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -19,7 +20,6 @@ class Validator
 {
     const SKU_MAX_LENGTH = 64;
     const DATE_PATTERN = '/^\d{4}-\d{2}-\d{2}( \d{2}:\d{2}:\d{2})?$/';
-    const DECIMAL_PATTERN = '/^-?\d{1,12}(\.\d{0,4})?$/';
 
     /** @var  MetaData */
     protected $metaData;
@@ -155,7 +155,7 @@ class Validator
                         }
                         break;
                     case EavAttributeInfo::TYPE_DECIMAL:
-                        if (!preg_match(self::DECIMAL_PATTERN, $value)) {
+                        if (!preg_match(Decimal::DECIMAL_PATTERN, $value)) {
                             $product->addError($eavAttribute . " is not a decimal number with dot (" . $value . ")");
                         }
                         break;
@@ -194,7 +194,7 @@ class Validator
             foreach ($decimalAttributes as $decimalAttribute) {
                 if (array_key_exists($decimalAttribute, $stockAttributes)) {
                     $value = $stockAttributes[$decimalAttribute];
-                    if (!preg_match(self::DECIMAL_PATTERN, $value)) {
+                    if (!preg_match(Decimal::DECIMAL_PATTERN, $value)) {
                         $product->addError($decimalAttribute . " is not a decimal number with dot (" . $value . ")");
                     }
                 }

@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Helper\Decimal;
+
 /**
  * @author Patrick van Bergen
  */
@@ -26,7 +28,7 @@ class CustomOptionValue
     {
         $this->customOption = $customOption;
         $this->sku = trim($sku);
-        $this->price = trim($price);
+        $this->price = Decimal::format($price);
         $this->priceType = trim($priceType);
         $this->title = trim($title);
     }

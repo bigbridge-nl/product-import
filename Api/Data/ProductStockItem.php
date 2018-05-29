@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Helper\Decimal;
+
 /**
  * @author Patrick van Bergen
  */
@@ -39,32 +41,32 @@ class ProductStockItem
 
     public function setQuantity(string $quantity)
     {
-        $this->attributes[self::QTY] = trim($quantity);
+        $this->attributes[self::QTY] = Decimal::format($quantity);
     }
 
     public function setMinimumQuantity(string $quantity)
     {
-        $this->attributes[self::MIN_QTY] = trim($quantity);
+        $this->attributes[self::MIN_QTY] = Decimal::format($quantity);
     }
 
     public function setNotifyStockQuantity(string $quantity)
     {
-        $this->attributes[self::NOTIFY_STOCK_QTY] = trim($quantity);
+        $this->attributes[self::NOTIFY_STOCK_QTY] = Decimal::format($quantity);
     }
 
     public function setMinimumSaleQuantity(string $quantity)
     {
-        $this->attributes[self::MIN_SALE_QTY] = trim($quantity);
+        $this->attributes[self::MIN_SALE_QTY] = Decimal::format($quantity);
     }
 
     public function setMaximumSaleQuantity(string $quantity)
     {
-        $this->attributes[self::MAX_SALE_QTY] = trim($quantity);
+        $this->attributes[self::MAX_SALE_QTY] = Decimal::format($quantity);
     }
 
     public function setQuantityIncrements(string $quantityIncrements)
     {
-        $this->attributes[self::QTY_INCREMENTS] = trim($quantityIncrements);
+        $this->attributes[self::QTY_INCREMENTS] = Decimal::format($quantityIncrements);
     }
 
     public function setLowStockDate(string $lowStockDate)

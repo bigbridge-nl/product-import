@@ -2,6 +2,8 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Helper\Decimal;
+
 /**
  * @author Patrick van Bergen
  */
@@ -19,7 +21,7 @@ class GroupedProductMember
     public function __construct(string $sku, string $defaultQuantity)
     {
         $this->sku = trim($sku);
-        $this->defaultQuantity = trim($defaultQuantity);
+        $this->defaultQuantity = Decimal::format($defaultQuantity);
     }
 
     /**
