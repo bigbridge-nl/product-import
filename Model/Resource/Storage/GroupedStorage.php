@@ -49,48 +49,62 @@ class GroupedStorage
             return [];
         }
 
-        $productIds = array_column($products, 'id');
+        $changed = [];
 
         $linkInfo = $this->metaData->linkInfo[LinkInfo::SUPER];
+        $productIds = array_column($products, 'id');
 
-        // Note: the position and default quantity of the member products are taken in account as well
-        $existingMembers = $this->db->fetchMap("
-            SELECT `product_id`, CONCAT(
-                GROUP_CONCAT(L.`linked_product_id` ORDER BY P.`value` SEPARATOR ' '),
-                ' ',
-                GROUP_CONCAT(Q.`value` ORDER BY P.`value` SEPARATOR ' '))
+        $allProductData = $this->db->fetchGrouped("
+            SELECT 
+                L.`product_id`, L.`link_id`, L.`linked_product_id`,
+                P.`value` AS `position`,
+                Q.`value` AS `default_quantity`  
             FROM `{$this->metaData->linkTable}` L
-            INNER JOIN `{$this->metaData->linkAttributeIntTable}` P ON P.`link_id` = L.`link_id` AND P.product_link_attribute_id = ?
-            INNER JOIN `{$this->metaData->linkAttributeDecimalTable}` Q ON Q.`link_id` = L.`link_id` AND Q.product_link_attribute_id = ?
-            WHERE 
-                L.`link_type_id` = ? AND
-                L.`product_id` IN (" . $this->db->getMarks($productIds) . ")                 
-            GROUP by L.`product_id`
+            INNER JOIN `{$this->metaData->linkAttributeIntTable}` P ON P.`link_id` = L.`link_id`
+            INNER JOIN `{$this->metaData->linkAttributeDecimalTable}` Q ON Q.`link_id` = L.`link_id`
+            WHERE
+                P.`product_link_attribute_id` = ? AND
+                Q.`product_link_attribute_id` = ? AND 
+                L.`link_type_id` = ? AND  
+                L.`product_id` IN (" . $this->db->getMarks($productIds) . ")
+            ORDER BY L.`product_id`, P.`value`    
         ", array_merge([
             $linkInfo->positionAttributeId,
             $linkInfo->defaultQuantityAttributeId,
             $linkInfo->typeId
-        ], $productIds));
-
-        $changed = [];
+        ], $productIds),
+            ['product_id', 'link_id']);
 
         foreach ($products as $product) {
-
-            $members = $product->getMembers();
-            $memberIds = array_column($members, 'id');
-            $serializedMemberData = implode(' ', $memberIds);
-
-            foreach ($members as $member) {
-                $serializedMemberData .= ' ' . sprintf('%.4f', $member->getDefaultQuantity());
+            if (!array_key_exists($product->id, $allProductData)) {
+                $changed[$product->id] = $product;
+                continue;
             }
+            $productData = $allProductData[$product->id];
+            $members = $product->getMembers();
+            if (count($productData) != count($members)) {
+                $changed[$product->id] = $product;
+                continue;
+            }
+            $i = 0;
+            foreach ($productData as $memberData) {
+                $member = $members[$i++];
 
-            if (!array_key_exists($product->id, $existingMembers) || $existingMembers[$product->id] !== $serializedMemberData) {
-                $changed[] = $product;
+                if ($member->getDefaultQuantity() != $memberData['default_quantity']) {
+                    $changed[$product->id] = $product;
+                    break;
+                }
+                $position = $i + 1;
+                if ($position != $memberData['position']) {
+                    $changed[$product->id] = $product;
+                    break;
+                }
             }
         }
 
         return $changed;
     }
+
 
     /**
      * @param GroupedProduct[] $products
