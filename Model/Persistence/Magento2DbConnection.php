@@ -303,6 +303,31 @@ class Magento2DbConnection
     /**
      * @param string $query
      * @param array $params
+     * @param array $groupColumns
+     * @return array
+     */
+    public function fetchGrouped(string $query, array $params, array $groupColumns) {
+        $all = $this->execute($query, $params)->fetchAll(PDO::FETCH_ASSOC);
+
+        $grouped = [];
+        foreach ($all as $row) {
+            $path = &$grouped;
+            foreach ($groupColumns as $groupColumn) {
+                $key = $row[$groupColumn];
+                if (!array_key_exists($key, $path)) {
+                    $path[$key] = [];
+                }
+                $path = &$path[$key];
+            }
+            $path = $row;
+        }
+
+        return $grouped;
+    }
+
+    /**
+     * @param string $query
+     * @param array $params
      * @return array
      */
     public function fetchAllNonAssoc(string $query, array $params = [])
