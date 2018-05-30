@@ -2,15 +2,15 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use Magento\Framework\App\ObjectManager;
+use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\BundleProductOption;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\CustomOption;
 use BigBridge\ProductImport\Api\Data\DownloadLink;
 use BigBridge\ProductImport\Api\Data\DownloadSample;
-use Magento\Framework\App\ObjectManager;
-use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
@@ -827,13 +827,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals([], $errors);
         $this->checkConfigurableData($configurable->id, $attributeData, $labelData, $linkData, $relationData);
 
-        $superAttributeIds = self::$db->fetchSingleColumn("
-            SELECT product_super_attribute_id
-            FROM " . self::$metaData->superAttributeTable . "
-            WHERE product_id = {$configurable->id}
-            ORDER BY position
-        ");
-
         // no change
 
         $importer->importConfigurableProduct($configurable);
@@ -841,16 +834,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals([], $errors);
         $this->checkConfigurableData($configurable->id, $attributeData, $labelData, $linkData, $relationData);
-
-        $newSuperAttributeIds = self::$db->fetchSingleColumn("
-            SELECT product_super_attribute_id
-            FROM " . self::$metaData->superAttributeTable . "
-            WHERE product_id = {$configurable->id}
-            ORDER BY position
-        ");
-
-        // the super attributes must not have been touched
-        $this->assertEquals($newSuperAttributeIds, $superAttributeIds);
 
         // change super attribute and simples
 
@@ -1573,9 +1556,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals([], $errors);
 
-        $newFirstOptionId = $this->checkBundleProduct($bundle);
-
-        $this->assertEquals($firstOptionId, $newFirstOptionId);
 
         // update with change
 

@@ -41,12 +41,9 @@ class ConfigurableStorage
      */
     protected function updateSuperAttributes(array $products)
     {
-        // collect products whose super attribute configuration has changed (which is very rare)
-        $changedSuperAttributeProducts = $this->collectChangedSuperAttributes($products);
-
         // update by remove and insert
-        $this->removeSuperAttributes($changedSuperAttributeProducts);
-        $this->createSuperAttributes($changedSuperAttributeProducts);
+        $this->removeSuperAttributes($products);
+        $this->createSuperAttributes($products);
     }
 
     /**
@@ -109,47 +106,6 @@ class ConfigurableStorage
         }
 
         $this->db->insertMultiple($this->metaData->relationTable, ['parent_id', 'child_id'], $values, Magento2DbConnection::_1_KB);
-    }
-
-    /**
-     * @param ConfigurableProduct[] $products
-     * @return array
-     */
-    protected function collectChangedSuperAttributes(array $products)
-    {
-        if (empty($products)) {
-            return [];
-        }
-
-        $changedSuperAttributeProducts = [];
-        $productIds = array_column($products, 'id');
-
-        // check for changes
-        $storedAttributes = $this->db->fetchMap("
-            SELECT product_id, GROUP_CONCAT(attribute_id ORDER BY attribute_id ASC SEPARATOR ' ')
-            FROM {$this->metaData->superAttributeTable}
-            WHERE product_id IN (" . $this->db->getMarks($productIds) . ")
-            GROUP BY product_id
-        ", $productIds);
-
-        foreach ($products as $product) {
-
-            // create a string with sorted super attribute ids
-            $superAttributeCodes = $product->getSuperAttributeCodes();
-            $serializedAttributeIds =  [];
-            foreach ($superAttributeCodes as $attributeCode) {
-                $serializedAttributeIds[] = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
-            }
-            sort($serializedAttributeIds);
-            $serializedAttributeIds = implode(' ', $serializedAttributeIds);
-
-            // check for changes
-            if (!array_key_exists($product->id, $storedAttributes) || ($storedAttributes[$product->id]) !== $serializedAttributeIds) {
-                $changedSuperAttributeProducts[] = $product;
-            }
-        }
-
-        return $changedSuperAttributeProducts;
     }
 
     /**

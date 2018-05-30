@@ -36,116 +36,96 @@ class DownloadableStorage
     }
 
     /**
-     * @param DownloadableProduct[] $updateProducts
-     */
-    public function performTypeSpecificStorage(array $updateProducts)
-    {
-        // updated products: remove and reinsert links and samples
-        $this->removeLinksAndSamples($updateProducts);
-        $this->insertLinksAndSamples($updateProducts);
-    }
-
-    /**
      * @param DownloadableProduct[] $products
      */
-    protected function removeLinksAndSamples(array $products)
+    public function performTypeSpecificStorage(array $products)
     {
-        $linkProductIds = [];
-        $sampleProductIds = [];
+        $affectedLinkProducts = [];
+        $affectedSampleProducts = [];
+
         foreach ($products as $product) {
             if ($product->getDownloadLinks() !== null) {
-                $linkProductIds[] = $product->id;
+                $affectedLinkProducts[] = $product;
             }
             if ($product->getDownloadSamples() !== null) {
-                $sampleProductIds[] = $product->id;
+                $affectedSampleProducts[] = $product;
             }
         }
 
-        $this->db->deleteMultiple($this->metaData->downloadableLinkTable, 'product_id', $linkProductIds);
-        $this->db->deleteMultiple($this->metaData->downloadableSampleTable, 'product_id', $sampleProductIds);
+        // updated products: remove and reinsert links and samples
+        $this->removeLinks($affectedLinkProducts);
+        $this->insertLinks($affectedLinkProducts);
+        $this->removeSamples($affectedSampleProducts);
+        $this->insertSamples($affectedSampleProducts);
     }
 
     /**
      * @param DownloadableProduct[] $products
      */
-    protected function insertLinksAndSamples(array $products)
+    protected function removeLinks(array $products)
     {
-        if (empty($products)) {
-            return;
-        }
+        $productIds = array_column($products, 'id');
 
-        // insert links and samples
+        $this->db->deleteMultiple($this->metaData->downloadableLinkTable, 'product_id', $productIds);
+    }
+
+    /**
+     * @param DownloadableProduct[] $products
+     */
+    protected function removeSamples(array $products)
+    {
+        $productIds = array_column($products, 'id');
+
+        $this->db->deleteMultiple($this->metaData->downloadableSampleTable, 'product_id', $productIds);
+    }
+
+    /**
+     * @param DownloadableProduct[] $products
+     */
+    protected function insertLinks(array $products)
+    {
+        // insert links
         foreach ($products as $product) {
 
-            if (($links = $product->getDownloadLinks()) !== null) {
+            foreach ($links = $product->getDownloadLinks() as $i => $downloadLink) {
 
-                foreach ($links as $i => $downloadLink) {
+                $order = $i + 1;
+                $isShareable = (int)$downloadLink->isShareable();
+                $numberOfDownloads = $downloadLink->getNumberOfDownloads();
 
-                    $order = $i + 1;
-                    $isShareable = (int)$downloadLink->isShareable();
-                    $numberOfDownloads = $downloadLink->getNumberOfDownloads();
+                list($linkUrl, $linkFile, $linkType) = $this->interpretFileOrUrl(
+                    $downloadLink->getFileOrUrl(), $downloadLink->getTemporaryStoragePathLink(), self::LINKS_PATH);
 
-                    list($linkUrl, $linkFile, $linkType) = $this->interpretFileOrUrl(
-                        $downloadLink->getFileOrUrl(), $downloadLink->getTemporaryStoragePathLink(), self::LINKS_PATH);
+                list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
+                    $downloadLink->getSampleFileOrUrl(), $downloadLink->getTemporaryStoragePathSample(), self::LINK_SAMPLES_PATH);
 
-                    list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
-                        $downloadLink->getSampleFileOrUrl(), $downloadLink->getTemporaryStoragePathSample(), self::LINK_SAMPLES_PATH);
+                $this->db->execute("
+                    INSERT INTO `" . $this->metaData->downloadableLinkTable . "`
+                    SET 
+                        `product_id` = ?, 
+                        `sort_order` = ?, 
+                        `number_of_downloads` = ?, 
+                        `is_shareable` = ?, 
+                        `link_url` = ?, 
+                        `link_file` = ?,
+                        `link_type` = ?, 
+                        `sample_url` = ?, 
+                        `sample_file` = ?,
+                        `sample_type` = ?
+                ", [
+                    $product->id,
+                    $order,
+                    $numberOfDownloads,
+                    $isShareable,
+                    $linkUrl,
+                    $linkFile,
+                    $linkType,
+                    $sampleUrl,
+                    $sampleFile,
+                    $sampleType
+                ]);
 
-                    $this->db->execute("
-                        INSERT INTO `" . $this->metaData->downloadableLinkTable . "`
-                        SET 
-                            `product_id` = ?, 
-                            `sort_order` = ?, 
-                            `number_of_downloads` = ?, 
-                            `is_shareable` = ?, 
-                            `link_url` = ?, 
-                            `link_file` = ?,
-                            `link_type` = ?, 
-                            `sample_url` = ?, 
-                            `sample_file` = ?,
-                            `sample_type` = ?
-                    ", [
-                        $product->id,
-                        $order,
-                        $numberOfDownloads,
-                        $isShareable,
-                        $linkUrl,
-                        $linkFile,
-                        $linkType,
-                        $sampleUrl,
-                        $sampleFile,
-                        $sampleType
-                    ]);
-
-                    $downloadLink->setId($this->db->getLastInsertId());
-                }
-            }
-
-            if (($samples = $product->getDownloadSamples()) !== null) {
-
-                foreach ($samples as $i => $downloadSample) {
-
-                    list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
-                        $downloadSample->getFileOrUrl(), $downloadSample->getTemporaryStoragePathSample(), self::SAMPLES_PATH);
-
-                    $this->db->execute("
-                        INSERT INTO `" . $this->metaData->downloadableSampleTable . "`
-                        SET 
-                            `product_id` = ?, 
-                            `sort_order` = ?, 
-                            `sample_url` = ?, 
-                            `sample_file` = ?,
-                            `sample_type` = ?
-                    ", [
-                        $product->id,
-                        $i + 1,
-                        $sampleUrl,
-                        $sampleFile,
-                        $sampleType
-                    ]);
-
-                    $downloadSample->setId($this->db->getLastInsertId());
-                }
+                $downloadLink->setId($this->db->getLastInsertId());
             }
         }
 
@@ -186,6 +166,47 @@ class DownloadableStorage
                         ]);
                     }
                 }
+            }
+        }
+    }
+
+
+    /**
+     * @param DownloadableProduct[] $products
+     */
+    protected function insertSamples(array $products)
+    {
+        // insert samples
+        foreach ($products as $product) {
+
+            foreach ($samples = $product->getDownloadSamples() as $i => $downloadSample) {
+
+                list($sampleUrl, $sampleFile, $sampleType) = $this->interpretFileOrUrl(
+                    $downloadSample->getFileOrUrl(), $downloadSample->getTemporaryStoragePathSample(), self::SAMPLES_PATH);
+
+                $this->db->execute("
+                    INSERT INTO `" . $this->metaData->downloadableSampleTable . "`
+                    SET 
+                        `product_id` = ?, 
+                        `sort_order` = ?, 
+                        `sample_url` = ?, 
+                        `sample_file` = ?,
+                        `sample_type` = ?
+                ", [
+                    $product->id,
+                    $i + 1,
+                    $sampleUrl,
+                    $sampleFile,
+                    $sampleType
+                ]);
+
+                $downloadSample->setId($this->db->getLastInsertId());
+            }
+        }
+
+        // insert titles and prices, per store view
+        foreach ($products as $product) {
+            foreach ($product->getStoreViews() as $storeView) {
 
                 foreach ($storeView->getDownloadSampleInformations() as $downloadSampleInformation) {
 

@@ -53,10 +53,10 @@ Currently I have used several types of mutations, depending on what fitted best 
 
 INSERT is always available.
 UPDATE is used for categories and images, because these tend to be modified even when a sync is in place.
-SYNC is used when the user is not likely to change this structure, and calculating a diff is not too complicated.
-REPLACE is used when the user is not likely to change this structure, and calculating a diff is quite complicated.
+SYNC is used only for tier prices.
+REPLACE is used when calculating a diff is complicated and error-prone.
 
-Eventually I would like the user of the library to be able to choose the type of mutation she wants, but this is quite a lot of work still.
+Eventually I would like the user of the library to be able to choose the type of mutation she wants, but this is quite a lot of work.
 
 ## Conflicting url_keys: why not just add id?
 
