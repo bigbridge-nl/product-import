@@ -127,6 +127,11 @@ class ImportConfig
     const EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR = 'check-import-dir';
     const EXISTING_IMAGE_STRATEGY_HTTP_CACHING = 'http-caching';
 
+    /**
+     * How to handle products that change type?
+     *
+     * @var string
+     */
     public $productTypeChange = self::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE;
 
     const PRODUCT_TYPE_CHANGE_ALLOWED = 'allowed'; // allow all product type changes

@@ -196,7 +196,9 @@ class CategoryImporter
         ]);
 
         // url
-        $urlKey = $this->nameToUrlKeyConverter->createUrlKeyFromName($categoryName);
+        $existingUrlKeys = $this->metaData->getExistingCategoryUrlKeys($parentId, 0);
+
+        $urlKey = $this->nameToUrlKeyConverter->createUniqueUrlKeyFromName($categoryName, $existingUrlKeys);
         if (count($idPath) == 1) {
             $urlPath = $urlKey;
         } else {
@@ -205,8 +207,6 @@ class CategoryImporter
         }
         $requestPath = $urlPath . $this->metaData->categoryUrlSuffix;
         $targetPath = "catalog/category/view/id/" . $categoryId;
-
-#todo $requestPath moet uniek zijn, evenals url_key
 
         // url_rewrite
         $this->db->execute("
@@ -229,7 +229,6 @@ class CategoryImporter
 
         $this->importEavAttribute($categoryId, 'name', $categoryName, EavAttributeInfo::TYPE_VARCHAR, 0);
         $this->importEavAttribute($categoryId, 'display_mode', "PRODUCTS", EavAttributeInfo::TYPE_VARCHAR, 0);
-#todo make url key unique
         $this->importEavAttribute($categoryId, 'url_key', $urlKey, EavAttributeInfo::TYPE_VARCHAR, 0);
         $this->importEavAttribute($categoryId, 'url_path', $urlPath, EavAttributeInfo::TYPE_VARCHAR, 0);
 

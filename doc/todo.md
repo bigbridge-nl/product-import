@@ -1,9 +1,5 @@
 # Todo
 
-## Functionality
-
-* Solve todo's in code
-
 # Validation
 
 * check attribute value uniqueness

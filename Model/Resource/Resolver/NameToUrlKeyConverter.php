@@ -18,4 +18,23 @@ class NameToUrlKeyConverter
 
         return $key;
     }
+
+    public function createUniqueUrlKeyFromName(string $name, array $excluded)
+    {
+        $urlKey = $this->createUrlKeyFromName($name);
+
+        if (in_array($urlKey, $excluded)) {
+
+            $suffix = 0;
+
+            do {
+                $suffix++;
+                $uniqueUrlKey = $urlKey . '_' . $suffix;
+            } while (in_array($uniqueUrlKey, $excluded));
+
+            $urlKey = $uniqueUrlKey;
+        }
+
+        return $urlKey;
+    }
 }

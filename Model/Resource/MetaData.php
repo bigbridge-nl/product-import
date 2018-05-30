@@ -619,6 +619,31 @@ class MetaData
     }
 
     /**
+     * Return the url_keys of all child categories of the given parent.
+     *
+     * @param int $parentCategoryId
+     * @param int $storeViewId
+     * @return array
+     */
+    public function getExistingCategoryUrlKeys(int $parentCategoryId, int $storeViewId)
+    {
+        $urlKeys = [];
+
+        foreach ($this->allCategoryInfo as $categoryInfo) {
+            $pathLength = count($categoryInfo->path);
+            if ($pathLength > 1) {
+                if ($parentCategoryId == $categoryInfo->path[$pathLength - 2]) {
+                    if (array_key_exists($storeViewId, $categoryInfo->urlKeys)) {
+                        $urlKeys[] = $categoryInfo->urlKeys[$storeViewId];
+                    }
+                }
+            }
+        }
+
+        return $urlKeys;
+    }
+
+    /**
      * @param int $categoryId
      * @param int[] $idPath The ids of the parent categories, including $categoryId
      * @param array $urlKeys A store-id => url_key array
