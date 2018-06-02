@@ -2,13 +2,10 @@
 
 namespace BigBridge\ProductImport\Model\Reader;
 
-use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\Importer;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Api\ProductImportLogger;
-use DOMDocument;
-use XMLReader;
 use Exception;
 
 /**
@@ -59,6 +56,7 @@ class XmlProductReader
 
     /**
      * @param string $xmlPath
+     * @param Importer $importer
      * @throws Exception
      */
     protected function processFile(string $xmlPath, Importer $importer)
@@ -71,50 +69,26 @@ class XmlProductReader
             throw new Exception("Input file '{$xmlPath}' does not exist");
         }
 
-        $reader = new XmlReader();
-        $success = $reader->open($xmlPath, 'UTF-8', LIBXML_NOWARNING);
+        $stream = fopen($xmlPath, 'r');
+        $parser = xml_parser_create();
 
-        if (!$success) {
-            throw new Exception("Unable to read XML from file {$xmlPath}");
+        $elementHandler = new ElementHandler($importer);
+
+        xml_set_element_handler($parser, [$elementHandler, 'elementStart'], [$elementHandler, 'elementEnd']);
+        xml_set_character_data_handler($parser, [$elementHandler, 'characterData']);
+
+        while (($data = fread($stream, 16384))) {
+            xml_parse($parser, $data);
+        }
+        xml_parse($parser, '', true);
+
+        $errorCode = xml_get_error_code($parser);
+        if ($errorCode) {
+            $errorString = xml_error_string($errorCode);
+            throw new Exception("$errorString in line " . xml_get_current_line_number($parser));
         }
 
-        $doc = new DOMDocument();
-
-        // move to the first product node
-        while ($reader->read()) {
-            if ($reader->name === self::TAG_PRODUCT) {
-                break;
-            }
-        };
-
-        while ($reader->name === self::TAG_PRODUCT) {
-            $productNode = simplexml_import_dom($doc->importNode($reader->expand(), true));
-
-            $this->processNode($productNode, $importer, 0);
-
-            // go to next <product />
-            $reader->next(self::TAG_PRODUCT);
-        }
-    }
-
-    /**
-     * @param \SimpleXMLElement $productNode
-     * @param Importer $importer
-     * @throws Exception
-     */
-    protected function processNode(\SimpleXMLElement $productNode, Importer $importer, int $lineNumber)
-    {
-        $type = (string)$productNode->type;
-        $sku = (string)$productNode->sku;
-
-        switch ($type) {
-            case SimpleProduct::TYPE_SIMPLE:
-                $product = new SimpleProduct($sku);
-                $product->lineNumber = $lineNumber;
-                $importer->importSimpleProduct($product);
-                break;
-            default:
-                throw new Exception("Missing 'type'");
-        }
+        xml_parser_free($parser);
+        fclose($stream);
     }
 }

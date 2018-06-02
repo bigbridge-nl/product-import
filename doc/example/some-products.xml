@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <import>
-	<product>
-		<type>simple</type>
-		<sku>skinny-jeans-811</sku>
+	<product type="simple" sku="skinny-jeans-811" attribute_set="Default">
+		<global>
+			<name>Skinny Jeans 811</name>
+			<price>19.95</price>
+		</global>
+		<store_view code="default">
+			<price>19.75</price>
+		</store_view>
 	</product>
-	<product>
-		<type>simple</type>
-		<sku>skinny-jeans-812</sku>
+	<product type="simple" sku="skinny-jeans-812" attribute_set="Default">
+		<global>
+			<name>Skinny Jeans 812</name>
+			<price>19.95</price>
+		</global>
 	</product>
 </import>

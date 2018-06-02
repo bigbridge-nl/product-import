@@ -38,7 +38,7 @@ class ProductImportCommandLogger implements ProductImportLogger
             $this->failedProductCount++;
 
             foreach ($product->getErrors() as $error) {
-                $this->output->writeln("{$error} in line {$product->lineNumber}");
+                $this->output->writeln("{$error} for product '{$product->getSku()}' that starts in line {$product->lineNumber}");
             }
         }
     }
