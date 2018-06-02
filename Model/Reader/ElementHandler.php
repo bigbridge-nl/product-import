@@ -26,18 +26,17 @@ class ElementHandler
 
     protected $characterData = "";
 
-    const TYPE = 'TYPE';
-    const SKU = 'SKU';
-    const ATTRIBUTE_SET = "ATTRIBUTE_SET";
-    const CODE = "CODE";
+    const TYPE = 'type';
+    const SKU = 'sku';
+    const ATTRIBUTE_SET = "attribute_set";
+    const CODE = "code";
 
-    const PRODUCT = 'PRODUCT';
-    const GLOBAL = "GLOBAL";
-    const STORE_VIEW = "STORE_VIEW";
-    const NAME = "NAME";
-    const PRICE = "PRICE";
-
-    const IMPORT = "IMPORT";
+    const PRODUCT = 'product';
+    const GLOBAL = "global";
+    const STORE_VIEW = "store_view";
+    const NAME = "name";
+    const PRICE = "price";
+    const IMPORT = "import";
 
     public function __construct(Importer $importer)
     {
@@ -53,6 +52,7 @@ class ElementHandler
     public function elementStart($parser, $element, $attributes)
     {
         $this->tag = $element;
+        $this->characterData = "";
 
         if ($this->storeView) {
 

@@ -61,6 +61,8 @@ class XmlProductReader
      */
     protected function processFile(string $xmlPath, Importer $importer)
     {
+        $elementHandler = new ElementHandler($importer);
+
         if (!preg_match('/.xml$/i', $xmlPath)) {
             throw new Exception("Input file '{$xmlPath}' should be an .xml file");
         }
@@ -69,25 +71,33 @@ class XmlProductReader
             throw new Exception("Input file '{$xmlPath}' does not exist");
         }
 
+        // open stream
         $stream = fopen($xmlPath, 'r');
         $parser = xml_parser_create();
 
-        $elementHandler = new ElementHandler($importer);
+        // set options
+        xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, "UTF-8");
+        xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 0);
+        xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
 
+        // set handlers
         xml_set_element_handler($parser, [$elementHandler, 'elementStart'], [$elementHandler, 'elementEnd']);
         xml_set_character_data_handler($parser, [$elementHandler, 'characterData']);
 
+        // read and parse chunks
         while (($data = fread($stream, 16384))) {
             xml_parse($parser, $data);
         }
-        xml_parse($parser, '', true);
 
+        // check for parse errors
         $errorCode = xml_get_error_code($parser);
         if ($errorCode) {
             $errorString = xml_error_string($errorCode);
             throw new Exception("$errorString in line " . xml_get_current_line_number($parser));
         }
 
+        // close
+        xml_parse($parser, '', true);
         xml_parser_free($parser);
         fclose($stream);
     }
