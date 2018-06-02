@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<product>
+		<type>simple</type>
+		<sku>skinny-jeans-811</sku>
+	</product>
+	<product>
+		<type>simple</type>
+		<sku>skinny-jeans-812</sku>
+	</product>
+</import>
