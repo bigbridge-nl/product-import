@@ -9,18 +9,12 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Importer;
-use Magento\Paypal\Model\Payflow\Pro;
 
 /**
  * @author Patrick van Bergen
  */
 class ElementHandler
 {
-    const TYPE = 'type';
-    const SKU = 'sku';
-    const ATTRIBUTE_SET_NAME = "attribute_set_name";
-    const CODE = "code";
-
     /** @var Importer */
     protected $importer;
 
@@ -41,6 +35,15 @@ class ElementHandler
 
     /** @var string[] */
     protected $path = ['root'];
+
+    const TYPE = 'type';
+    const SKU = 'sku';
+    const ATTRIBUTE_SET_NAME = "attribute_set_name";
+    const CODE = "code";
+
+    const ATTR_TAX_CLASS_NAME = "tax_class_name";
+    const GENERATE_URL_KEY = "generate_url_key";
+    const ATTR_META_KEYWORDS = "meta_keywords";
 
     public function __construct(Importer $importer)
     {
@@ -96,6 +99,26 @@ class ElementHandler
                 ProductStoreView::ATTR_NAME,
                 ProductStoreView::ATTR_PRICE,
                 ProductStoreView::ATTR_GIFT_MESSAGE_AVAILABLE,
+                ProductStoreView::ATTR_STATUS,
+                ProductStoreView::ATTR_VISIBILITY,
+                ProductStoreView::ATTR_DESCRIPTION,
+                ProductStoreView::ATTR_SHORT_DESCRIPTION,
+                ProductStoreView::ATTR_META_TITLE,
+                ProductStoreView::ATTR_META_DESCRIPTION,
+                ProductStoreView::ATTR_COST,
+                ProductStoreView::ATTR_MSRP,
+                ProductStoreView::ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE,
+                ProductStoreView::ATTR_URL_KEY,
+                ProductStoreView::ATTR_WEIGHT,
+                ProductStoreView::ATTR_SPECIAL_PRICE,
+                ProductStoreView::ATTR_SPECIAL_FROM_DATE,
+                ProductStoreView::ATTR_SPECIAL_TO_DATE,
+                ProductStoreView::ATTR_NEWS_FROM_DATE,
+                ProductStoreView::ATTR_NEWS_TO_DATE,
+                ProductStoreView::ATTR_MANUFACTURER,
+                self::ATTR_META_KEYWORDS,
+                self::ATTR_TAX_CLASS_NAME,
+                self::GENERATE_URL_KEY,
             ])) {
                 $unknown = true;
             }
@@ -147,8 +170,50 @@ class ElementHandler
                 $this->storeView->setName($this->characterData);
             } elseif ($element === ProductStoreView::ATTR_PRICE) {
                 $this->storeView->setPrice($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_STATUS) {
+                $this->storeView->setStatus($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_VISIBILITY) {
+                $this->storeView->setVisibility($this->characterData);
+            } elseif ($element === self::ATTR_TAX_CLASS_NAME) {
+                $this->storeView->setTaxClassName($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_DESCRIPTION) {
+                $this->storeView->setDescription($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_SHORT_DESCRIPTION) {
+                $this->storeView->setShortDescription($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_URL_KEY) {
+                $this->storeView->setUrlKey($this->characterData);
+            } elseif ($element === self::GENERATE_URL_KEY) {
+                if ($this->characterData === "1") {
+                    $this->storeView->generateUrlKey();
+                }
             } elseif ($element === ProductStoreView::ATTR_GIFT_MESSAGE_AVAILABLE) {
                 $this->storeView->setGiftMessageAvailable($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_META_TITLE) {
+                $this->storeView->setMetaTitle($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_META_DESCRIPTION) {
+                $this->storeView->setMetaDescription($this->characterData);
+            } elseif ($element === self::ATTR_META_KEYWORDS) {
+                $this->storeView->setMetaKeywords($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_COST) {
+                $this->storeView->setCost($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_MSRP) {
+                $this->storeView->setMsrp($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE) {
+                $this->storeView->setMsrpDisplayActualPriceType($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_WEIGHT) {
+                $this->storeView->setWeight($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_SPECIAL_PRICE) {
+                $this->storeView->setSpecialPrice($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_SPECIAL_FROM_DATE) {
+                $this->storeView->setSpecialFromDate($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_SPECIAL_TO_DATE) {
+                $this->storeView->setSpecialToDate($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_NEWS_FROM_DATE) {
+                $this->storeView->setNewsFromDate($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_NEWS_TO_DATE) {
+                $this->storeView->setNewsToDate($this->characterData);
+            } elseif ($element === ProductStoreView::ATTR_MANUFACTURER) {
+                $this->storeView->setManufacturer($this->characterData);
             }
         } elseif ($scope === "category_global_name" || $scope === "category_ids" || $scope === "website_codes") {
             if ($element === "item") {

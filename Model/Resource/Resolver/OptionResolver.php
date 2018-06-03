@@ -35,7 +35,7 @@ class OptionResolver
                 if (in_array($attributeCode, $autoCreateOptionAttributes)) {
                     $id = $this->metaData->addAttributeOption($attributeCode, $optionName);
                 } else {
-                    $error = "option " . $optionName . " not found in attribute " . $attributeCode;
+                    $error = "option '" . $optionName . "' not found in attribute '" . $attributeCode . "'";
                 }
 
             } else {
@@ -46,7 +46,6 @@ class OptionResolver
 
         return [$id, $error];
     }
-
 
     public function resolveOptions(string $attributeCode, array $optionNames, array $autoCreateOptionAttributes): array
     {

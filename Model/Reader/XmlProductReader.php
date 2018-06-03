@@ -36,6 +36,10 @@ class XmlProductReader
         $time = date('H:i:s');
         $output->info("{$time} Import start");
 
+        if ($config->dryRun) {
+            $output->info("Dry run: no products are stored in the database (All auto-generated items used by these products will still be stored)");
+        }
+
         try {
 
             $importer = $this->importerFactory->createImporter($config);
@@ -73,7 +77,7 @@ class XmlProductReader
 
         // open stream
         $stream = fopen($xmlPath, 'r');
-        $parser = xml_parser_create();
+        $parser = xml_parser_create("UTF-8");
 
         // set options
         xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, "UTF-8");
@@ -88,6 +92,8 @@ class XmlProductReader
         while (($data = fread($stream, 16384))) {
             xml_parse($parser, $data);
         }
+        // "Entity errors are reported at the end of the data thus only if <i>is_final</i> is set and <b>TRUE</b>.
+        xml_parse($parser, '', true);
 
         // check for parse errors
         $errorCode = xml_get_error_code($parser);
@@ -97,7 +103,6 @@ class XmlProductReader
         }
 
         // close
-        xml_parse($parser, '', true);
         xml_parser_free($parser);
         fclose($stream);
     }

@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Console\Command;
 
 use BigBridge\ProductImport\Api\ImportConfig;
-use BigBridge\ProductImport\Model\Reader\FileReaderOutput;
 use BigBridge\ProductImport\Model\Reader\ProductImportCommandLogger;
 use BigBridge\ProductImport\Model\Reader\XmlProductReader;
 use Symfony\Component\Console\Command\Command;
@@ -20,6 +19,7 @@ class ProductImportCommand extends Command
     const ARGUMENT_FILENAME = 'filename';
 
     const OPTION_DRY_RUN = 'dry-run';
+    const OPTION_AUTO_CREATE_OPTION = 'auto-create-option';
 
     /** @var XmlProductReader */
     protected $xmlProductReader;
@@ -40,13 +40,19 @@ class ProductImportCommand extends Command
             new InputArgument(
                 self::ARGUMENT_FILENAME,
                 InputArgument::REQUIRED,
-                'XML file with products'
+                '.xml file with products'
             ),
             new InputOption(
                 self::OPTION_DRY_RUN,
                 null,
                 InputOption::VALUE_NONE,
-                'Name'
+                'Prepares and validates products, but does not import'
+            ),
+            new InputOption(
+                self::OPTION_AUTO_CREATE_OPTION,
+                null,
+                InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+                'Auto-create options for this attribute'
             )
         ]);
     }
@@ -66,6 +72,7 @@ class ProductImportCommand extends Command
 
         $config = new ImportConfig();
         $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
+        $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->resultCallbacks = [[$logger, 'productImported']];
 
         // import!
