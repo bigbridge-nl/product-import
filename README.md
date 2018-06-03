@@ -167,6 +167,8 @@ It will help you use this library by understanding how I use certain words:
 * by "set", as in "setSpecialPrice", I mean "replace"
 * by "add", as in "addCategories" I mean "insert or update, but not remove"
 
+When Magento 2 uses "name" where I would use "code", I follow Magento. "attribute_set_name" For instance, would qualify as a code in my view, but I call it "name" to be consistent with Magento.
+
 ## Empty values and removing attributes
 
 Any simple (scalar) attribute may be removed from the database (on a global level, or per store view) by setting it to null. For example:

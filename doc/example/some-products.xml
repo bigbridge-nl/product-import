@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <import>
-	<product type="simple" sku="skinny-jeans-811" attribute_set="Default">
+	<product type="simple" sku="skinny-jeans-811" attribute_set_name="Default">
 		<global>
 			<name>Skinny Jeans 811</name>
 			<price>19.95</price>
@@ -8,11 +8,24 @@
 		<store_view code="default">
 			<price>19.75</price>
 		</store_view>
+		<category_global_names>
+			<item>Default Category/Trousers</item>
+			<item>Default Category/Trendy</item>
+		</category_global_names>
+		<website_codes>
+			<item>base</item>
+		</website_codes>
 	</product>
-	<product type="simple" sku="skinny-jeans-812" attribute_set="Default">
+	<product type="virtual" sku="services-104-ax" attribute_set_name="Default">
 		<global>
-			<name>Skinny Jeans 812</name>
-			<price>19.95</price>
+			<name>Filling in tax form</name>
+			<price>79.95</price>
 		</global>
+		<category_ids>
+			<item>2</item>
+		</category_ids>
+		<website_ids>
+			<item>1</item>
+		</website_ids>
 	</product>
 </import>
