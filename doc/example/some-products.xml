@@ -23,7 +23,9 @@
 			<special_to_date>2018-06-30</special_to_date>
 			<news_from_date>2018-06-03</news_from_date>
 			<news_to_date>2018-06-30</news_to_date>
-			<manufacturer>Jeans &amp; 2Co</manufacturer>
+			<manufacturer>Jeans &amp; Co</manufacturer>
+			<country_of_manufacture>Hungaria</country_of_manufacture>
+			<color>Blue</color>
 		</global>
 		<store_view code="default">
 			<price>19.75</price>
@@ -41,6 +43,8 @@
 			<name>Filling in tax form</name>
 			<price>79.95</price>
 			<url_key>filling-in-tax-form</url_key>
+			<special_from_date remove="true" />
+			<custom code="weight">0.9</custom>
 		</global>
 		<category_ids>
 			<item>2</item>

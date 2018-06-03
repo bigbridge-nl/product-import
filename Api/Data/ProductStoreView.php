@@ -325,13 +325,13 @@ class ProductStoreView
      * Set the value of a user defined attribute.
      * Apply trim() to $value before calling this function, if necessary.
      *
-     * @param string $name
+     * @param string $attributeCode
      * @param string|null $value
      */
-    public function setCustomAttribute(string $name, string $value = null)
+    public function setCustomAttribute(string $attributeCode, string $value = null)
     {
         // not trimmed, because it may have textarea as input
-        $this->attributes[trim($name)] = $value;
+        $this->attributes[trim($attributeCode)] = $value;
     }
 
     /**

@@ -35,6 +35,9 @@ class ElementHandler
 
     /** @var string[] */
     protected $path = ['root'];
+    
+    /** @var array */
+    protected $attributes = null;
 
     const TYPE = 'type';
     const SKU = 'sku';
@@ -44,6 +47,10 @@ class ElementHandler
     const ATTR_TAX_CLASS_NAME = "tax_class_name";
     const GENERATE_URL_KEY = "generate_url_key";
     const ATTR_META_KEYWORDS = "meta_keywords";
+
+    const REMOVE = "remove";
+
+    const CUSTOM = "custom";
 
     public function __construct(Importer $importer)
     {
@@ -95,6 +102,9 @@ class ElementHandler
                 $unknown = true;
             }
         } elseif ($scope === "global" || $scope === "store_view") {
+
+            $this->attributes = $attributes;
+
             if (!in_array($element, [
                 ProductStoreView::ATTR_NAME,
                 ProductStoreView::ATTR_PRICE,
@@ -116,9 +126,12 @@ class ElementHandler
                 ProductStoreView::ATTR_NEWS_FROM_DATE,
                 ProductStoreView::ATTR_NEWS_TO_DATE,
                 ProductStoreView::ATTR_MANUFACTURER,
+                ProductStoreView::ATTR_COUNTRY_OF_MANUFACTURE,
+                ProductStoreView::ATTR_COLOR,
                 self::ATTR_META_KEYWORDS,
                 self::ATTR_TAX_CLASS_NAME,
                 self::GENERATE_URL_KEY,
+                self::CUSTOM
             ])) {
                 $unknown = true;
             }
@@ -150,7 +163,8 @@ class ElementHandler
     public function elementEnd($parser, $element)
     {
         $scope = $this->path[count($this->path) - 2];
-
+        $value = $this->characterData;
+        
         if ($scope === "import") {
             if ($element === "product") {
                 $this->importer->importAnyProduct($this->product);
@@ -166,64 +180,76 @@ class ElementHandler
                 $this->product->setWebsitesIds($this->items);
             }
         } elseif ($scope === "global" || $scope === "store_view") {
+
+            if (array_key_exists(self::REMOVE, $this->attributes) && $this->attributes[self::REMOVE] === "true") {
+                $value = null;
+            }
+
             if ($element === ProductStoreView::ATTR_NAME) {
-                $this->storeView->setName($this->characterData);
+                $this->storeView->setName($value);
             } elseif ($element === ProductStoreView::ATTR_PRICE) {
-                $this->storeView->setPrice($this->characterData);
+                $this->storeView->setPrice($value);
             } elseif ($element === ProductStoreView::ATTR_STATUS) {
-                $this->storeView->setStatus($this->characterData);
+                $this->storeView->setStatus($value);
             } elseif ($element === ProductStoreView::ATTR_VISIBILITY) {
-                $this->storeView->setVisibility($this->characterData);
+                $this->storeView->setVisibility($value);
             } elseif ($element === self::ATTR_TAX_CLASS_NAME) {
-                $this->storeView->setTaxClassName($this->characterData);
+                $this->storeView->setTaxClassName($value);
             } elseif ($element === ProductStoreView::ATTR_DESCRIPTION) {
-                $this->storeView->setDescription($this->characterData);
+                $this->storeView->setDescription($value);
             } elseif ($element === ProductStoreView::ATTR_SHORT_DESCRIPTION) {
-                $this->storeView->setShortDescription($this->characterData);
+                $this->storeView->setShortDescription($value);
             } elseif ($element === ProductStoreView::ATTR_URL_KEY) {
-                $this->storeView->setUrlKey($this->characterData);
+                $this->storeView->setUrlKey($value);
             } elseif ($element === self::GENERATE_URL_KEY) {
-                if ($this->characterData === "1") {
+                if ($value === "1") {
                     $this->storeView->generateUrlKey();
                 }
             } elseif ($element === ProductStoreView::ATTR_GIFT_MESSAGE_AVAILABLE) {
-                $this->storeView->setGiftMessageAvailable($this->characterData);
+                $this->storeView->setGiftMessageAvailable($value);
             } elseif ($element === ProductStoreView::ATTR_META_TITLE) {
-                $this->storeView->setMetaTitle($this->characterData);
+                $this->storeView->setMetaTitle($value);
             } elseif ($element === ProductStoreView::ATTR_META_DESCRIPTION) {
-                $this->storeView->setMetaDescription($this->characterData);
+                $this->storeView->setMetaDescription($value);
             } elseif ($element === self::ATTR_META_KEYWORDS) {
-                $this->storeView->setMetaKeywords($this->characterData);
+                $this->storeView->setMetaKeywords($value);
             } elseif ($element === ProductStoreView::ATTR_COST) {
-                $this->storeView->setCost($this->characterData);
+                $this->storeView->setCost($value);
             } elseif ($element === ProductStoreView::ATTR_MSRP) {
-                $this->storeView->setMsrp($this->characterData);
+                $this->storeView->setMsrp($value);
             } elseif ($element === ProductStoreView::ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE) {
-                $this->storeView->setMsrpDisplayActualPriceType($this->characterData);
+                $this->storeView->setMsrpDisplayActualPriceType($value);
             } elseif ($element === ProductStoreView::ATTR_WEIGHT) {
-                $this->storeView->setWeight($this->characterData);
+                $this->storeView->setWeight($value);
             } elseif ($element === ProductStoreView::ATTR_SPECIAL_PRICE) {
-                $this->storeView->setSpecialPrice($this->characterData);
+                $this->storeView->setSpecialPrice($value);
             } elseif ($element === ProductStoreView::ATTR_SPECIAL_FROM_DATE) {
-                $this->storeView->setSpecialFromDate($this->characterData);
+                $this->storeView->setSpecialFromDate($value);
             } elseif ($element === ProductStoreView::ATTR_SPECIAL_TO_DATE) {
-                $this->storeView->setSpecialToDate($this->characterData);
+                $this->storeView->setSpecialToDate($value);
             } elseif ($element === ProductStoreView::ATTR_NEWS_FROM_DATE) {
-                $this->storeView->setNewsFromDate($this->characterData);
+                $this->storeView->setNewsFromDate($value);
             } elseif ($element === ProductStoreView::ATTR_NEWS_TO_DATE) {
-                $this->storeView->setNewsToDate($this->characterData);
+                $this->storeView->setNewsToDate($value);
             } elseif ($element === ProductStoreView::ATTR_MANUFACTURER) {
-                $this->storeView->setManufacturer($this->characterData);
+                $this->storeView->setManufacturer($value);
+            } elseif ($element === ProductStoreView::ATTR_COUNTRY_OF_MANUFACTURE) {
+                $this->storeView->setCountryOfManufacture($value);
+            } elseif ($element === ProductStoreView::ATTR_COLOR) {
+                $this->storeView->setColor($value);
+            } elseif ($element === self::CUSTOM) {
+                $this->setCustomAttribute($parser, $this->attributes, $value);
             }
         } elseif ($scope === "category_global_name" || $scope === "category_ids" || $scope === "website_codes") {
             if ($element === "item") {
-                $this->items[] = $this->characterData;
+                $this->items[] = $value;
             }
         }
 
         array_pop($this->path);
 
         $this->characterData = "";
+        $this->remove = false;
     }
 
     /**
@@ -278,6 +304,22 @@ class ElementHandler
         } else {
             $storeView = $product->storeView($attributes[self::CODE]);
             return $storeView;
+        }
+    }
+
+    /**
+     * @param $parser
+     * @param $attributes
+     * @param $value
+     * @throws Exception
+     */
+    protected function setCustomAttribute($parser, $attributes, $value)
+    {
+        if (!array_key_exists(self::CODE, $attributes)) {
+            throw new Exception("Missing code in line " . xml_get_current_line_number($parser));
+        } else {
+            $attributeCode = $attributes[self::CODE];
+            $this->storeView->setCustomAttribute($attributeCode, $value);
         }
     }
 }
