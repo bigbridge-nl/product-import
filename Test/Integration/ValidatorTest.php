@@ -139,7 +139,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
                 if ($fieldName == 'attribute_set_id') {
                     $product->setAttributeSetId($fieldValue);
                 } elseif ($fieldName == 'category_ids') {
-                    $product->setCategoryIds($fieldValue);
+                    $product->addCategoryIds($fieldValue);
                 } elseif ($fieldName == 'website_ids') {
                     $product->setWebsitesIds($fieldValue);
                 } elseif ($fieldName == 'name') {

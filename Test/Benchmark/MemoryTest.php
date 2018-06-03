@@ -134,7 +134,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
 
             $product = new SimpleProduct($skus[$i]);
             $product->setAttributeSetByName("Default");
-            $product->setCategoriesByGlobalName([$categories[0], $categories[1]]);
+            $product->addCategoriesByGlobalName([$categories[0], $categories[1]]);
             $product->setWebsitesByCode(['base']);
 
             $global = $product->global();
@@ -182,7 +182,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
 
             $product = new SimpleProduct($skus[$i]);
             $product->setAttributeSetByName("Default");
-            $product->setCategoriesByGlobalName([$categories[1], $categories[2]]);
+            $product->addCategoriesByGlobalName([$categories[1], $categories[2]]);
             $product->setWebsitesByCode(['base']);
 
             $global = $product->global();

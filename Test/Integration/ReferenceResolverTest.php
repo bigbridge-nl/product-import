@@ -79,7 +79,7 @@ class ReferenceResolverTest extends \PHPUnit\Framework\TestCase
                 if ($fieldName == 'tax_class_id') {
                     $product->global()->setTaxClassName($fieldValue);
                 } elseif ($fieldName == 'category_ids') {
-                    $product->setCategoriesByGlobalName($fieldValue);
+                    $product->addCategoriesByGlobalName($fieldValue);
                 } elseif ($fieldName == 'attribute_set_id') {
                     $product->setAttributeSetByName($fieldValue);
                 } elseif ($fieldName == 'website_ids') {

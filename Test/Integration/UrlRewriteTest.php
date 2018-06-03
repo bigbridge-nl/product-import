@@ -80,7 +80,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $product = new SimpleProduct($sku1);
 
         $product->setAttributeSetByName("Default");
-        $product->setCategoriesByGlobalName(["Boxes", "Colored Things/Containers/Large"]);
+        $product->addCategoriesByGlobalName(["Boxes", "Colored Things/Containers/Large"]);
 
         $global = $product->global();
         $global->setName("Big Purple Box");
@@ -123,7 +123,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         // create a product just for the category
         $productX = new SimpleProduct('cat-product-import');
         $productX->setAttributeSetByName("Default");
-        $productX->setCategoriesByGlobalName(["Boxes"]);
+        $productX->addCategoriesByGlobalName(["Boxes"]);
         $productX->global()->setName("Category dummy");
         $productX->global()->setPrice("0");
         $importer->importSimpleProduct($productX);
@@ -137,7 +137,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         // product
         $product1 = new SimpleProduct('1-product-import');
         $product1->setAttributeSetByName("Default");
-        $product1->setCategoriesByGlobalName(["Boxes"]);
+        $product1->addCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Turquoise Box product-import");
         $product1->global()->setPrice("2.75");
         $product1->global()->generateUrlKey();
@@ -152,7 +152,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         // another product
         $product3 = new SimpleProduct('2-product-import');
         $product3->setAttributeSetByName("Default");
-        $product3->setCategoriesByGlobalName(["Boxes"]);
+        $product3->addCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Green Box product-import");
         $product3->global()->setPrice("2.65");
         $product3->global()->generateUrlKey();
@@ -217,7 +217,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
 
         // change categories
 
-        $product3->setCategoriesByGlobalName(["Containers"]);
+        $product3->addCategoriesByGlobalName(["Containers"]);
 
         $importer->importSimpleProduct($product1);
         $importer->importSimpleProduct($product3);
@@ -264,7 +264,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         // create a product just for the category
         $productX = new SimpleProduct('cat-product-import');
         $productX->setAttributeSetByName("Default");
-        $productX->setCategoriesByGlobalName(["Boxes"]);
+        $productX->addCategoriesByGlobalName(["Boxes"]);
         $productX->global()->setName("Category dummy");
         $productX->global()->setPrice("0");
         $importer->importSimpleProduct($productX);
@@ -278,7 +278,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         // product
         $product1 = new SimpleProduct('3-product-import');
         $product1->setAttributeSetByName("Default");
-        $product1->setCategoriesByGlobalName(["Boxes"]);
+        $product1->addCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Red Box product-import");
         $product1->global()->setPrice("2.75");
         $product1->global()->generateUrlKey();
@@ -292,7 +292,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         // another product
         $product3 = new SimpleProduct('4-product-import');
         $product3->setAttributeSetByName("Default");
-        $product3->setCategoriesByGlobalName(["Boxes"]);
+        $product3->addCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Yellow Box product-import");
         $product3->global()->setPrice("2.65");
         $product3->global()->generateUrlKey();
@@ -312,7 +312,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
 
         // change categories
 
-        $product3->setCategoriesByGlobalName(["Containers"]);
+        $product3->addCategoriesByGlobalName(["Containers"]);
 
         $importer->importSimpleProduct($product1);
         $importer->importSimpleProduct($product3);

@@ -134,7 +134,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $product = new SimpleProduct($sku1);
         $product->setAttributeSetByName("Default");
-        $product->setCategoryIds([1]);
+        $product->addCategoryIds([1]);
 
         $global = $product->global();
         $global->setName("Big Blue Box");
@@ -146,7 +146,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $product->setAttributeSetByName("Default");
 
         $product->setAttributeSetByName("Default");
-        $product->setCategoryIds([1, 2, 999]);
+        $product->addCategoryIds([1, 2, 999]);
 
         $global = $product->global();
         $global->setName("Big Yellow Box");
@@ -190,7 +190,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $product->setAttributeSetByName("Default");
 
         $product->setAttributeSetByName("Default");
-        $product->setCategoryIds([1, 2]);
+        $product->addCategoryIds([1, 2]);
 
         $global = $product->global();
         $global->setName("Big Blueish Box");
@@ -201,7 +201,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $product = new SimpleProduct($sku2);
         $product->setAttributeSetByName("Default");
-        $product->setCategoryIds([]);
+        $product->addCategoryIds([]);
 
         $global = $product->global();
         $global->setName("Big Yellowish Box");
@@ -328,7 +328,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $product1 = new SimpleProduct(uniqid('bb'));
         $product1->setAttributeSetByName("Default");
-        $product1->setCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $product1->addCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product1->global();
         $global->setName("Pine trees");
         $global->setPrice('399.95');
@@ -337,7 +337,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $product2 = new SimpleProduct(uniqid('bb'));
         $product2->setAttributeSetByName("Default");
-        $product2->setCategoriesByGlobalName(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $product2->addCategoriesByGlobalName(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
         $global = $product2->global();
         $global->setName("Oak trees");
         $global->setPrice('449.95');
@@ -406,7 +406,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $product1 = new SimpleProduct("gummybears");
         $product1->setAttributeSetByName("Default");
-        $product1->setCategoriesByGlobalName(['Gummybears', 'Other Candy', 'German Candy']);
+        $product1->addCategoriesByGlobalName(['Gummybears', 'Other Candy', 'German Candy']);
         $global = $product1->global();
         $global->setName("Gummybears");
         $global->setPrice('1.99');

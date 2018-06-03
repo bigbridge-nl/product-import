@@ -175,7 +175,7 @@ abstract class Product
         return $this->stockItems;
     }
 
-    public function setCategoryIds(array $categoryIds)
+    public function addCategoryIds(array $categoryIds)
     {
         $this->category_ids = $categoryIds;
     }
@@ -191,7 +191,7 @@ abstract class Product
     /**
      * @param array $categoryNames An array of category name paths (i.e. ['Books/Novels', 'Books/Sci-Fi/Foreign'].
      */
-    public function setCategoriesByGlobalName(array $categoryNames)
+    public function addCategoriesByGlobalName(array $categoryNames)
     {
         $this->unresolvedAttributes[self::CATEGORY_IDS] = $categoryNames;
     }

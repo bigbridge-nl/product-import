@@ -158,6 +158,15 @@ An example of the name attribute on the Danish store view 'store_dk':
 
     $product->storeView('store_dk')->setName('Farverige terning');
 
+## Naming
+
+It will help you use this library by understanding how I use certain words:
+
+* by "id" I mean the primary key of a field (an integer)
+* by "code" I mean short non-translatable identifier (a small string)
+* by "set", as in "setSpecialPrice", I mean "replace"
+* by "add", as in "addCategories" I mean "insert or update, but not remove"
+
 ## Empty values and removing attributes
 
 Any simple (scalar) attribute may be removed from the database (on a global level, or per store view) by setting it to null. For example:
@@ -446,7 +455,7 @@ Forbid any kind of type change with
 
 Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials". Separate category names with "/".
 
-    $product->setCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+    $product->addCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
 
 When the category does not exist, it is created. The name is added to the global scope. If you don't want auto-creation, and rather just see an error, use
 
@@ -454,7 +463,7 @@ When the category does not exist, it is created. The name is added to the global
 
 You can also use ids
 
-    $product->setCategoryIds([123, 125]);
+    $product->addCategoryIds([123, 125]);
 
 The importer does not test whether the the ids exist and will throw an database exception if they don't.
 
