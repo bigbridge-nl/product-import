@@ -5,11 +5,11 @@ namespace BigBridge\ProductImport\Model\Reader;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
-use Exception;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Importer;
+use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -28,9 +28,6 @@ class ElementHandler
     /** @var ProductStockItem */
     protected $defaultStockItem = null;
 
-    /** @var string|null */
-    protected $tag = null;
-
     /** @var string  */
     protected $characterData = "";
 
@@ -38,11 +35,11 @@ class ElementHandler
     protected $items = [];
 
     /** @var string[] */
-    protected $path = [self::ROOT];
-    
-    /** @var array */
-    protected $attributes = null;
+    protected $elementPath = [self::ROOT];
 
+    /** @var array[] */
+    protected $attributePath = [[]];
+    
     /**
      * Attributes
      */
@@ -106,9 +103,11 @@ class ElementHandler
     public function elementStart($parser, $element, $attributes)
     {
         $this->characterData = "";
+        $scope = $this->elementPath[count($this->elementPath) - 1];
 
-        $scope = $this->path[count($this->path) - 1];
-        $this->path[] = $element;
+        $this->elementPath[] = $element;
+        $this->attributePath[] = $attributes;
+
         $unknown = false;
 
         if ($scope === self::ROOT) {
@@ -134,8 +133,6 @@ class ElementHandler
                 $unknown = true;
             }
         } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
-
-            $this->attributes = $attributes;
 
             if (!in_array($element, [
                 ProductStoreView::ATTR_NAME,
@@ -207,7 +204,7 @@ class ElementHandler
      */
     public function elementEnd($parser, $element)
     {
-        $scope = $this->path[count($this->path) - 2];
+        $scope = $this->elementPath[count($this->elementPath) - 2];
         $value = $this->characterData;
         
         if ($scope === self::IMPORT) {
@@ -226,7 +223,9 @@ class ElementHandler
             }
         } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
 
-            if (array_key_exists(self::REMOVE, $this->attributes) && $this->attributes[self::REMOVE] === "true") {
+            $attributes = $this->attributePath[count($this->attributePath) - 1];
+
+            if (array_key_exists(self::REMOVE, $attributes) && $attributes[self::REMOVE] === "1") {
                 $value = null;
             }
 
@@ -283,11 +282,11 @@ class ElementHandler
             } elseif ($element === ProductStoreView::ATTR_COLOR) {
                 $this->storeView->setColor($value);
             } elseif ($element === self::SELECT) {
-                $this->setSelectAttribute($parser, $this->attributes, $value);
+                $this->setSelectAttribute($parser, $attributes, $value);
             } elseif ($element === self::MULTI_SELECT) {
-                $this->setMultiSelectAttribute($parser, $this->attributes, $this->items);
+                $this->setMultiSelectAttribute($parser, $attributes, $this->items);
             } elseif ($element === self::CUSTOM) {
-                $this->setCustomAttribute($parser, $this->attributes, $value);
+                $this->setCustomAttribute($parser, $attributes, $value);
             }
         } elseif (in_array($scope, $this->multiAttributes)) {
             if ($element === "item") {
@@ -301,10 +300,10 @@ class ElementHandler
             }
         }
 
-        array_pop($this->path);
+        array_pop($this->elementPath);
+        array_pop($this->attributePath);
 
         $this->characterData = "";
-        $this->remove = false;
     }
 
     /**
