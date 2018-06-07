@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Reader;
 
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use Exception;
 use BigBridge\ProductImport\Api\Data\Product;
@@ -24,6 +25,9 @@ class ElementHandler
     /** @var ProductStoreView */
     protected $storeView = null;
 
+    /** @var ProductStockItem */
+    protected $defaultStockItem = null;
+
     /** @var string|null */
     protected $tag = null;
 
@@ -34,24 +38,41 @@ class ElementHandler
     protected $items = [];
 
     /** @var string[] */
-    protected $path = ['root'];
+    protected $path = [self::ROOT];
     
     /** @var array */
     protected $attributes = null;
 
+    /**
+     * Attributes
+     */
     const TYPE = 'type';
     const SKU = 'sku';
-    const ATTRIBUTE_SET_NAME = "attribute_set_name";
     const CODE = "code";
-
-    const ATTR_TAX_CLASS_NAME = "tax_class_name";
-    const GENERATE_URL_KEY = "generate_url_key";
-    const ATTR_META_KEYWORDS = "meta_keywords";
-
     const REMOVE = "remove";
+    const ATTRIBUTE_SET_NAME = "attribute_set_name";
+
+    /**
+     * Tags
+     */
+    const ROOT = "root";
+    const IMPORT = "import";
+    const PRODUCT = "product";
+    const GLOBAL = "global";
+    const STORE_VIEW = "store_view";
+    const CATEGORY_GLOBAL_NAMES = "category_global_names";
+    const CATEGORY_IDS = "category_ids";
+    const WEBSITE_CODES = "website_codes";
+    const WEBSITE_IDS = "website_ids";
+    const TAX_CLASS_NAME = "tax_class_name";
+    const META_KEYWORDS = "meta_keywords";
+    const GENERATE_URL_KEY = "generate_url_key";
     const CUSTOM = "custom";
     const SELECT = "select";
     const MULTI_SELECT = "multi_select";
+    const STOCK = "stock";
+    const QUANTITY = "quantity";
+    const IS_IN_STOCK = "is_in_stock";
 
     public function __construct(Importer $importer)
     {
@@ -59,18 +80,18 @@ class ElementHandler
     }
 
     protected $multiAttributes = [
-        "category_global_names",
-        "category_ids",
-        "website_codes",
-        "website_ids",
+        self::CATEGORY_GLOBAL_NAMES,
+        self::CATEGORY_IDS,
+        self::WEBSITE_CODES,
+        self::WEBSITE_IDS,
         self::MULTI_SELECT
     ];
 
     protected $globalMultiAttributes = [
-        "category_global_names",
-        "category_ids",
-        "website_codes",
-        "website_ids",
+        self::CATEGORY_GLOBAL_NAMES,
+        self::CATEGORY_IDS,
+        self::WEBSITE_CODES,
+        self::WEBSITE_IDS,
     ];
 
     /**
@@ -90,27 +111,29 @@ class ElementHandler
         $this->path[] = $element;
         $unknown = false;
 
-        if ($scope === "root") {
-            if ($element === "import") {
+        if ($scope === self::ROOT) {
+            if ($element === self::IMPORT) {
             } else {
                 $unknown = true;
             }
-        } elseif ($scope === "import") {
-            if ($element === "product") {
+        } elseif ($scope === self::IMPORT) {
+            if ($element === self::PRODUCT) {
                 $this->product = $this->createProduct($parser, $attributes);
             } else {
                 $unknown = true;
             }
-        } elseif ($scope === "product") {
-            if ($element === "global") {
+        } elseif ($scope === self::PRODUCT) {
+            if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
-            } elseif ($element === "store_view") {
+            } elseif ($element === self::STORE_VIEW) {
                 $this->storeView = $this->createStoreView($parser, $attributes, $this->product);
             } elseif (in_array($element, $this->globalMultiAttributes)) {
+            } elseif ($element === self::STOCK) {
+                $this->defaultStockItem = $this->product->defaultStockItem();
             } else {
                 $unknown = true;
             }
-        } elseif ($scope === "global" || $scope === "store_view") {
+        } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
 
             $this->attributes = $attributes;
 
@@ -139,8 +162,8 @@ class ElementHandler
                 ProductStoreView::ATTR_COLOR,
                 self::SELECT,
                 self::MULTI_SELECT,
-                self::ATTR_META_KEYWORDS,
-                self::ATTR_TAX_CLASS_NAME,
+                self::META_KEYWORDS,
+                self::TAX_CLASS_NAME,
                 self::GENERATE_URL_KEY,
                 self::CUSTOM
             ])) {
@@ -149,6 +172,13 @@ class ElementHandler
         } elseif (in_array($scope, $this->multiAttributes)) {
             if ($element === "item") {
             } else {
+                $unknown = true;
+            }
+        } elseif ($scope === self::STOCK) {
+            if (!in_array($element, [
+                self::QUANTITY,
+                self::IS_IN_STOCK
+            ])) {
                 $unknown = true;
             }
         } else {
@@ -180,21 +210,21 @@ class ElementHandler
         $scope = $this->path[count($this->path) - 2];
         $value = $this->characterData;
         
-        if ($scope === "import") {
-            if ($element === "product") {
+        if ($scope === self::IMPORT) {
+            if ($element === self::PRODUCT) {
                 $this->importer->importAnyProduct($this->product);
             }
-        } elseif ($scope === "product") {
-            if ($element === "category_global_names") {
+        } elseif ($scope === self::PRODUCT) {
+            if ($element === self::CATEGORY_GLOBAL_NAMES) {
                 $this->product->addCategoriesByGlobalName($this->items);
-            } elseif ($element === "category_ids") {
+            } elseif ($element === self::CATEGORY_IDS) {
                 $this->product->addCategoryIds($this->items);
-            } elseif ($element === "website_codes") {
+            } elseif ($element === self::WEBSITE_CODES) {
                 $this->product->setWebsitesByCode($this->items);
-            } elseif ($element === "website_ids") {
+            } elseif ($element === self::WEBSITE_IDS) {
                 $this->product->setWebsitesIds($this->items);
             }
-        } elseif ($scope === "global" || $scope === "store_view") {
+        } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
 
             if (array_key_exists(self::REMOVE, $this->attributes) && $this->attributes[self::REMOVE] === "true") {
                 $value = null;
@@ -208,7 +238,7 @@ class ElementHandler
                 $this->storeView->setStatus($value);
             } elseif ($element === ProductStoreView::ATTR_VISIBILITY) {
                 $this->storeView->setVisibility($value);
-            } elseif ($element === self::ATTR_TAX_CLASS_NAME) {
+            } elseif ($element === self::TAX_CLASS_NAME) {
                 $this->storeView->setTaxClassName($value);
             } elseif ($element === ProductStoreView::ATTR_DESCRIPTION) {
                 $this->storeView->setDescription($value);
@@ -226,7 +256,7 @@ class ElementHandler
                 $this->storeView->setMetaTitle($value);
             } elseif ($element === ProductStoreView::ATTR_META_DESCRIPTION) {
                 $this->storeView->setMetaDescription($value);
-            } elseif ($element === self::ATTR_META_KEYWORDS) {
+            } elseif ($element === self::META_KEYWORDS) {
                 $this->storeView->setMetaKeywords($value);
             } elseif ($element === ProductStoreView::ATTR_COST) {
                 $this->storeView->setCost($value);
@@ -262,6 +292,12 @@ class ElementHandler
         } elseif (in_array($scope, $this->multiAttributes)) {
             if ($element === "item") {
                 $this->items[] = $value;
+            }
+        } elseif ($scope === self::STOCK) {
+            if ($element === self::QUANTITY) {
+                $this->defaultStockItem->setQuantity($value);
+            } elseif ($element === self::IS_IN_STOCK) {
+                $this->defaultStockItem->setIsInStock($value);
             }
         }
 

@@ -37,6 +37,10 @@
 		<website_codes>
 			<item>base</item>
 		</website_codes>
+		<stock>
+			<quantity>12</quantity>
+			<is_in_stock>1</is_in_stock>
+		</stock>
 	</product>
 	<product type="virtual" sku="services-104-ax" attribute_set_name="Default">
 		<global>

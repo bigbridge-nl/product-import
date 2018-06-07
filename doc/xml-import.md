@@ -14,6 +14,8 @@ All options are listed with --help
 
 See doc/example/some-products.xml for an example of the elements used.
 
+Booleans are specified as 0 or 1.
+
 ## Remove an attribute value
 
 To remove the value of a simple attribute, set the xml attribute "remove" to "true". For example
