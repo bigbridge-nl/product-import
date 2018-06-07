@@ -7,6 +7,7 @@ use BigBridge\ProductImport\Api\Importer;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Api\ProductImportLogger;
 use Exception;
+use XMLReader;
 
 /**
  * @author Patrick van Bergen
@@ -44,18 +45,58 @@ class XmlProductReader
 
             $importer = $this->importerFactory->createImporter($config);
 
-            $this->processFile($xmlPath, $importer);
+            // https://www.freeformatter.com/xsd-generator.html
+            // generate xsd from some-products.xml, choose XSD design "Russion Doll"
+            $validationErrors = $this->validateFile($xmlPath);
+
+            foreach ($validationErrors as $error) {
+                $output->error($error);
+            }
+
+            if (empty($validationErrors)) {
+                $this->processFile($xmlPath, $importer);
+            }
 
             $importer->flush();
 
         } catch (\Exception $e) {
-            $output->handleException($e);
+            $output->error($e->getMessage());
         }
 
         $time = date('H:i:s');
         $output->info("{$time} Import end");
         $output->info("{$output->getOkProductCount()} products imported");
         $output->info("{$output->getFailedProductCount()} products failed");
+    }
+
+    /**
+     * See https://medium.com/@Sirolad/validating-xml-against-xsd-in-php-5607f725955a
+     *
+     * @param string $xmlPath
+     * @return array
+     */
+    protected function validateFile(string $xmlPath)
+    {
+        $errors = [];
+
+        $reader = new XMLReader();
+        $reader->open($xmlPath);
+        $reader->setSchema(__DIR__ . '/product-import.xsd');
+        libxml_use_internal_errors(true);
+        while ($reader->read()) {
+            if (!$reader->isValid()) {
+
+                $xmlErrors = libxml_get_errors();
+                foreach ($xmlErrors as $error) {
+                    $errors[] = "Error in line {$error->line}: " . trim($error->message);
+                }
+                libxml_clear_errors();
+            }
+        }
+
+        $reader->close();
+
+        return $errors;
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Api;
 
-use Exception;
 use BigBridge\ProductImport\Api\Data\Product;
 
 /**
@@ -18,9 +17,9 @@ interface ProductImportLogger
     public function productImported(Product $product);
 
     /**
-     * @param Exception $e
+     * @param string $e
      */
-    public function handleException(Exception $e);
+    public function error(string $e);
 
     /**
      * @param string $info

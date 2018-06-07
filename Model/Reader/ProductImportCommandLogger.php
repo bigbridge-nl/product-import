@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Model\Reader;
 
 use BigBridge\ProductImport\Api\Data\Product;
-use Exception;
 use BigBridge\ProductImport\Api\ProductImportLogger;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -22,7 +21,7 @@ class ProductImportCommandLogger implements ProductImportLogger
     protected $okProductCount = 0;
 
     /** @var bool  */
-    protected $exceptionOccurred = false;
+    protected $errorOccurred = false;
 
     public function __construct(OutputInterface $output)
     {
@@ -43,11 +42,11 @@ class ProductImportCommandLogger implements ProductImportLogger
         }
     }
 
-    public function handleException(Exception $e)
+    public function error(string $e)
     {
-        $this->exceptionOccurred = true;
+        $this->errorOccurred = true;
 
-        $this->output->writeln("<error>" . $e->getMessage() . "</error>");
+        $this->output->writeln("<error>" . $e . "</error>");
     }
 
     public function info(string $info)
@@ -74,8 +73,8 @@ class ProductImportCommandLogger implements ProductImportLogger
     /**
      * @return bool
      */
-    public function hasExceptionOccurred(): bool
+    public function hasErrorOccurred(): bool
     {
-        return $this->exceptionOccurred;
+        return $this->errorOccurred;
     }
 }

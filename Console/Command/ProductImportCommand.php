@@ -78,7 +78,7 @@ class ProductImportCommand extends Command
         // import!
         $this->xmlProductReader->import($fileName, $config, $logger);
 
-        if (!$logger->hasExceptionOccurred() && $logger->getFailedProductCount() === 0) {
+        if (!$logger->hasErrorOccurred() && $logger->getFailedProductCount() === 0) {
             return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
         } else {
             return \Magento\Framework\Console\Cli::RETURN_FAILURE;
