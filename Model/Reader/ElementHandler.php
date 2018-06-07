@@ -49,13 +49,29 @@ class ElementHandler
     const ATTR_META_KEYWORDS = "meta_keywords";
 
     const REMOVE = "remove";
-
     const CUSTOM = "custom";
+    const SELECT = "select";
+    const MULTI_SELECT = "multi_select";
 
     public function __construct(Importer $importer)
     {
         $this->importer = $importer;
     }
+
+    protected $multiAttributes = [
+        "category_global_names",
+        "category_ids",
+        "website_codes",
+        "website_ids",
+        self::MULTI_SELECT
+    ];
+
+    protected $globalMultiAttributes = [
+        "category_global_names",
+        "category_ids",
+        "website_codes",
+        "website_ids",
+    ];
 
     /**
      * Check if element exists in current scope.
@@ -90,14 +106,7 @@ class ElementHandler
                 $this->storeView = $this->product->global();
             } elseif ($element === "store_view") {
                 $this->storeView = $this->createStoreView($parser, $attributes, $this->product);
-            } elseif ($element === "category_global_names") {
-                $this->items = [];
-            } elseif ($element === "category_ids") {
-                $this->items = [];
-            } elseif ($element === "website_codes") {
-                $this->items = [];
-            } elseif ($element === "website_ids") {
-                $this->items = [];
+            } elseif (in_array($element, $this->globalMultiAttributes)) {
             } else {
                 $unknown = true;
             }
@@ -128,6 +137,8 @@ class ElementHandler
                 ProductStoreView::ATTR_MANUFACTURER,
                 ProductStoreView::ATTR_COUNTRY_OF_MANUFACTURE,
                 ProductStoreView::ATTR_COLOR,
+                self::SELECT,
+                self::MULTI_SELECT,
                 self::ATTR_META_KEYWORDS,
                 self::ATTR_TAX_CLASS_NAME,
                 self::GENERATE_URL_KEY,
@@ -135,7 +146,7 @@ class ElementHandler
             ])) {
                 $unknown = true;
             }
-        } elseif ($scope === "category_global_names" || $scope === "category_ids" || $scope === "website_codes" || $scope === "website_ids") {
+        } elseif (in_array($scope, $this->multiAttributes)) {
             if ($element === "item") {
             } else {
                 $unknown = true;
@@ -147,6 +158,10 @@ class ElementHandler
         if ($unknown) {
             $line = xml_get_current_line_number($parser);
             throw new Exception("Unknown element '{$element}' in line {$line}");
+        }
+
+        if (in_array($element, $this->multiAttributes)) {
+            $this->items = [];
         }
     }
 
@@ -237,10 +252,14 @@ class ElementHandler
                 $this->storeView->setCountryOfManufacture($value);
             } elseif ($element === ProductStoreView::ATTR_COLOR) {
                 $this->storeView->setColor($value);
+            } elseif ($element === self::SELECT) {
+                $this->setSelectAttribute($parser, $this->attributes, $value);
+            } elseif ($element === self::MULTI_SELECT) {
+                $this->setMultiSelectAttribute($parser, $this->attributes, $this->items);
             } elseif ($element === self::CUSTOM) {
                 $this->setCustomAttribute($parser, $this->attributes, $value);
             }
-        } elseif ($scope === "category_global_name" || $scope === "category_ids" || $scope === "website_codes") {
+        } elseif (in_array($scope, $this->multiAttributes)) {
             if ($element === "item") {
                 $this->items[] = $value;
             }
@@ -320,6 +339,38 @@ class ElementHandler
         } else {
             $attributeCode = $attributes[self::CODE];
             $this->storeView->setCustomAttribute($attributeCode, $value);
+        }
+    }
+
+    /**
+     * @param $parser
+     * @param $attributes
+     * @param $value
+     * @throws Exception
+     */
+    protected function setSelectAttribute($parser, $attributes, $value)
+    {
+        if (!array_key_exists(self::CODE, $attributes)) {
+            throw new Exception("Missing code in line " . xml_get_current_line_number($parser));
+        } else {
+            $attributeCode = $attributes[self::CODE];
+            $this->storeView->setSelectAttribute($attributeCode, $value);
+        }
+    }
+
+    /**
+     * @param $parser
+     * @param $attributes
+     * @param $value
+     * @throws Exception
+     */
+    protected function setMultiSelectAttribute($parser, $attributes, array $values)
+    {
+        if (!array_key_exists(self::CODE, $attributes)) {
+            throw new Exception("Missing code in line " . xml_get_current_line_number($parser));
+        } else {
+            $attributeCode = $attributes[self::CODE];
+            $this->storeView->setMultipleSelectAttribute($attributeCode, $values);
         }
     }
 }

@@ -45,6 +45,11 @@
 			<url_key>filling-in-tax-form</url_key>
 			<special_from_date remove="true" />
 			<custom code="weight">0.9</custom>
+			<select code="color">Blue</select>
+			<multi_select code="color_group">
+				<item>Red</item>
+				<item>Blue</item>
+			</multi_select>
 		</global>
 		<category_ids>
 			<item>2</item>

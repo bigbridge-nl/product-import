@@ -92,11 +92,9 @@ class CategoryImporter
                 if (!$autoCreateCategories) {
                     $error = "category not found: " . $categoryName;
                     break;
+                } else {
+                    $categoryId = $this->importChildCategory($idPath, $categoryName);
                 }
-            }
-
-            if ($categoryId === null) {
-                $categoryId = $this->importChildCategory($idPath, $categoryName);
             }
 
             $idPath[] = $categoryId;
@@ -199,7 +197,7 @@ class CategoryImporter
         $existingUrlKeys = $this->metaData->getExistingCategoryUrlKeys($parentId, 0);
 
         $urlKey = $this->nameToUrlKeyConverter->createUniqueUrlKeyFromName($categoryName, $existingUrlKeys);
-        if (count($idPath) == 1) {
+        if (count($idPath) <= 2) {
             $urlPath = $urlKey;
         } else {
             $parentUrlPath = $this->getParentUrlPath($parentId);
@@ -246,7 +244,7 @@ class CategoryImporter
         return $categoryId;
     }
 
-    protected function getParentUrlPath(int $parentId): string
+    protected function getParentUrlPath(int $parentId)
     {
         $attributeId = $this->metaData->categoryAttributeMap['url_path'];
 

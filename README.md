@@ -118,12 +118,17 @@ These attributes are given with example values. You have to change them.
     $product->setCategoriesByGlobalName(['Default Category/Desks', 'Default Category/Chairs', 'Default Category/Boards']);
     $product->setWebsitesByCode(['base']);
 
+    $global = $product->global();
     $global->setName("My product");
     $global->setPrice("9.95");
     $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
     $global->setStatus(ProductStoreView::STATUS_DISABLED);
     $global->setTaxClassName("Taxable Goods");
     $global->generateUrlKey();
+
+    $stockItem = $product->defaultStockItem();
+    $stockItem->setQuantity('100');
+    $stockItem->setIsInStock(true);
 
 ## Standard attributes
 

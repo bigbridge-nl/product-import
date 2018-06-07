@@ -932,7 +932,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer->importSimpleProduct($product1);
         $importer->flush();
 
-        $this->assertEquals(["option white not found in attribute color", "option(s) red, blue not found in attribute color_group_product_importer"], $product1->getErrors());
+        $this->assertEquals(["option 'white' not found in attribute 'color'", "option(s) red, blue not found in attribute color_group_product_importer"], $product1->getErrors());
 
         // auto create option
 
