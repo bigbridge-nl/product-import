@@ -69,7 +69,6 @@ class ElementHandler
     const MULTI_SELECT = "multi_select";
     const STOCK = "stock";
     const QUANTITY = "quantity";
-    const IS_IN_STOCK = "is_in_stock";
 
     public function __construct(Importer $importer)
     {
@@ -126,6 +125,10 @@ class ElementHandler
         }
     }
 
+    /**
+     * @param $parser
+     * @param $data
+     */
     public function characterData($parser, $data)
     {
         $this->characterData .= $data;
@@ -229,8 +232,48 @@ class ElementHandler
         } elseif ($scope === self::STOCK) {
             if ($element === self::QUANTITY) {
                 $this->defaultStockItem->setQuantity($value);
-            } elseif ($element === self::IS_IN_STOCK) {
+            } elseif ($element === ProductStockItem::IS_IN_STOCK) {
                 $this->defaultStockItem->setIsInStock($value);
+            } elseif ($element === ProductStockItem::MIN_QTY) {
+                $this->defaultStockItem->setMinimumQuantity($value);
+            } elseif ($element === ProductStockItem::NOTIFY_STOCK_QTY) {
+                $this->defaultStockItem->setNotifyStockQuantity($value);
+            } elseif ($element === ProductStockItem::MIN_SALE_QTY) {
+                $this->defaultStockItem->setMinimumSaleQuantity($value);
+            } elseif ($element === ProductStockItem::MAX_SALE_QTY) {
+                $this->defaultStockItem->setMaximumSaleQuantity($value);
+            } elseif ($element === ProductStockItem::QTY_INCREMENTS) {
+                $this->defaultStockItem->setQuantityIncrements($value);
+            } elseif ($element === ProductStockItem::LOW_STOCK_DATE) {
+                $this->defaultStockItem->setLowStockDate($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_MIN_QTY) {
+                $this->defaultStockItem->setUseConfigMinimumQuantity($value);
+            } elseif ($element === ProductStockItem::IS_QTY_DECIMAL) {
+                $this->defaultStockItem->setIsQuantityDecimal($value);
+            } elseif ($element === ProductStockItem::BACKORDERS) {
+                $this->defaultStockItem->setBackorders($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_BACKORDERS) {
+                $this->defaultStockItem->setUseConfigBackorders($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_MIN_SALE_QTY) {
+                $this->defaultStockItem->setUseConfigMinimumSaleQuantity($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_MAX_SALE_QTY) {
+                $this->defaultStockItem->setUseConfigMaximumSaleQuantity($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_NOTIFY_STOCK_QTY) {
+                $this->defaultStockItem->setUseConfigNotifyStockQuantity($value);
+            } elseif ($element === ProductStockItem::MANAGE_STOCK) {
+                $this->defaultStockItem->setManageStock($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_MANAGE_STOCK) {
+                $this->defaultStockItem->setUseConfigManageStock($value);
+            } elseif ($element === ProductStockItem::STOCK_STATUS_CHANGED_AUTO) {
+                $this->defaultStockItem->setStockStatusChangedAuto($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_QTY_INCREMENTS) {
+                $this->defaultStockItem->setUseConfigQuantityIncrements($value);
+            } elseif ($element === ProductStockItem::USE_CONFIG_ENABLE_QTY_INC) {
+                $this->defaultStockItem->setUseConfigEnableQuantityIncrements($value);
+            } elseif ($element === ProductStockItem::ENABLE_QTY_INCREMENTS) {
+                $this->defaultStockItem->setEnableQuantityIncrements($value);
+            } elseif ($element === ProductStockItem::IS_DECIMAL_DIVIDED) {
+                $this->defaultStockItem->setIsDecimalDivided($value);
             }
         }
 
@@ -330,7 +373,7 @@ class ElementHandler
     /**
      * @param $parser
      * @param $attributes
-     * @param $value
+     * @param array $values
      * @throws Exception
      */
     protected function setMultiSelectAttribute($parser, $attributes, array $values)
