@@ -68,26 +68,26 @@ class ElementHandler
     const SELECT = "select";
     const MULTI_SELECT = "multi_select";
     const STOCK = "stock";
-
-    public function __construct(Importer $importer)
-    {
-        $this->importer = $importer;
-    }
+    const ITEM = "item";
+    const CROSS_SELL_PRODUCT_SKUS = "cross_sell_product_skus";
+    const UP_SELL_PRODUCT_SKUS = "up_sell_product_skus";
+    const RELATED_PRODUCT_SKUS = "related_product_skus";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
         self::CATEGORY_IDS,
         self::WEBSITE_CODES,
         self::WEBSITE_IDS,
-        self::MULTI_SELECT
+        self::MULTI_SELECT,
+        self::CROSS_SELL_PRODUCT_SKUS,
+        self::UP_SELL_PRODUCT_SKUS,
+        self::RELATED_PRODUCT_SKUS,
     ];
 
-    protected $globalMultiAttributes = [
-        self::CATEGORY_GLOBAL_NAMES,
-        self::CATEGORY_IDS,
-        self::WEBSITE_CODES,
-        self::WEBSITE_IDS,
-    ];
+    public function __construct(Importer $importer)
+    {
+        $this->importer = $importer;
+    }
 
     /**
      * Initialize data structures.
@@ -156,6 +156,12 @@ class ElementHandler
                 $this->product->setWebsitesByCode($this->items);
             } elseif ($element === self::WEBSITE_IDS) {
                 $this->product->setWebsitesIds($this->items);
+            } elseif ($element === self::CROSS_SELL_PRODUCT_SKUS) {
+                $this->product->setCrossSellProductSkus($this->items);
+            } elseif ($element === self::UP_SELL_PRODUCT_SKUS) {
+                $this->product->setUpSellProductSkus($this->items);
+            } elseif ($element === self::RELATED_PRODUCT_SKUS) {
+                $this->product->setRelatedProductSkus($this->items);
             }
         } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
 
@@ -225,7 +231,7 @@ class ElementHandler
                 $this->setCustomAttribute($parser, $attributes, $value);
             }
         } elseif (in_array($scope, $this->multiAttributes)) {
-            if ($element === "item") {
+            if ($element === self::ITEM) {
                 $this->items[] = $value;
             }
         } elseif ($scope === self::STOCK) {

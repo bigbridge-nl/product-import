@@ -82,5 +82,17 @@
 		<website_ids>
 			<item>1</item>
 		</website_ids>
+		<cross_sell_products>
+			<item>services-104-b1</item>
+			<item>services-104-b2</item>
+		</cross_sell_products>
+		<up_sell_products>
+			<item>services-104-c1</item>
+			<item>services-104-c2</item>
+		</up_sell_products>
+		<related_products>
+			<item>services-104-e1</item>
+			<item>services-104-e2</item>
+		</related_products>
 	</product>
 </import>
