@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <import>
+	<!-- A simple product with some basic attributes -->
 	<product type="simple" sku="skinny-jeans-811" attribute_set_name="Default">
 		<global>
 			<name>Skinny Jeans 811</name>
@@ -38,8 +39,28 @@
 			<item>base</item>
 		</website_codes>
 		<stock>
-			<quantity>12</quantity>
+			<qty>12</qty>
 			<is_in_stock>1</is_in_stock>
+			<min_qty>5.0</min_qty>
+			<notify_stock_qty>10.0</notify_stock_qty>
+			<min_sale_qty>5.0</min_sale_qty>
+			<max_sale_qty>500.0</max_sale_qty>
+			<qty_increments>5.0</qty_increments>
+			<low_stock_date>2018-06-08</low_stock_date>
+			<use_config_min_qty>0</use_config_min_qty>
+			<is_qty_decimal>1</is_qty_decimal>
+			<backorders>1</backorders>
+			<use_config_backorders>0</use_config_backorders>
+			<use_config_min_sale_qty>1</use_config_min_sale_qty>
+			<use_config_max_sale_qty>0</use_config_max_sale_qty>
+			<use_config_notify_stock_qty>0</use_config_notify_stock_qty>
+			<manage_stock>1</manage_stock>
+			<use_config_manage_stock>0</use_config_manage_stock>
+			<stock_status_changed_auto>1</stock_status_changed_auto>
+			<use_config_qty_increments>1</use_config_qty_increments>
+			<use_config_enable_qty_inc>1</use_config_enable_qty_inc>
+			<enable_qty_increments>0</enable_qty_increments>
+			<is_decimal_divided>1</is_decimal_divided>
 		</stock>
 	</product>
 	<product type="virtual" sku="services-104-ax" attribute_set_name="Default">
