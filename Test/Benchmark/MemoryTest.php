@@ -161,7 +161,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
             $global->setMsrpDisplayActualPriceType(ProductStoreView::MSRP_USE_CONFIG);
 
             $stock = $product->defaultStockItem();
-            $stock->setQuantity(100);
+            $stock->setQty(100);
             $stock->setIsInStock(true);
 
             $importer->importSimpleProduct($product);
@@ -206,7 +206,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
             $global->generateUrlKey();
 
             $stock = $product->defaultStockItem();
-            $stock->setQuantity(98);
+            $stock->setQty(98);
             $stock->setIsInStock(true);
 
             $importer->importSimpleProduct($product);

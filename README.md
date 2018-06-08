@@ -127,7 +127,7 @@ These attributes are given with example values. You have to change them.
     $global->generateUrlKey();
 
     $stockItem = $product->defaultStockItem();
-    $stockItem->setQuantity('100');
+    $stockItem->setQty('100');
     $stockItem->setIsInStock(true);
 
 ## Standard attributes
@@ -267,7 +267,7 @@ Inventory information (stock) is kept in a separate table. Currently Magento sup
 
 Stock information can be entered this way:
 
-    $product->defaultStockItem()->setQuantity('100');
+    $product->defaultStockItem()->setQty('100');
     $product->defaultStockItem()->setIsInStock(true);
 
 The other 20 stock info attributes are available as well.

@@ -625,7 +625,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setPrice('5.95');
 
         $stock = $product1->defaultStockItem();
-        $stock->setQuantity('11');
+        $stock->setQty('11');
 
         $importer->importSimpleProduct($product1);
         $importer->flush();
@@ -644,7 +644,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setPrice('2.95');
 
         $stock = $product2->defaultStockItem();
-        $stock->setQuantity('1.5');
+        $stock->setQty('1.5');
         $stock->setMinimumQuantity('1');
         $stock->setUseConfigMinimumQuantity(false);
         $stock->setIsQuantityDecimal(true);
@@ -704,7 +704,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $product3 = new SimpleProduct("woodstock-product-import");
         $product3->setAttributeSetByName("Default");
         $stock = $product3->defaultStockItem();
-        $stock->setQuantity('1.4');
+        $stock->setQty('1.4');
 
         $importer->importSimpleProduct($product3);
         $importer->flush();

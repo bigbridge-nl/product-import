@@ -39,7 +39,7 @@ class ProductStockItem
 
     protected $attributes = [];
 
-    public function setQuantity(string $quantity)
+    public function setQty(string $quantity)
     {
         $this->attributes[self::QTY] = Decimal::format($quantity);
     }

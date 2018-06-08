@@ -250,7 +250,7 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
             foreach ($test[0] as $name => $value) {
                 if ($name == ProductStockItem::QTY) {
-                    $stock->setQuantity($value);
+                    $stock->setQty($value);
                 } elseif ($name == ProductStockItem::LOW_STOCK_DATE) {
                     $stock->setLowStockDate($value);
                 }

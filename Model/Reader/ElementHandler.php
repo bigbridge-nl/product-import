@@ -68,7 +68,6 @@ class ElementHandler
     const SELECT = "select";
     const MULTI_SELECT = "multi_select";
     const STOCK = "stock";
-    const QUANTITY = "quantity";
 
     public function __construct(Importer $importer)
     {
@@ -230,8 +229,8 @@ class ElementHandler
                 $this->items[] = $value;
             }
         } elseif ($scope === self::STOCK) {
-            if ($element === self::QUANTITY) {
-                $this->defaultStockItem->setQuantity($value);
+            if ($element === ProductStockItem::QTY) {
+                $this->defaultStockItem->setQty($value);
             } elseif ($element === ProductStockItem::IS_IN_STOCK) {
                 $this->defaultStockItem->setIsInStock($value);
             } elseif ($element === ProductStockItem::MIN_QTY) {
