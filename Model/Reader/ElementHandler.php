@@ -92,7 +92,6 @@ class ElementHandler
     ];
 
     /**
-     * Check if element exists in current scope.
      * Initialize data structures.
      *
      * @param $parser
@@ -108,83 +107,18 @@ class ElementHandler
         $this->elementPath[] = $element;
         $this->attributePath[] = $attributes;
 
-        $unknown = false;
-
-        if ($scope === self::ROOT) {
-            if ($element === self::IMPORT) {
-            } else {
-                $unknown = true;
-            }
-        } elseif ($scope === self::IMPORT) {
+        if ($scope === self::IMPORT) {
             if ($element === self::PRODUCT) {
                 $this->product = $this->createProduct($parser, $attributes);
-            } else {
-                $unknown = true;
             }
         } elseif ($scope === self::PRODUCT) {
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
                 $this->storeView = $this->createStoreView($parser, $attributes, $this->product);
-            } elseif (in_array($element, $this->globalMultiAttributes)) {
             } elseif ($element === self::STOCK) {
                 $this->defaultStockItem = $this->product->defaultStockItem();
-            } else {
-                $unknown = true;
             }
-        } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
-
-            if (!in_array($element, [
-                ProductStoreView::ATTR_NAME,
-                ProductStoreView::ATTR_PRICE,
-                ProductStoreView::ATTR_GIFT_MESSAGE_AVAILABLE,
-                ProductStoreView::ATTR_STATUS,
-                ProductStoreView::ATTR_VISIBILITY,
-                ProductStoreView::ATTR_DESCRIPTION,
-                ProductStoreView::ATTR_SHORT_DESCRIPTION,
-                ProductStoreView::ATTR_META_TITLE,
-                ProductStoreView::ATTR_META_DESCRIPTION,
-                ProductStoreView::ATTR_COST,
-                ProductStoreView::ATTR_MSRP,
-                ProductStoreView::ATTR_MSRP_DISPLAY_ACTUAL_PRICE_TYPE,
-                ProductStoreView::ATTR_URL_KEY,
-                ProductStoreView::ATTR_WEIGHT,
-                ProductStoreView::ATTR_SPECIAL_PRICE,
-                ProductStoreView::ATTR_SPECIAL_FROM_DATE,
-                ProductStoreView::ATTR_SPECIAL_TO_DATE,
-                ProductStoreView::ATTR_NEWS_FROM_DATE,
-                ProductStoreView::ATTR_NEWS_TO_DATE,
-                ProductStoreView::ATTR_MANUFACTURER,
-                ProductStoreView::ATTR_COUNTRY_OF_MANUFACTURE,
-                ProductStoreView::ATTR_COLOR,
-                self::SELECT,
-                self::MULTI_SELECT,
-                self::META_KEYWORDS,
-                self::TAX_CLASS_NAME,
-                self::GENERATE_URL_KEY,
-                self::CUSTOM
-            ])) {
-                $unknown = true;
-            }
-        } elseif (in_array($scope, $this->multiAttributes)) {
-            if ($element === "item") {
-            } else {
-                $unknown = true;
-            }
-        } elseif ($scope === self::STOCK) {
-            if (!in_array($element, [
-                self::QUANTITY,
-                self::IS_IN_STOCK
-            ])) {
-                $unknown = true;
-            }
-        } else {
-            $unknown = true;
-        }
-
-        if ($unknown) {
-            $line = xml_get_current_line_number($parser);
-            throw new Exception("Unknown element '{$element}' in line {$line}");
         }
 
         if (in_array($element, $this->multiAttributes)) {

@@ -45,10 +45,8 @@ class XmlProductReader
 
             $importer = $this->importerFactory->createImporter($config);
 
-            // https://www.freeformatter.com/xsd-generator.html
-            // generate xsd from some-products.xml, choose XSD design "Russion Doll"
-//            $validationErrors = $this->validateFile($xmlPath);
-
+            $validationErrors = $this->validateXmlFile($xmlPath);
+#todo: remove
 $validationErrors = [];
 
             foreach ($validationErrors as $error) {
@@ -77,7 +75,7 @@ $validationErrors = [];
      * @param string $xmlPath
      * @return array
      */
-    protected function validateFile(string $xmlPath)
+    protected function validateXmlFile(string $xmlPath)
     {
         libxml_use_internal_errors(true);
 
@@ -86,6 +84,7 @@ $validationErrors = [];
         $reader->setSchema(__DIR__ . '/product-import.xsd');
 
         // read all nodes
+        /** @noinspection PhpStatementHasEmptyBodyInspection */
         while ($reader->read()) {
         }
 

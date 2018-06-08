@@ -94,7 +94,7 @@ The library provides these possibilities for url_keys:
 * based on sku
 * based on sku (on conflict, add a serial number).
 
-### Names and ids
+## Names and ids
 
 For imports and exports it is customary to use human readable names for attributes. "visibility" for example is exported by Magento's exporter as "Catalog, Search". The internal value is 4.
 Somehow the names should be converted into id's. Quickly, easily and robustly, if possible. These types of names exist:
@@ -107,11 +107,11 @@ For option values, the admin value is preferred.
 
 I chose for the option to have the developer explicitly call convertNameToId() before adding a value to a product, since the conversion is only done when needed, it is explicit, and can be easily preprocessed by the importer.
 
-### Batch processing
+## Batch processing
 
 I only used batch processing because it is much faster than individual queries per product. For the developer, it is less comfortable, because the importer's process() function doesn't reply with the import results immediately. The resultCallbacks callback array is the only way the developer can get error feedback. It is not ideal, but I could think of no better method.
 
-### Placeholders
+## Placeholders
 
 In order to import a product that has links to other products that have not yet been imported, the library creates placeholders for these linked products. A placeholder is just a product with some required properties that will be replaced by the real product once it comes in. It is a VirtualProduct because it needs to be converted to anything else.
 
@@ -127,11 +127,11 @@ In case of 2 the library needs to replace the placeholder with the linked produc
 
 Only if 1 and 2 do not apply, a placeholder is created. It can be replaced in a later batch, case 3. The library needs to be able to recognize it as a placeholder, in case its type needs to be converted. This conversion must always be allowed. This is already the case for virtual products, but could have been forbidden by a config setting. This is checked in ProductTypeChanger.
 
-### Memory use
+## Memory use
 
 I try to keep the memory footprint of the importer small and of constant size. The number of products to be imported should not be limited by the importer. All product and feedback data is released once a batch is processed.
 
-### Maximum query size
+## Maximum query size
 
 This library creates long queries. This reduces the overhead of query transportation, interpretation and execution considerably.
 
@@ -160,13 +160,13 @@ $magnitude is the maximum size of each insert in kB (in order of magnitude, as a
 
 This allows me to use the allowed packet size efficiently while not straining the library developer much.
 
-### Nice to know
+## Nice to know
 
 * When concatenating sets of values "(a, b, c)" "(d, e, f)" etc, implode(", ", $values) is faster than just string concatenation, even though an array of 1000 items needs to be created
 
 * I used to distinguish between inserted products and updated products. But a quick test showed that the speed difference between inserts and inserts-as-update is very small (a few percents) and it reduces complexity quite a bit if you don't need to consider inserts anymore.
 
-### The slowness of the unique url_key constraint
+## The slowness of the unique url_key constraint
 
 To check the uniqueness of url_keys, it is necessary to query catalog_product_entity_varchar for specific values. Magento has no key for it.
 
@@ -176,26 +176,26 @@ Magmi encountered this problem, in a more severe form, because products are hand
 
 https://sourceforge.net/p/magmi/patches/23/
 
-### Images
+## Images
 
 All images are places in a temporary location in the validation phase, before being processed  further. This ensures that all images are valid when being processed.
 Make sure to remove all images from their temporary location later.
 
-### Configurable variants
+## Configurable variants
 
 Configurable variants are specified as complete products, not just sku's, even though that would be more flexible. The variant products are used in the validation process.
 
-### Default values
+## Default values
 
 I came back from the idea of setting default values (attribute_set_id, visibility, etc) for new products. They slow the importer down a bit, they make the system a little less flexible , and they provide a false sense of security. I want to make the user think at least a few minutes about these values. She will have to do this eventually anyway. And they were some attributes that I could not settle on to make them defaults (url_key, website_ids).
 
-### Removing attribute values
+## Removing attribute values
 
 Magento 2 usually sets eav attribute values to null, when an attribute is cleared in the admin panel. This is database pollution, and I will not contribute to it, if not necessary.
 
 Note that when a product is first created, these attributes are not set to null. New custom attributes also won't have a value of null in the database. So I think it is fair to assume that Magento's queries won't break if no null value is present, but the attribute value is just missing.
 
-### Query speed
+## Query speed
 
 I use queries with many inserts / updates at once, because this is faster than individual queries.
 
@@ -260,3 +260,11 @@ Collecting values like this proved fastest
     $values[] = $variant->id;
 
 It is faster than array_push() and much faster than array_merge().
+
+## XML import
+
+I used [XSD/XML Schema generator](https://www.freeformatter.com/xsd-generator.html) to generate the XSD. I adapted it later to fill in the requiredness of attributes.
+
+* generate xsd from some-products.xml, choose XSD design "Russion Doll"
+
+You will probably wonder why I used such an old PHP XML parser (xml_parse). That's because I wanted to importer to handle very large files, and claim a fixed, small amount of memory, and I wanted it to print line numbers in the error message.
