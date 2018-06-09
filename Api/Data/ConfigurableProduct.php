@@ -12,8 +12,11 @@ class ConfigurableProduct extends Product
     /** @var array  */
     protected $superAttributeCodes = [];
 
-    /** @var SimpleProduct[] */
-    protected $variants = [];
+    /** @var string[] */
+    protected $variantSkus = [];
+
+    /** @var int[] */
+    protected $variantIds = [];
 
     /**
      * @param string $sku
@@ -25,7 +28,7 @@ class ConfigurableProduct extends Product
         parent::__construct($sku);
 
         $this->superAttributeCodes = $superAttributeCodes;
-        $this->variants = $variants;
+        $this->variantSkus = $variants;
     }
 
     public function getType()
@@ -44,11 +47,11 @@ class ConfigurableProduct extends Product
     }
 
     /**
-     * @return SimpleProduct[]
+     * @return string[]
      */
-    public function getVariants()
+    public function getVariantSkus()
     {
-        return $this->variants;
+        return $this->variantSkus;
     }
 
     /**
@@ -57,5 +60,21 @@ class ConfigurableProduct extends Product
     public function getSuperAttributeCodes()
     {
         return $this->superAttributeCodes;
+    }
+
+    /**
+     * @return int[]
+     */
+    public function getVariantIds(): array
+    {
+        return $this->variantIds;
+    }
+
+    /**
+     * @param int[] $variantIds
+     */
+    public function setVariantIds(array $variantIds)
+    {
+        $this->variantIds = $variantIds;
     }
 }

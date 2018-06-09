@@ -769,6 +769,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setPrice('99.00');
         $global->setCustomAttribute('color', 1);
         $global->setCustomAttribute('manufacturer', 1);
+        $importer->importSimpleProduct($simple1);
 
         $simple2 = new SimpleProduct('bricks-red-scotts-product-import');
         $simple2->setAttributeSetByName("Default");
@@ -777,6 +778,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setPrice('89.00');
         $global->setCustomAttribute('color', 2);
         $global->setCustomAttribute('manufacturer', 1);
+        $importer->importSimpleProduct($simple2);
 
         $simple3 = new SimpleProduct('bricks-orange-scotts-product-import');
         $simple3->setAttributeSetByName("Default");
@@ -785,11 +787,12 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setPrice('90.00');
         $global->setCustomAttribute('color', 2);
         $global->setCustomAttribute('manufacturer', 2);
+        $importer->importSimpleProduct($simple3);
 
         $configurable = new ConfigurableProduct('scotts-product-import', ['color', 'manufacturer'], [
-            $simple1,
-            $simple2,
-            $simple3
+            'bricks-red-redweiser-product-import',
+            'bricks-red-scotts-product-import',
+            'bricks-orange-scotts-product-import'
         ]);
         $configurable->setAttributeSetByName("Default");
         $global = $configurable->global();
@@ -838,8 +841,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // change super attribute and simples
 
         $configurable = new ConfigurableProduct('scotts-product-import', ['color'], [
-            $simple1,
-            $simple2
+            'bricks-red-redweiser-product-import',
+            'bricks-red-scotts-product-import',
         ]);
         $configurable->setAttributeSetByName("Default");
         $global = $configurable->global();

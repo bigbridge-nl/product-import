@@ -1,0 +1,54 @@
+<?php
+
+namespace BigBridge\ProductImport\Model\Resource\Resolver;
+
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
+use Exception;
+
+/**
+ * @author Patrick van Bergen
+ */
+class ConfigurableProductReferenceResolver
+{
+    /** @var ProductEntityStorage */
+    protected $productEntityStorage;
+
+    public function __construct(
+        ProductEntityStorage $productEntityStorage)
+    {
+        $this->productEntityStorage = $productEntityStorage;
+    }
+
+    /**
+     * @param ConfigurableProduct[] $products
+     * @throws \Exception
+     */
+    public function resolveIds(array $products)
+    {
+        $variantSkus = [];
+        foreach ($products as $product) {
+            $variantSkus = array_merge($variantSkus, $product->getVariantSkus());
+        }
+
+        // query all ids at once
+        $sku2id = $this->productEntityStorage->getExistingSkus($variantSkus);
+
+        // assign these ids
+        foreach ($products as $product) {
+
+            $variantIds = [];
+
+            foreach ($product->getVariantSkus() as $sku) {
+
+                if (array_key_exists($sku, $sku2id)) {
+                    $variantIds[] = $sku2id[$sku];
+                } else {
+                    throw new Exception("Configurable product variant with sku " . $sku . " should have been created before, but it cannot be found");
+                }
+            }
+
+            $product->setVariantIds($variantIds);
+        }
+    }
+}

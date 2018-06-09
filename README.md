@@ -311,17 +311,15 @@ The user of the library must make sure the placeholder products will be imported
 
 Configurable products are defined as the configuration of configuration attributes and variants
 
-Given some simple products (SimpleProduct, here: $simple1, $simple2, $simple3), they can be combined to form a configurable with:
-
     $configurable = new ConfigurableProduct('scottish-table', ['color', 'weight'], [
-        $simple1,
-        $simple2,
-        $simple3
+        "scottish-table-red-2st",
+        "scottish-table-brown-2st",
+        "scottish-table-brown-3st",
     ]);
 
 Here the configurable with sku 'scottish-table' defines two "super attributes": color and weight. The attributes must have global scope and input type Dropdown.
 
-The three simples each need to have a unique combination of attribute values for these super attributes.
+The three variants each need to have a unique combination of attribute values for these super attributes.
 
 Importing is done with
 

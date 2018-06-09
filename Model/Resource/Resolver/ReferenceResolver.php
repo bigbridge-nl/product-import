@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
@@ -45,6 +46,9 @@ class ReferenceResolver
     /** @var GroupedProductReferenceResolver */
     protected $groupedProductReferenceResolver;
 
+    /** @var ConfigurableProductReferenceResolver */
+    protected $configurableProductReferenceResolver;
+
     public function __construct(
         CategoryImporter $categoryImporter,
         TaxClassResolver $taxClassResolver,
@@ -55,7 +59,8 @@ class ReferenceResolver
         LinkedProductReferenceResolver $linkedProductReferenceResolver,
         TierPriceResolver $tierPriceResolver,
         BundleProductReferenceResolver $bundleProductReferenceResolver,
-        GroupedProductReferenceResolver $groupedProductReferenceResolver
+        GroupedProductReferenceResolver $groupedProductReferenceResolver,
+        ConfigurableProductReferenceResolver $configurableProductReferenceResolver
     )
     {
         $this->categoryImporter = $categoryImporter;
@@ -68,6 +73,7 @@ class ReferenceResolver
         $this->tierPriceResolver = $tierPriceResolver;
         $this->bundleProductReferenceResolver = $bundleProductReferenceResolver;
         $this->groupedProductReferenceResolver = $groupedProductReferenceResolver;
+        $this->configurableProductReferenceResolver = $configurableProductReferenceResolver;
     }
 
     /**
@@ -196,6 +202,10 @@ class ReferenceResolver
 
         if (!empty($productsByType[GroupedProduct::TYPE_GROUPED])) {
             $this->groupedProductReferenceResolver->resolveIds($productsByType[GroupedProduct::TYPE_GROUPED]);
+        }
+
+        if (!empty($productsByType[ConfigurableProduct::TYPE_CONFIGURABLE])) {
+            $this->configurableProductReferenceResolver->resolveIds($productsByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
         }
     }
 }

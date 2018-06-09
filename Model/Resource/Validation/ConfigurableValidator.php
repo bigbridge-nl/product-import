@@ -27,7 +27,6 @@ class ConfigurableValidator
     {
         $this->validateSuperAttributes($product);
         $this->validateVariants($product);
-        $this->validateVariantSuperAttributeValues($product);
     }
 
     /**
@@ -61,56 +60,8 @@ class ConfigurableValidator
      */
     protected function validateVariants(ConfigurableProduct $product)
     {
-        if (empty($product->getVariants())) {
+        if (empty($product->getVariantSkus())) {
             $product->addError("Specify at least 1 variant");
-        }
-
-        $skus = [];
-
-        foreach ($product->getVariants() as $variant) {
-            if (!$variant->isOk()) {
-                $skus[] = $variant->getSku();
-            }
-        }
-
-        if (!empty($skus)) {
-            $product->addError("These variants have errors: " . implode(', ', $skus));
-        }
-    }
-
-    /**
-     * @param ConfigurableProduct $product
-     */
-    protected function validateVariantSuperAttributeValues(ConfigurableProduct $product)
-    {
-        $configurations = [];
-
-        foreach ($product->getVariants() as $variant) {
-
-            $config = '';
-            $sep = "";
-
-            foreach ($product->getSuperAttributeCodes() as $superAttributeCode) {
-
-                $value = $variant->global()->getAttribute($superAttributeCode);
-
-                if ($value === null) {
-                    $product->addError("Variant " . $variant->getSku() . " does not have a value for " . $superAttributeCode);
-                } else {
-                    $config .= $sep . $value;
-                    $sep = "-";
-                }
-            }
-
-            if ($config !== "") {
-                if (array_key_exists($config, $configurations)) {
-                    $product->addError("The variants " . $variant->getSku() . ' and ' . $configurations[$config]->getSku() .
-                        " have the same combination of super attributes: " . $config);
-                } else {
-                    $configurations[$config] = $variant;
-                }
-            }
-
         }
     }
 }

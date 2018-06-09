@@ -110,10 +110,8 @@ class Importer
      */
     public function importConfigurableProduct(ConfigurableProduct $product)
     {
-        // variants must be done first, their id is needed by the configurable
-        foreach ($product->getVariants() as $variant) {
-            $this->importAnyProduct($variant);
-        }
+        // create placeholders for non-existing variants
+        $this->createConfigurableProductPlaceholders($product);
 
         // create placeholders for non-existing linked products
         $this->createLinkedProductPlaceholders($product);
@@ -244,6 +242,16 @@ class Importer
                 $this->importGroupedProduct($product);
                 break;
         }
+    }
+
+    /**
+     * @param ConfigurableProduct $product
+     */
+    protected function createConfigurableProductPlaceholders(Product $product)
+    {
+        $variantSkus = $product->getVariantSkus();
+
+        $this->createPlaceholders($variantSkus);
     }
 
     /**

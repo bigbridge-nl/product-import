@@ -82,9 +82,9 @@ class ConfigurableStorage
         $values = [];
 
         foreach ($products as $product) {
-            foreach ($product->getVariants() as $variant) {
-                $values[] = $variant->id;
-                $values[] = $product->id;
+            foreach ($product->getVariantIds() as $variantId) {
+                $values[] = $variantId;
+                $values[] = $product;
             }
         }
 
@@ -99,7 +99,7 @@ class ConfigurableStorage
         $values = [];
 
         foreach ($products as $product) {
-            foreach ($product->getVariants() as $variant) {
+            foreach ($product->getVariantSkus() as $variant) {
                 $values[] = $product->id;
                 $values[] = $variant->id;
             }
@@ -148,10 +148,7 @@ class ConfigurableStorage
 
             $configurableId = $configurable->id;
 
-            $currentChildIds = [];
-            foreach ($configurable->getVariants() as $variant) {
-                $currentChildIds[] = $variant->id;
-            }
+            $currentChildIds = $configurable->getVariantIds();
 
             $added = array_diff($currentChildIds, $existingVariantIds[$configurableId]);
             $removed = array_diff($existingVariantIds[$configurableId], $currentChildIds);
@@ -210,10 +207,7 @@ class ConfigurableStorage
 
             $configurableId = $configurable->id;
 
-            $currentChildIds = [];
-            foreach ($configurable->getVariants() as $variant) {
-                $currentChildIds[] = $variant->id;
-            }
+            $currentChildIds = $configurable->getVariantIds();
 
             $added = array_diff($currentChildIds, $existingVariantIds[$configurableId]);
             $removed = array_diff($existingVariantIds[$configurableId], $currentChildIds);

@@ -181,10 +181,6 @@ https://sourceforge.net/p/magmi/patches/23/
 All images are places in a temporary location in the validation phase, before being processed  further. This ensures that all images are valid when being processed.
 Make sure to remove all images from their temporary location later.
 
-## Configurable variants
-
-Configurable variants are specified as complete products, not just sku's, even though that would be more flexible. The variant products are used in the validation process.
-
 ## Default values
 
 I came back from the idea of setting default values (attribute_set_id, visibility, etc) for new products. They slow the importer down a bit, they make the system a little less flexible , and they provide a false sense of security. I want to make the user think at least a few minutes about these values. She will have to do this eventually anyway. And they were some attributes that I could not settle on to make them defaults (url_key, website_ids).
