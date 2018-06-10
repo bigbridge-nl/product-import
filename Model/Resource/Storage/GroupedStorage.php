@@ -33,8 +33,16 @@ class GroupedStorage
      */
     public function performTypeSpecificStorage(array $products)
     {
-        $this->removeLinkedProducts($products);
-        $this->insertLinkedProducts($products);
+        $affectedProducts = [];
+
+        foreach ($products as $product) {
+            if ($product->getMembers() !== null) {
+                $affectedProducts[] = $product;
+            }
+        }
+
+        $this->removeLinkedProducts($affectedProducts);
+        $this->insertLinkedProducts($affectedProducts);
     }
 
     /**

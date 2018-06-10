@@ -26,9 +26,17 @@ class GroupedProductReferenceResolver
      */
     public function resolveIds(array $products)
     {
+        /** @var GroupedProduct[] $affectedProducts */
+        $affectedProducts = [];
+        foreach ($products as $product) {
+            if ($product->getMembers() !== null) {
+                $affectedProducts[] = $product;
+            }
+        }
+
         // collect all member skus
         $memberSkus = [];
-        foreach ($products as $product) {
+        foreach ($affectedProducts as $product) {
             foreach ($product->getMembers() as $member) {
                 $memberSkus[] = $member->getSku();
             }
@@ -40,7 +48,7 @@ class GroupedProductReferenceResolver
         $sku2id = $this->productEntityStorage->getExistingSkus($memberSkus);
 
         // assign these ids
-        foreach ($products as $product) {
+        foreach ($affectedProducts as $product) {
             foreach ($product->getMembers() as $member) {
 
                 $sku = $member->getSku();

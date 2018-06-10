@@ -13,18 +13,6 @@ class GroupedProduct extends Product
     protected $members;
 
     /**
-     * GroupedProduct constructor.
-     * @param string $sku
-     * @param GroupedProductMember[] $members
-     */
-    public function __construct(string $sku, array $members)
-    {
-        parent::__construct($sku);
-
-        $this->members = $members;
-    }
-
-    /**
      * Used in catalog_product_entity table
      * @return string
      */
@@ -34,9 +22,17 @@ class GroupedProduct extends Product
     }
 
     /**
+     * @param GroupedProductMember[] $members
+     */
+    public function setMembers(array $members)
+    {
+        $this->members = $members;
+    }
+
+    /**
      * @return GroupedProductMember[]
      */
-    public function getMembers(): array
+    public function getMembers()
     {
         return $this->members;
     }

@@ -27,13 +27,21 @@ class ConfigurableStorage
     }
 
     /**
-     * @param ConfigurableProduct[] $updateProducts
+     * @param ConfigurableProduct[] $products
      */
-    public function performTypeSpecificStorage(array $updateProducts)
+    public function performTypeSpecificStorage(array $products)
     {
-        $this->updateSuperAttributes($updateProducts);
-        $this->updateLinks($updateProducts);
-        $this->updateRelations($updateProducts);
+        $affectedProducts = [];
+
+        foreach ($products as $product) {
+            if ($product->getVariantSkus() !== null) {
+                $affectedProducts[] = $product;
+            }
+        }
+
+        $this->updateSuperAttributes($affectedProducts);
+        $this->updateLinks($affectedProducts);
+        $this->updateRelations($affectedProducts);
     }
 
     /**
@@ -72,40 +80,6 @@ class ConfigurableStorage
                 ]);
             }
         }
-    }
-
-    /**
-     * @param ConfigurableProduct[] $products
-     */
-    protected function createLinks(array $products)
-    {
-        $values = [];
-
-        foreach ($products as $product) {
-            foreach ($product->getVariantIds() as $variantId) {
-                $values[] = $variantId;
-                $values[] = $product;
-            }
-        }
-
-        $this->db->insertMultiple($this->metaData->superLinkTable, ['product_id', 'parent_id'], $values, Magento2DbConnection::_1_KB);
-    }
-
-    /**
-     * @param ConfigurableProduct[] $products
-     */
-    protected function createRelations(array $products)
-    {
-        $values = [];
-
-        foreach ($products as $product) {
-            foreach ($product->getVariantSkus() as $variant) {
-                $values[] = $product->id;
-                $values[] = $variant->id;
-            }
-        }
-
-        $this->db->insertMultiple($this->metaData->relationTable, ['parent_id', 'child_id'], $values, Magento2DbConnection::_1_KB);
     }
 
     /**

@@ -26,8 +26,15 @@ class ConfigurableProductReferenceResolver
      */
     public function resolveIds(array $products)
     {
-        $variantSkus = [];
+        $affectedProducts = [];
         foreach ($products as $product) {
+            if ($product->getVariantSkus() !== null) {
+                $affectedProducts[] = $product;
+            }
+        }
+
+        $variantSkus = [];
+        foreach ($affectedProducts as $product) {
             $variantSkus = array_merge($variantSkus, $product->getVariantSkus());
         }
 
@@ -35,7 +42,7 @@ class ConfigurableProductReferenceResolver
         $sku2id = $this->productEntityStorage->getExistingSkus($variantSkus);
 
         // assign these ids
-        foreach ($products as $product) {
+        foreach ($affectedProducts as $product) {
 
             $variantIds = [];
 

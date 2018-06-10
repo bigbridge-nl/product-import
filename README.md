@@ -311,7 +311,8 @@ The user of the library must make sure the placeholder products will be imported
 
 Configurable products are defined as the configuration of configuration attributes and variants
 
-    $configurable = new ConfigurableProduct('scottish-table', ['color', 'weight'], [
+    $configurable = new ConfigurableProduct('scottish-table');
+    $configurable->setVariants(['color', 'weight'], [
         "scottish-table-red-2st",
         "scottish-table-brown-2st",
         "scottish-table-brown-3st",
@@ -329,7 +330,8 @@ Importing is done with
 
 Grouped products are defined as an array of group members. Each member has an sku and a default quantity. The order of the members in the array is used for the position.
 
-    $group = new GroupedProduct("bucky-cutlery", [
+    $group = new GroupedProduct("bucky-cutlery")
+    $group->setMembers([
         new GroupedProductMember("bucky-knife", 5),
         new GroupedProductMember("bucky-fork", 5),
         new GroupedProductMember("bucky-spoon", 5),

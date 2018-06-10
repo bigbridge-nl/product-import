@@ -789,7 +789,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setCustomAttribute('manufacturer', 2);
         $importer->importSimpleProduct($simple3);
 
-        $configurable = new ConfigurableProduct('scotts-product-import', ['color', 'manufacturer'], [
+        $configurable = new ConfigurableProduct('scotts-product-import');
+        $configurable->setVariants(['color', 'manufacturer'], [
             'bricks-red-redweiser-product-import',
             'bricks-red-scotts-product-import',
             'bricks-orange-scotts-product-import'
@@ -838,9 +839,21 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals([], $errors);
         $this->checkConfigurableData($configurable->id, $attributeData, $labelData, $linkData, $relationData);
 
+        // import without variants: variants should not be removed
+
+        $configurable = new ConfigurableProduct('scotts-product-import');
+        $global->setPrice('91.00');
+
+        $importer->importConfigurableProduct($configurable);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+        $this->checkConfigurableData($configurable->id, $attributeData, $labelData, $linkData, $relationData);
+
         // change super attribute and simples
 
-        $configurable = new ConfigurableProduct('scotts-product-import', ['color'], [
+        $configurable = new ConfigurableProduct('scotts-product-import');
+        $configurable->setVariants(['color'], [
             'bricks-red-redweiser-product-import',
             'bricks-red-scotts-product-import',
         ]);
@@ -1157,7 +1170,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $global->setName("Fork");
         $global->setPrice('2.25');
 
-        $group = new GroupedProduct("cutlery-product-import", [
+        $group = new GroupedProduct("cutlery-product-import");
+        $group->setMembers([
             new GroupedProductMember("knife-product-import", 2),
             new GroupedProductMember("fork-product-import", 3),
             // this one does not exist yet
@@ -1195,7 +1209,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         // change the order of the member products and the default quantities, remove 1, add 1
 
-        $group = new GroupedProduct("cutlery-product-import", [
+        $group = new GroupedProduct("cutlery-product-import");
+        $group->setMembers([
             new GroupedProductMember("teaspoon-product-import", 3),
             new GroupedProductMember("knife-product-import", 2.5),
             new GroupedProductMember("spoon-product-import", 4),
@@ -1223,10 +1238,25 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals($memberData, $this->getMemberData($group));
 
+        // member not set: they should not be removed
+
+        $group = new GroupedProduct("cutlery-product-import");
+
+        $importer->importGroupedProduct($group);
+        $importer->flush();
+
+        $memberData = [
+            [$group->id, $simple4->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, "3.0000"],
+            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, "2.5000"],
+            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, "4.0000"],
+        ];
+
+        $this->assertEquals($memberData, $this->getMemberData($group));
+
         // no members: they should be removed
 
-        $group = new GroupedProduct("cutlery-product-import", [
-        ]);
+        $group = new GroupedProduct("cutlery-product-import");
+        $group->setMembers([]);
 
         $importer->importGroupedProduct($group);
         $importer->flush();

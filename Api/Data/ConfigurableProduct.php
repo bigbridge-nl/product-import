@@ -10,23 +10,20 @@ class ConfigurableProduct extends Product
     const TYPE_CONFIGURABLE = 'configurable';
 
     /** @var array  */
-    protected $superAttributeCodes = [];
+    protected $superAttributeCodes = null;
 
     /** @var string[] */
-    protected $variantSkus = [];
+    protected $variantSkus = null;
 
     /** @var int[] */
-    protected $variantIds = [];
+    protected $variantIds = null;
 
     /**
-     * @param string $sku
      * @param array $superAttributeCodes
      * @param array $variants
      */
-    public function __construct(string $sku, array $superAttributeCodes, array $variants)
+    public function setVariants(array $superAttributeCodes, array $variants)
     {
-        parent::__construct($sku);
-
         $this->superAttributeCodes = $superAttributeCodes;
         $this->variantSkus = $variants;
     }
@@ -47,7 +44,7 @@ class ConfigurableProduct extends Product
     }
 
     /**
-     * @return string[]
+     * @return string[]|null
      */
     public function getVariantSkus()
     {
@@ -55,7 +52,7 @@ class ConfigurableProduct extends Product
     }
 
     /**
-     * @return string[]
+     * @return string[]|null
      */
     public function getSuperAttributeCodes()
     {
@@ -63,7 +60,7 @@ class ConfigurableProduct extends Product
     }
 
     /**
-     * @return int[]
+     * @return int[]|null
      */
     public function getVariantIds(): array
     {

@@ -245,16 +245,6 @@ class Importer
     }
 
     /**
-     * @param ConfigurableProduct $product
-     */
-    protected function createConfigurableProductPlaceholders(Product $product)
-    {
-        $variantSkus = $product->getVariantSkus();
-
-        $this->createPlaceholders($variantSkus);
-    }
-
-    /**
      * @param Product $product
      */
     protected function createLinkedProductPlaceholders(Product $product)
@@ -276,13 +266,25 @@ class Importer
     }
 
     /**
+     * @param ConfigurableProduct $product
+     */
+    protected function createConfigurableProductPlaceholders(Product $product)
+    {
+        if (($variantSkus = $product->getVariantSkus()) !== null) {
+            $this->createPlaceholders($variantSkus);
+        }
+    }
+
+    /**
      * @param GroupedProduct $product
      */
     protected function createGroupedProductPlaceholders(GroupedProduct $product)
     {
         $memberSkus = [];
-        foreach ($product->getMembers() as $member) {
-            $memberSkus[] = $member->getSku();
+        if (($members = $product->getMembers()) !== null) {
+            foreach ($product->getMembers() as $member) {
+                $memberSkus[] = $member->getSku();
+            }
         }
 
         $this->createPlaceholders($memberSkus);

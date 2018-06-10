@@ -1,5 +1,7 @@
 # Todo
 
+* change of products type is actually performed in dry-run
+
 # Validation
 
 * check attribute value uniqueness
