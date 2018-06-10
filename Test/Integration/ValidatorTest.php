@@ -278,7 +278,7 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
         $this->assertSame([
             "Specify at least 1 super attribute",
-            "Specify at least 1 variant"
+            "Specify the variants with setVariants()"
         ], $configurable->getErrors());
     }
 

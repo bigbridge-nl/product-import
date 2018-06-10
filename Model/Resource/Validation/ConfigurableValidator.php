@@ -65,8 +65,8 @@ class ConfigurableValidator
      */
     protected function validateVariants(ConfigurableProduct $product)
     {
-        if ($product->id === null && empty($product->getVariantSkus())) {
-            $product->addError("Specify at least 1 variant");
+        if ($product->id === null && $product->getVariantSkus() === null) {
+            $product->addError("Specify the variants with setVariants()");
         }
     }
 }

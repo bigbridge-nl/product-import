@@ -33,6 +33,9 @@ class Validator
     /** @var ConfigurableValidator */
     protected $configurableValidator;
 
+    /** @var GroupedValidator */
+    protected $groupedValidator;
+
     /** @var DownloadableValidator */
     protected $downloadableValidator;
 
@@ -41,13 +44,15 @@ class Validator
         ImageValidator $imageValidator,
         CustomOptionsValidator $customOptionsValidator,
         ConfigurableValidator $configurableValidator,
-        DownloadableValidator $downloadableValidator)
+        DownloadableValidator $downloadableValidator,
+        GroupedValidator $groupedValidator)
     {
         $this->metaData = $metaData;
         $this->imageValidator = $imageValidator;
         $this->customOptionsValidator = $customOptionsValidator;
         $this->configurableValidator = $configurableValidator;
         $this->downloadableValidator = $downloadableValidator;
+        $this->groupedValidator = $groupedValidator;
     }
 
     /**
@@ -210,6 +215,9 @@ class Validator
                 /** @var ConfigurableProduct $product */
                 $this->configurableValidator->validate($product);
                 break;
+            case GroupedProduct::TYPE_GROUPED:
+                /** @var GroupedProduct $product */
+                $this->groupedValidator->validate($product);
         }
     }
 }
