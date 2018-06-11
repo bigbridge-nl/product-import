@@ -19,13 +19,19 @@ class ConfigurableProduct extends Product
     protected $variantIds = null;
 
     /**
-     * @param array $superAttributeCodes
      * @param array $variants
      */
-    public function setVariants(array $superAttributeCodes, array $variants)
+    public function setVariantSkus(array $variants)
+    {
+        $this->variantSkus = $variants;
+    }
+
+    /**
+     * @param array $superAttributeCodes
+     */
+    public function setSuperAttributeCodes(array $superAttributeCodes)
     {
         $this->superAttributeCodes = $superAttributeCodes;
-        $this->variantSkus = $variants;
     }
 
     public function getType()

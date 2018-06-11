@@ -34,10 +34,10 @@ class ConfigurableValidator
      */
     protected function validateSuperAttributes(ConfigurableProduct $product)
     {
-        if (empty($product->getSuperAttributeCodes())) {
+        if ($product->getSuperAttributeCodes() === null) {
 
             if ($product->id === null) {
-                $product->addError("Specify at least 1 super attribute");
+                $product->addError("specify the super attributes with setSuperAttrbuteCodes()");
                 return;
             }
 
@@ -46,14 +46,14 @@ class ConfigurableValidator
             foreach ($product->getSuperAttributeCodes() as $superAttributeCode) {
 
                 if (!array_key_exists($superAttributeCode, $this->metaData->productEavAttributeInfo)) {
-                    $product->addError("Attribute does not exist: " . $superAttributeCode);
+                    $product->addError("attribute does not exist: " . $superAttributeCode);
                 } else {
                     $info = $this->metaData->productEavAttributeInfo[$superAttributeCode];
                     if ($info->scope !== EavAttributeInfo::SCOPE_GLOBAL) {
-                        $product->addError("Attribute does not have global scope: " . $superAttributeCode);
+                        $product->addError("attribute does not have global scope: " . $superAttributeCode);
                     }
                     if ($info->frontendInput !== EavAttributeInfo::FRONTEND_SELECT) {
-                        $product->addError("Attribute input type is not dropdown: " . $superAttributeCode);
+                        $product->addError("attribute input type is not dropdown: " . $superAttributeCode);
                     }
                 }
             }
@@ -66,7 +66,7 @@ class ConfigurableValidator
     protected function validateVariants(ConfigurableProduct $product)
     {
         if ($product->id === null && $product->getVariantSkus() === null) {
-            $product->addError("Specify the variants with setVariants()");
+            $product->addError("specify the variants with setVariantSkus()");
         }
     }
 }

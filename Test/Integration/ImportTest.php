@@ -790,7 +790,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         $importer->importSimpleProduct($simple3);
 
         $configurable = new ConfigurableProduct('scotts-product-import');
-        $configurable->setVariants(['color', 'manufacturer'], [
+        $configurable->setSuperAttributeCodes(['color', 'manufacturer']);
+        $configurable->setVariantSkus([
             'bricks-red-redweiser-product-import',
             'bricks-red-scotts-product-import',
             'bricks-orange-scotts-product-import'
@@ -853,7 +854,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // change super attribute and simples
 
         $configurable = new ConfigurableProduct('scotts-product-import');
-        $configurable->setVariants(['color'], [
+        $configurable->setSuperAttributeCodes(['color']);
+        $configurable->setVariantSkus([
             'bricks-red-redweiser-product-import',
             'bricks-red-scotts-product-import',
         ]);

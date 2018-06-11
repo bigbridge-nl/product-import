@@ -31,17 +31,21 @@ class ConfigurableStorage
      */
     public function performTypeSpecificStorage(array $products)
     {
-        $affectedProducts = [];
+        $affectedVariantProducts = [];
+        $affectedSuperAttributeProducts = [];
 
         foreach ($products as $product) {
             if ($product->getVariantSkus() !== null) {
-                $affectedProducts[] = $product;
+                $affectedVariantProducts[] = $product;
+            }
+            if ($product->getSuperAttributeCodes() !== null) {
+                $affectedSuperAttributeProducts[] = $product;
             }
         }
 
-        $this->updateSuperAttributes($affectedProducts);
-        $this->updateLinks($affectedProducts);
-        $this->updateRelations($affectedProducts);
+        $this->updateSuperAttributes($affectedVariantProducts);
+        $this->updateLinks($affectedSuperAttributeProducts);
+        $this->updateRelations($affectedSuperAttributeProducts);
     }
 
     /**

@@ -312,7 +312,8 @@ The user of the library must make sure the placeholder products will be imported
 Configurable products are defined as the configuration of configuration attributes and variants
 
     $configurable = new ConfigurableProduct('scottish-table');
-    $configurable->setVariants(['color', 'weight'], [
+    $configurable->setSuperAttributeCodes(['color', 'weight']);
+    $configurable->setVariantSkus([
         "scottish-table-red-2st",
         "scottish-table-brown-2st",
         "scottish-table-brown-3st",

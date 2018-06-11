@@ -268,7 +268,7 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
         // ----
 
-        $configurable = new ConfigurableProduct('scotts-product-import', [], []);
+        $configurable = new ConfigurableProduct('scotts-product-import');
         $configurable->setAttributeSetId(4);
         $global = $configurable->global();
         $global->setName("Bricks");
@@ -277,8 +277,8 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
         $configurableValidator->validate($configurable);
 
         $this->assertSame([
-            "Specify at least 1 super attribute",
-            "Specify the variants with setVariants()"
+            "specify the super attributes with setSuperAttrbuteCodes()",
+            "specify the variants with setVariantSkus()"
         ], $configurable->getErrors());
     }
 
