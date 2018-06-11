@@ -2,7 +2,11 @@
 
 namespace BigBridge\ProductImport\Model\Reader;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProductMember;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use BigBridge\ProductImport\Api\Data\Product;
@@ -39,6 +43,9 @@ class ElementHandler
 
     /** @var array[] */
     protected $attributePath = [[]];
+
+    /** @var GroupedProductMember[] */
+    protected $members = null;
     
     /**
      * Attributes
@@ -72,6 +79,8 @@ class ElementHandler
     const CROSS_SELL_PRODUCT_SKUS = "cross_sell_product_skus";
     const UP_SELL_PRODUCT_SKUS = "up_sell_product_skus";
     const RELATED_PRODUCT_SKUS = "related_product_skus";
+    const SUPER_ATTRIBUTE_CODES = "super_attribute_codes";
+    const VARIANT_SKUS = "variant_skus";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -82,7 +91,22 @@ class ElementHandler
         self::CROSS_SELL_PRODUCT_SKUS,
         self::UP_SELL_PRODUCT_SKUS,
         self::RELATED_PRODUCT_SKUS,
+        self::SUPER_ATTRIBUTE_CODES,
+        self::VARIANT_SKUS,
     ];
+
+    protected $productTypes = [
+        SimpleProduct::TYPE_SIMPLE,
+        VirtualProduct::TYPE_VIRTUAL,
+        DownloadableProduct::TYPE_DOWNLOADABLE,
+        ConfigurableProduct::TYPE_CONFIGURABLE,
+        BundleProduct::TYPE_BUNDLE,
+        GroupedProduct::TYPE_GROUPED,
+    ];
+
+    const MEMBERS = "members";
+
+    const MEMBER = "member";
 
     public function __construct(Importer $importer)
     {
@@ -106,16 +130,22 @@ class ElementHandler
         $this->attributePath[] = $attributes;
 
         if ($scope === self::IMPORT) {
-            if ($element === self::PRODUCT) {
-                $this->product = $this->createProduct($parser, $attributes);
+            if (in_array($element, $this->productTypes)) {
+                $this->product = $this->createProduct($parser, $element, $attributes);
             }
-        } elseif ($scope === self::PRODUCT) {
+        } elseif (in_array($scope, $this->productTypes)) {
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
                 $this->storeView = $this->createStoreView($parser, $attributes, $this->product);
             } elseif ($element === self::STOCK) {
                 $this->defaultStockItem = $this->product->defaultStockItem();
+            }
+
+            if ($scope === GroupedProduct::TYPE_GROUPED) {
+                if ($element === self::MEMBERS) {
+                    $this->members = [];
+                }
             }
         }
 
@@ -140,15 +170,19 @@ class ElementHandler
      */
     public function elementEnd($parser, $element)
     {
-        $scope = $this->elementPath[count($this->elementPath) - 2];
+        $depth = count($this->elementPath);
+        $scope = $this->elementPath[$depth - 2];
         $value = $this->characterData;
-        
+        $attributes = $this->attributePath[$depth - 1];
+
         if ($scope === self::IMPORT) {
-            if ($element === self::PRODUCT) {
+            if (in_array($element, $this->productTypes)) {
                 $this->importer->importAnyProduct($this->product);
             }
-        } elseif ($scope === self::PRODUCT) {
-            if ($element === self::CATEGORY_GLOBAL_NAMES) {
+        } elseif (in_array($scope, $this->productTypes)) {
+            if ($element === self::ATTRIBUTE_SET_NAME) {
+                $this->product->setAttributeSetByName($value);
+            } elseif ($element === self::CATEGORY_GLOBAL_NAMES) {
                 $this->product->addCategoriesByGlobalName($this->items);
             } elseif ($element === self::CATEGORY_IDS) {
                 $this->product->addCategoryIds($this->items);
@@ -163,9 +197,26 @@ class ElementHandler
             } elseif ($element === self::RELATED_PRODUCT_SKUS) {
                 $this->product->setRelatedProductSkus($this->items);
             }
-        } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
 
-            $attributes = $this->attributePath[count($this->attributePath) - 1];
+            if ($scope === ConfigurableProduct::TYPE_CONFIGURABLE) {
+                /** @var ConfigurableProduct $configurable */
+                $configurable = $this->product;
+
+                if ($element === self::SUPER_ATTRIBUTE_CODES) {
+                    $configurable->setSuperAttributeCodes($this->items);
+                } elseif ($element === self::VARIANT_SKUS) {
+                    $configurable->setVariantSkus($this->items);
+                }
+            } elseif ($scope === GroupedProduct::TYPE_GROUPED) {
+                /** @var GroupedProduct $grouped */
+                $grouped = $this->product;
+
+                if ($element === self::MEMBERS) {
+                    $grouped->setMembers($this->members);
+                }
+            }
+
+        } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
 
             if (array_key_exists(self::REMOVE, $attributes) && $attributes[self::REMOVE] === "1") {
                 $value = null;
@@ -280,6 +331,11 @@ class ElementHandler
             } elseif ($element === ProductStockItem::IS_DECIMAL_DIVIDED) {
                 $this->defaultStockItem->setIsDecimalDivided($value);
             }
+        } elseif ($scope === self::MEMBERS) {
+
+            if ($element === self::MEMBER) {
+                $this->members[] = new GroupedProductMember($attributes['sku'], $attributes['default_quantity']);
+            }
         }
 
         array_pop($this->elementPath);
@@ -290,19 +346,17 @@ class ElementHandler
 
     /**
      * @param $parser
+     * @param string $type
      * @param array $attributes
      * @return Product
      * @throws Exception
      */
-    protected function createProduct($parser, array $attributes)
+    protected function createProduct($parser, string $type, array $attributes)
     {
-        if (!isset($attributes[self::TYPE])) {
-            throw new Exception("Missing type in line " . xml_get_current_line_number($parser));
-        } elseif (!isset($attributes[self::SKU])) {
+        if (!isset($attributes[self::SKU])) {
             throw new Exception("Missing sku in line " . xml_get_current_line_number($parser));
         } else {
 
-            $type = $attributes[self::TYPE];
             $sku = $attributes[self::SKU];
 
             if ($type === SimpleProduct::TYPE_SIMPLE) {
@@ -311,16 +365,17 @@ class ElementHandler
                 $product = new VirtualProduct($sku);
             } elseif ($type === DownloadableProduct::TYPE_DOWNLOADABLE) {
                 $product = new VirtualProduct($sku);
+            } elseif ($type === ConfigurableProduct::TYPE_CONFIGURABLE) {
+                $product = new ConfigurableProduct($sku);
+            } elseif ($type === BundleProduct::TYPE_BUNDLE) {
+                $product = new BundleProduct($sku);
+            } elseif ($type === GroupedProduct::TYPE_GROUPED) {
+                $product = new GroupedProduct($sku);
             } else {
                 throw new Exception("Unknown type: " . $attributes[self::TYPE] . " in line " . xml_get_current_line_number($parser));
             }
 
             $product->lineNumber = xml_get_current_line_number($parser);
-
-            if (isset($attributes[self::ATTRIBUTE_SET_NAME])) {
-                $attributeSetName = $attributes[self::ATTRIBUTE_SET_NAME];
-                $product->setAttributeSetByName($attributeSetName);
-            }
 
             return $product;
         }

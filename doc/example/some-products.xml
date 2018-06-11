@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <import>
-	<!-- A simple product with some basic attributes -->
-	<product type="simple" sku="skinny-jeans-811" attribute_set_name="Default">
+	<simple sku="skinny-jeans-811" id="82311">
+		<attribute_set_name>Default</attribute_set_name>
 		<global>
 			<name>Skinny Jeans 811</name>
 			<price>19.95</price>
@@ -62,8 +62,9 @@
 			<enable_qty_increments>0</enable_qty_increments>
 			<is_decimal_divided>1</is_decimal_divided>
 		</stock>
-	</product>
-	<product type="virtual" sku="services-104-ax" attribute_set_name="Default">
+	</simple>
+	<virtual sku="services-104-ax">
+		<attribute_set_name>Default</attribute_set_name>
 		<global>
 			<name>Filling in tax form</name>
 			<price>79.95</price>
@@ -94,5 +95,39 @@
 			<item>services-104-e1</item>
 			<item>services-104-e2</item>
 		</related_products>
-	</product>
+	</virtual>
+	<simple sku="swimsuit-403">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Swimsuit featuring fish</name>
+			<price>19.95</price>
+		</global>
+	</simple>
+	<configurable sku="scottish-table">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Scotting Table</name>
+			<price>1190</price>
+		</global>
+		<super_attribute_codes>
+			<item>color</item>
+		</super_attribute_codes>
+		<variant_skus>
+			<item>scottish-table-red-2st</item>
+			<item>scottish-table-brown-2st</item>
+			<item>scottish-table-brown-3st</item>
+		</variant_skus>
+	</configurable>
+	<grouped sku="bucky-cutlery">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Bucky Cutlery</name>
+			<price>120</price>
+		</global>
+		<members>
+			<member sku="bucky-knife" default_quantity="5" />
+			<member sku="bucky-spoon" default_quantity="5" />
+			<member sku="bucky-fork" default_quantity="5" />
+		</members>
+	</grouped>
 </import>
