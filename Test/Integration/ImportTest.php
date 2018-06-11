@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\Data\BundleProductSelection;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -1566,13 +1567,17 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             $option2 = new BundleProductOption(BundleProduct::INPUT_TYPE_MULTIPLE_SELECT, false)
         ]);
 
-        $option1->addProductSelection('monitor1-product-import', true, 1, '25.00', '1', false);
-        $option1->addProductSelection('monitor2-product-import', false, 0, '300.00', '2', true);
+        $option1->setProductSelections([
+            new BundleProductSelection('monitor1-product-import', true, 1, '25.00', '1', false),
+            new BundleProductSelection('monitor2-product-import', false, 0, '300.00', '2', true)
+        ]);
 
         $global->setOptionTitle($option1, 'Monitor');
         $bundle->storeView('default')->setOptionTitle($option1, 'Monitor A');
 
-        $option2->addProductSelection('keyboard-product-import', false, 2, '200.00', '2', true);
+        $option2->setProductSelections([
+            new BundleProductSelection('keyboard-product-import', false, 2, '200.00', '2', true)
+        ]);
 
         $global->setOptionTitle($option2, 'Keyboard');
         $bundle->storeView('default')->setOptionTitle($option2, 'Keyboard A');

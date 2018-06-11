@@ -30,6 +30,14 @@ class BundleProductSelection
     /** @var int */
     protected $productId;
 
+    /**
+     * @param string $sku
+     * @param bool $isDefault Is this product selected by default from this option
+     * @param int $priceType Fixed or percent. Use a PRICE_TYPE constant from this class
+     * @param string $priceValue Price, 12.4 decimal Either a fixed price or a percentage
+     * @param string $quantity Default quantity
+     * @param bool $canChangeQuantity Is the customer enabled to change the quantity?
+     */
     public function __construct(string $sku, bool $isDefault, int $priceType, string $priceValue, string $quantity, bool $canChangeQuantity)
     {
         $this->sku = trim($sku);

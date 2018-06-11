@@ -3,6 +3,9 @@
 namespace BigBridge\ProductImport\Model\Reader;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\BundleProductOption;
+use BigBridge\ProductImport\Api\Data\BundleProductSelection;
+use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
@@ -46,15 +49,22 @@ class ElementHandler
 
     /** @var GroupedProductMember[] */
     protected $members = null;
+
+    /** @var BundleProductOption[] */
+    protected $options = null;
+
+    /** @var BundleProductOption */
+    protected $option = null;
+
+    /** @var BundleProductSelection[] */
+    protected $productSelections = null;
     
     /**
      * Attributes
      */
-    const TYPE = 'type';
     const SKU = 'sku';
     const CODE = "code";
     const REMOVE = "remove";
-    const ATTRIBUTE_SET_NAME = "attribute_set_name";
 
     /**
      * Tags
@@ -64,6 +74,7 @@ class ElementHandler
     const PRODUCT = "product";
     const GLOBAL = "global";
     const STORE_VIEW = "store_view";
+    const ATTRIBUTE_SET_NAME = "attribute_set_name";
     const CATEGORY_GLOBAL_NAMES = "category_global_names";
     const CATEGORY_IDS = "category_ids";
     const WEBSITE_CODES = "website_codes";
@@ -81,6 +92,12 @@ class ElementHandler
     const RELATED_PRODUCT_SKUS = "related_product_skus";
     const SUPER_ATTRIBUTE_CODES = "super_attribute_codes";
     const VARIANT_SKUS = "variant_skus";
+    const MEMBERS = "members";
+    const MEMBER = "member";
+    const OPTIONS = "options";
+    const OPTION = "option";
+    const PRODUCT_SELECTIONS = "product_selections";
+    const PRODUCT_SELECTION = "product_selection";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -103,10 +120,6 @@ class ElementHandler
         BundleProduct::TYPE_BUNDLE,
         GroupedProduct::TYPE_GROUPED,
     ];
-
-    const MEMBERS = "members";
-
-    const MEMBER = "member";
 
     public function __construct(Importer $importer)
     {
@@ -137,7 +150,7 @@ class ElementHandler
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
-                $this->storeView = $this->createStoreView($parser, $attributes, $this->product);
+                $this->storeView = $this->product->storeView($attributes[self::CODE]);
             } elseif ($element === self::STOCK) {
                 $this->defaultStockItem = $this->product->defaultStockItem();
             }
@@ -146,7 +159,15 @@ class ElementHandler
                 if ($element === self::MEMBERS) {
                     $this->members = [];
                 }
+            } elseif ($scope === BundleProduct::TYPE_BUNDLE) {
+                if ($element === self::OPTIONS) {
+                    $this->options = [];
+                }
             }
+        } elseif ($element === self::OPTION) {
+            $this->option = new BundleProductOption($attributes['input_type'], $attributes['required']);
+        } elseif ($element === self::PRODUCT_SELECTIONS) {
+            $this->productSelections = [];
         }
 
         if (in_array($element, $this->multiAttributes)) {
@@ -214,6 +235,13 @@ class ElementHandler
                 if ($element === self::MEMBERS) {
                     $grouped->setMembers($this->members);
                 }
+            } elseif ($scope === BundleProduct::TYPE_BUNDLE) {
+                /** @var BundleProduct $bundle */
+                $bundle = $this->product;
+
+                if ($element === self::OPTIONS) {
+                    $bundle->setOptions($this->options);
+                }
             }
 
         } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
@@ -275,12 +303,27 @@ class ElementHandler
             } elseif ($element === ProductStoreView::ATTR_COLOR) {
                 $this->storeView->setColor($value);
             } elseif ($element === self::SELECT) {
-                $this->setSelectAttribute($parser, $attributes, $value);
+                $this->storeView->setSelectAttribute($attributes[self::CODE], $value);
             } elseif ($element === self::MULTI_SELECT) {
-                $this->setMultiSelectAttribute($parser, $attributes, $this->items);
+                $this->storeView->setMultipleSelectAttribute($attributes[self::CODE], $this->items);
             } elseif ($element === self::CUSTOM) {
-                $this->setCustomAttribute($parser, $attributes, $value);
+                $this->storeView->setCustomAttribute($attributes[self::CODE], $value);
             }
+
+            if ($this->storeView instanceof BundleProductStoreView) {
+                if ($element === BundleProductStoreView::ATTR_PRICE_TYPE) {
+                    $this->storeView->setPriceType($value);
+                } elseif ($element === BundleProductStoreView::ATTR_SKU_TYPE) {
+                    $this->storeView->setSkuType($value);
+                } elseif ($element === BundleProductStoreView::ATTR_WEIGHT_TYPE) {
+                    $this->storeView->setWeightType($value);
+                } elseif ($element === BundleProductStoreView::ATTR_PRICE_VIEW) {
+                    $this->storeView->setPriceView($value);
+                } elseif ($element === BundleProductStoreView::ATTR_SHIPMENT_TYPE) {
+                    $this->storeView->setShipmentType($value);
+                }
+            }
+
         } elseif (in_array($scope, $this->multiAttributes)) {
             if ($element === self::ITEM) {
                 $this->items[] = $value;
@@ -332,9 +375,21 @@ class ElementHandler
                 $this->defaultStockItem->setIsDecimalDivided($value);
             }
         } elseif ($scope === self::MEMBERS) {
-
             if ($element === self::MEMBER) {
                 $this->members[] = new GroupedProductMember($attributes['sku'], $attributes['default_quantity']);
+            }
+        } elseif ($scope === self::OPTIONS) {
+            if ($element === self::OPTION) {
+                $this->options[] = $this->option;
+            }
+        } elseif ($scope === self::OPTION) {
+            if ($element === self::PRODUCT_SELECTIONS) {
+                $this->option->setProductSelections($this->productSelections);
+            }
+        } elseif ($scope === self::PRODUCT_SELECTIONS) {
+            if ($element === self::PRODUCT_SELECTION) {
+                $this->productSelections[] = new BundleProductSelection($attributes['sku'], $attributes['is_default'],
+                    $attributes['price_type'], $attributes['price_value'], $attributes['quantity'], $attributes['can_change_quantity']);
             }
         }
 
@@ -353,96 +408,26 @@ class ElementHandler
      */
     protected function createProduct($parser, string $type, array $attributes)
     {
-        if (!isset($attributes[self::SKU])) {
-            throw new Exception("Missing sku in line " . xml_get_current_line_number($parser));
+        $sku = $attributes[self::SKU];
+
+        if ($type === SimpleProduct::TYPE_SIMPLE) {
+            $product = new SimpleProduct($sku);
+        } elseif ($type === VirtualProduct::TYPE_VIRTUAL) {
+            $product = new VirtualProduct($sku);
+        } elseif ($type === DownloadableProduct::TYPE_DOWNLOADABLE) {
+            $product = new VirtualProduct($sku);
+        } elseif ($type === ConfigurableProduct::TYPE_CONFIGURABLE) {
+            $product = new ConfigurableProduct($sku);
+        } elseif ($type === BundleProduct::TYPE_BUNDLE) {
+            $product = new BundleProduct($sku);
+        } elseif ($type === GroupedProduct::TYPE_GROUPED) {
+            $product = new GroupedProduct($sku);
         } else {
-
-            $sku = $attributes[self::SKU];
-
-            if ($type === SimpleProduct::TYPE_SIMPLE) {
-                $product = new SimpleProduct($sku);
-            } elseif ($type === VirtualProduct::TYPE_VIRTUAL) {
-                $product = new VirtualProduct($sku);
-            } elseif ($type === DownloadableProduct::TYPE_DOWNLOADABLE) {
-                $product = new VirtualProduct($sku);
-            } elseif ($type === ConfigurableProduct::TYPE_CONFIGURABLE) {
-                $product = new ConfigurableProduct($sku);
-            } elseif ($type === BundleProduct::TYPE_BUNDLE) {
-                $product = new BundleProduct($sku);
-            } elseif ($type === GroupedProduct::TYPE_GROUPED) {
-                $product = new GroupedProduct($sku);
-            } else {
-                throw new Exception("Unknown type: " . $attributes[self::TYPE] . " in line " . xml_get_current_line_number($parser));
-            }
-
-            $product->lineNumber = xml_get_current_line_number($parser);
-
-            return $product;
+            throw new Exception("Unknown type: " . $type . " in line " . xml_get_current_line_number($parser));
         }
-    }
 
-    /**
-     * @param $parser
-     * @param $attributes
-     * @param Product $product
-     * @return ProductStoreView
-     * @throws Exception
-     */
-    protected function createStoreView($parser, $attributes, Product $product)
-    {
-        if (!isset($attributes[self::CODE])) {
-            throw new Exception("Missing code in line " . xml_get_current_line_number($parser));
-        } else {
-            $storeView = $product->storeView($attributes[self::CODE]);
-            return $storeView;
-        }
-    }
+        $product->lineNumber = xml_get_current_line_number($parser);
 
-    /**
-     * @param $parser
-     * @param $attributes
-     * @param $value
-     * @throws Exception
-     */
-    protected function setCustomAttribute($parser, $attributes, $value)
-    {
-        if (!array_key_exists(self::CODE, $attributes)) {
-            throw new Exception("Missing code in line " . xml_get_current_line_number($parser));
-        } else {
-            $attributeCode = $attributes[self::CODE];
-            $this->storeView->setCustomAttribute($attributeCode, $value);
-        }
-    }
-
-    /**
-     * @param $parser
-     * @param $attributes
-     * @param $value
-     * @throws Exception
-     */
-    protected function setSelectAttribute($parser, $attributes, $value)
-    {
-        if (!array_key_exists(self::CODE, $attributes)) {
-            throw new Exception("Missing code in line " . xml_get_current_line_number($parser));
-        } else {
-            $attributeCode = $attributes[self::CODE];
-            $this->storeView->setSelectAttribute($attributeCode, $value);
-        }
-    }
-
-    /**
-     * @param $parser
-     * @param $attributes
-     * @param array $values
-     * @throws Exception
-     */
-    protected function setMultiSelectAttribute($parser, $attributes, array $values)
-    {
-        if (!array_key_exists(self::CODE, $attributes)) {
-            throw new Exception("Missing code in line " . xml_get_current_line_number($parser));
-        } else {
-            $attributeCode = $attributes[self::CODE];
-            $this->storeView->setMultipleSelectAttribute($attributeCode, $values);
-        }
+        return $product;
     }
 }

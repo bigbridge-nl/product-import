@@ -15,14 +15,14 @@ class BundleProductStoreView extends ProductStoreView
     const ATTR_PRICE_VIEW = 'price_view';
     const ATTR_SHIPMENT_TYPE = 'shipment_type';
 
-    const PRICE_TYPE_STATIC = 0;
-    const PRICE_TYPE_DYNAMIC = 1;
+    const PRICE_TYPE_STATIC = 1;
+    const PRICE_TYPE_DYNAMIC = 0;
 
-    const SKU_TYPE_STATIC = 0;
-    const SKU_TYPE_DYNAMIC = 1;
+    const SKU_TYPE_STATIC = 1;
+    const SKU_TYPE_DYNAMIC = 0;
 
-    const WEIGHT_TYPE_STATIC = 0;
-    const WEIGHT_TYPE_DYNAMIC = 1;
+    const WEIGHT_TYPE_STATIC = 1;
+    const WEIGHT_TYPE_DYNAMIC = 0;
 
     const PRICE_VIEW_PRICE_RANGE = 0;
     const PRICE_VIEW_AS_LOW_AS = 1;
