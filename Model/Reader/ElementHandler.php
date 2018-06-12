@@ -8,6 +8,9 @@ use BigBridge\ProductImport\Api\Data\BundleProductSelection;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProductStoreView;
+use BigBridge\ProductImport\Api\Data\DownloadLink;
+use BigBridge\ProductImport\Api\Data\DownloadSample;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProductMember;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
@@ -58,6 +61,18 @@ class ElementHandler
 
     /** @var BundleProductSelection[] */
     protected $productSelections = null;
+
+    /** @var DownloadLink[] */
+    protected $downloadLinks = null;
+
+    /** @var DownloadLink */
+    protected $downloadLink = null;
+
+    /** @var DownloadSample[] */
+    protected $downloadSamples = null;
+
+    /** @var DownloadSample */
+    protected $downloadSample = null;
     
     /**
      * Attributes
@@ -99,6 +114,12 @@ class ElementHandler
     const PRODUCT_SELECTIONS = "product_selections";
     const PRODUCT_SELECTION = "product_selection";
     const OPTION_TITLE = "option_title";
+    const DOWNLOAD_LINKS = "download_links";
+    const DOWNLOAD_LINK = "download_link";
+    const DOWNLOAD_LINK_INFORMATION = "download_link_information";
+    const DOWNLOAD_SAMPLES = "download_samples";
+    const DOWNLOAD_SAMPLE = "download_sample";
+    const DOWNLOAD_SAMPLE_INFORMATION = "download_sample_information";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -164,7 +185,15 @@ class ElementHandler
                 if ($element === self::OPTIONS) {
                     $this->options = [];
                 }
+            } elseif ($scope === DownloadableProduct::TYPE_DOWNLOADABLE) {
+                if ($element === self::DOWNLOAD_LINKS) {
+                    $this->downloadLinks = [];
+                }
+                if ($element === self::DOWNLOAD_SAMPLES) {
+                    $this->downloadSamples = [];
+                }
             }
+
         } elseif ($scope === self::OPTIONS) {
             if ($element === self::OPTION) {
                 $this->option = new BundleProductOption($attributes['input_type'], $attributes['required']);
@@ -173,6 +202,21 @@ class ElementHandler
             if ($element === self::PRODUCT_SELECTIONS) {
                 $this->productSelections = [];
             } elseif ($element === self::GLOBAL) {
+                $this->storeView = $this->product->global();
+            } elseif ($element === self::STORE_VIEW) {
+                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+            }
+        } elseif ($scope === self::DOWNLOAD_LINKS) {
+            if ($element === self::DOWNLOAD_LINK) {
+                $this->downloadLink = new DownloadLink($attributes['file_or_url'], $attributes['number_of_downloads'],
+                    $attributes['is_shareable'], $attributes['sample_file_or_url']);
+            }
+        } elseif ($scope === self::DOWNLOAD_SAMPLES) {
+            if ($element === self::DOWNLOAD_SAMPLE) {
+                $this->downloadSample = new DownloadSample($attributes['file_or_url']);
+            }
+        } elseif ($scope === self::DOWNLOAD_LINK || $scope === self::DOWNLOAD_SAMPLE) {
+            if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
                 $this->storeView = $this->product->storeView($attributes[self::CODE]);
@@ -250,6 +294,15 @@ class ElementHandler
 
                 if ($element === self::OPTIONS) {
                     $bundle->setOptions($this->options);
+                }
+            } elseif ($scope === DownloadableProduct::TYPE_DOWNLOADABLE) {
+                /** @var DownloadableProduct $downloadable */
+                $downloadable = $this->product;
+
+                if ($element === self::DOWNLOAD_LINKS) {
+                    $downloadable->setDownloadLinks($this->downloadLinks);
+                } elseif ($element === self::DOWNLOAD_SAMPLES) {
+                    $downloadable->setDownloadSamples($this->downloadSamples);
                 }
             }
 
@@ -332,9 +385,25 @@ class ElementHandler
                     $this->storeView->setShipmentType($value);
                 }
 
-                // bundle / options / option / global|storeview
+                // bundle / options / option / global|store_view
                 if ($element === self::OPTION_TITLE) {
                     $this->storeView->setOptionTitle($this->option, $value);
+                }
+
+            } elseif ($this->storeView instanceof DownloadableProductStoreView) {
+                if ($element === DownloadableProductStoreView::ATTR_LINKS_PURCHASED_SEPARATELY) {
+                    $this->storeView->setLinksPurchasedSeparately($value);
+                } elseif ($element === DownloadableProductStoreView::ATTR_LINKS_TITLE) {
+                    $this->storeView->setLinksTitle($value);
+                } elseif ($element === DownloadableProductStoreView::ATTR_SAMPLES_TITLE) {
+                    $this->storeView->setSamplesTitle($value);
+                }
+
+                // downloadable / download_links / download_link / global|store_view
+                if ($element === self::DOWNLOAD_LINK_INFORMATION) {
+                    $this->storeView->setDownloadLinkInformation($this->downloadLink, $attributes['title'], $attributes['price']);
+                } elseif ($element === self::DOWNLOAD_SAMPLE_INFORMATION) {
+                    $this->storeView->setDownloadSampleInformation($this->downloadSample, $attributes['title']);
                 }
             }
 
@@ -405,6 +474,14 @@ class ElementHandler
                 $this->productSelections[] = new BundleProductSelection($attributes['sku'], $attributes['is_default'],
                     $attributes['price_type'], $attributes['price_value'], $attributes['quantity'], $attributes['can_change_quantity']);
             }
+        } elseif ($scope === self::DOWNLOAD_LINKS) {
+            if ($element === self::DOWNLOAD_LINK) {
+                $this->downloadLinks[] = $this->downloadLink;
+            }
+        } elseif ($scope === self::DOWNLOAD_SAMPLES) {
+            if ($element === self::DOWNLOAD_SAMPLE) {
+                $this->downloadSamples[] = $this->downloadSample;
+            }
         }
 
         array_pop($this->elementPath);
@@ -429,7 +506,7 @@ class ElementHandler
         } elseif ($type === VirtualProduct::TYPE_VIRTUAL) {
             $product = new VirtualProduct($sku);
         } elseif ($type === DownloadableProduct::TYPE_DOWNLOADABLE) {
-            $product = new VirtualProduct($sku);
+            $product = new DownloadableProduct($sku);
         } elseif ($type === ConfigurableProduct::TYPE_CONFIGURABLE) {
             $product = new ConfigurableProduct($sku);
         } elseif ($type === BundleProduct::TYPE_BUNDLE) {
