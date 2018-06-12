@@ -20,11 +20,11 @@ class ProductImportCommand extends Command
 
     const OPTION_DRY_RUN = 'dry-run';
     const OPTION_AUTO_CREATE_OPTION = 'auto-create-option';
+    const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
+    const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
 
     /** @var XmlProductReader */
     protected $xmlProductReader;
-
-    const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
 
     public function __construct(
         XmlProductReader $xmlProductReader,
@@ -54,13 +54,21 @@ class ProductImportCommand extends Command
                 self::OPTION_AUTO_CREATE_OPTION,
                 null,
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
-                'Auto-create options for this attribute'
+                'Auto-create options for this attribute',
+                []
+            ),
+            new InputOption(
+                self::OPTION_AUTO_CREATE_CATEGORIES,
+                null,
+                InputOption::VALUE_NONE,
+                'Auto-create categories'
             ),
             new InputOption(
                 self::OPTION_PRODUCT_TYPE_CHANGE,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Changing product type: allowed, forbidden, non-destructive'
+                'Changing product type: allowed, forbidden, non-destructive',
+                ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE
             ),
         ]);
     }
@@ -79,13 +87,12 @@ class ProductImportCommand extends Command
         $logger = new ProductImportCommandLogger($output);
 
         $config = new ImportConfig();
-        $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
-        $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->resultCallbacks = [[$logger, 'productImported']];
 
-        if ($value = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE)) {
-            $config->productTypeChange = $value;
-        }
+        $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
+        $config->autoCreateCategories = $input->getOption(self::OPTION_AUTO_CREATE_CATEGORIES);
+        $config->productTypeChange = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE);
+        $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
 
         // import!
         $this->xmlProductReader->import($fileName, $config, $logger);
