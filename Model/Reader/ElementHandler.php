@@ -98,6 +98,7 @@ class ElementHandler
     const OPTION = "option";
     const PRODUCT_SELECTIONS = "product_selections";
     const PRODUCT_SELECTION = "product_selection";
+    const OPTION_TITLE = "option_title";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -164,10 +165,18 @@ class ElementHandler
                     $this->options = [];
                 }
             }
-        } elseif ($element === self::OPTION) {
-            $this->option = new BundleProductOption($attributes['input_type'], $attributes['required']);
-        } elseif ($element === self::PRODUCT_SELECTIONS) {
-            $this->productSelections = [];
+        } elseif ($scope === self::OPTIONS) {
+            if ($element === self::OPTION) {
+                $this->option = new BundleProductOption($attributes['input_type'], $attributes['required']);
+            }
+        } elseif ($scope === self::OPTION) {
+            if ($element === self::PRODUCT_SELECTIONS) {
+                $this->productSelections = [];
+            } elseif ($element === self::GLOBAL) {
+                $this->storeView = $this->product->global();
+            } elseif ($element === self::STORE_VIEW) {
+                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+            }
         }
 
         if (in_array($element, $this->multiAttributes)) {
@@ -321,6 +330,11 @@ class ElementHandler
                     $this->storeView->setPriceView($value);
                 } elseif ($element === BundleProductStoreView::ATTR_SHIPMENT_TYPE) {
                     $this->storeView->setShipmentType($value);
+                }
+
+                // bundle / options / option / global|storeview
+                if ($element === self::OPTION_TITLE) {
+                    $this->storeView->setOptionTitle($this->option, $value);
                 }
             }
 
