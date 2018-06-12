@@ -22,6 +22,7 @@ class ProductImportCommand extends Command
     const OPTION_AUTO_CREATE_OPTION = 'auto-create-option';
     const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
+    const OPTION_PATH_SEPARATOR = 'path-separator';
 
     /** @var XmlProductReader */
     protected $xmlProductReader;
@@ -70,6 +71,13 @@ class ProductImportCommand extends Command
                 'Changing product type: allowed, forbidden, non-destructive',
                 ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE
             ),
+            new InputOption(
+                self::OPTION_PATH_SEPARATOR,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Category name path separator (default = "/")',
+                "/"
+            )
         ]);
     }
 
@@ -93,6 +101,7 @@ class ProductImportCommand extends Command
         $config->autoCreateCategories = $input->getOption(self::OPTION_AUTO_CREATE_CATEGORIES);
         $config->productTypeChange = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE);
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
+        $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
 
         // import!
         $this->xmlProductReader->import($fileName, $config, $logger);
