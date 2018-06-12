@@ -24,6 +24,8 @@ class ProductImportCommand extends Command
     /** @var XmlProductReader */
     protected $xmlProductReader;
 
+    const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
+
     public function __construct(
         XmlProductReader $xmlProductReader,
         string $name = null)
@@ -53,7 +55,13 @@ class ProductImportCommand extends Command
                 null,
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
                 'Auto-create options for this attribute'
-            )
+            ),
+            new InputOption(
+                self::OPTION_PRODUCT_TYPE_CHANGE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Changing product type: allowed, forbidden, non-destructive'
+            ),
         ]);
     }
 
@@ -74,6 +82,10 @@ class ProductImportCommand extends Command
         $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->resultCallbacks = [[$logger, 'productImported']];
+
+        if ($value = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE)) {
+            $config->productTypeChange = $value;
+        }
 
         // import!
         $this->xmlProductReader->import($fileName, $config, $logger);
