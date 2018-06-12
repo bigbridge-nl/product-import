@@ -77,6 +77,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
 
             // plain
             [['price' => '123.95'], true, ""],
+            [['price' => '.99'], true, ""],
             // corrupt
             [['price' => '123,95'], false, "price is not a decimal number with dot (123,95)"],
 

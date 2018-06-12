@@ -7,7 +7,7 @@ namespace BigBridge\ProductImport\Helper;
  */
 class Decimal
 {
-    const DECIMAL_PATTERN = '/^-?\d{1,12}(\.\d{0,4})?$/';
+    const DECIMAL_PATTERN = '/^-?\d{0,12}(\.\d{0,4})?$/';
     const DECIMAL_FORMAT = "%.4f";
 
     /**
