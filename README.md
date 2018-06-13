@@ -488,7 +488,7 @@ Note: the library only adds and updates categories. It does not remove categorie
 
 You can specify on which websites a product is used, by specifying their codes
 
-    $product->setWebsitesByCode(['clothes', 'bicycles']);
+    $product->setWebsitesByCode(['base', 'german_website', 'french_website']);
 
 or their ids
 
@@ -703,6 +703,7 @@ The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to
 * Requires >= PHP 7.0
 * Input in UTF-8 (Magento standard)
 * MySQL max_packet_size on both MySQL client and MySQL server must be at least 1 MB (Which will be the case if the value wasn't deliberately lowered from the default)
+* Unix system (not tested on Windows)
 
 ## Thanks to
 

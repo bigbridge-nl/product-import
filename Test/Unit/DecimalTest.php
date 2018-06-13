@@ -24,6 +24,7 @@ class DecimalTest  extends \PHPUnit\Framework\TestCase
         $this->assertSame("-10.0000", Decimal::format("-10"));
         $this->assertSame("10.2500", Decimal::format("10.25"));
         $this->assertSame("10.2536", Decimal::format("10.2536"));
+        $this->assertSame("0.2536", Decimal::format(".2536"));
         $this->assertSame("three", Decimal::format("three"));
     }
 }

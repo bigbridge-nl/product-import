@@ -23,6 +23,8 @@ class ProductImportCommand extends Command
     const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
     const OPTION_PATH_SEPARATOR = 'path-separator';
+    const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
+    const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
 
     /** @var XmlProductReader */
     protected $xmlProductReader;
@@ -75,9 +77,22 @@ class ProductImportCommand extends Command
                 self::OPTION_PATH_SEPARATOR,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Category name path separator (default = "/")',
-                "/"
-            )
+                'Category name path separator',
+                ImportConfig::DEFAULT_CATEGORY_PATH_SEPARATOR
+            ),
+            new InputOption(
+                self::OPTION_IMAGE_SOURCE_DIR,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Base directory for source images with relative paths'
+            ),
+            new InputOption(
+                self::OPTION_IMAGE_CACHE_DIR,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Base directory where images will be cached during import',
+                ImportConfig::TEMP_PRODUCT_IMAGE_PATH
+            ),
         ]);
     }
 
@@ -103,6 +118,8 @@ class ProductImportCommand extends Command
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
 
+        $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
+
         // import!
         $this->xmlProductReader->import($fileName, $config, $logger);
 
@@ -111,5 +128,30 @@ class ProductImportCommand extends Command
         } else {
             return \Magento\Framework\Console\Cli::RETURN_FAILURE;
         }
+    }
+
+    protected function guessImageSourceDir(string $fileName, string $imageSourceDirOption = null)
+    {
+        // select specified dir
+        $dirName = $imageSourceDirOption;
+
+        // none specified?
+        if (!$dirName) {
+
+            // select dirname from xml file
+            $dirName = dirname($fileName);
+        }
+
+        if ($dirName) {
+            // prepend relative paths with the working dir
+            if ($dirName[0] !== DIRECTORY_SEPARATOR) {
+                $dirName = getcwd() . DIRECTORY_SEPARATOR . $dirName;
+            }
+        } else {
+            // take the working directory
+            $dirName = getcwd();
+        }
+
+        return $dirName;
     }
 }

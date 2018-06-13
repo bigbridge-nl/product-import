@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Data\Image;
@@ -15,8 +16,9 @@ use BigBridge\ProductImport\Model\Resource\MetaData;
  */
 class ImageStorage
 {
-    const TEMP_PRODUCT_IMAGE_PATH = BP . "/pub/media/import";
     const PRODUCT_IMAGE_PATH = BP . "/pub/media/catalog/product";
+
+    const URL_PATTERN = '#^(http://|https://|//)#i';
 
     /** @var  Magento2DbConnection */
     protected $db;
@@ -35,10 +37,6 @@ class ImageStorage
         $this->db = $db;
         $this->metaData = $metaData;
         $this->httpCache = $httpCache;
-
-        if (!file_exists(self::TEMP_PRODUCT_IMAGE_PATH)) {
-            mkdir(self::TEMP_PRODUCT_IMAGE_PATH, 0777, true);
-        }
     }
 
     /**
@@ -47,64 +45,140 @@ class ImageStorage
      */
     public function moveImagesToTemporaryLocation(array $products, ImportConfig $config)
     {
+        if (!file_exists($config->imageCacheDir)) {
+            mkdir($config->imageCacheDir, 0777, true);
+        }
+
         foreach ($products as $product) {
             foreach ($product->getImages() as $image) {
 
                 $imagePath = $image->getImagePath();
 
-                if (!preg_match('/\.(png|jpg|jpeg|gif)$/i', $imagePath)) {
-                    $product->addError("Filetype not allowed (use .jpg, .png or .gif): " . $imagePath);
+                $temporaryStoragePath = $this->getTemporaryStoragePath($product, $imagePath, $config);
+
+                if ($temporaryStoragePath !== null) {
+                    $image->setTemporaryStoragePath($temporaryStoragePath);
                 }
-
-                $temporaryStoragePath = self::TEMP_PRODUCT_IMAGE_PATH . '/' . md5($image->getImagePath()) . '-' . basename($image->getImagePath());
-
-
-                // keep temporary file?
-                if (file_exists($temporaryStoragePath)) {
-                    if ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR) {
-                        // yes: use it!
-                        goto end;
-                    } elseif ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING) {
-                        // do nothing; it serves as http cache
-                    } else {
-                        // no cache: remove it
-                        unlink($temporaryStoragePath);
-                    }
-                }
-
-                if (preg_match('#(https?:)?//#i', $imagePath)) {
-
-                    $error = $this->httpCache->fetchFromUrl($imagePath, $temporaryStoragePath, $config);
-                    if ($error !== '') {
-                        $product->addError($error);
-                        continue;
-                    }
-                } elseif (!is_file($imagePath)) {
-                    $product->addError("File not found: " . $imagePath);
-                    continue;
-                } elseif (stat($imagePath)['dev'] !== stat(__FILE__)['dev']) {
-                    // file is on different device
-                    copy($imagePath, $temporaryStoragePath);
-                } elseif (!file_exists($temporaryStoragePath)) {
-                    // file is on same device
-                    link($imagePath, $temporaryStoragePath);
-                }
-
-                if (!file_exists($temporaryStoragePath)) {
-                    $product->addError("File was not copied to temporary storage: " . $imagePath);
-                    continue;
-                }
-
-                if (filesize($temporaryStoragePath) === 0) {
-                    $product->addError("File is empty: " . $imagePath);
-                    unlink($temporaryStoragePath);
-                    continue;
-                }
-
-                end:
-
-                $image->setTemporaryStoragePath($temporaryStoragePath);
             }
+
+            if ($product instanceof DownloadableProduct) {
+                $this->validateLinkImages($product, $config);
+            }
+        }
+    }
+
+    protected function validateLinkImages(DownloadableProduct $product, ImportConfig $config)
+    {
+        if (($links = $product->getDownloadLinks()) !== null) {
+            foreach ($links as $downloadLink) {
+                $fileOrUrl = $downloadLink->getFileOrUrl();
+                $downloadLink->setTemporaryStoragePathLink($this->getDownloadableTemporaryStoragePath($product, $fileOrUrl, $config));
+
+                $sampleFileOrUrl = $downloadLink->getSampleFileOrUrl();
+                $downloadLink->setTemporaryStoragePathSample($this->getDownloadableTemporaryStoragePath($product, $sampleFileOrUrl, $config));
+            }
+        }
+
+        if (($samples = $product->getDownloadSamples()) !== null) {
+            foreach ($samples as $downloadSample) {
+                $sampleFileOrUrl = $downloadSample->getFileOrUrl();
+                $downloadSample->setTemporaryStoragePathSample($this->getDownloadableTemporaryStoragePath($product, $sampleFileOrUrl, $config));
+            }
+        }
+    }
+
+    protected function getTemporaryStoragePath(Product $product, string $imagePath, ImportConfig $config)
+    {
+        if ($imagePath && !preg_match(self::URL_PATTERN, $imagePath) && $imagePath[0] !== DIRECTORY_SEPARATOR) {
+            $imagePath = $config->imageSourceDir . DIRECTORY_SEPARATOR . $imagePath;
+        }
+
+        if (!preg_match('/\.(png|jpg|jpeg|gif)$/i', $imagePath)) {
+            $product->addError("Filetype not allowed (use .jpg, .png or .gif): " . $imagePath);
+        }
+
+        $temporaryStoragePath = $config->imageCacheDir . '/' . md5($imagePath) . '-' . basename($imagePath);
+
+        // keep temporary file?
+        if (file_exists($temporaryStoragePath)) {
+            if ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_CHECK_IMPORT_DIR) {
+                // yes: use it!
+                return $temporaryStoragePath;
+            } elseif ($config->existingImageStrategy === ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING) {
+                // do nothing; it serves as http cache
+            } else {
+                // no cache: remove it
+                unlink($temporaryStoragePath);
+            }
+        }
+
+        if (preg_match(self::URL_PATTERN, $imagePath)) {
+
+            $error = $this->httpCache->fetchFromUrl($imagePath, $temporaryStoragePath, $config);
+            if ($error !== '') {
+                $product->addError($error);
+                return null;
+            }
+        } elseif (!is_file($imagePath)) {
+            $product->addError("File not found: " . $imagePath);
+            return null;
+        } elseif (stat($imagePath)['dev'] !== stat(__FILE__)['dev']) {
+            // file is on different device
+            copy($imagePath, $temporaryStoragePath);
+        } elseif (!file_exists($temporaryStoragePath)) {
+            // file is on same device
+            link($imagePath, $temporaryStoragePath);
+        }
+
+        if (!file_exists($temporaryStoragePath)) {
+            $product->addError("File was not copied to temporary storage: " . $imagePath);
+            return null;
+        }
+
+        if (filesize($temporaryStoragePath) === 0) {
+            $product->addError("File is empty: " . $imagePath);
+            unlink($temporaryStoragePath);
+            return null;
+        }
+
+        return $temporaryStoragePath;
+    }
+
+    protected function getDownloadableTemporaryStoragePath(DownloadableProduct $product, $fileOrUrl, ImportConfig $config)
+    {
+        if ($fileOrUrl === '') {
+            return null;
+        } elseif (preg_match(ImageStorage::URL_PATTERN, $fileOrUrl)) {
+            return null;
+        } else {
+
+            $temporaryStoragePath = $config->imageCacheDir . '/' . uniqid() . basename($fileOrUrl);
+
+            if ($fileOrUrl && $fileOrUrl[0] !== DIRECTORY_SEPARATOR) {
+                $fileOrUrl = $config->imageSourceDir . DIRECTORY_SEPARATOR . $fileOrUrl;
+            }
+
+            if (!is_file($fileOrUrl)) {
+                $product->addError("File not found: " . $fileOrUrl);
+                return null;
+            } elseif (stat($fileOrUrl)['dev'] !== stat(__FILE__)['dev']) {
+                // file is on different device
+                copy($fileOrUrl, $temporaryStoragePath);
+            } else {
+                // file is on same device
+                link($fileOrUrl, $temporaryStoragePath);
+            }
+
+            if (!file_exists($temporaryStoragePath)) {
+                $product->addError("File was not copied to temporary storage: " . $fileOrUrl);
+                return null;
+            } else if (filesize($temporaryStoragePath) === 0) {
+                $product->addError("File is empty: " . $fileOrUrl);
+                unlink($temporaryStoragePath);
+                return null;
+            }
+
+            return $temporaryStoragePath;
         }
     }
 

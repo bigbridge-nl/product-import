@@ -4,7 +4,6 @@ namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
-use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
@@ -36,22 +35,17 @@ class Validator
     /** @var GroupedValidator */
     protected $groupedValidator;
 
-    /** @var DownloadableValidator */
-    protected $downloadableValidator;
-
     public function __construct(
         MetaData $metaData,
         ImageValidator $imageValidator,
         CustomOptionsValidator $customOptionsValidator,
         ConfigurableValidator $configurableValidator,
-        DownloadableValidator $downloadableValidator,
         GroupedValidator $groupedValidator)
     {
         $this->metaData = $metaData;
         $this->imageValidator = $imageValidator;
         $this->customOptionsValidator = $customOptionsValidator;
         $this->configurableValidator = $configurableValidator;
-        $this->downloadableValidator = $downloadableValidator;
         $this->groupedValidator = $groupedValidator;
     }
 
@@ -207,10 +201,6 @@ class Validator
         }
 
         switch ($product->getType()) {
-            case DownloadableProduct::TYPE_DOWNLOADABLE:
-                /** @var DownloadableProduct $product */
-                $this->downloadableValidator->validate($product);
-                break;
             case ConfigurableProduct::TYPE_CONFIGURABLE:
                 /** @var ConfigurableProduct $product */
                 $this->configurableValidator->validate($product);

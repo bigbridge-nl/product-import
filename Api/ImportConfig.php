@@ -2,11 +2,16 @@
 
 namespace BigBridge\ProductImport\Api;
 
+use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
+
 /**
  * @author Patrick van Bergen
  */
 class ImportConfig
 {
+    const DEFAULT_CATEGORY_PATH_SEPARATOR = '/';
+    const TEMP_PRODUCT_IMAGE_PATH = BP . "/pub/media/import";
+
     /**
      * When set to true, no products are saved to the database
      *
@@ -112,7 +117,20 @@ class ImportConfig
      *
      * @var string
      */
-    public $categoryNamePathSeparator = '/';
+    public $categoryNamePathSeparator = self::DEFAULT_CATEGORY_PATH_SEPARATOR;
+
+    /**
+     * Base directory the source images with relative paths
+     * By default: relative to the location of the
+     * @var string|null
+     */
+    public $imageSourceDir = null;
+
+    /**
+     * Base directory where images will be cached during import.
+     * @var string
+     */
+    public $imageCacheDir = self::TEMP_PRODUCT_IMAGE_PATH;
 
     /**
      * Downloading images can be slow. Choose your image strategy:

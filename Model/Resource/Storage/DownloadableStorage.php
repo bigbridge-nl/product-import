@@ -236,7 +236,7 @@ class DownloadableStorage
             $type = null;
             $file = null;
             $url = null;
-        } elseif (preg_match('#^(http://|https://|://)#i', $fileOrUrl)) {
+        } elseif (preg_match(ImageStorage::URL_PATTERN, $fileOrUrl)) {
             $type = "url";
             $file = null;
             $url = $fileOrUrl;
@@ -282,6 +282,10 @@ class DownloadableStorage
                     }
 
                 } while (true);
+            } else {
+                // remove temporary file
+                unlink($temporaryStoragePath);
+                return $actualStoragePath;
             }
         }
 

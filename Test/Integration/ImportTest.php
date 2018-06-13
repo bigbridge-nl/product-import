@@ -1844,7 +1844,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
             ["disposable", " Disposable ", "2.1000"]
         );
 
-        // "" default: ignore (
+        // "" default: ignore
         $this->checkEmptyValues($config, $product1,
             ["", "", ""],
             ["disposable", " Disposable ", "2.1000"]
