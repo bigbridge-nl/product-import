@@ -30,6 +30,10 @@ class ProductImportCommand extends Command
     /** @var XmlProductReader */
     protected $xmlProductReader;
 
+    const OPTION_URL_KEY_SOURCE = "url-key-source";
+
+    const OPTION_URL_KEY_STRATEGY = "url-key-strategy";
+
     public function __construct(
         XmlProductReader $xmlProductReader,
         string $name = null)
@@ -101,6 +105,20 @@ class ProductImportCommand extends Command
                 'Base directory where images will be cached during import',
                 ImportConfig::TEMP_PRODUCT_IMAGE_PATH
             ),
+            new InputOption(
+                self::OPTION_URL_KEY_SOURCE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                "Derive generated url keys from: from-name, from-sku",
+                ImportConfig::URL_KEY_SCHEME_FROM_NAME
+            ),
+            new InputOption(
+                self::OPTION_URL_KEY_STRATEGY,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                "Action for duplicate url key: error, add-sku, add-serial",
+                ImportConfig::DUPLICATE_KEY_STRATEGY_ERROR
+            ),
         ]);
     }
 
@@ -126,6 +144,8 @@ class ProductImportCommand extends Command
         $config->existingImageStrategy = $input->getOption(self::OPTION_IMAGE_CACHING);
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
+        $config->urlKeyScheme = $input->getOption(self::OPTION_URL_KEY_SOURCE);
+        $config->duplicateUrlKeyStrategy = $input->getOption(self::OPTION_URL_KEY_STRATEGY);
 
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 

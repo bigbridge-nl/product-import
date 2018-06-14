@@ -100,6 +100,7 @@ class ElementHandler
     const SKU = 'sku';
     const CODE = "code";
     const REMOVE = "remove";
+    const ID = 'id';
 
     /**
      * Tags
@@ -568,6 +569,10 @@ class ElementHandler
             $product = new GroupedProduct($sku);
         } else {
             throw new Exception("Unknown type: " . $type . " in line " . xml_get_current_line_number($parser));
+        }
+
+        if (isset($attributes[self::ID])) {
+            $product->id = $attributes[self::ID];
         }
 
         $product->lineNumber = xml_get_current_line_number($parser);
