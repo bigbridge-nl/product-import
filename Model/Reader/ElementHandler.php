@@ -14,6 +14,7 @@ use BigBridge\ProductImport\Api\Data\DownloadSample;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProductMember;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
+use BigBridge\ProductImport\Api\Data\TierPrice;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
@@ -88,7 +89,10 @@ class ElementHandler
 
     /** @var Image */
     protected $image;
-    
+
+    /** @var TierPrice[] */
+    protected $tierPrices;
+
     /**
      * Attributes
      */
@@ -141,6 +145,8 @@ class ElementHandler
     const IMAGE = "image";
     const GALLERY_INFORMATION = "gallery_information";
     const ROLE = "role";
+    const TIER_PRICES = "tier_prices";
+    const TIER_PRICE = "tier_price";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -198,6 +204,8 @@ class ElementHandler
                 $this->defaultStockItem = $this->product->defaultStockItem();
             } elseif ($element === self::IMAGES) {
                 $this->images = [];
+            } elseif ($element === self::TIER_PRICES) {
+                $this->tierPrices = [];
             }
 
             if ($scope === GroupedProduct::TYPE_GROUPED) {
@@ -303,6 +311,8 @@ class ElementHandler
                 $this->product->setUpSellProductSkus($this->items);
             } elseif ($element === self::RELATED_PRODUCT_SKUS) {
                 $this->product->setRelatedProductSkus($this->items);
+            } elseif ($element === self::TIER_PRICES) {
+                $this->product->setTierPrices($this->tierPrices);
             }
 
             if ($scope === ConfigurableProduct::TYPE_CONFIGURABLE) {
@@ -518,6 +528,12 @@ class ElementHandler
         } elseif ($scope === self::DOWNLOAD_SAMPLES) {
             if ($element === self::DOWNLOAD_SAMPLE) {
                 $this->downloadSamples[] = $this->downloadSample;
+            }
+        } elseif ($scope === self::TIER_PRICES) {
+            if ($element === self::TIER_PRICE) {
+                $customerGroupName = isset($attributes['customer_group_name']) ? $attributes['customer_group_name'] : null;
+                $websiteCode = isset($attributes['website_code']) ? $attributes['website_code'] : null;
+                $this->tierPrices[] = new TierPrice($attributes['qty'], $attributes['value'], $customerGroupName, $websiteCode);
             }
         }
 

@@ -21,6 +21,7 @@ class ProductImportCommand extends Command
     const OPTION_DRY_RUN = 'dry-run';
     const OPTION_AUTO_CREATE_OPTION = 'auto-create-option';
     const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
+    const OPTION_IMAGE_CACHING = "image-caching";
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
     const OPTION_PATH_SEPARATOR = 'path-separator';
     const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
@@ -74,6 +75,13 @@ class ProductImportCommand extends Command
                 ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE
             ),
             new InputOption(
+                self::OPTION_IMAGE_CACHING,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Image caching: force-download, check-import-dir, http-caching',
+                ImportConfig::EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD
+            ),
+            new InputOption(
                 self::OPTION_PATH_SEPARATOR,
                 null,
                 InputOption::VALUE_OPTIONAL,
@@ -115,6 +123,7 @@ class ProductImportCommand extends Command
         $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
         $config->autoCreateCategories = $input->getOption(self::OPTION_AUTO_CREATE_CATEGORIES);
         $config->productTypeChange = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE);
+        $config->existingImageStrategy = $input->getOption(self::OPTION_IMAGE_CACHING);
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
 
