@@ -19,6 +19,7 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Importer;
+use BigBridge\ProductImport\Model\Data\Image;
 use Exception;
 
 /**
@@ -29,20 +30,15 @@ class ElementHandler
     /** @var Importer */
     protected $importer;
 
-    /** @var Product */
-    protected $product = null;
-
-    /** @var ProductStoreView */
-    protected $storeView = null;
-
-    /** @var ProductStockItem */
-    protected $defaultStockItem = null;
+    /**
+     * XML processing
+     */
 
     /** @var string  */
-    protected $characterData = "";
+    protected $characterData;
 
     /** @var string[] */
-    protected $items = [];
+    protected $items;
 
     /** @var string[] */
     protected $elementPath = [self::ROOT];
@@ -50,33 +46,53 @@ class ElementHandler
     /** @var array[] */
     protected $attributePath = [[]];
 
+    /**
+     * Context items
+     */
+
+    /** @var Product */
+    protected $product;
+
+    /** @var ProductStoreView */
+    protected $storeView;
+
+    /** @var ProductStockItem */
+    protected $defaultStockItem;
+
     /** @var GroupedProductMember[] */
-    protected $members = null;
+    protected $members;
 
     /** @var BundleProductOption[] */
-    protected $options = null;
+    protected $options;
 
     /** @var BundleProductOption */
-    protected $option = null;
+    protected $option;
 
     /** @var BundleProductSelection[] */
-    protected $productSelections = null;
+    protected $productSelections;
 
     /** @var DownloadLink[] */
-    protected $downloadLinks = null;
+    protected $downloadLinks;
 
     /** @var DownloadLink */
-    protected $downloadLink = null;
+    protected $downloadLink;
 
     /** @var DownloadSample[] */
-    protected $downloadSamples = null;
+    protected $downloadSamples;
 
     /** @var DownloadSample */
-    protected $downloadSample = null;
+    protected $downloadSample;
+
+    /** @var Image[] */
+    protected $images;
+
+    /** @var Image */
+    protected $image;
     
     /**
      * Attributes
      */
+
     const SKU = 'sku';
     const CODE = "code";
     const REMOVE = "remove";
@@ -84,6 +100,7 @@ class ElementHandler
     /**
      * Tags
      */
+
     const ROOT = "root";
     const IMPORT = "import";
     const PRODUCT = "product";
@@ -120,6 +137,10 @@ class ElementHandler
     const DOWNLOAD_SAMPLES = "download_samples";
     const DOWNLOAD_SAMPLE = "download_sample";
     const DOWNLOAD_SAMPLE_INFORMATION = "download_sample_information";
+    const IMAGES = "images";
+    const IMAGE = "image";
+    const GALLERY_INFORMATION = "gallery_information";
+    const ROLE = "role";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -175,6 +196,8 @@ class ElementHandler
                 $this->storeView = $this->product->storeView($attributes[self::CODE]);
             } elseif ($element === self::STOCK) {
                 $this->defaultStockItem = $this->product->defaultStockItem();
+            } elseif ($element === self::IMAGES) {
+                $this->images = [];
             }
 
             if ($scope === GroupedProduct::TYPE_GROUPED) {
@@ -216,6 +239,16 @@ class ElementHandler
                 $this->downloadSample = new DownloadSample($attributes['file_or_url']);
             }
         } elseif ($scope === self::DOWNLOAD_LINK || $scope === self::DOWNLOAD_SAMPLE) {
+            if ($element === self::GLOBAL) {
+                $this->storeView = $this->product->global();
+            } elseif ($element === self::STORE_VIEW) {
+                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+            }
+        } elseif ($scope === self::IMAGES) {
+            if ($element === self::IMAGE) {
+                $this->image = $this->product->addImage($attributes['file_or_url']);
+            }
+        } elseif ($scope === self::IMAGE) {
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
@@ -370,6 +403,10 @@ class ElementHandler
                 $this->storeView->setMultipleSelectAttribute($attributes[self::CODE], $this->items);
             } elseif ($element === self::CUSTOM) {
                 $this->storeView->setCustomAttribute($attributes[self::CODE], $value);
+            } elseif ($element === self::GALLERY_INFORMATION) {
+                $this->storeView->setImageGalleryInformation($this->image, $attributes['label'], $attributes['position'], $attributes['enabled']);
+            } elseif ($element === self::ROLE) {
+                $this->storeView->setImageRole($this->image, $value);
             }
 
             if ($this->storeView instanceof BundleProductStoreView) {

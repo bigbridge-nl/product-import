@@ -96,12 +96,34 @@
 			<item>services-104-e2</item>
 		</related_products>
 	</virtual>
-	<simple sku="swimsuit-403">
+	<simple sku="macdonald-of-the-isles">
 		<attribute_set_name>Default</attribute_set_name>
 		<global>
-			<name>Swimsuit featuring fish</name>
+			<name>MacDonald of the Isles</name>
 			<price>19.95</price>
 		</global>
+		<images>
+			<image file_or_url="images/MacDonald_of_the_Isles_(MacIan).jpg">
+				<global>
+					<role>image</role>
+					<role>small_image</role>
+					<gallery_information label="Mac Donald of the Isles" position="1" enabled="1" />
+				</global>
+				<store_view code="default">
+					<gallery_information label="Mac Donald des Isles" position="2" enabled="0" />
+				</store_view>
+			</image>
+			<image file_or_url="images/MacDonald_of_the_Isles_(MacIan) - small.jpg">
+				<global>
+					<role>thumbnail</role>
+					<role>swatch_image</role>
+					<gallery_information label="Mac Donald of the Isles (small" position="2" enabled="1" />
+				</global>
+				<store_view code="default">
+					<gallery_information label="Mac Donald des Isles (petit)" position="1" enabled="0" />
+				</store_view>
+			</image>
+		</images>
 	</simple>
 	<configurable sku="scottish-table">
 		<attribute_set_name>Default</attribute_set_name>
