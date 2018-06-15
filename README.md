@@ -654,8 +654,8 @@ Set the title
 
 Set the the option sku, the price, the price type, and the title per value like this:
 
-    $product->global()->setCustomOptionValue($option1, "red", "1.00", Product::PRICE_TYPE_FIXED, 'Red');
-    $product->global()->setCustomOptionValue($option1, "green", "1.20", Product::PRICE_TYPE_FIXED, 'Green');
+    $product->global()->setCustomOptionValue($option1, "red", "1.00", ProductStoreView::PRICE_TYPE_FIXED, 'Red');
+    $product->global()->setCustomOptionValue($option1, "green", "1.20", ProductStoreView::PRICE_TYPE_FIXED, 'Green');
 
 Note that each of the value's sku's (here: red, green) must have a custom option value.
 

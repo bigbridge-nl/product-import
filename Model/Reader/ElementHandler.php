@@ -7,6 +7,7 @@ use BigBridge\ProductImport\Api\Data\BundleProductOption;
 use BigBridge\ProductImport\Api\Data\BundleProductSelection;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\CustomOption;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProductStoreView;
 use BigBridge\ProductImport\Api\Data\DownloadLink;
@@ -93,6 +94,15 @@ class ElementHandler
     /** @var TierPrice[] */
     protected $tierPrices;
 
+    /** @var CustomOption[] */
+    protected $customOptions;
+
+    /** @var CustomOption */
+    protected $customOption;
+
+    /** @var string[] */
+    protected $skuValues;
+
     /**
      * Attributes
      */
@@ -148,6 +158,21 @@ class ElementHandler
     const ROLE = "role";
     const TIER_PRICES = "tier_prices";
     const TIER_PRICE = "tier_price";
+    const CUSTOM_OPTIONS = "custom_options";
+    const CUSTOM_OPTION_TEXTFIELD = "custom_option_textfield";
+    const CUSTOM_OPTION_TEXTAREA = "custom_option_textarea";
+    const CUSTOM_OPTION_FILE = 'custom_option_file';
+    const CUSTOM_OPTION_DATE = "custom_option_date";
+    const CUSTOM_OPTION_DATETIME = "custom_option_datetime";
+    const CUSTOM_OPTION_TIME = "custom_option_time";
+    const CUSTOM_OPTION_DROPDOWN = "custom_option_dropdown";
+    const CUSTOM_OPTION_RADIO_BUTTONS = "custom_option_radio_buttons";
+    const CUSTOM_OPTION_CHECKBOX_GROUP = "custom_option_checkbox_group";
+    const CUSTOM_OPTION_MULTIPLE_SELECT = "custom_option_multiple_select";
+    const CUSTOM_OPTION_TITLE = "custom_option_title";
+    const CUSTOM_OPTION_PRICE = "custom_option_price";
+    const CUSTOM_OPTION_VALUE = "custom_option_value";
+    const SKU_VALUES = "sku_values";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -160,6 +185,7 @@ class ElementHandler
         self::RELATED_PRODUCT_SKUS,
         self::SUPER_ATTRIBUTE_CODES,
         self::VARIANT_SKUS,
+        self::SKU_VALUES
     ];
 
     protected $productTypes = [
@@ -169,6 +195,19 @@ class ElementHandler
         ConfigurableProduct::TYPE_CONFIGURABLE,
         BundleProduct::TYPE_BUNDLE,
         GroupedProduct::TYPE_GROUPED,
+    ];
+
+    protected $customOptionElements = [
+        self::CUSTOM_OPTION_TEXTFIELD,
+        self::CUSTOM_OPTION_TEXTAREA,
+        self::CUSTOM_OPTION_FILE,
+        self::CUSTOM_OPTION_DATE,
+        self::CUSTOM_OPTION_DATETIME,
+        self::CUSTOM_OPTION_TIME,
+        self::CUSTOM_OPTION_DROPDOWN,
+        self::CUSTOM_OPTION_RADIO_BUTTONS,
+        self::CUSTOM_OPTION_CHECKBOX_GROUP,
+        self::CUSTOM_OPTION_MULTIPLE_SELECT,
     ];
 
     public function __construct(Importer $importer)
@@ -207,6 +246,8 @@ class ElementHandler
                 $this->images = [];
             } elseif ($element === self::TIER_PRICES) {
                 $this->tierPrices = [];
+            } elseif ($element === self::CUSTOM_OPTIONS) {
+                $this->customOptions = [];
             }
 
             if ($scope === GroupedProduct::TYPE_GROUPED) {
@@ -263,6 +304,39 @@ class ElementHandler
             } elseif ($element === self::STORE_VIEW) {
                 $this->storeView = $this->product->storeView($attributes[self::CODE]);
             }
+        } elseif ($scope === self::CUSTOM_OPTIONS) {
+            if ($element === self::CUSTOM_OPTION_TEXTFIELD) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionTextField($attributes['sku'],
+                    $attributes['required'], $attributes['max_characters']);
+            } elseif ($element === self::CUSTOM_OPTION_TEXTAREA) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionTextArea($attributes['sku'],
+                    $attributes['required'], $attributes['max_characters']);
+            } elseif ($element === self::CUSTOM_OPTION_FILE) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionFile($attributes['sku'],
+                    $attributes['required'], $attributes['file_extensions'], $attributes['max_width'], $attributes['max_height']);
+            } elseif ($element === self::CUSTOM_OPTION_DATE) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionDate($attributes['sku'], $attributes['required']);
+            } elseif ($element === self::CUSTOM_OPTION_DATETIME) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionDateTime($attributes['sku'], $attributes['required']);
+            } elseif ($element === self::CUSTOM_OPTION_TIME) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionTime($attributes['sku'], $attributes['required']);
+            } elseif ($element === self::CUSTOM_OPTION_DROPDOWN) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionDropDown($attributes['required'], []);
+            } elseif ($element === self::CUSTOM_OPTION_RADIO_BUTTONS) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionRadioButtons($attributes['required'], []);
+            } elseif ($element === self::CUSTOM_OPTION_CHECKBOX_GROUP) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionCheckboxGroup($attributes['required'], []);
+            } elseif ($element === self::CUSTOM_OPTION_MULTIPLE_SELECT) {
+                $this->customOptions[] = $this->customOption = CustomOption::createCustomOptionMultipleSelect($attributes['required'], []);
+            }
+        } elseif (in_array($scope, $this->customOptionElements)) {
+            if ($element === self::GLOBAL) {
+                $this->storeView = $this->product->global();
+            } elseif ($element === self::STORE_VIEW) {
+                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+            } elseif ($element === self::SKU_VALUES) {
+                $this->skuValues = [];
+            }
         }
 
         if (in_array($element, $this->multiAttributes)) {
@@ -314,6 +388,8 @@ class ElementHandler
                 $this->product->setRelatedProductSkus($this->items);
             } elseif ($element === self::TIER_PRICES) {
                 $this->product->setTierPrices($this->tierPrices);
+            } elseif ($element === self::CUSTOM_OPTIONS) {
+                $this->product->setCustomOptions($this->customOptions);
             }
 
             if ($scope === ConfigurableProduct::TYPE_CONFIGURABLE) {
@@ -418,6 +494,12 @@ class ElementHandler
                 $this->storeView->setImageGalleryInformation($this->image, $attributes['label'], $attributes['position'], $attributes['enabled']);
             } elseif ($element === self::ROLE) {
                 $this->storeView->setImageRole($this->image, $value);
+            } elseif ($element === self::CUSTOM_OPTION_TITLE) {
+                $this->storeView->setCustomOptionTitle($this->customOption, $value);
+            } elseif ($element === self::CUSTOM_OPTION_PRICE) {
+                $this->storeView->setCustomOptionPrice($this->customOption, $attributes['price'], $attributes['price_type']);
+            } elseif ($element === self::CUSTOM_OPTION_VALUE) {
+                $this->storeView->setCustomOptionValue($this->customOption, $attributes['sku'], $attributes['price'], $attributes['price_type'], $attributes['title']);
             }
 
             if ($this->storeView instanceof BundleProductStoreView) {
@@ -535,6 +617,10 @@ class ElementHandler
                 $customerGroupName = isset($attributes['customer_group_name']) ? $attributes['customer_group_name'] : null;
                 $websiteCode = isset($attributes['website_code']) ? $attributes['website_code'] : null;
                 $this->tierPrices[] = new TierPrice($attributes['qty'], $attributes['value'], $customerGroupName, $websiteCode);
+            }
+        } elseif (in_array($scope, $this->customOptionElements)) {
+            if ($element === self::SKU_VALUES) {
+                $this->customOption->setValueSkus($this->items);
             }
         }
 

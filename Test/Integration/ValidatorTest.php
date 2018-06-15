@@ -316,8 +316,8 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
         ]);
 
         $product->global()->setCustomOptionTitle($color, "Color");
-        $product->global()->setCustomOptionValue($color, "red", "0.10", Product::PRICE_TYPE_FIXED, 'Red');
-        $product->global()->setCustomOptionValue($color, "green", "0.15", Product::PRICE_TYPE_FIXED, 'Green');
+        $product->global()->setCustomOptionValue($color, "red", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red');
+        $product->global()->setCustomOptionValue($color, "green", "0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green');
 
         /** @var Validator $validator */
         $validator = ObjectManager::getInstance()->get(Validator::class);

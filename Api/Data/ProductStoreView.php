@@ -64,6 +64,9 @@ class ProductStoreView
     const BASE_IMAGE = 'image';
     const THUMBNAIL_IMAGE = 'thumbnail';
 
+    const PRICE_TYPE_FIXED = 'fixed';
+    const PRICE_TYPE_PERCENT = 'percent';
+
     /**
      * For internal use only; not for application use
      * @var  Product
@@ -470,7 +473,7 @@ class ProductStoreView
      * @param CustomOption $customOption
      * @param string $sku
      * @param string $price
-     * @param string $priceType
+     * @param string $priceType One of the PRICE_TYPE_ constants in this class
      * @param string $title
      */
     public function setCustomOptionValue(CustomOption $customOption, string $sku, string $price, string $priceType, string $title)

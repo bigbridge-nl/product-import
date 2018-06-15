@@ -43,6 +43,14 @@ class CustomOption
         $this->fileExtensions = $fileExtensions;
         $this->imageSizeX = $imageSizeX;
         $this->imageSizeY = $imageSizeY;
+        $this->setValueSkus($valueSkus);
+    }
+
+    /**
+     * @param string[] $valueSkus
+     */
+    public function setValueSkus(array $valueSkus)
+    {
         $this->valueSkus = array_values(array_map('trim', $valueSkus));
     }
 

@@ -18,9 +18,6 @@ abstract class Product
     const ATTRIBUTE_SET_ID = 'attribute_set_id';
     const WEBSITE_IDS = 'website_ids';
 
-    const PRICE_TYPE_FIXED = 'fixed';
-    const PRICE_TYPE_PERCENT = 'percent';
-
     /** @var  int */
     public $id;
 
