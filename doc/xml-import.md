@@ -18,9 +18,12 @@ Booleans are specified as 0 or 1.
 
 ## Remove an attribute value
 
-To remove the value of a simple attribute, set the xml attribute "remove" to "true". For example
+To delete the value of a simple attribute from the database, use the element "delete" with the name of the attribute as its value.
+For example
 
-    <special_from_date remove="true" />
+    <delete code="special_from_date" />
+
+This only applies to global and store_view level attributes.
 
 ## Reference implementation
 

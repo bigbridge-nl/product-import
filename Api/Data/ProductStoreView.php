@@ -333,7 +333,7 @@ class ProductStoreView
      */
     public function setCustomAttribute(string $attributeCode, string $value = null)
     {
-        // not trimmed, because it may have textarea as input
+        // value is not trimmed, because it may have textarea as input, or it may be null
         $this->attributes[trim($attributeCode)] = $value;
     }
 

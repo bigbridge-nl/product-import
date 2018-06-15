@@ -104,15 +104,6 @@ class ElementHandler
     protected $skuValues;
 
     /**
-     * Attributes
-     */
-
-    const SKU = 'sku';
-    const CODE = "code";
-    const REMOVE = "remove";
-    const ID = 'id';
-
-    /**
      * Tags
      */
 
@@ -173,6 +164,7 @@ class ElementHandler
     const CUSTOM_OPTION_PRICE = "custom_option_price";
     const CUSTOM_OPTION_VALUE = "custom_option_value";
     const SKU_VALUES = "sku_values";
+    const DELETE = "delete";
 
     protected $multiAttributes = [
         self::CATEGORY_GLOBAL_NAMES,
@@ -239,7 +231,7 @@ class ElementHandler
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
-                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+                $this->storeView = $this->product->storeView($attributes['code']);
             } elseif ($element === self::STOCK) {
                 $this->defaultStockItem = $this->product->defaultStockItem();
             } elseif ($element === self::IMAGES) {
@@ -277,7 +269,7 @@ class ElementHandler
             } elseif ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
-                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+                $this->storeView = $this->product->storeView($attributes['code']);
             }
         } elseif ($scope === self::DOWNLOAD_LINKS) {
             if ($element === self::DOWNLOAD_LINK) {
@@ -292,7 +284,7 @@ class ElementHandler
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
-                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+                $this->storeView = $this->product->storeView($attributes['code']);
             }
         } elseif ($scope === self::IMAGES) {
             if ($element === self::IMAGE) {
@@ -302,7 +294,7 @@ class ElementHandler
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
-                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+                $this->storeView = $this->product->storeView($attributes['code']);
             }
         } elseif ($scope === self::CUSTOM_OPTIONS) {
             if ($element === self::CUSTOM_OPTION_TEXTFIELD) {
@@ -333,7 +325,7 @@ class ElementHandler
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
-                $this->storeView = $this->product->storeView($attributes[self::CODE]);
+                $this->storeView = $this->product->storeView($attributes['code']);
             } elseif ($element === self::SKU_VALUES) {
                 $this->skuValues = [];
             }
@@ -428,10 +420,6 @@ class ElementHandler
 
         } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
 
-            if (array_key_exists(self::REMOVE, $attributes) && $attributes[self::REMOVE] === "1") {
-                $value = null;
-            }
-
             if ($element === ProductStoreView::ATTR_NAME) {
                 $this->storeView->setName($value);
             } elseif ($element === ProductStoreView::ATTR_PRICE) {
@@ -452,6 +440,8 @@ class ElementHandler
                 if ($value === "1") {
                     $this->storeView->generateUrlKey();
                 }
+            } elseif ($element === self::DELETE) {
+                $this->storeView->setCustomAttribute($attributes['code'], null);
             } elseif ($element === ProductStoreView::ATTR_GIFT_MESSAGE_AVAILABLE) {
                 $this->storeView->setGiftMessageAvailable($value);
             } elseif ($element === ProductStoreView::ATTR_META_TITLE) {
@@ -485,11 +475,11 @@ class ElementHandler
             } elseif ($element === ProductStoreView::ATTR_COLOR) {
                 $this->storeView->setColor($value);
             } elseif ($element === self::SELECT) {
-                $this->storeView->setSelectAttribute($attributes[self::CODE], $value);
+                $this->storeView->setSelectAttribute($attributes['code'], $value);
             } elseif ($element === self::MULTI_SELECT) {
-                $this->storeView->setMultipleSelectAttribute($attributes[self::CODE], $this->items);
+                $this->storeView->setMultipleSelectAttribute($attributes['code'], $this->items);
             } elseif ($element === self::CUSTOM) {
-                $this->storeView->setCustomAttribute($attributes[self::CODE], $value);
+                $this->storeView->setCustomAttribute($attributes['code'], $value);
             } elseif ($element === self::GALLERY_INFORMATION) {
                 $this->storeView->setImageGalleryInformation($this->image, $attributes['label'], $attributes['position'], $attributes['enabled']);
             } elseif ($element === self::ROLE) {
@@ -499,7 +489,8 @@ class ElementHandler
             } elseif ($element === self::CUSTOM_OPTION_PRICE) {
                 $this->storeView->setCustomOptionPrice($this->customOption, $attributes['price'], $attributes['price_type']);
             } elseif ($element === self::CUSTOM_OPTION_VALUE) {
-                $this->storeView->setCustomOptionValue($this->customOption, $attributes['sku'], $attributes['price'], $attributes['price_type'], $attributes['title']);
+                $this->storeView->setCustomOptionValue($this->customOption, $attributes['sku'], $attributes['price'],
+                    $attributes['price_type'], $attributes['title']);
             }
 
             if ($this->storeView instanceof BundleProductStoreView) {
@@ -639,7 +630,7 @@ class ElementHandler
      */
     protected function createProduct($parser, string $type, array $attributes)
     {
-        $sku = $attributes[self::SKU];
+        $sku = $attributes['sku'];
 
         if ($type === SimpleProduct::TYPE_SIMPLE) {
             $product = new SimpleProduct($sku);
@@ -653,12 +644,10 @@ class ElementHandler
             $product = new BundleProduct($sku);
         } elseif ($type === GroupedProduct::TYPE_GROUPED) {
             $product = new GroupedProduct($sku);
-        } else {
-            throw new Exception("Unknown type: " . $type . " in line " . xml_get_current_line_number($parser));
         }
 
-        if (isset($attributes[self::ID])) {
-            $product->id = $attributes[self::ID];
+        if (isset($attributes['id'])) {
+            $product->id = $attributes['id'];
         }
 
         $product->lineNumber = xml_get_current_line_number($parser);

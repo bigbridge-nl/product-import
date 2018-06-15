@@ -69,8 +69,7 @@
 			<name>Filling in tax form</name>
 			<price>79.95</price>
 			<url_key>filling-in-tax-form</url_key>
-			<special_from_date remove="1" />
-			<custom code="weight">0.9</custom>
+			<delete code="weight" />
 			<select code="color">Blue</select>
 			<multi_select code="color_group">
 				<item>Red</item>

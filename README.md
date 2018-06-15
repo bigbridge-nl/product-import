@@ -1,6 +1,6 @@
 # BigBridge Product Import
 
-Imports product data into Magento 2 via direct database access.
+A library to imports product data into Magento 2 via direct database access.
 
 Hi! My name is Patrick van Bergen. I created this library because I needed product import to be fast.
 
@@ -31,6 +31,7 @@ This library just helps you to get products into Magento's database quickly, low
 * product type changes
 * a solution for the problem that linked products have not been imported yet
 * dry run (no products are written to the database)
+* XML file import
 
 ## Indexing
 
