@@ -264,3 +264,10 @@ I used [XSD/XML Schema generator](https://www.freeformatter.com/xsd-generator.ht
 * generate xsd from some-products.xml, choose XSD design "Russion Doll"
 
 You will probably wonder why I used such an old PHP XML parser (xml_parse). That's because I wanted to importer to handle very large files, and claim a fixed, small amount of memory, and I wanted it to print line numbers in the error message.
+
+When I use xsd validation on my computer I get this error
+
+    '' is not a valid value of the atomic type 'xs:int'
+
+and similar errors. This is a [known error](https://bugs.launchpad.net/lxml/+bug/1615510). I changed all integer and boolean attributes types to string for this reason. And I added an option --skip-xsd for users that have other problems with this library.
+

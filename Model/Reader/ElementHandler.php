@@ -21,7 +21,6 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Importer;
-use BigBridge\ProductImport\Model\Data\Image;
 use Exception;
 
 /**

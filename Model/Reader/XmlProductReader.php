@@ -29,10 +29,10 @@ class XmlProductReader
     /**
      * @param string $xmlPath
      * @param ImportConfig $config
+     * @param bool $skipXsdValidation
      * @param ProductImportLogger $output
-     * @throws Exception
      */
-    public function import(string $xmlPath, ImportConfig $config, ProductImportLogger $output)
+    public function import(string $xmlPath, ImportConfig $config, bool $skipXsdValidation, ProductImportLogger $output)
     {
         $time = date('H:i:s');
         $output->info("{$time} Import start");
@@ -45,9 +45,11 @@ class XmlProductReader
 
             $importer = $this->importerFactory->createImporter($config);
 
-            $validationErrors = $this->validateXmlFile($xmlPath);
-#todo: remove
-$validationErrors = [];
+            $validationErrors = [];
+
+            if (!$skipXsdValidation) {
+                $validationErrors = $this->validateXmlFile($xmlPath);
+            }
 
             foreach ($validationErrors as $error) {
                 $output->error($error);

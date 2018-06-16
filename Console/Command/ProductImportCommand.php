@@ -26,13 +26,12 @@ class ProductImportCommand extends Command
     const OPTION_PATH_SEPARATOR = 'path-separator';
     const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
     const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
+    const OPTION_URL_KEY_SOURCE = "url-key-source";
+    const OPTION_URL_KEY_STRATEGY = "url-key-strategy";
+    const SKIP_XSD = "skip-xsd";
 
     /** @var XmlProductReader */
     protected $xmlProductReader;
-
-    const OPTION_URL_KEY_SOURCE = "url-key-source";
-
-    const OPTION_URL_KEY_STRATEGY = "url-key-strategy";
 
     public function __construct(
         XmlProductReader $xmlProductReader,
@@ -57,6 +56,12 @@ class ProductImportCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Prepares and validates products, but does not import'
+            ),
+            new InputOption(
+                self::OPTION_IMAGE_SOURCE_DIR,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Base directory for source images with relative paths'
             ),
             new InputOption(
                 self::OPTION_AUTO_CREATE_OPTION,
@@ -86,26 +91,6 @@ class ProductImportCommand extends Command
                 ImportConfig::EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD
             ),
             new InputOption(
-                self::OPTION_PATH_SEPARATOR,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Category name path separator',
-                ImportConfig::DEFAULT_CATEGORY_PATH_SEPARATOR
-            ),
-            new InputOption(
-                self::OPTION_IMAGE_SOURCE_DIR,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Base directory for source images with relative paths'
-            ),
-            new InputOption(
-                self::OPTION_IMAGE_CACHE_DIR,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Base directory where images will be cached during import',
-                ImportConfig::TEMP_PRODUCT_IMAGE_PATH
-            ),
-            new InputOption(
                 self::OPTION_URL_KEY_SOURCE,
                 null,
                 InputOption::VALUE_OPTIONAL,
@@ -118,6 +103,26 @@ class ProductImportCommand extends Command
                 InputOption::VALUE_OPTIONAL,
                 "Action for duplicate url key: error, add-sku, add-serial",
                 ImportConfig::DUPLICATE_KEY_STRATEGY_ERROR
+            ),
+            new InputOption(
+                self::OPTION_PATH_SEPARATOR,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Category name path separator',
+                ImportConfig::DEFAULT_CATEGORY_PATH_SEPARATOR
+            ),
+            new InputOption(
+                self::OPTION_IMAGE_CACHE_DIR,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Base directory where images will be cached during import',
+                ImportConfig::TEMP_PRODUCT_IMAGE_PATH
+            ),
+            new InputOption(
+                self::SKIP_XSD,
+                null,
+                InputOption::VALUE_NONE,
+                "Skip XSD validation of the XML file"
             ),
         ]);
     }
@@ -149,8 +154,10 @@ class ProductImportCommand extends Command
 
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 
+        $skipXsdValidation = $input->getOption(self::SKIP_XSD);
+
         // import!
-        $this->xmlProductReader->import($fileName, $config, $logger);
+        $this->xmlProductReader->import($fileName, $config, $skipXsdValidation, $logger);
 
         if (!$logger->hasErrorOccurred() && $logger->getFailedProductCount() === 0) {
             return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
