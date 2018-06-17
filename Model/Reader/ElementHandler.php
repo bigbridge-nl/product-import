@@ -21,6 +21,7 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\Importer;
+use BigBridge\ProductImport\Model\Data\Image;
 use Exception;
 
 /**
@@ -227,6 +228,12 @@ class ElementHandler
                 $this->product = $this->createProduct($parser, $element, $attributes);
             }
         } elseif (in_array($scope, $this->productTypes)) {
+
+            // fix the fact that the XSD validator allows skipping the <import> tag altogether
+            if ($this->product === null) {
+                throw new Exception("Missing top level <import> element");
+            }
+
             if ($element === self::GLOBAL) {
                 $this->storeView = $this->product->global();
             } elseif ($element === self::STORE_VIEW) {
@@ -643,6 +650,8 @@ class ElementHandler
             $product = new BundleProduct($sku);
         } elseif ($type === GroupedProduct::TYPE_GROUPED) {
             $product = new GroupedProduct($sku);
+        } else {
+            throw new Exception("Unknowne product: " . $type);
         }
 
         if (isset($attributes['id'])) {
