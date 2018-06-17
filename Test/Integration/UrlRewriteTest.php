@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
 use Exception;
 use Magento\Framework\App\ObjectManager;
@@ -52,7 +53,6 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         self::$db->execute("DELETE FROM `{$table}` WHERE request_path LIKE '%product-import.html'");
     }
 
-
     /**
      * @throws Exception
      */
@@ -86,6 +86,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $global->setName("Big Purple Box");
         $global->setPrice("1.25");
         $global->setUrlKey($urlKey);
+        $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
 
         $importer->importSimpleProduct($product);
 
@@ -106,6 +107,76 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
             ['product', 'colored-things/containers/' . $urlKey . '.html', 'catalog/product/view/id/' . $product->id . '/category/' . $c2b, '0', '1', '1', serialize(['category_id' => (string)$c2b])],
             ['product', 'colored-things/containers/large/' . $urlKey . '.html', 'catalog/product/view/id/' . $product->id . '/category/' . $c2c, '0', '1', '1', serialize(['category_id' => (string)$c2c])],
         ];
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testNoUrlRewrites()
+    {
+        /** @var Magento2DbConnection $db */
+        $db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+        /** @var MetaData $metadata */
+        $metadata = ObjectManager::getInstance()->get(MetaData::class);
+
+        $config = new ImportConfig();
+        $config->magentoVersion = '2.1.8';
+
+        $importer = self::$factory->createImporter($config);
+
+        $sku1 = uniqid("bb");
+        $urlKey = 'u' . $sku1;
+
+        $product = new SimpleProduct($sku1);
+        $product->setAttributeSetByName("Default");
+
+        $global = $product->global();
+        $global->setName("Big Purple Box");
+        $global->setPrice("1.25");
+        $global->setUrlKey($urlKey);
+        // note: no visibility
+
+        $importer->importSimpleProduct($product);
+
+        $importer->flush();
+
+        $this->assertEquals([], $product->getErrors());
+
+        $actual = $db->fetchAllNonAssoc("
+            SELECT * FROM `{$metadata->urlRewriteTable}` 
+            WHERE `store_id` = 1 AND `entity_id` = {$product->id}
+            ORDER BY `url_rewrite_id`
+        ");
+
+        $expected = [];
+
+        $this->assertEquals($expected, $actual);
+
+        $product = new SimpleProduct($sku1);
+        $product->setAttributeSetByName("Default");
+
+        $global = $product->global();
+        $global->setName("Big Purple Box");
+        $global->setPrice("1.25");
+        $global->setUrlKey($urlKey);
+        // note: visibility: not visible individually
+        $global->setVisibility(ProductStoreView::VISIBILITY_NOT_VISIBLE);
+
+        $importer->importSimpleProduct($product);
+
+        $importer->flush();
+
+        $this->assertEquals([], $product->getErrors());
+
+        $actual = $db->fetchAllNonAssoc("
+            SELECT * FROM `{$metadata->urlRewriteTable}` 
+            WHERE `store_id` = 1 AND `entity_id` = {$product->id}
+            ORDER BY `url_rewrite_id`
+        ");
+
+        $expected = [];
 
         $this->assertEquals($expected, $actual);
     }
@@ -140,6 +211,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $product1->addCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Turquoise Box product-import");
         $product1->global()->setPrice("2.75");
+        $product1->global()->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
         $product1->global()->generateUrlKey();
 
         // same sku, different store view
@@ -155,6 +227,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $product3->addCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Green Box product-import");
         $product3->global()->setPrice("2.65");
+        $product3->global()->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
         $product3->global()->generateUrlKey();
 
         $importer->importSimpleProduct($product3);
@@ -281,6 +354,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $product1->addCategoriesByGlobalName(["Boxes"]);
         $product1->global()->setName("Big Red Box product-import");
         $product1->global()->setPrice("2.75");
+        $product1->global()->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
         $product1->global()->generateUrlKey();
 
         $default = $product1->storeView('default');
@@ -295,6 +369,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $product3->addCategoriesByGlobalName(["Boxes"]);
         $product3->global()->setName("Big Grass Yellow Box product-import");
         $product3->global()->setPrice("2.65");
+        $product3->global()->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
         $product3->global()->generateUrlKey();
 
         $importer->importSimpleProduct($product3);

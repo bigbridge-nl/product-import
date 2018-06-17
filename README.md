@@ -14,6 +14,14 @@ Use this library if you need speed and don't care about any plugins or custom ev
 
 This library just helps you to get products into Magento's database quickly, low level.
 
+## Assumptions
+
+* For Magento 2.1+ Opensource Edition
+* Requires >= PHP 7.0
+* Input in UTF-8 (Magento standard)
+* MySQL max_packet_size on both MySQL client and MySQL server must be at least 1 MB (Which will be the case if the value wasn't deliberately lowered from the default)
+* Unix system (not tested on Windows)
+
 ## Features
 
 * insert, update and delete products
@@ -25,13 +33,14 @@ This library just helps you to get products into Magento's database quickly, low
 * image caching (local and HTTP cache)
 * custom options
 * unique url_key generation
+* url_rewrite creation
 * whitespace trimming (spaces, tabs, newlines) from all fields, except free field texts
 * attribute deletion
 * input validation (data type, requiredness,  and length restrictions)
 * product type changes
-* a solution for the problem that linked products have not been imported yet
+* importing links to products have not been imported yet
 * dry run (no products are written to the database)
-* XML file import
+* [XML file import](doc/xml-import.md)
 
 ## Indexing
 
@@ -602,6 +611,12 @@ The url will then look something like this
 
     https://myshop.com/synthetisch-kinderdekbed-4-seizoenen-kdb-18004.html
 
+## Url rewrites
+
+Entries in the table url_rewrite are automatically generated, but only if the attribute visibility is set and is not equal to ProductStoreView::VISIBILITY_NOT_VISIBLE.
+
+This is default Magento behaviour. Invisible products (like most configurable variants) need no urls.
+
 ## Custom options
 
 Magento allows you to specify unique "attributes" to a product that are applicable to that single product alone. These are called custom options.
@@ -697,14 +712,6 @@ Note that dry run does not imply that no changes are made to the database in a d
 ## Changes to Magento
 
 The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to catalog_product_entity_varchar because it drastically speeds up checking for duplicate url_keys.
-
-## Assumptions
-
-* For Magento 2.1+ Opensource Edition
-* Requires >= PHP 7.0
-* Input in UTF-8 (Magento standard)
-* MySQL max_packet_size on both MySQL client and MySQL server must be at least 1 MB (Which will be the case if the value wasn't deliberately lowered from the default)
-* Unix system (not tested on Windows)
 
 ## Thanks to
 

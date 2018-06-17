@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\UrlRewriteInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
@@ -83,6 +84,13 @@ class UrlRewriteStorage
 
         $changedProducts = [];
         foreach ($products as $product) {
+
+            // skip products that are not visible individually
+            $visibility = $product->global()->getAttribute(ProductStoreView::ATTR_VISIBILITY);
+            if ($visibility === null || $visibility === ProductStoreView::VISIBILITY_NOT_VISIBLE) {
+                continue;
+            }
+
             foreach ($product->getStoreViews() as $storeView) {
 
                 $storeViewId = $storeView->getStoreViewId();

@@ -14,6 +14,11 @@ All options are listed with --help
 
 See doc/example for some examples of import files.
 
+* a-basic-product.xml - contains the basic attributes needed to put a product on a frontend website
+* a-bundle.xml - contains just the attributes of this type
+* all-custom-options.xml - highlights custom options
+* some-products.xml - my test-file with all products and features
+
 ## Remarks
 
 Booleans should be entered as 0 or 1.
