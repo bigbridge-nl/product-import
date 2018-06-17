@@ -14,6 +14,7 @@ use BigBridge\ProductImport\Model\Data\Placeholder;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\Storage\BundleStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ConfigurableStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\DownloadableStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\GroupedStorage;
 
 /**
@@ -36,18 +37,23 @@ class ProductTypeChanger
     /** @var BundleStorage */
     protected $bundleStorage;
 
+    /** @var DownloadableStorage */
+    protected $downloadableStorage;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
         ConfigurableStorage $configurableStorage,
         GroupedStorage $groupedStorage,
-        BundleStorage $bundleStorage)
+        BundleStorage $bundleStorage,
+        DownloadableStorage $downloadableStorage)
     {
         $this->db = $db;
         $this->metaData = $metaData;
         $this->groupedStorage = $groupedStorage;
         $this->bundleStorage = $bundleStorage;
         $this->configurableStorage = $configurableStorage;
+        $this->downloadableStorage = $downloadableStorage;
     }
 
     public function handleTypeChanges(array $updatedProducts, ImportConfig $config)
@@ -94,7 +100,12 @@ class ProductTypeChanger
         }
 
         if ($config->productTypeChange === ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE) {
-            if (in_array($oldType, [GroupedProduct::TYPE_GROUPED, BundleProduct::TYPE_BUNDLE, ConfigurableProduct::TYPE_CONFIGURABLE])) {
+            if (in_array($oldType, [
+                GroupedProduct::TYPE_GROUPED,
+                BundleProduct::TYPE_BUNDLE,
+                ConfigurableProduct::TYPE_CONFIGURABLE,
+                DownloadableProduct::TYPE_DOWNLOADABLE
+            ])) {
                 $product->addError("Type conversion losing data from {$oldType} to {$newType} is not allowed");
                 return;
             }
@@ -111,7 +122,9 @@ class ProductTypeChanger
         switch ($oldType) {
             case SimpleProduct::TYPE_SIMPLE:
             case VirtualProduct::TYPE_VIRTUAL:
+                break;
             case DownloadableProduct::TYPE_DOWNLOADABLE:
+                $this->downloadableStorage->removeLinksAndSamples([$product]);
                 break;
             case GroupedProduct::TYPE_GROUPED:
                 $this->groupedStorage->removeLinkedProducts([$product]);

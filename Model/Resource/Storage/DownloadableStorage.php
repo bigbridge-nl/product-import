@@ -300,4 +300,9 @@ class DownloadableStorage
         return $actualStoragePath;
     }
 
+    public function removeLinksAndSamples(array $products)
+    {
+        $this->removeLinks($products);
+        $this->removeSamples($products);
+    }
 }
