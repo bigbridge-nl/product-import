@@ -1,30 +1,22 @@
-<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<xs:element name="name" type="xs:string"/>
-	<xs:element name="price" type="xs:float"/>
-	<xs:element name="status" type="xs:byte"/>
-	<xs:element name="gift_message_available" type="xs:byte"/>
-	<xs:element name="visibility" type="xs:byte"/>
+	<xs:element name="price" type="xs:string"/>
+	<xs:element name="status" type="xs:string"/>
+	<xs:element name="gift_message_available" type="xs:string"/>
+	<xs:element name="visibility" type="xs:string"/>
 	<xs:element name="tax_class_name" type="xs:string"/>
-	<xs:element name="generate_url_key" type="xs:byte"/>
+	<xs:element name="generate_url_key" type="xs:string"/>
 	<xs:element name="description" type="xs:string"/>
 	<xs:element name="short_description" type="xs:string"/>
 	<xs:element name="meta_title" type="xs:string"/>
 	<xs:element name="meta_description" type="xs:string"/>
 	<xs:element name="meta_keywords" type="xs:string"/>
-	<xs:element name="cost" type="xs:float"/>
-	<xs:element name="msrp" type="xs:float"/>
-	<xs:element name="msrp_display_actual_price_type" type="xs:byte"/>
-	<xs:element name="weight" type="xs:float"/>
-	<xs:element name="special_price" type="xs:float"/>
-	<xs:element name="special_from_date">
-		<xs:complexType>
-			<xs:simpleContent>
-				<xs:extension base="xs:string">
-					<xs:attribute type="xs:byte" name="remove" use="optional"/>
-				</xs:extension>
-			</xs:simpleContent>
-		</xs:complexType>
-	</xs:element>
+	<xs:element name="cost" type="xs:string"/>
+	<xs:element name="msrp" type="xs:string"/>
+	<xs:element name="msrp_display_actual_price_type" type="xs:string"/>
+	<xs:element name="weight" type="xs:string"/>
+	<xs:element name="special_price" type="xs:string"/>
+	<xs:element name="special_from_date" type="xs:date"/>
 	<xs:element name="special_to_date" type="xs:date"/>
 	<xs:element name="news_from_date" type="xs:date"/>
 	<xs:element name="news_to_date" type="xs:date"/>
@@ -32,34 +24,34 @@
 	<xs:element name="country_of_manufacture" type="xs:string"/>
 	<xs:element name="color" type="xs:string"/>
 	<xs:element name="item" type="xs:string"/>
-	<xs:element name="qty" type="xs:byte"/>
-	<xs:element name="is_in_stock" type="xs:byte"/>
-	<xs:element name="min_qty" type="xs:float"/>
-	<xs:element name="notify_stock_qty" type="xs:float"/>
-	<xs:element name="min_sale_qty" type="xs:float"/>
-	<xs:element name="max_sale_qty" type="xs:float"/>
-	<xs:element name="qty_increments" type="xs:float"/>
+	<xs:element name="qty" type="xs:string"/>
+	<xs:element name="is_in_stock" type="xs:string"/>
+	<xs:element name="min_qty" type="xs:string"/>
+	<xs:element name="notify_stock_qty" type="xs:string"/>
+	<xs:element name="min_sale_qty" type="xs:string"/>
+	<xs:element name="max_sale_qty" type="xs:string"/>
+	<xs:element name="qty_increments" type="xs:string"/>
 	<xs:element name="low_stock_date" type="xs:date"/>
-	<xs:element name="use_config_min_qty" type="xs:byte"/>
-	<xs:element name="is_qty_decimal" type="xs:byte"/>
-	<xs:element name="backorders" type="xs:byte"/>
-	<xs:element name="use_config_backorders" type="xs:byte"/>
-	<xs:element name="use_config_min_sale_qty" type="xs:byte"/>
-	<xs:element name="use_config_max_sale_qty" type="xs:byte"/>
-	<xs:element name="use_config_notify_stock_qty" type="xs:byte"/>
-	<xs:element name="manage_stock" type="xs:byte"/>
-	<xs:element name="use_config_manage_stock" type="xs:byte"/>
-	<xs:element name="stock_status_changed_auto" type="xs:byte"/>
-	<xs:element name="use_config_qty_increments" type="xs:byte"/>
-	<xs:element name="use_config_enable_qty_inc" type="xs:byte"/>
-	<xs:element name="enable_qty_increments" type="xs:byte"/>
-	<xs:element name="is_decimal_divided" type="xs:byte"/>
+	<xs:element name="use_config_min_qty" type="xs:string"/>
+	<xs:element name="is_qty_decimal" type="xs:string"/>
+	<xs:element name="backorders" type="xs:string"/>
+	<xs:element name="use_config_backorders" type="xs:string"/>
+	<xs:element name="use_config_min_sale_qty" type="xs:string"/>
+	<xs:element name="use_config_max_sale_qty" type="xs:string"/>
+	<xs:element name="use_config_notify_stock_qty" type="xs:string"/>
+	<xs:element name="manage_stock" type="xs:string"/>
+	<xs:element name="use_config_manage_stock" type="xs:string"/>
+	<xs:element name="stock_status_changed_auto" type="xs:string"/>
+	<xs:element name="use_config_qty_increments" type="xs:string"/>
+	<xs:element name="use_config_enable_qty_inc" type="xs:string"/>
+	<xs:element name="enable_qty_increments" type="xs:string"/>
+	<xs:element name="is_decimal_divided" type="xs:string"/>
 	<xs:element name="attribute_set_name" type="xs:string"/>
 	<xs:element name="global">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="name"/>
-				<xs:element ref="price"/>
+				<xs:element ref="name" minOccurs="0"/>
+				<xs:element ref="price" minOccurs="0"/>
 				<xs:element ref="status" minOccurs="0"/>
 				<xs:element ref="gift_message_available" minOccurs="0"/>
 				<xs:element ref="visibility" minOccurs="0"/>
@@ -75,7 +67,6 @@
 				<xs:element ref="msrp_display_actual_price_type" minOccurs="0"/>
 				<xs:element ref="weight" minOccurs="0"/>
 				<xs:element ref="special_price" minOccurs="0"/>
-				<xs:element ref="url_key" minOccurs="0"/>
 				<xs:element ref="special_from_date" minOccurs="0"/>
 				<xs:element ref="special_to_date" minOccurs="0"/>
 				<xs:element ref="news_from_date" minOccurs="0"/>
@@ -83,18 +74,78 @@
 				<xs:element ref="manufacturer" minOccurs="0"/>
 				<xs:element ref="country_of_manufacture" minOccurs="0"/>
 				<xs:element ref="color" minOccurs="0"/>
-				<xs:element ref="custom" minOccurs="0"/>
+				<xs:element ref="custom_option_title" minOccurs="0"/>
+				<xs:element ref="custom_option_price" minOccurs="0"/>
+				<xs:element ref="custom_option_value" maxOccurs="unbounded" minOccurs="0"/>
+				<xs:element ref="url_key" minOccurs="0"/>
+				<xs:element ref="delete" minOccurs="0"/>
 				<xs:element ref="select" minOccurs="0"/>
 				<xs:element ref="multi_select" minOccurs="0"/>
+				<xs:element ref="role" maxOccurs="unbounded" minOccurs="0"/>
+				<xs:element ref="gallery_information" minOccurs="0"/>
+				<xs:element ref="option_title" minOccurs="0"/>
+				<xs:element ref="price_type" minOccurs="0"/>
+				<xs:element ref="sku_type" minOccurs="0"/>
+				<xs:element ref="weight_type" minOccurs="0"/>
+				<xs:element ref="price_view" minOccurs="0"/>
+				<xs:element ref="shipment_type" minOccurs="0"/>
+				<xs:element ref="download_link_information" minOccurs="0"/>
+				<xs:element ref="download_sample_information" minOccurs="0"/>
+				<xs:element ref="links_purchased_separately" minOccurs="0"/>
+				<xs:element ref="links_title" minOccurs="0"/>
+				<xs:element ref="samples_title" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="store_view">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="price"/>
+				<xs:element ref="name" minOccurs="0"/>
+				<xs:element ref="price" minOccurs="0"/>
+				<xs:element ref="status" minOccurs="0"/>
+				<xs:element ref="gift_message_available" minOccurs="0"/>
+				<xs:element ref="visibility" minOccurs="0"/>
+				<xs:element ref="tax_class_name" minOccurs="0"/>
+				<xs:element ref="generate_url_key" minOccurs="0"/>
+				<xs:element ref="description" minOccurs="0"/>
+				<xs:element ref="short_description" minOccurs="0"/>
+				<xs:element ref="meta_title" minOccurs="0"/>
+				<xs:element ref="meta_description" minOccurs="0"/>
+				<xs:element ref="meta_keywords" minOccurs="0"/>
+				<xs:element ref="cost" minOccurs="0"/>
+				<xs:element ref="msrp" minOccurs="0"/>
+				<xs:element ref="msrp_display_actual_price_type" minOccurs="0"/>
+				<xs:element ref="weight" minOccurs="0"/>
+				<xs:element ref="special_price" minOccurs="0"/>
+				<xs:element ref="special_from_date" minOccurs="0"/>
+				<xs:element ref="special_to_date" minOccurs="0"/>
+				<xs:element ref="news_from_date" minOccurs="0"/>
+				<xs:element ref="news_to_date" minOccurs="0"/>
+				<xs:element ref="manufacturer" minOccurs="0"/>
+				<xs:element ref="country_of_manufacture" minOccurs="0"/>
+				<xs:element ref="color" minOccurs="0"/>
+				<xs:element ref="custom_option_title" minOccurs="0"/>
+				<xs:element ref="custom_option_price" minOccurs="0"/>
+				<xs:element ref="custom_option_value" maxOccurs="unbounded" minOccurs="0"/>
+				<xs:element ref="url_key" minOccurs="0"/>
+				<xs:element ref="delete" minOccurs="0"/>
+				<xs:element ref="select" minOccurs="0"/>
+				<xs:element ref="multi_select" minOccurs="0"/>
+				<xs:element ref="role" maxOccurs="unbounded" minOccurs="0"/>
+				<xs:element ref="gallery_information" minOccurs="0"/>
+				<xs:element ref="option_title" minOccurs="0"/>
+				<xs:element ref="price_type" minOccurs="0"/>
+				<xs:element ref="sku_type" minOccurs="0"/>
+				<xs:element ref="weight_type" minOccurs="0"/>
+				<xs:element ref="price_view" minOccurs="0"/>
+				<xs:element ref="shipment_type" minOccurs="0"/>
+				<xs:element ref="download_link_information" minOccurs="0"/>
+				<xs:element ref="download_sample_information" minOccurs="0"/>
+				<xs:element ref="links_purchased_separately" minOccurs="0"/>
+				<xs:element ref="links_title" minOccurs="0"/>
+				<xs:element ref="samples_title" minOccurs="0"/>
 			</xs:sequence>
-			<xs:attribute type="xs:string" name="code"/>
+			<xs:attribute type="xs:string" name="code" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="category_global_names">
@@ -107,44 +158,44 @@
 	<xs:element name="website_codes">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="item"/>
+				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="stock">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="qty"/>
-				<xs:element ref="is_in_stock"/>
-				<xs:element ref="min_qty"/>
-				<xs:element ref="notify_stock_qty"/>
-				<xs:element ref="min_sale_qty"/>
-				<xs:element ref="max_sale_qty"/>
-				<xs:element ref="qty_increments"/>
-				<xs:element ref="low_stock_date"/>
-				<xs:element ref="use_config_min_qty"/>
-				<xs:element ref="is_qty_decimal"/>
-				<xs:element ref="backorders"/>
-				<xs:element ref="use_config_backorders"/>
-				<xs:element ref="use_config_min_sale_qty"/>
-				<xs:element ref="use_config_max_sale_qty"/>
-				<xs:element ref="use_config_notify_stock_qty"/>
-				<xs:element ref="manage_stock"/>
-				<xs:element ref="use_config_manage_stock"/>
-				<xs:element ref="stock_status_changed_auto"/>
-				<xs:element ref="use_config_qty_increments"/>
-				<xs:element ref="use_config_enable_qty_inc"/>
-				<xs:element ref="enable_qty_increments"/>
-				<xs:element ref="is_decimal_divided"/>
-			</xs:sequence>
+			<xs:all>
+				<xs:element ref="qty" minOccurs="0"/>
+				<xs:element ref="is_in_stock" minOccurs="0"/>
+				<xs:element ref="min_qty" minOccurs="0"/>
+				<xs:element ref="notify_stock_qty" minOccurs="0"/>
+				<xs:element ref="min_sale_qty" minOccurs="0"/>
+				<xs:element ref="max_sale_qty" minOccurs="0"/>
+				<xs:element ref="qty_increments" minOccurs="0"/>
+				<xs:element ref="low_stock_date" minOccurs="0"/>
+				<xs:element ref="use_config_min_qty" minOccurs="0"/>
+				<xs:element ref="is_qty_decimal" minOccurs="0"/>
+				<xs:element ref="backorders" minOccurs="0"/>
+				<xs:element ref="use_config_backorders" minOccurs="0"/>
+				<xs:element ref="use_config_min_sale_qty" minOccurs="0"/>
+				<xs:element ref="use_config_max_sale_qty" minOccurs="0"/>
+				<xs:element ref="use_config_notify_stock_qty" minOccurs="0"/>
+				<xs:element ref="manage_stock" minOccurs="0"/>
+				<xs:element ref="use_config_manage_stock" minOccurs="0"/>
+				<xs:element ref="stock_status_changed_auto" minOccurs="0"/>
+				<xs:element ref="use_config_qty_increments" minOccurs="0"/>
+				<xs:element ref="use_config_enable_qty_inc" minOccurs="0"/>
+				<xs:element ref="enable_qty_increments" minOccurs="0"/>
+				<xs:element ref="is_decimal_divided" minOccurs="0"/>
+			</xs:all>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="url_key" type="xs:string"/>
-	<xs:element name="custom">
+	<xs:element name="delete">
 		<xs:complexType>
 			<xs:simpleContent>
-				<xs:extension base="xs:float">
-					<xs:attribute type="xs:string" name="code"/>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="code" use="required"/>
 				</xs:extension>
 			</xs:simpleContent>
 		</xs:complexType>
@@ -153,7 +204,7 @@
 		<xs:complexType>
 			<xs:simpleContent>
 				<xs:extension base="xs:string">
-					<xs:attribute type="xs:string" name="code"/>
+					<xs:attribute type="xs:string" name="code" use="required"/>
 				</xs:extension>
 			</xs:simpleContent>
 		</xs:complexType>
@@ -163,20 +214,155 @@
 			<xs:sequence>
 				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
 			</xs:sequence>
-			<xs:attribute type="xs:string" name="code"/>
+			<xs:attribute type="xs:string" name="code" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_title" type="xs:string"/>
+	<xs:element name="custom_option_price">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="price" use="required"/>
+					<xs:attribute type="xs:string" name="price_type" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_value">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="price" use="required"/>
+					<xs:attribute type="xs:string" name="price_type" use="required"/>
+					<xs:attribute type="xs:string" name="title" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="sku_values">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_textfield">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="global" minOccurs="1"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="sku" use="required"/>
+			<xs:attribute type="xs:string" name="required" use="required"/>
+			<xs:attribute type="xs:string" name="max_characters" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_textarea">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="required" use="required"/>
+					<xs:attribute type="xs:string" name="max_characters" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_file">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="required" use="required"/>
+					<xs:attribute type="xs:string" name="file_extensions" use="required"/>
+					<xs:attribute type="xs:string" name="max_width" use="required"/>
+					<xs:attribute type="xs:string" name="max_height" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_date">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="required" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_datetime">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="required" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_time">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="required" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_dropdown">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="sku_values" minOccurs="1"/>
+				<xs:element ref="global" minOccurs="1"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_radio_buttons">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="sku_values" minOccurs="1"/>
+				<xs:element ref="global" minOccurs="1"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_checkbox_group">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="sku_values" minOccurs="1"/>
+				<xs:element ref="global" minOccurs="1"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_multiple_select">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="sku_values" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="category_ids">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="item"/>
+				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="website_ids">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="item"/>
+				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -201,6 +387,69 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="custom_options">
+		<xs:complexType>
+			<xs:choice maxOccurs="unbounded" minOccurs="0">
+				<xs:element ref="custom_option_textfield"/>
+				<xs:element ref="custom_option_textarea"/>
+				<xs:element ref="custom_option_file"/>
+				<xs:element ref="custom_option_date"/>
+				<xs:element ref="custom_option_datetime"/>
+				<xs:element ref="custom_option_time"/>
+				<xs:element ref="custom_option_dropdown"/>
+				<xs:element ref="custom_option_radio_buttons"/>
+				<xs:element ref="custom_option_checkbox_group"/>
+				<xs:element ref="custom_option_multiple_select"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="role" type="xs:string"/>
+	<xs:element name="gallery_information">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="label" use="required"/>
+					<xs:attribute type="xs:string" name="position" use="required"/>
+					<xs:attribute type="xs:string" name="enabled" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="image">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="file_or_url" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tier_price">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="qty" use="required"/>
+					<xs:attribute type="xs:string" name="value" use="required"/>
+					<xs:attribute type="xs:string" name="customer_group_name" use="optional"/>
+					<xs:attribute type="xs:string" name="website_code" use="optional"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="images">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="image" maxOccurs="unbounded" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="tier_prices">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="tier_price" maxOccurs="unbounded" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="super_attribute_codes">
 		<xs:complexType>
 			<xs:sequence>
@@ -215,41 +464,261 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="simple">
+	<xs:element name="member">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="attribute_set_name"/>
-				<xs:element ref="global"/>
-				<xs:element ref="store_view"/>
-				<xs:element ref="category_global_names"/>
-				<xs:element ref="website_codes"/>
-				<xs:element ref="stock"/>
-			</xs:sequence>
-			<xs:attribute type="xs:string" name="sku"/>
-			<xs:attribute type="xs:int" name="id"/>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="default_quantity" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="virtual">
+	<xs:element name="members">
 		<xs:complexType>
 			<xs:sequence>
-				<xs:element ref="attribute_set_name"/>
+				<xs:element ref="member" maxOccurs="unbounded" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="price_type" type="xs:string"/>
+	<xs:element name="sku_type" type="xs:string"/>
+	<xs:element name="weight_type" type="xs:string"/>
+	<xs:element name="price_view" type="xs:string"/>
+	<xs:element name="shipment_type" type="xs:string"/>
+	<xs:element name="product_selection">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="sku" use="required"/>
+					<xs:attribute type="xs:string" name="is_default" use="required"/>
+					<xs:attribute type="xs:string" name="price_type" use="required"/>
+					<xs:attribute type="xs:string" name="price_value" use="required"/>
+					<xs:attribute type="xs:string" name="quantity" use="required"/>
+					<xs:attribute type="xs:string" name="can_change_quantity" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="option_title" type="xs:string"/>
+	<xs:element name="product_selections">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="product_selection" maxOccurs="unbounded" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="option">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="product_selections" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="input_type" use="optional"/>
+			<xs:attribute type="xs:string" name="required" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="options">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="option" maxOccurs="unbounded" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="links_purchased_separately" type="xs:string"/>
+	<xs:element name="links_title" type="xs:string"/>
+	<xs:element name="samples_title" type="xs:string"/>
+	<xs:element name="download_link_information">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="title" use="required"/>
+					<xs:attribute type="xs:string" name="price" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="download_link">
+		<xs:complexType>
+			<xs:all minOccurs="0">
 				<xs:element ref="global"/>
+				<xs:element ref="store_view"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="file_or_url" use="required"/>
+			<xs:attribute type="xs:string" name="number_of_downloads" use="required"/>
+			<xs:attribute type="xs:string" name="is_shareable" use="required"/>
+			<xs:attribute type="xs:string" name="sample_file_or_url" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="download_sample_information">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="title" use="required"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="download_sample">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="file_or_url"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="download_links">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="download_link" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="download_samples">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="download_sample" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="simple">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="attribute_set_name" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="category_global_names" minOccurs="0"/>
+				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
 				<xs:element ref="website_ids" minOccurs="0"/>
 				<xs:element ref="cross_sell_products" minOccurs="0"/>
 				<xs:element ref="up_sell_products" minOccurs="0"/>
 				<xs:element ref="related_products" minOccurs="0"/>
-			</xs:sequence>
-			<xs:attribute type="xs:string" name="sku" use="optional"/>
+				<xs:element ref="custom_options" minOccurs="0"/>
+				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="tier_prices" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="sku" use="required"/>
+			<xs:attribute type="xs:string" name="id"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="virtual">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="attribute_set_name" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="category_global_names" minOccurs="0"/>
+				<xs:element ref="website_codes" minOccurs="0"/>
+				<xs:element ref="category_ids" minOccurs="0"/>
+				<xs:element ref="website_ids" minOccurs="0"/>
+				<xs:element ref="cross_sell_products" minOccurs="0"/>
+				<xs:element ref="up_sell_products" minOccurs="0"/>
+				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="custom_options" minOccurs="0"/>
+				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="tier_prices" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="sku" use="required"/>
+			<xs:attribute type="xs:string" name="id"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="downloadable">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="download_links" minOccurs="0"/>
+				<xs:element ref="download_samples" minOccurs="0"/>
+				<xs:element ref="attribute_set_name" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="category_global_names" minOccurs="0"/>
+				<xs:element ref="website_codes" minOccurs="0"/>
+				<xs:element ref="category_ids" minOccurs="0"/>
+				<xs:element ref="website_ids" minOccurs="0"/>
+				<xs:element ref="cross_sell_products" minOccurs="0"/>
+				<xs:element ref="up_sell_products" minOccurs="0"/>
+				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="custom_options" minOccurs="0"/>
+				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="tier_prices" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="sku" use="required"/>
+			<xs:attribute type="xs:string" name="id"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="configurable">
 		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="super_attribute_codes"/>
-				<xs:element ref="variant_skus"/>
-			</xs:sequence>
-			<xs:attribute type="xs:string" name="sku"/>
+			<xs:all>
+				<xs:element ref="super_attribute_codes" minOccurs="0"/>
+				<xs:element ref="variant_skus" minOccurs="0"/>
+				<xs:element ref="attribute_set_name" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="category_global_names" minOccurs="0"/>
+				<xs:element ref="website_codes" minOccurs="0"/>
+				<xs:element ref="category_ids" minOccurs="0"/>
+				<xs:element ref="website_ids" minOccurs="0"/>
+				<xs:element ref="cross_sell_products" minOccurs="0"/>
+				<xs:element ref="up_sell_products" minOccurs="0"/>
+				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="custom_options" minOccurs="0"/>
+				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="tier_prices" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="sku" use="required"/>
+			<xs:attribute type="xs:string" name="id"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="grouped">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="members" minOccurs="0"/>
+				<xs:element ref="attribute_set_name" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="category_global_names" minOccurs="0"/>
+				<xs:element ref="website_codes" minOccurs="0"/>
+				<xs:element ref="category_ids" minOccurs="0"/>
+				<xs:element ref="website_ids" minOccurs="0"/>
+				<xs:element ref="cross_sell_products" minOccurs="0"/>
+				<xs:element ref="up_sell_products" minOccurs="0"/>
+				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="custom_options" minOccurs="0"/>
+				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="tier_prices" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="sku" use="required"/>
+			<xs:attribute type="xs:string" name="id"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="bundle">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="options" minOccurs="0"/>
+				<xs:element ref="attribute_set_name" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="store_view" minOccurs="0"/>
+				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="category_global_names" minOccurs="0"/>
+				<xs:element ref="website_codes" minOccurs="0"/>
+				<xs:element ref="category_ids" minOccurs="0"/>
+				<xs:element ref="website_ids" minOccurs="0"/>
+				<xs:element ref="cross_sell_products" minOccurs="0"/>
+				<xs:element ref="up_sell_products" minOccurs="0"/>
+				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="custom_options" minOccurs="0"/>
+				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="tier_prices" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="sku" use="required"/>
+			<xs:attribute type="xs:string" name="id"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="import">
@@ -258,6 +727,9 @@
 				<xs:element ref="simple"/>
 				<xs:element ref="virtual"/>
 				<xs:element ref="configurable"/>
+				<xs:element ref="grouped"/>
+				<xs:element ref="bundle"/>
+				<xs:element ref="downloadable"/>
 			</xs:choice>
 		</xs:complexType>
 	</xs:element>
