@@ -69,7 +69,8 @@
 			<name>Filling in tax form</name>
 			<price>79.95</price>
 			<url_key>filling-in-tax-form</url_key>
-			<delete code="weight" />
+			<delete code="msrp" />
+			<delete code="manufacturer" />
 			<select code="color">Blue</select>
 			<multi_select code="color_group">
 				<item>Red</item>
@@ -100,9 +101,9 @@
 					<custom_option_title>Inscription</custom_option_title>
 					<custom_option_price price="0.50" price_type="fixed" />
 				</global>
-				<storeview code="default">
+				<store_view code="default">
 					<custom_option_title>Inscriptie</custom_option_title>
-				</storeview>
+				</store_view>
 			</custom_option_textfield>
 			<custom_option_textarea sku="note" required="0" max_characters="250" />
 			<custom_option_file sku="id-card" required="1" file_extensions=".jpg .jpeg" max_width="5000" max_height="7000" />
@@ -293,6 +294,14 @@
 			</download_link>
 		</download_links>
 		<download_samples>
+			<download_sample file_or_url="images/MacDonald_of_the_Isles_(MacIan).jpg" >
+				<global>
+					<download_sample_information title="Morlord The Game - sample" />
+				</global>
+				<store_view code="default">
+					<download_sample_information title="Morlord das Spiel - Beispiel" />
+				</store_view>
+			</download_sample>
 			<download_sample file_or_url="images/MacDonald_of_the_Isles_(MacIan).jpg" >
 				<global>
 					<download_sample_information title="Morlord The Game - sample" />

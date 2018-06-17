@@ -265,9 +265,36 @@ I used [XSD/XML Schema generator](https://www.freeformatter.com/xsd-generator.ht
 
 You will probably wonder why I used such an old PHP XML parser (xml_parse). That's because I wanted to importer to handle very large files, and claim a fixed, small amount of memory, and I wanted it to print line numbers in the error message.
 
+## XSD
+
 When I use xsd validation on my computer I get this error
 
     '' is not a valid value of the atomic type 'xs:int'
 
 and similar errors. This is a [known error](https://bugs.launchpad.net/lxml/+bug/1615510). I changed all integer and boolean attributes types to string for this reason. And I added an option --skip-xsd for users that have other problems with this library.
 
+Compositors
+
+### A D B C
+
+multiple children, each child one 0/1 times
+
+    <xs:all><xs:element minOccurs="0"/>
+
+Common for an element with multiple children, all or most of which are optional, and none of which can occur more than once.
+
+### A A A
+
+one child 0+ times
+
+    <xs:sequence><xs:element maxOccurs="unbounded" minOccurs="0"/>
+
+I use the sequence only with a single child.
+
+### B A C C B A
+
+multiple children, each child 0+ times
+
+    <xs:choice maxOccurs="unbounded" minOccurs="0"><xs:element minOccurs="0"/>
+
+This is very unrestrictive. Use it sparingly.

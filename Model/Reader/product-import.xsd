@@ -49,7 +49,7 @@
 	<xs:element name="attribute_set_name" type="xs:string"/>
 	<xs:element name="global">
 		<xs:complexType>
-			<xs:sequence>
+			<xs:choice maxOccurs="unbounded" minOccurs="0">
 				<xs:element ref="name" minOccurs="0"/>
 				<xs:element ref="price" minOccurs="0"/>
 				<xs:element ref="status" minOccurs="0"/>
@@ -74,14 +74,7 @@
 				<xs:element ref="manufacturer" minOccurs="0"/>
 				<xs:element ref="country_of_manufacture" minOccurs="0"/>
 				<xs:element ref="color" minOccurs="0"/>
-				<xs:element ref="custom_option_title" minOccurs="0"/>
-				<xs:element ref="custom_option_price" minOccurs="0"/>
-				<xs:element ref="custom_option_value" maxOccurs="unbounded" minOccurs="0"/>
 				<xs:element ref="url_key" minOccurs="0"/>
-				<xs:element ref="delete" minOccurs="0"/>
-				<xs:element ref="select" minOccurs="0"/>
-				<xs:element ref="multi_select" minOccurs="0"/>
-				<xs:element ref="role" maxOccurs="unbounded" minOccurs="0"/>
 				<xs:element ref="gallery_information" minOccurs="0"/>
 				<xs:element ref="option_title" minOccurs="0"/>
 				<xs:element ref="price_type" minOccurs="0"/>
@@ -94,12 +87,19 @@
 				<xs:element ref="links_purchased_separately" minOccurs="0"/>
 				<xs:element ref="links_title" minOccurs="0"/>
 				<xs:element ref="samples_title" minOccurs="0"/>
-			</xs:sequence>
+				<xs:element ref="custom_option_title" minOccurs="0"/>
+				<xs:element ref="custom_option_price" minOccurs="0"/>
+				<xs:element ref="custom_option_value" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="delete" minOccurs="0"/>
+				<xs:element ref="select" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="multi_select" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="role" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:choice>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="store_view">
 		<xs:complexType>
-			<xs:sequence>
+			<xs:choice maxOccurs="unbounded" minOccurs="0">
 				<xs:element ref="name" minOccurs="0"/>
 				<xs:element ref="price" minOccurs="0"/>
 				<xs:element ref="status" minOccurs="0"/>
@@ -124,14 +124,7 @@
 				<xs:element ref="manufacturer" minOccurs="0"/>
 				<xs:element ref="country_of_manufacture" minOccurs="0"/>
 				<xs:element ref="color" minOccurs="0"/>
-				<xs:element ref="custom_option_title" minOccurs="0"/>
-				<xs:element ref="custom_option_price" minOccurs="0"/>
-				<xs:element ref="custom_option_value" maxOccurs="unbounded" minOccurs="0"/>
 				<xs:element ref="url_key" minOccurs="0"/>
-				<xs:element ref="delete" minOccurs="0"/>
-				<xs:element ref="select" minOccurs="0"/>
-				<xs:element ref="multi_select" minOccurs="0"/>
-				<xs:element ref="role" maxOccurs="unbounded" minOccurs="0"/>
 				<xs:element ref="gallery_information" minOccurs="0"/>
 				<xs:element ref="option_title" minOccurs="0"/>
 				<xs:element ref="price_type" minOccurs="0"/>
@@ -144,7 +137,14 @@
 				<xs:element ref="links_purchased_separately" minOccurs="0"/>
 				<xs:element ref="links_title" minOccurs="0"/>
 				<xs:element ref="samples_title" minOccurs="0"/>
-			</xs:sequence>
+				<xs:element ref="custom_option_title" minOccurs="0"/>
+				<xs:element ref="custom_option_price" minOccurs="0"/>
+				<xs:element ref="custom_option_value" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="delete" minOccurs="0"/>
+				<xs:element ref="select" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="multi_select" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="role" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:choice>
 			<xs:attribute type="xs:string" name="code" use="required"/>
 		</xs:complexType>
 	</xs:element>
@@ -319,7 +319,7 @@
 				<xs:element ref="global" minOccurs="1"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 			</xs:all>
-			<xs:attribute type="xs:string" name="required"/>
+			<xs:attribute type="xs:string" name="required" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="custom_option_radio_buttons">
@@ -329,7 +329,7 @@
 				<xs:element ref="global" minOccurs="1"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 			</xs:all>
-			<xs:attribute type="xs:string" name="required"/>
+			<xs:attribute type="xs:string" name="required" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="custom_option_checkbox_group">
@@ -339,17 +339,17 @@
 				<xs:element ref="global" minOccurs="1"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 			</xs:all>
-			<xs:attribute type="xs:string" name="required"/>
+			<xs:attribute type="xs:string" name="required" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="custom_option_multiple_select">
 		<xs:complexType>
 			<xs:all>
-				<xs:element ref="sku_values" minOccurs="0"/>
-				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="sku_values" minOccurs="1"/>
+				<xs:element ref="global" minOccurs="1"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 			</xs:all>
-			<xs:attribute type="xs:string" name="required"/>
+			<xs:attribute type="xs:string" name="required" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="category_ids">
@@ -512,11 +512,11 @@
 		<xs:complexType>
 			<xs:all>
 				<xs:element ref="product_selections" minOccurs="0"/>
-				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="1"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 			</xs:all>
-			<xs:attribute type="xs:string" name="input_type" use="optional"/>
-			<xs:attribute type="xs:string" name="required" use="optional"/>
+			<xs:attribute type="xs:string" name="input_type" use="required"/>
+			<xs:attribute type="xs:string" name="required" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="options">
@@ -541,9 +541,9 @@
 	</xs:element>
 	<xs:element name="download_link">
 		<xs:complexType>
-			<xs:all minOccurs="0">
-				<xs:element ref="global"/>
-				<xs:element ref="store_view"/>
+			<xs:all>
+				<xs:element ref="global" minOccurs="1"/>
+				<xs:element ref="store_view" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="file_or_url" use="required"/>
 			<xs:attribute type="xs:string" name="number_of_downloads" use="required"/>
@@ -563,10 +563,10 @@
 	<xs:element name="download_sample">
 		<xs:complexType>
 			<xs:all>
-				<xs:element ref="global" minOccurs="0"/>
+				<xs:element ref="global" minOccurs="1"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 			</xs:all>
-			<xs:attribute type="xs:string" name="file_or_url"/>
+			<xs:attribute type="xs:string" name="file_or_url" use="required"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="download_links">
@@ -602,7 +602,7 @@
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
-			<xs:attribute type="xs:string" name="id"/>
+			<xs:attribute type="xs:string" name="id" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="virtual">
@@ -624,7 +624,7 @@
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
-			<xs:attribute type="xs:string" name="id"/>
+			<xs:attribute type="xs:string" name="id" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="downloadable">
@@ -648,7 +648,7 @@
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
-			<xs:attribute type="xs:string" name="id"/>
+			<xs:attribute type="xs:string" name="id" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="configurable">
@@ -672,7 +672,7 @@
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
-			<xs:attribute type="xs:string" name="id"/>
+			<xs:attribute type="xs:string" name="id" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="grouped">
@@ -695,7 +695,7 @@
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
-			<xs:attribute type="xs:string" name="id"/>
+			<xs:attribute type="xs:string" name="id" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="bundle">
@@ -718,7 +718,7 @@
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
-			<xs:attribute type="xs:string" name="id"/>
+			<xs:attribute type="xs:string" name="id" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="import">
