@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<downloadable sku="morlord-the-game">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Morlord the game</name>
+			<price>24.95</price>
+			<links_purchased_separately>1</links_purchased_separately>
+			<links_title>Links</links_title>
+			<samples_title>Samples</samples_title>
+		</global>
+		<store_view code="default">
+			<samples_title>Beispielen</samples_title>
+		</store_view>
+		<download_links>
+			<download_link file_or_url="http://download-resources.net/morlord-setup.exe" number_of_downloads="0" is_shareable="1" sample_file_or_url="images/MacDonald_of_the_Isles_(MacIan).jpg" >
+				<global>
+					<download_link_information title="Morlord The Game" price="12.95" />
+				</global>
+				<store_view code="default">
+					<download_link_information title="Morlord das Spiel" price="12.45" />
+				</store_view>
+			</download_link>
+		</download_links>
+		<download_samples>
+			<download_sample file_or_url="images/MacDonald_of_the_Isles_(MacIan).jpg" >
+				<global>
+					<download_sample_information title="Morlord The Game - sample" />
+				</global>
+				<store_view code="default">
+					<download_sample_information title="Morlord das Spiel - Beispiel" />
+				</store_view>
+			</download_sample>
+			<download_sample file_or_url="images/MacDonald_of_the_Isles_(MacIan).jpg" >
+				<global>
+					<download_sample_information title="Morlord The Game - sample" />
+				</global>
+				<store_view code="default">
+					<download_sample_information title="Morlord das Spiel - Beispiel" />
+				</store_view>
+			</download_sample>
+		</download_samples>
+	</downloadable>
+</import>

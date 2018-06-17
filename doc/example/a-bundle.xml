@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<bundle sku="ibm-pc">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>IBM PC</name>
+			<price>780</price>
+			<price_type>0</price_type>
+			<sku_type>0</sku_type>
+			<weight_type>0</weight_type>
+			<price_view>1</price_view>
+			<shipment_type>1</shipment_type>
+		</global>
+		<options>
+			<option input_type="select" required="1" >
+				<product_selections>
+					<product_selection sku="flat_screen_monitor" is_default="1" price_type="1" price_value="300.00" quantity="1" can_change_quantity="0" />
+					<product_selection sku="crt_monitor" is_default="1" price_type="1" price_value="200.00" quantity="1" can_change_quantity="1" />
+				</product_selections>
+				<global>
+					<option_title>Monitor</option_title>
+				</global>
+			</option>
+			<option input_type="multi" required="0" >
+				<product_selections>
+					<product_selection sku="fast_delivery" is_default="0" price_type="0" price_value="10.00" quantity="1" can_change_quantity="1" />
+					<product_selection sku="three_year_quarantee" is_default="0" price_type="0" price_value="20.00" quantity="2" can_change_quantity="1" />
+				</product_selections>
+				<global>
+					<option_title>Services</option_title>
+				</global>
+				<store_view code="default">
+					<option_title>Diensten</option_title>
+				</store_view>
+			</option>
+		</options>
+	</bundle>
+</import>

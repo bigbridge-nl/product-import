@@ -4,17 +4,19 @@ The XML import provided allows you to import products from an XML file.
 
 Example:
 
-    bin/magento bigbridge:product:import --dry-run --auto-create-option="color" --auto-create-option="manufacturer" vendor/bigbridge/product-import/doc/example/some-products.xml
+    bin/magento bigbridge:product:import vendor/bigbridge/product-import/doc/example/some-products.xml
 
 All options are listed with --help
 
     bin/magento bigbridge:product:import --help
 
-## XML specification
+## Examples
 
-See doc/example/some-products.xml for an example of the elements used.
+See doc/example for some examples of import files.
 
-Booleans are specified as 0 or 1.
+## Remarks
+
+Booleans should be entered as 0 or 1.
 
 ## Remove an attribute value
 

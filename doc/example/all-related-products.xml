@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<simple sku="services-104-ax">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Filling in tax form</name>
+			<price>79.95</price>
+		</global>
+		<cross_sell_products>
+			<item>services-104-b1</item>
+			<item>services-104-b2</item>
+		</cross_sell_products>
+		<up_sell_products>
+			<item>services-104-c1</item>
+			<item>services-104-c2</item>
+		</up_sell_products>
+		<related_products>
+			<item>services-104-e1</item>
+			<item>services-104-e2</item>
+		</related_products>
+	</simple>
+</import>

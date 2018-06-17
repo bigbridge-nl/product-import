@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<simple sku="services-104-ax">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Filling in tax form</name>
+			<price>79.95</price>
+			<url_key>filling-in-tax-form</url_key>
+			<delete code="msrp" />
+			<delete code="manufacturer" />
+			<select code="color">Blue</select>
+			<multi_select code="color_group">
+				<item>Red</item>
+				<item>Blue</item>
+			</multi_select>
+		</global>
+		<category_ids>
+			<item>2</item>
+		</category_ids>
+		<website_ids>
+			<item>1</item>
+		</website_ids>
+	</simple>
+</import>

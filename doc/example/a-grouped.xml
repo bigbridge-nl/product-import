@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<grouped sku="bucky-cutlery">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Bucky Cutlery</name>
+			<price>120</price>
+		</global>
+		<members>
+			<member sku="bucky-knife" default_quantity="5" />
+			<member sku="bucky-spoon" default_quantity="5" />
+			<member sku="bucky-fork" default_quantity="5" />
+		</members>
+	</grouped>
+</import>

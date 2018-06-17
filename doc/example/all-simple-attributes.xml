@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<simple sku="skinny-jeans-811">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Skinny Jeans 811</name>
+			<price>19.95</price>
+			<status>1</status>
+			<gift_message_available>1</gift_message_available>
+			<visibility>4</visibility>
+			<tax_class_name>Taxable Goods</tax_class_name>
+			<generate_url_key>1</generate_url_key>
+			<description>A lovely pair of jeans</description>
+			<short_description>A lovely pair of jeans</short_description>
+			<meta_title>Skinny Jeans 811</meta_title>
+			<meta_description>Cheap Skinny Jeans</meta_description>
+			<meta_keywords>Skinny, Jeans, Cheap</meta_keywords>
+			<cost>11.35</cost>
+			<msrp>23.95</msrp>
+			<msrp_display_actual_price_type>0</msrp_display_actual_price_type>
+			<weight>0.5</weight>
+			<special_price>12.45</special_price>
+			<special_from_date>2018-06-03</special_from_date>
+			<special_to_date>2018-06-30</special_to_date>
+			<news_from_date>2018-06-03</news_from_date>
+			<news_to_date>2018-06-30</news_to_date>
+			<manufacturer>Jeans &amp; Co</manufacturer>
+			<country_of_manufacture>Hungaria</country_of_manufacture>
+			<color>Blue</color>
+		</global>
+	</simple>
+</import>

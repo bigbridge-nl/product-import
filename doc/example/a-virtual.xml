@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<virtual sku="services-104-ax">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Filling in tax form</name>
+			<price>79.95</price>
+		</global>
+	</virtual>
+</import>

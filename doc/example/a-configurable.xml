@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<configurable sku="scottish-table">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Scotting Table</name>
+			<price>1190</price>
+		</global>
+		<super_attribute_codes>
+			<item>color</item>
+		</super_attribute_codes>
+		<variant_skus>
+			<item>scottish-table-red-2st</item>
+			<item>scottish-table-brown-2st</item>
+			<item>scottish-table-brown-3st</item>
+		</variant_skus>
+	</configurable>
+</import>
