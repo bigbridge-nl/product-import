@@ -169,14 +169,13 @@ class ProductStorage
         $this->productEntityStorage->checkIfIdsExist($products);
 
         // distinguish between inserts and updates (and assign ids)
-        list($insertProducts, $updateProducts) = $this->separateInsertsFromUpdates($products);
+        list(, $updateProducts) = $this->separateInsertsFromUpdates($products);
 
         // replace reference(s) with ids; changes $product->errors
         $this->referenceResolver->resolveExternalReferences($products, $config);
 
         // create url keys based on name and id; changes $product->errors
-        $this->urlKeyGenerator->createUrlKeysForNewProducts($insertProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
-        $this->urlKeyGenerator->createUrlKeysForExistingProducts($updateProducts, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
+        $this->urlKeyGenerator->resolveAndValidateUrlKeys($products, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
 
         // handle products that changed type; changes $product->errors
         $this->productTypeChanger->handleTypeChanges($updateProducts, $config);
@@ -308,9 +307,6 @@ class ProductStorage
     /**
      * @param ImportConfig $config
      * @param Product[] $products
-     * @param $removedAttributes
-     * @param $attributeInfo
-     * @param $productsByAttribute
      * @return array
      */
     protected function separateUpsertsFromDeletes(array $products, ImportConfig $config): array

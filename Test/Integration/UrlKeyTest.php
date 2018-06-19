@@ -91,7 +91,7 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Generated url key already exists: summer-flora"], $product2->getErrors());
+        $this->assertEquals(["generated url key already exists: summer-flora"], $product2->getErrors());
 
         $product3 = $this->createProduct('product-import-1#c');
         $product3->storeView('default')->setName("Summer Flora");
@@ -100,7 +100,7 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Generated url key already exists: summer-flora"], $product3->getErrors());
+        $this->assertEquals(["generated url key already exists: summer-flora"], $product3->getErrors());
     }
 
     /**
@@ -124,7 +124,7 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Url key already exists: product-import-6"], $product2->getErrors());
+        $this->assertEquals(["url key already exists: product-import-6 in store view default"], $product2->getErrors());
 
         $product3 = $this->createProduct('product-import-6#c');
         $product3->storeView('default')->setName("Flowers All Year");
@@ -133,7 +133,7 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
 
         $importer->flush();
 
-        $this->assertEquals(["Url key already exists: product-import-6"], $product3->getErrors());
+        $this->assertEquals(["url key already exists: product-import-6 in store view default"], $product3->getErrors());
     }
 
     /**
@@ -156,9 +156,14 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
         $product2->storeView('default')->generateUrlKey();
         $importer->importSimpleProduct($product2);
 
+        $product3 = $this->createProduct('product-import-2#c');
+        $product3->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product3);
+
         $importer->flush();
 
         $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals(['url key is based on name and product has no name in store view'], $product3->getErrors());
         $this->assertEquals("winter-woozling-product-import-2-b", $product2->storeView('default')->getUrlKey());
 
         $product3 = $this->createProduct('product-import-2#c');
@@ -203,10 +208,18 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
         $product2->storeView('default')->generateUrlKey();
         $importer->importSimpleProduct($product2);
 
+        // conflicting key, same batch
+        $product3 = $this->createProduct('product-import-3#c');
+        $product3->storeView('default')->setName("Autumn Flowers");
+        $product3->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product3);
+
         $importer->flush();
 
         $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals([], $product3->getErrors());
         $this->assertEquals("autumn-flowers-1", $product2->storeView('default')->getUrlKey());
+        $this->assertEquals("autumn-flowers-2", $product3->storeView('default')->getUrlKey());
 
         // conflicting key - different batch
         $product3 = $this->createProduct('product-import-3#c');
@@ -243,10 +256,18 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
         $product2->storeView('default')->generateUrlKey();
         $importer->importSimpleProduct($product2);
 
+        // conflicting key - same batch
+        $product3 = $this->createProduct('product-import-5!a');
+        $product3->storeView('default')->setName("Moonlight Every Day");
+        $product3->storeView('default')->generateUrlKey();
+        $importer->importSimpleProduct($product3);
+
         $importer->flush();
 
         $this->assertEquals([], $product2->getErrors());
+        $this->assertEquals([], $product3->getErrors());
         $this->assertEquals("product-import-5-a-1", $product2->storeView('default')->getUrlKey());
+        $this->assertEquals("product-import-5-a-2", $product3->storeView('default')->getUrlKey());
 
         // conflicting key - different batch
         $product3 = $this->createProduct('product-import-5#a');
@@ -264,7 +285,7 @@ class UrlKeyTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals([], $product3->getErrors());
         $this->assertEquals([], $product4->getErrors());
         $this->assertEquals('product-import-5-a', $product3->storeView('default')->getUrlKey());
-        $this->assertEquals('product-import-5-a-2', $product4->storeView('default')->getUrlKey());
+        $this->assertEquals('product-import-5-a-3', $product4->storeView('default')->getUrlKey());
     }
 
     /**
