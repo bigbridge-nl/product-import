@@ -4,7 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
-use BigBridge\ProductImport\Model\Data\UrlRewriteInfo;
+use BigBridge\ProductImport\Model\Data\UrlRewrite;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
@@ -14,6 +14,12 @@ use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
  */
 class UrlRewriteStorage
 {
+    const NO_REDIRECT = 0;
+    const REDIRECT = 301;
+
+    const TARGET_PATH_BASE = 'catalog/product/view/id/';
+    const TARGET_PATH_EXT = '/category/';
+
     /** @var  Magento2DbConnection */
     protected $db;
 
@@ -28,367 +34,426 @@ class UrlRewriteStorage
         $this->metaData = $metaData;
     }
 
-    public function updateRewrites(array $products, array $existingValues, ValueSerializer $valueSerializer)
-    {
-        $changedProducts = $this->getChangedProducts($products, $existingValues);
-
-        $newRewriteValues = $this->getNewRewriteValues($changedProducts);
-
-        $this->rewriteExistingRewrites($newRewriteValues, $valueSerializer);
-    }
-
-    public function getExistingProductValues(array $products)
-    {
-        if (empty($products)) {
-            return [];
-        }
-
-        $productIds = array_column($products, 'id');
-
-        $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
-
-        $existingData = $this->db->fetchAllAssoc("
-            SELECT URL_KEY.`entity_id` as product_id, URL_KEY.`value` AS url_key, GROUP_CONCAT(PG.`category_id` SEPARATOR ',') as category_ids, URL_KEY.`store_id`
-            FROM `{$this->metaData->productEntityTable}_varchar` URL_KEY
-            LEFT JOIN `{$this->metaData->urlRewriteProductCategoryTable}` PG ON PG.`product_id` = URL_KEY.`entity_id`
-            WHERE 
-                URL_KEY.`attribute_id` = ? AND
-                URL_KEY.`entity_id` IN (" . $this->db->getMarks($productIds) . ")
-            GROUP BY URL_KEY.`entity_id`, URL_KEY.`store_id` 
-        ", array_merge([
-            $attributeId
-        ], $productIds));
-
-        $data = [];
-        foreach ($existingData as $existingDatum) {
-            $productId = $existingDatum['product_id'];
-            $storeId = $existingDatum['store_id'];
-            $categoryIds = is_null($existingDatum['category_ids']) ? [] : explode(',', $existingDatum['category_ids']);
-            $urlKey = $existingDatum['url_key'];
-            $data[$storeId][$productId] = ['url_key' => $urlKey, 'category_ids' => $categoryIds];
-        }
-
-        return $data;
-    }
-
     /**
      * @param Product[] $products
-     * @param array $existingValues
-     * @return array
+     * @param ValueSerializer $valueSerializer
      */
-    protected function getChangedProducts(array $products, array $existingValues)
+    public function updateRewrites(array $products, ValueSerializer $valueSerializer)
     {
-        if (empty($products)) {
-            return [];
+        $productIds = array_column($products, 'id');
+
+        if (empty($productIds)) {
+            $existingUrlRewrites = [];
+            $allProductCategoryIds = [];
+            $allProductUrlKeys = [];
+            $allVisibilities = [];
+        } else {
+            $existingUrlRewrites = $this->getExistingUrlRewrites($productIds, $valueSerializer);
+            $allProductCategoryIds = $this->getExistingProductCategoryIds($productIds);
+            $allProductUrlKeys = $this->getExistingProductUrlKeys($productIds);
+            $allVisibilities = $this->getExistingVisibilities($productIds);
         }
 
-        $changedProducts = [];
-        foreach ($products as $product) {
+        // there are no global url_rewrites
+        $allStoreIds = array_diff($this->metaData->storeViewMap, ['0']);
 
-            // skip products that are not visible individually
-            $visibility = $product->global()->getAttribute(ProductStoreView::ATTR_VISIBILITY);
-            if ($visibility === null || $visibility === ProductStoreView::VISIBILITY_NOT_VISIBLE) {
-                continue;
-            }
+        foreach ($productIds as $productId) {
 
-            foreach ($product->getStoreViews() as $storeView) {
+            $productCategoryIds = array_key_exists($productId, $allProductCategoryIds) ? $allProductCategoryIds[$productId] : [];
 
-                $storeViewId = $storeView->getStoreViewId();
+            foreach ($allStoreIds as $storeViewId) {
 
-                if (array_key_exists($storeViewId, $existingValues) && array_key_exists($product->id, $existingValues[$storeViewId])) {
-
-                    $existingDatum = $existingValues[$storeViewId][$product->id];
-
-                    // a product has changed if its url_key or its categories change
-                    if ($storeView->getUrlKey() != $existingDatum['url_key']) {
-                        $changedProducts[] = $product;
-                    } elseif (array_diff($product->getCategoryIds(), $existingDatum['category_ids']) || array_diff($existingDatum['category_ids'], $product->getCategoryIds())) {
-                        $changedProducts[] = $product;
-                    }
-
+                if (isset($allVisibilities[$productId][$storeViewId])) {
+                    $visibility = $allVisibilities[$productId][$storeViewId];
+                } elseif (isset($allVisibilities[$productId][0])) {
+                    $visibility = $allVisibilities[$productId][0];
                 } else {
-                    $changedProducts[] = $product;
+                    $visibility = null;
                 }
+
+                if ($visibility === null || $visibility === ProductStoreView::VISIBILITY_NOT_VISIBLE) {
+                    continue;
+                }
+
+                $this->updateRewriteGroup($productId, $storeViewId, $existingUrlRewrites, $productCategoryIds, $allProductUrlKeys, $valueSerializer);
             }
         }
-
-        return $changedProducts;
     }
 
     /**
-     * @param UrlRewriteInfo[] $urlRewrites
+     * @param int[] $productIds
      * @param ValueSerializer $valueSerializer
      * @return array
      */
-    protected function getExistingUrlRewriteData(array $urlRewrites, ValueSerializer $valueSerializer)
+    protected function getExistingUrlRewrites(array $productIds, ValueSerializer $valueSerializer)
     {
-        // prepare information of existing rewrites
-        $productIds = [];
-        foreach ($urlRewrites as $urlRewriteInfo) {
-            $productIds[$urlRewriteInfo->storeId][$urlRewriteInfo->productId] = $urlRewriteInfo->productId;
+        $allStoreIds = array_diff($this->metaData->storeViewMap, ['0']);
+
+        // group products by store view
+        $collection = [];
+        foreach ($productIds as $productId) {
+            foreach ($allStoreIds as $storeViewId) {
+                $collection[$storeViewId][] = $productId;
+            }
         }
 
         $data = [];
-        foreach ($productIds as $storeId => $ids) {
+        foreach ($collection as $storeId => $ids) {
 
-            $oldUrlRewrites = $this->db->fetchAllAssoc("
-                SELECT `url_rewrite_id`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `metadata`
+            $urlRewriteData = $this->db->fetchAllAssoc("
+                SELECT `url_rewrite_id`, `entity_id`, `request_path`, `target_path`, `redirect_type`, `metadata`, `is_autogenerated`
                 FROM `{$this->metaData->urlRewriteTable}`
                 WHERE
-                    store_id = ? AND `entity_id` IN (" . $this->db->getMarks($ids) . ")
+                    `store_id` = ? AND 
+                    `entity_id` IN (" . $this->db->getMarks($ids) . ") AND
+                    `entity_type` = 'product' AND
+                    `redirect_type` = '0'
             ", array_merge([
                 $storeId
             ], $ids));
 
-            foreach ($oldUrlRewrites as $oldUrlRewrite) {
+            foreach ($urlRewriteData as $datum) {
 
-                $categoryId = $valueSerializer->extract($oldUrlRewrite['metadata'], 'category_id');
-                $key = $oldUrlRewrite['entity_id'] . '/' . $categoryId;
+                $categoryId = $valueSerializer->extract($datum['metadata'], 'category_id');
 
-                $data[$storeId][$key][] = $oldUrlRewrite;
+                $urlRewrite = new UrlRewrite($datum['url_rewrite_id'], $datum['entity_id'], $datum['request_path'],
+                    $datum['target_path'], $datum['redirect_type'], $storeId, $categoryId, $datum['is_autogenerated']);
+
+                $data[$storeId][$urlRewrite->getProductId()][$urlRewrite->getCategoryId()] = $urlRewrite;
             }
         }
 
         return $data;
     }
 
-    protected function getNewRewriteValues(array $products): array
+    /**
+     * @param int[] $productIds
+     * @return array
+     */
+    protected function getExistingProductCategoryIds(array $productIds)
     {
-        if (empty($products)) {
-            return [];
-        }
-
-        // all store view ids, without 0
-        $allStoreIds = array_diff($this->metaData->storeViewMap, ['0']);
-
-        $productIds = array_column($products, 'id');
-        $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
-
-        $results = $this->db->fetchAllAssoc("
-            SELECT `entity_id`, `store_id`, `value` AS `url_key`
-            FROM `{$this->metaData->productEntityTable}_varchar`
-            WHERE
-                `attribute_id` = ? AND
-                `entity_id` IN (" . $this->db->getMarks($productIds) . ")
-        ", array_merge([$attributeId], $productIds));
-
-        $urlKeys = [];
-        foreach ($results as $result) {
-            $productId = $result['entity_id'];
-            $storeId = $result['store_id'];
-            $urlKey = $result['url_key'];
-
-            if ($storeId == 0) {
-                // insert url key to all store views
-                foreach ($allStoreIds as $aStoreId) {
-                    // but do not overwrite explicit assignments
-                    if (!array_key_exists($productId, $urlKeys) || !array_key_exists($aStoreId, $urlKeys[$productId])) {
-                        $urlKeys[$productId][$aStoreId] = $urlKey;
-                    }
-                }
-            } else {
-                $urlKeys[$productId][$storeId] = $urlKey;
-            }
-        }
-
-        // category ids per product
-        $categoryIds = [];
-        $results = $this->db->fetchAllAssoc("
+        $rows = $this->db->fetchAllAssoc("
             SELECT `product_id`, `category_id`
             FROM `{$this->metaData->categoryProductTable}`
-            WHERE
-                `product_id` IN (" . $this->db->getMarks($productIds) .")
+            WHERE `product_id` IN (" . $this->db->getMarks($productIds) . ")
         ", $productIds);
 
-        $rewriteValues = [];
-        foreach ($results as $result) {
-            $categoryIds[$result['product_id']][$result['category_id']] = $result['category_id'];
+        $categoryIds = [];
+        foreach ($rows as $row) {
+            $categoryIds[$row['product_id']][] = $row['category_id'];
         }
 
-        foreach ($urlKeys as $productId => $urlKeyData) {
-            foreach ($urlKeyData as $storeId => $urlKey) {
+        return $categoryIds;
+    }
 
-                $shortUrl = $urlKey . $this->metaData->productUrlSuffix;
+    protected function getExistingProductUrlKeys(array $productIds)
+    {
+        $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
 
-                // url keys without categories
-                $requestPath = $shortUrl;
-                $targetPath = 'catalog/product/view/id/' . $productId;
-                $rewriteValues[] = new UrlRewriteInfo($productId, $requestPath, $targetPath, 0, $storeId, null, 1);
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `entity_id`, `store_id`, `value`
+            FROM `{$this->metaData->productEntityTable}_varchar`
+            WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ") AND
+                attribute_id = ?
+        ", array_merge($productIds, [$attributeId]));
 
-                if (!array_key_exists($productId, $categoryIds)) {
-                    continue;
-                }
-
-                // url keys with categories
-                foreach ($categoryIds[$productId] as $directCategoryId) {
-
-                    // here we check if the category id supplied actually exists
-                    if (!array_key_exists($directCategoryId, $this->metaData->allCategoryInfo)) {
-                        continue;
-                    }
-
-                    $path = "";
-                    foreach ($this->metaData->allCategoryInfo[$directCategoryId]->path as $i => $parentCategoryId) {
-
-                        // the root category is not used for the url path
-                        if ($i === 0) {
-                            continue;
-                        }
-
-                        $categoryInfo = $this->metaData->allCategoryInfo[$parentCategoryId];
-
-                        // take the url_key from the store view, or default to the global url_key
-                        $urlKey = array_key_exists($storeId, $categoryInfo->urlKeys) ? $categoryInfo->urlKeys[$storeId] : $categoryInfo->urlKeys[0];
-
-                        $path .= $urlKey . "/";
-
-                        $requestPath = $path . $shortUrl;
-                        $targetPath = 'catalog/product/view/id/' . $productId . '/category/' . $parentCategoryId;
-                        $metadata = ['category_id' => (string)$parentCategoryId];
-
-                        $rewriteValues[] = new UrlRewriteInfo($productId, $requestPath, $targetPath, 0, $storeId, $metadata, 1);
-                    }
-                }
-            }
+        $urlKeys = [];
+        foreach ($rows as $row) {
+            $urlKeys[$row['entity_id']][$row['store_id']] = $row['value'];
         }
 
-        return $rewriteValues;
+        return $urlKeys;
+    }
+
+    protected function getExistingVisibilities(array $productIds)
+    {
+        $attributeId = $this->metaData->productEavAttributeInfo['visibility']->attributeId;
+
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `entity_id`, `store_id`, `value`
+            FROM `{$this->metaData->productEntityTable}_int`
+            WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ") AND
+                attribute_id = ?
+        ", array_merge($productIds, [$attributeId]));
+
+        $urlKeys = [];
+        foreach ($rows as $row) {
+            $urlKeys[$row['entity_id']][$row['store_id']] = (int)$row['value'];
+        }
+
+        return $urlKeys;
     }
 
     /**
-     * @param UrlRewriteInfo[] $urlRewrites
+     * @param int $productId
+     * @param int $storeViewId
+     * @param array $existingUrlRewrites
+     * @param array $categoryIds
+     * @param array $allProductUrlKeys
      * @param ValueSerializer $valueSerializer
      */
-    protected function rewriteExistingRewrites(array $urlRewrites, ValueSerializer $valueSerializer)
+    protected function updateRewriteGroup(int $productId, int $storeViewId, array $existingUrlRewrites, array $categoryIds,
+                                          array $allProductUrlKeys, ValueSerializer $valueSerializer)
     {
-        if (empty($urlRewrites)) {
-            return;
+        $this->updateRewrite($productId, $storeViewId, null, $existingUrlRewrites, $allProductUrlKeys, $valueSerializer);
+
+        $productCategoryIds = $this->collectSubcategories($categoryIds);
+
+        foreach ($productCategoryIds as $categoryId) {
+            $this->updateRewrite($productId, $storeViewId, $categoryId, $existingUrlRewrites, $allProductUrlKeys, $valueSerializer);
         }
-
-        $existingUrlRewriteData = $this->getExistingUrlRewriteData($urlRewrites, $valueSerializer);
-
-        $updatedRewrites = [];
-        $oldRewriteIds = [];
-        foreach ($urlRewrites as $urlRewriteInfo) {
-
-            // distinct store_id, product_id, metadata
-
-            $categoryId = empty($urlRewriteInfo->metadata) ? null : $urlRewriteInfo->metadata['category_id'];
-            $key = $urlRewriteInfo->productId . '/' . $categoryId;
-
-            if (!array_key_exists($urlRewriteInfo->storeId, $existingUrlRewriteData) || ! array_key_exists($key, $existingUrlRewriteData[$urlRewriteInfo->storeId])) {
-                continue;
-            }
-
-            $oldUrlRewrites = $existingUrlRewriteData[$urlRewriteInfo->storeId][$key];
-
-            // multiple old rewrites with matching store_id, product_id, metadata
-
-            foreach ($oldUrlRewrites as $oldRewrite) {
-
-                $oldRewriteId = $oldRewrite['url_rewrite_id'];
-                $oldRequestPath = $oldRewrite['request_path'];
-                $oldRedirectType = $oldRewrite['redirect_type'];
-
-                $oldRewriteIds[] = $oldRewriteId;
-
-                $updatedRedirectType = '301';
-
-                if ($oldRedirectType == '0') {
-
-                    if (!$this->metaData->saveRewritesHistory) {
-                        // no history: ignore the existing entry
-                        continue;
-                    }
-
-                }
-
-                if ($oldRequestPath === $urlRewriteInfo->requestPath) {
-                    // a redirect should not redirect to itself
-                    continue;
-                }
-
-                $updatedTargetPath = $urlRewriteInfo->requestPath;
-
-                // when a url rewrite changes to a redirect, its metadata always is a structure
-                $metadata = $urlRewriteInfo->metadata;
-                if ($metadata === null) {
-                    $metadata = [];
-                }
-
-                // autogenerated changes to 0 for redirects
-                $autogenerated = 0;
-
-                // group rewrites
-                // Note: this array grows to big that PHP "holds" 65K for it for a longer amount of time, this shows up in memory_get_usage
-                $updatedRewrites[] =
-                    new UrlRewriteInfo($urlRewriteInfo->productId, $oldRequestPath, $updatedTargetPath, $updatedRedirectType, $urlRewriteInfo->storeId, $metadata, $autogenerated);
-            }
-        }
-
-        $this->db->deleteMultiple($this->metaData->urlRewriteTable, 'url_rewrite_id', $oldRewriteIds);
-
-        $this->writeUrlRewrites($urlRewrites, $valueSerializer, true);
-
-        $this->writeUrlRewrites($updatedRewrites, $valueSerializer, false);
     }
 
     /**
-     * @param UrlRewriteInfo[] $urlRewrites
-     * @param ValueSerializer $valueSerializer
-     * @param $buildIndex
+     * @param int[] $categoryIds
+     * @return array
      */
-    protected function writeUrlRewrites(array $urlRewrites, ValueSerializer $valueSerializer, $buildIndex)
+    protected function collectSubcategories(array $categoryIds)
     {
-        if (empty($urlRewrites)) {
+        $subCategories = [];
+
+        foreach ($categoryIds as $categoryId) {
+            $categoryInfo = $this->metaData->allCategoryInfo[$categoryId];
+            $subCategories = array_merge($subCategories, $categoryInfo->path);
+        }
+
+        return array_unique($subCategories);
+    }
+
+    /**
+     * @param int $productId
+     * @param int $storeViewId
+     * @param int|null $categoryId
+     * @param array $allProductUrlKeys
+     * @return string|null
+     */
+    protected function createRequestPaths(int $productId, int $storeViewId, $categoryId, array $allProductUrlKeys)
+    {
+        $pieces = [];
+
+        if ($categoryId !== null) {
+
+            $categoryInfo = $this->metaData->allCategoryInfo[$categoryId];
+            $parentIds = $categoryInfo->path;
+
+            // 1st parent: root (1), 2nd parent: website root (has no url_key)
+            if (count($parentIds) < 3) {
+                return null;
+            }
+
+            for ($i = 2; $i < count($parentIds); $i++) {
+
+                $parentId = $parentIds[$i];
+
+                if (!array_key_exists($parentId, $this->metaData->allCategoryInfo)) {
+                    // parent category in path (no longer) exists
+                    return null;
+                }
+
+                $parentCategoryInfo = $this->metaData->allCategoryInfo[$parentId];
+
+                if (array_key_exists($storeViewId, $parentCategoryInfo->urlKeys)) {
+                    $section = $parentCategoryInfo->urlKeys[$storeViewId];
+                } elseif (array_key_exists(0, $parentCategoryInfo->urlKeys)) {
+                    $section = $parentCategoryInfo->urlKeys[0];
+                } else {
+                    // parent category has no url_key
+                    return null;
+                }
+
+                $pieces[] = $section;
+            }
+        }
+
+        // product url_key for store view (inherits from global)
+
+        if (isset($allProductUrlKeys[$productId][$storeViewId])) {
+            $productUrlKey =  $allProductUrlKeys[$productId][$storeViewId];
+        } elseif (isset($allProductUrlKeys[$productId][0])) {
+            $productUrlKey =  $allProductUrlKeys[$productId][0];
+        } else {
+            return null;
+        }
+
+        $pieces[] = $productUrlKey;
+
+        return implode('/', $pieces) . $this->metaData->productUrlSuffix;
+    }
+
+    /**
+     * @param int $productId
+     * @param int $storeViewId
+     * @param int|null $categoryId
+     * @param array $existingUrlRewrites
+     * @param array $allProductUrlKeys
+     * @param ValueSerializer $valueSerializer
+     */
+    protected function updateRewrite(int $productId, int $storeViewId, $categoryId, array $existingUrlRewrites,
+                                     array $allProductUrlKeys, ValueSerializer $valueSerializer)
+    {
+        /** @var UrlRewrite $existingRewrite */
+        $existingRewrite = isset($existingUrlRewrites[$storeViewId][$productId][$categoryId])
+            ? $existingUrlRewrites[$storeViewId][$productId][$categoryId] : null;
+
+        // build new item
+        $requestPath = $this->createRequestPaths($productId, $storeViewId, $categoryId, $allProductUrlKeys);
+        if ($requestPath === null) {
             return;
         }
 
-        $newRewriteValues = [];
-        foreach ($urlRewrites as $urlRewrite) {
+        $newRewrite = new UrlRewrite(
+            null,
+            $productId,
+            $requestPath,
+            self::TARGET_PATH_BASE . $productId . ($categoryId === null ? '' : self::TARGET_PATH_EXT . $categoryId),
+            self::NO_REDIRECT,
+            $storeViewId,
+            $categoryId,
+            true
+        );
 
-            $metadata = $urlRewrite->metadata === null ? null : $valueSerializer->serialize($urlRewrite->metadata);
+        if ($existingRewrite === null) {
 
-            $newRewriteValues[] = 'product';
-            $newRewriteValues[] = $urlRewrite->productId;
-            $newRewriteValues[] = $urlRewrite->requestPath;
-            $newRewriteValues[] = $urlRewrite->targetPath;
-            $newRewriteValues[] = $urlRewrite->redirectType;
-            $newRewriteValues[] = $urlRewrite->storeId;
-            $newRewriteValues[] = $urlRewrite->autogenerated;
-            $newRewriteValues[] = $metadata;
+            $this->insertUrlRewrite($newRewrite, $valueSerializer);
+
+        } else {
+
+            if (!$newRewrite->equals($existingRewrite)) {
+                if ($this->metaData->saveRewritesHistory) {
+
+                    // replace existing rewrite
+                    $replacedRewrite = new UrlRewrite(
+                        $existingRewrite->getUrlRewriteId(),
+                        $existingRewrite->getProductId(),
+                        $existingRewrite->getRequestPath(),
+                        $requestPath,
+                        self::REDIRECT,
+                        $existingRewrite->getStoreId(),
+                        $existingRewrite->getCategoryId(),
+                        false
+                    );
+
+                    $this->removeIndex($existingRewrite->getUrlRewriteId());
+                    $this->updateUrlRewrite($replacedRewrite, $valueSerializer);
+                    $this->insertUrlRewrite($newRewrite, $valueSerializer);
+
+                } else {
+
+                    // replace existing rewrite
+                    $replacedRewrite = new UrlRewrite(
+                        $existingRewrite->getUrlRewriteId(),
+                        $newRewrite->getProductId(),
+                        $newRewrite->getRequestPath(),
+                        $newRewrite->getTargetPath(),
+                        self::NO_REDIRECT,
+                        $newRewrite->getStoreId(),
+                        $newRewrite->getCategoryId(),
+                        true
+                    );
+
+                    $this->updateUrlRewrite($replacedRewrite, $valueSerializer);
+
+                }
+            }
         }
+    }
 
-        // add new values
-        // IGNORE works on the key request_path, store_id
-        // when this combination already exists, it is ignored
-        // this may happen if a main product is followed by one of its store views
-        $this->db->insertMultipleWithIgnore(
-            $this->metaData->urlRewriteTable,
-            ['entity_type', 'entity_id', 'request_path', 'target_path', 'redirect_type', 'store_id', 'is_autogenerated', 'metadata'],
-            $newRewriteValues,
-            Magento2DbConnection::_2_KB);
+    /**
+     * @param UrlRewrite $urlRewrite
+     * @param ValueSerializer $valueSerializer
+     */
+    protected function insertUrlRewrite(UrlRewrite $urlRewrite, ValueSerializer $valueSerializer)
+    {
+        // on duplicate key update is needed, for example when two products swap their url_key
+        // otherwise a "duplicate key" error occurs
+        // and there are many other cases
+        $this->db->execute("
+            INSERT INTO `{$this->metaData->urlRewriteTable}`
+            SET
+                `entity_type` = ?, 
+                `entity_id` = ?, 
+                `request_path` = ?, 
+                `target_path` = ?, 
+                `redirect_type` = ?, 
+                `store_id` = ?, 
+                `is_autogenerated` = ?, 
+                `metadata` = ?
+             ON DUPLICATE KEY UPDATE
+                `entity_type` = VALUES(`entity_type`), 
+                `entity_id` = VALUES(`entity_id`), 
+                `target_path` = VALUES(`target_path`), 
+                `redirect_type` = VALUES(`redirect_type`), 
+                `is_autogenerated` = VALUES(`is_autogenerated`), 
+                `metadata` = VALUES(`metadata`)
+        ", [
+            'product',
+            $urlRewrite->getProductId(),
+            $urlRewrite->getRequestPath(),
+            $urlRewrite->getTargetPath(),
+            $urlRewrite->getRedirectType(),
+            $urlRewrite->getStoreId(),
+            $urlRewrite->getAutogenerated(),
+            $valueSerializer->serialize($urlRewrite->getMetadata())
+        ]);
 
-        if ($buildIndex) {
+        if ($insertId = $this->db->getLastInsertId()) {
 
-            // the last insert id is guaranteed to be the first id generated
-            $insertId = $this->db->getLastInsertId();
+            if ($urlRewrite->getCategoryId() !== null) {
 
-            if ($insertId != 0) {
-
-                // the SUBSTRING_INDEX extracts the category id from the target_path
                 $this->db->execute("
-                    INSERT INTO `{$this->metaData->urlRewriteProductCategoryTable}` (`url_rewrite_id`, `category_id`, `product_id`)
-                    SELECT `url_rewrite_id`, SUBSTRING_INDEX(`target_path`, '/', -1), `entity_id`
-                    FROM `{$this->metaData->urlRewriteTable}`
-                    WHERE 
-                        `url_rewrite_id` >= ? AND
-                        `target_path` LIKE '%/category/%' 
+                    INSERT INTO `{$this->metaData->urlRewriteProductCategoryTable}` 
+                    SET
+                        `url_rewrite_id` = ?, 
+                        `category_id` = ?, 
+                        `product_id` = ?
                 ", [
-                    $insertId
+                    $insertId,
+                    $urlRewrite->getCategoryId(),
+                    $urlRewrite->getProductId()
                 ]);
             }
         }
     }
-}
 
+    protected function removeIndex(int $urlRewriteId)
+    {
+        $this->db->execute("
+            DELETE FROM `{$this->metaData->urlRewriteProductCategoryTable}` 
+            WHERE
+                `url_rewrite_id` = ?
+        ", [
+            $urlRewriteId
+        ]);
+    }
+
+    /**
+     * @param UrlRewrite $urlRewrite
+     * @param ValueSerializer $valueSerializer
+     */
+    protected function updateUrlRewrite(UrlRewrite $urlRewrite, ValueSerializer $valueSerializer)
+    {
+        $this->db->execute("
+            UPDATE `{$this->metaData->urlRewriteTable}`
+            SET
+                `entity_type` = 'product', 
+                `entity_id` = ?, 
+                `request_path` = ?, 
+                `target_path` = ?, 
+                `redirect_type` = ?, 
+                `store_id` = ?, 
+                `is_autogenerated` = ?, 
+                `metadata` = ?
+            WHERE
+                `url_rewrite_id` = ?     
+        ", [
+            $urlRewrite->getProductId(),
+            $urlRewrite->getRequestPath(),
+            $urlRewrite->getTargetPath(),
+            $urlRewrite->getRedirectType(),
+            $urlRewrite->getStoreId(),
+            $urlRewrite->getAutogenerated(),
+            $valueSerializer->serialize($urlRewrite->getMetadata()),
+            $urlRewrite->getUrlRewriteId()
+        ]);
+    }
+}

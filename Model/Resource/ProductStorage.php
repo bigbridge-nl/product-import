@@ -258,9 +258,6 @@ class ProductStorage
 
         $this->db->execute("START TRANSACTION");
 
-        // existing values must be queried before the product is inserted or updated
-        $existingValues = $this->urlRewriteStorage->getExistingProductValues($validUpdateProducts);
-
         try {
 
             $this->productEntityStorage->insertMainTable($validInsertProducts);
@@ -285,7 +282,7 @@ class ProductStorage
             $this->tierPriceStorage->updateTierPrices($validProducts);
 
             // url_rewrite (must be done after url_key and category_id)
-            $this->urlRewriteStorage->updateRewrites($validProducts, $existingValues, $valueSerializer);
+            $this->urlRewriteStorage->updateRewrites($validProducts, $valueSerializer);
 
             $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
             $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);

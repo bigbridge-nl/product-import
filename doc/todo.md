@@ -20,6 +20,10 @@
 * Update table import_history
 * check for non-utf-8 in csv imports
 
+## Url rewrites
+
+url_rewrites are created for all store views. No attempt is made to check if they belong to a website that the product is in.
+
 ## Extra
 
 * an url-rewrite tool
