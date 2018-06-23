@@ -611,6 +611,14 @@ The url will then look something like this
 
     https://myshop.com/synthetisch-kinderdekbed-4-seizoenen-kdb-18004.html
 
+Finally there is the case where you don't want suffixes, and where it may occur that two products switch url keys (because their names change, for example).
+
+Within the import session you want to temporarily allow two products to have the same url key.
+
+    $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ALLOW;
+
+Needless to say: be careful with this, because it can cause the corrupt state with duplicate url_keys.
+
 ## Url rewrites
 
 Entries in the table url_rewrite are automatically generated, but only if the attribute visibility is set and is not equal to ProductStoreView::VISIBILITY_NOT_VISIBLE.

@@ -60,7 +60,8 @@ class UrlKeyGenerator
                 } elseif ($urlKey instanceof GeneratedUrlKey) {
 
                     // generated key for existing product? just take the existing value!
-                    if ($product->id !== null && (($urlKey = $this->getProductUrlKey($product->id, $storeViewId)) !== null)) {
+                    if ($urlKey = $this->getAcceptableExistingUrlKey($product->id, $storeView, $urlKeyScheme)) {
+
                         $storeView->setUrlKey($urlKey);
 
                     // generate a key
@@ -77,6 +78,34 @@ class UrlKeyGenerator
                 }
             }
         }
+    }
+
+    /**
+     * Checks if the product already has a url key and if its basic part matches the url key schema
+     *
+     * @param int|null $productId
+     * @param ProductStoreView $storeView
+     * @param $urlKeyScheme
+     * @return false|string
+     */
+    protected function getAcceptableExistingUrlKey($productId, ProductStoreView $storeView, $urlKeyScheme)
+    {
+        $storeViewId = $storeView->getStoreViewId();
+
+        if ($productId !== null) {
+            $urlKey = $this->getProductUrlKey($productId, $storeViewId);
+            if ($urlKey !== null) {
+
+                $pattern = "/^" . $this->getBasicGeneratedUrlKey($storeView, $urlKeyScheme) . "/";
+
+                // check if the existing key has the right base name
+                if (preg_match($pattern, $urlKey)) {
+                    return $urlKey;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -150,6 +179,10 @@ class UrlKeyGenerator
             } while ($this->urlKeyExists($postfixedUrlKey, $storeView->getStoreViewId(), $newUrlKeys));
 
             $urlKey = $postfixedUrlKey;
+
+        } elseif ($duplicateUrlKeyStrategy === ImportConfig::DUPLICATE_KEY_STRATEGY_ALLOW) {
+
+            // no change
 
         } else {
 

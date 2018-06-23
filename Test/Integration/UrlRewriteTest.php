@@ -447,4 +447,102 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expectedIndexes, $actualIndexes);
 
     }
+
+    /**
+     * @throws Exception
+     */
+    public function testSwitchUrlKeys()
+    {
+        $config = new ImportConfig();
+        $config->magentoVersion = "2.1.8";
+        $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ALLOW;
+
+        $importer = self::$factory->createImporter($config);
+
+        // create a product just for the category
+        $productX = new SimpleProduct('cat-product-import');
+        $productX->setAttributeSetByName("Default");
+        $productX->addCategoriesByGlobalName(["Default Category/Names of Things"]);
+        $productX->global()->setName("Category dummy");
+        $productX->global()->setPrice("0");
+        $importer->importSimpleProduct($productX);
+        $importer->flush();
+
+        $categoryId = $productX->getCategoryIds()[0];
+
+        // product
+        $product1 = new SimpleProduct('5-product-import');
+        $product1->setAttributeSetByName("Default");
+        $product1->addCategoriesByGlobalName(["Default Category/Names of Things"]);
+        $product1->global()->setName("The First Name");
+        $product1->global()->setPrice("2.75");
+        $product1->global()->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
+        $product1->global()->generateUrlKey();
+
+        $importer->importSimpleProduct($product1);
+
+        // another product
+        $product2 = new SimpleProduct('6-product-import');
+        $product2->setAttributeSetByName("Default");
+        $product2->addCategoriesByGlobalName(["Default Category/Names of Things"]);
+        $product2->global()->setName("The Second Name");
+        $product2->global()->setPrice("2.65");
+        $product2->global()->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
+        $product2->global()->generateUrlKey();
+
+        $importer->importSimpleProduct($product2);
+
+        $importer->flush();
+
+        // insert
+
+        $expectedRewrites = [
+            ["product", "the-first-name.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+            ["product", "names-of-things/the-first-name.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+
+            ["product", "the-second-name.html", "catalog/product/view/id/{$product2->id}", "0", "1", "1", null],
+            ["product", "names-of-things/the-second-name.html", "catalog/product/view/id/{$product2->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+        ];
+
+        $expectedIndexes = [
+            [(string)$categoryId, $product1->id],
+            [(string)$categoryId, $product2->id],
+        ];
+
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2);
+
+        // swap url_keys
+
+        $product1->global()->setName('The Second Name');
+        $product1->global()->generateUrlKey();
+        $product2->global()->setName('The First Name');
+        $product2->global()->generateUrlKey();
+
+        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product2);
+
+        $importer->flush();
+
+        $expectedRewrites = [
+//            ["product", "the-first-name.html", "the-second-name.html", "301", "1", "0", serialize([])],
+//            ["product", "names-of-things/the-first-name.html", "names-of-things/the-second-name.html", "301", "1", "0",
+//                serialize(['category_id' => (string)$categoryId])],
+
+            ["product", "the-second-name.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+            ["product", "names-of-things/the-second-name.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+
+//            ["product", "the-second-name.html", "the-first-name.html", "301", "1", "0", serialize([])],
+//            ["product", "names-of-things/the-second-name.html", "names-of-things/the-first-name.html", "301", "1", "0",
+//                serialize(['category_id' => (string)$categoryId])],
+
+            ["product", "the-first-name.html", "catalog/product/view/id/{$product2->id}", "0", "1", "1", null],
+            ["product", "names-of-things/the-first-name.html", "catalog/product/view/id/{$product2->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+        ];
+
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product2);
+    }
 }
