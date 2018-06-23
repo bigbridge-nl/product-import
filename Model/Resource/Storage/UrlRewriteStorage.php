@@ -42,20 +42,13 @@ class UrlRewriteStorage
     {
         $productIds = array_column($products, 'id');
 
-        if (empty($productIds)) {
-            $existingUrlRewrites = [];
-            $allProductCategoryIds = [];
-            $allProductUrlKeys = [];
-            $allVisibilities = [];
-        } else {
-            $existingUrlRewrites = $this->getExistingUrlRewrites($productIds, $valueSerializer);
-            $allProductCategoryIds = $this->getExistingProductCategoryIds($productIds);
-            $allProductUrlKeys = $this->getExistingProductUrlKeys($productIds);
-            $allVisibilities = $this->getExistingVisibilities($productIds);
-        }
-
         // there are no global url_rewrites
         $allStoreIds = array_diff($this->metaData->storeViewMap, ['0']);
+
+        $existingUrlRewrites = $this->getExistingUrlRewrites($productIds, $allStoreIds, $valueSerializer);
+        $allProductCategoryIds = $this->getExistingProductCategoryIds($productIds);
+        $allProductUrlKeys = $this->getExistingProductUrlKeys($productIds);
+        $allVisibilities = $this->getExistingVisibilities($productIds);
 
         foreach ($productIds as $productId) {
 
@@ -85,9 +78,11 @@ class UrlRewriteStorage
      * @param ValueSerializer $valueSerializer
      * @return array
      */
-    protected function getExistingUrlRewrites(array $productIds, ValueSerializer $valueSerializer)
+    protected function getExistingUrlRewrites(array $productIds, array $allStoreIds, ValueSerializer $valueSerializer)
     {
-        $allStoreIds = array_diff($this->metaData->storeViewMap, ['0']);
+        if (empty($productIds)) {
+            return [];
+        }
 
         // group products by store view
         $collection = [];
@@ -132,6 +127,10 @@ class UrlRewriteStorage
      */
     protected function getExistingProductCategoryIds(array $productIds)
     {
+        if (empty($productIds)) {
+            return [];
+        }
+
         $rows = $this->db->fetchAllAssoc("
             SELECT `product_id`, `category_id`
             FROM `{$this->metaData->categoryProductTable}`
@@ -148,6 +147,10 @@ class UrlRewriteStorage
 
     protected function getExistingProductUrlKeys(array $productIds)
     {
+        if (empty($productIds)) {
+            return [];
+        }
+
         $attributeId = $this->metaData->productEavAttributeInfo['url_key']->attributeId;
 
         $rows = $this->db->fetchAllAssoc("
@@ -167,6 +170,10 @@ class UrlRewriteStorage
 
     protected function getExistingVisibilities(array $productIds)
     {
+        if (empty($productIds)) {
+            return [];
+        }
+
         $attributeId = $this->metaData->productEavAttributeInfo['visibility']->attributeId;
 
         $rows = $this->db->fetchAllAssoc("
@@ -214,7 +221,8 @@ class UrlRewriteStorage
 
         foreach ($categoryIds as $categoryId) {
             $categoryInfo = $this->metaData->allCategoryInfo[$categoryId];
-            $subCategories = array_merge($subCategories, $categoryInfo->path);
+            $categoriesWithUrlKeysIds = array_slice($categoryInfo->path, 2);
+            $subCategories = array_merge($subCategories, $categoriesWithUrlKeysIds);
         }
 
         return array_unique($subCategories);
@@ -235,11 +243,6 @@ class UrlRewriteStorage
 
             $categoryInfo = $this->metaData->allCategoryInfo[$categoryId];
             $parentIds = $categoryInfo->path;
-
-            // 1st parent: root (1), 2nd parent: website root (has no url_key)
-            if (count($parentIds) < 3) {
-                return null;
-            }
 
             for ($i = 2; $i < count($parentIds); $i++) {
 
@@ -301,11 +304,13 @@ class UrlRewriteStorage
             return;
         }
 
+        $targetPath = self::TARGET_PATH_BASE . $productId . ($categoryId === null ? '' : self::TARGET_PATH_EXT . $categoryId);
+
         $newRewrite = new UrlRewrite(
             null,
             $productId,
             $requestPath,
-            self::TARGET_PATH_BASE . $productId . ($categoryId === null ? '' : self::TARGET_PATH_EXT . $categoryId),
+            $targetPath,
             self::NO_REDIRECT,
             $storeViewId,
             $categoryId,
@@ -314,7 +319,7 @@ class UrlRewriteStorage
 
         if ($existingRewrite === null) {
 
-            $this->insertUrlRewrite($newRewrite, $valueSerializer);
+            $this->replaceIntoUrlRewrite($newRewrite, $valueSerializer);
 
         } else {
 
@@ -334,24 +339,31 @@ class UrlRewriteStorage
                     );
 
                     $this->removeIndex($existingRewrite->getUrlRewriteId());
+                    // update is possible because request_path/store_id stays the same
                     $this->updateUrlRewrite($replacedRewrite, $valueSerializer);
-                    $this->insertUrlRewrite($newRewrite, $valueSerializer);
+                    // insert new key (replace into, because a request_path/store_id could already exist
+                    $this->replaceIntoUrlRewrite($newRewrite, $valueSerializer);
 
                 } else {
 
                     // replace existing rewrite
                     $replacedRewrite = new UrlRewrite(
                         $existingRewrite->getUrlRewriteId(),
-                        $newRewrite->getProductId(),
+                        $existingRewrite->getProductId(),
                         $newRewrite->getRequestPath(),
-                        $newRewrite->getTargetPath(),
-                        self::NO_REDIRECT,
-                        $newRewrite->getStoreId(),
-                        $newRewrite->getCategoryId(),
-                        true
+                        $existingRewrite->getTargetPath(),
+                        $existingRewrite->getRedirectType(),
+                        $existingRewrite->getStoreId(),
+                        $existingRewrite->getCategoryId(),
+                        $existingRewrite->getAutogenerated()
                     );
 
-                    $this->updateUrlRewrite($replacedRewrite, $valueSerializer);
+                    // this was originally just an update,
+                    // but request_path/store_id could already exist,
+                    // replace into removes:
+                    // - the old url_rewrite (because the url_rewrite_id)
+                    // - any url_rewrites with the same request_path/store_id
+                    $this->replaceIntoUrlRewrite($replacedRewrite, $valueSerializer);
 
                 }
             }
@@ -362,7 +374,7 @@ class UrlRewriteStorage
      * @param UrlRewrite $urlRewrite
      * @param ValueSerializer $valueSerializer
      */
-    protected function insertUrlRewrite(UrlRewrite $urlRewrite, ValueSerializer $valueSerializer)
+    protected function replaceIntoUrlRewrite(UrlRewrite $urlRewrite, ValueSerializer $valueSerializer)
     {
         // replace is needed, for example when two products swap their url_key
         // otherwise a "duplicate key" error occurs
@@ -371,6 +383,7 @@ class UrlRewriteStorage
         $this->db->execute("
             REPLACE INTO `{$this->metaData->urlRewriteTable}`
             SET
+                `url_rewrite_id` = ?,
                 `entity_type` = ?, 
                 `entity_id` = ?, 
                 `request_path` = ?, 
@@ -380,6 +393,7 @@ class UrlRewriteStorage
                 `is_autogenerated` = ?, 
                 `metadata` = ?
         ", [
+            $urlRewrite->getUrlRewriteId(), // null | integer
             'product',
             $urlRewrite->getProductId(),
             $urlRewrite->getRequestPath(),

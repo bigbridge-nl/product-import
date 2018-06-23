@@ -109,15 +109,13 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
         echo "Updates: " . sprintf('%.1f', $time) . " seconds; " . $memory . " kB \n";
 
         $this->assertSame([], $lastErrors);
-        // 65K is not leaked but "held" by PHP for the large array $updatedRewrites in UrlRewriteStorage::rewriteExistingRewrites
-        // try running updateProducts twice, the memory consumed does not accumulate
-        $this->assertLessThan(132, $memory);
+        $this->assertLessThan(1, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000000);
-        $this->assertLessThan(56, $peakMemory);
+        $this->assertLessThan(15, $peakMemory);
 
         echo "Peak mem: " . $peakMemory . " MB \n";
     }

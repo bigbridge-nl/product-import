@@ -160,6 +160,43 @@ $magnitude is the maximum size of each insert in kB (in order of magnitude, as a
 
 This allows me to use the allowed packet size efficiently while not straining the library developer much.
 
+## Url Rewrite
+
+The table url_rewrite (and its companion, catalog_url_rewrite_product_category) are indexes for product, category and cms page pretty urls.
+It is not generated as part of the indexing process and must be built whenever products change.
+
+Updating them is quite a task! You must think of at least the following:
+
+url rewrite entries depend on:
+
+* the url_key of the product
+* the url_path of each of its categories (which depends on its url_keys)
+* the url suffix
+
+when you create the url_rewrites:
+
+* create a url_rewrite for the product without any category
+* create a url_rewrite for each of its categories
+* create a url_rewrite for each of its categories' parent categories (except for the topmost two levels)
+* each store view has its own url_rewrites, but global has none
+
+note:
+
+* products with a visibility of "not-visible-individually" get no url_rewrite (since they would have no use)
+* existing url_rewrites are not removed when a product changes to "not-visible-individually"
+* when a product or category has no url_key for a store view, it inherits its url_key from global
+* the metadata field was encoded with serialize before M2.2, and with JSON since M2.2
+
+When the config value "save rewrites history", is on, old rewrites are never deleted, but just transformed into 301 entries. New entries are added to the list.
+Only non-301 rewrites get an entry in catalog_url_rewrite_product_category.
+
+On conflicts:
+
+* url_keys have no unique key constraint (not could they have, since they are stored in the _varchar table)
+* url_rewrites are subject to a unique key constraint on request_path and store view id
+* this constraint causes problems on updates where url_keys move from one product to another
+* product request_paths shared the same space with category paths and cms paths
+
 ## Nice to know
 
 * When concatenating sets of values "(a, b, c)" "(d, e, f)" etc, implode(", ", $values) is faster than just string concatenation, even though an array of 1000 items needs to be created
