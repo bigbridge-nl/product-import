@@ -459,6 +459,24 @@ class MetaData
         return array_values(array_diff(array_keys($this->storeViewMap), [Product::GLOBAL_STORE_VIEW_CODE]));
     }
 
+    /**
+     * @param array $storeViewCodes
+     * @return array
+     * @throws Exception
+     */
+    public function getStoreViewIds(array $storeViewCodes)
+    {
+        $ids = [];
+        foreach ($storeViewCodes as $code) {
+            if (array_key_exists($code, $this->storeViewMap)) {
+                $ids[] = $this->storeViewMap[$code];
+            } else {
+                throw new Exception("Store view code not found: " . $code);
+            }
+        }
+        return $ids;
+    }
+
     protected function getStoreViewWebsiteMap()
     {
         return $this->db->fetchMap("SELECT `store_id`, `website_id` FROM {$this->storeTable}");

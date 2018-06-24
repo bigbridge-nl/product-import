@@ -10,6 +10,8 @@ use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
  */
 class UrlRewriteUpdater
 {
+    const BUNCH_SIZE = 1000;
+
     /** @var ImporterFactory */
     protected $importerFactory;
 
@@ -19,23 +21,37 @@ class UrlRewriteUpdater
     /** @var MetaData */
     protected $metaData;
 
+    /** @var Information */
+    protected $information;
+
     public function __construct(
         MetaData $metaData,
         ImporterFactory $importerFactory,
-        UrlRewriteStorage $urlRewriteStorage
+        UrlRewriteStorage $urlRewriteStorage,
+        Information $information
     )
     {
         $this->importerFactory = $importerFactory;
         $this->urlRewriteStorage = $urlRewriteStorage;
         $this->metaData = $metaData;
+        $this->information = $information;
     }
 
+    /**
+     * @param array $storeViewCodes
+     * @throws \Exception
+     */
     public function updateUrlRewrites(array $storeViewCodes)
     {
-#todo
-        $productIds = []; // from Information
-        $storeViewIds = []; // from metadata
+        $storeViewIds = $this->metaData->getStoreViewIds($storeViewCodes);
 
-        $this->urlRewriteStorage->updateRewrites($productIds, $storeViewIds);
+        $i = 0;
+        while ($productIds = $this->information->getLimitedProductIds($i, self::BUNCH_SIZE)) {
+            $this->urlRewriteStorage->updateRewrites($productIds, $storeViewIds);
+            $i += self::BUNCH_SIZE;
+#todo: not here
+echo "\r" . $i;
+
+        }
     }
 }

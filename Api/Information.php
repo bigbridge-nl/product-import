@@ -27,9 +27,27 @@ class Information
 
     /**
      * Returns the codes of all store views, except for the global store view.
+     * @return string[]
      */
     public function getNonGlobalStoreViewCodes()
     {
         return $this->metaData->getNonGlobalStoreViewCodes();
+    }
+
+    /**
+     * Returns a range of product ids
+     *
+     * @param int $offset
+     * @param int $limit
+     * @return array
+     */
+    public function getLimitedProductIds(int $offset, int $limit)
+    {
+        return $this->db->fetchSingleColumn("
+            SELECT `entity_id`
+            FROM `" . $this->metaData->productEntityTable . "`
+            ORDER BY `entity_id`
+            LIMIT $limit OFFSET $offset
+        ");
     }
 }
