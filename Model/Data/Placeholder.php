@@ -16,9 +16,11 @@ abstract class Placeholder extends Product
     const PLACEHOLDER_PRICE = '123456.7800';
 
     /**
+     * @param string $sku
+     * @param int $attributeSetId
      * @return VirtualProduct
      */
-    public static function createPlaceholder($sku, $attributeSetId)
+    public static function createPlaceholder(string $sku, int $attributeSetId)
     {
         $placeholder = new VirtualProduct($sku);
         $placeholder->placeholder = true;

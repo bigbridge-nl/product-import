@@ -109,7 +109,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
         echo "Updates: " . sprintf('%.1f', $time) . " seconds; " . $memory . " kB \n";
 
         $this->assertSame([], $lastErrors);
-        $this->assertLessThan(1, $memory);
+        $this->assertLessThan(66, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 

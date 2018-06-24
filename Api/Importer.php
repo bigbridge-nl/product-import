@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Api;
 
-use BigBridge\ProductImport\Model\Resource\ProductDeleter;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
@@ -14,7 +13,6 @@ use BigBridge\ProductImport\Model\Data\Placeholder;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\ProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
-use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 
 /**
  * This is the main class for API based imports.
@@ -30,35 +28,25 @@ class Importer
     /** @var  ImportConfig */
     protected $config;
 
-    /** @var  ValueSerializer */
-    protected $valueSerializer;
-
     /** @var ProductEntityStorage */
     protected $productEntityStorage;
 
     /** @var ProductStorage */
     protected $productStorage;
 
-    /** @var ProductDeleter */
-    protected $productDeleter;
-
     /** @var MetaData */
     protected $metaData;
 
     public function __construct(
         ImportConfig $config,
-        ValueSerializer $valueSerializer,
         ProductEntityStorage $productEntityStorage,
         ProductStorage $productStorage,
-        ProductDeleter $productDeleter,
         MetaData $metaData)
     {
         $this->config = $config;
-        $this->valueSerializer = $valueSerializer;
         $this->productEntityStorage = $productEntityStorage;
         $this->productStorage = $productStorage;
         $this->metaData = $metaData;
-        $this->productDeleter = $productDeleter;
     }
 
     /**
@@ -178,7 +166,7 @@ class Importer
             }
         }
 
-        $this->productStorage->storeProducts($this->products, $this->config, $this->valueSerializer);
+        $this->productStorage->storeProducts($this->products, $this->config);
 
         // help the garbage collector by removing cyclic dependencies
         foreach ($this->products as $product) {
@@ -188,26 +176,6 @@ class Importer
         }
 
         $this->products = [];
-    }
-
-    /**
-     * Delete products specified by id.
-     *
-     * @param array $ids
-     */
-    public function deleteProductsByIds(array $ids)
-    {
-        $this->productDeleter->deleteProductsByIds($ids);
-    }
-
-    /**
-     * Delete products specified by sku.
-     *
-     * @param array $skus
-     */
-    public function deleteProductsBySkus(array $skus)
-    {
-        $this->productDeleter->deleteProductsBySkus($skus);
     }
 
     /**
@@ -268,7 +236,7 @@ class Importer
     /**
      * @param ConfigurableProduct $product
      */
-    protected function createConfigurableProductPlaceholders(Product $product)
+    protected function createConfigurableProductPlaceholders(ConfigurableProduct $product)
     {
         if (($variantSkus = $product->getVariantSkus()) !== null) {
             $this->createPlaceholders($variantSkus);

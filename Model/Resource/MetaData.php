@@ -2,10 +2,15 @@
 
 namespace BigBridge\ProductImport\Model\Resource;
 
+use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Data\CategoryInfo;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
+use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;
+use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
+use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
+use Exception;
 
 /**
  * Pre-loads all meta data needed for the core processes once.
@@ -62,6 +67,12 @@ class MetaData
 
     /** @var  Magento2DbConnection */
     protected $db;
+
+    /** @var string */
+    public $magentoVersion;
+
+    /** @var ValueSerializer */
+    public $valueSerializer;
 
     /** @var string  */
     public $entityTypeTable;
@@ -252,9 +263,17 @@ class MetaData
     /** @var LinkInfo[] */
     public $linkInfo;
 
+    /**
+     * MetaData constructor.
+     * @param Magento2DbConnection $db
+     * @throws Exception
+     */
     public function __construct(Magento2DbConnection $db)
     {
         $this->db = $db;
+
+        $this->magentoVersion = $this->detectMagentoVersion();
+        $this->valueSerializer = $this->getValueSerializer();
 
         $this->entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
@@ -329,6 +348,41 @@ class MetaData
     }
 
     /**
+     * @return string
+     * @throws Exception
+     */
+    protected function detectMagentoVersion()
+    {
+        // Note: this is the official version to determine the Magento version:
+        //
+        // $productMetadata = new \Magento\Framework\App\ProductMetadata();
+        // $version = $productMetadata->getVersion();
+        //
+        // But is takes 0.2 seconds to execute, this is too long
+        // See also https://magento.stackexchange.com/questions/96858/how-to-get-magento-version-in-magento2-equivalent-of-magegetversion
+
+        if (preg_match('/"version": "([^\"]+)"/',
+            file_get_contents(BP . '/vendor/magento/magento2-base/composer.json'), $matches)) {
+
+            $magentoVersion = $matches[1];
+
+        } else {
+            throw new Exception("Magento version could not be detected.");
+        }
+
+        return $magentoVersion;
+    }
+
+    protected function getValueSerializer()
+    {
+        if (version_compare($this->magentoVersion, '2.2.0') >= 0) {
+            return new JsonValueSerializer();
+        } else {
+            return new SerializeValueSerializer();
+        }
+    }
+
+    /**
      * Returns the id of the default category attribute set id.
      *
      * @return int
@@ -385,6 +439,24 @@ class MetaData
     protected function getStoreViewMap()
     {
         return $this->db->fetchMap("SELECT `code`, `store_id` FROM {$this->storeTable}");
+    }
+
+    /**
+     * Returns the ids of all store views, except global.
+     * @return array
+     */
+    public function getNonGlobalStoreViewIds()
+    {
+        return array_diff($this->storeViewMap, ['0']);
+    }
+
+    /**
+     * Returns the codes of all store views, except global.
+     * @return array
+     */
+    public function getNonGlobalStoreViewCodes()
+    {
+        return array_values(array_diff(array_keys($this->storeViewMap), [Product::GLOBAL_STORE_VIEW_CODE]));
     }
 
     protected function getStoreViewWebsiteMap()

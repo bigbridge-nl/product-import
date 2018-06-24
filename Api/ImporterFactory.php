@@ -3,9 +3,6 @@
 namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
-use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;
-use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
-use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use Magento\Framework\App\ObjectManager;
 use Exception;
 
@@ -36,14 +33,10 @@ class ImporterFactory
         // disallow changing the config after import creation; it could cause all kinds of trouble
         $config = clone $originalConfig;
 
-        $this->fillInDefaults($config);
-
         $this->validateConfig($config);
 
-        $valueSerializer = $this->createValueSerializer($config);
-
         $om = ObjectManager::getInstance();
-        $importer = $om->create(Importer::class, ['config' => $config, 'valueSerializer' => $valueSerializer]);
+        $importer = $om->create(Importer::class, ['config' => $config]);
 
         return $importer;
     }
@@ -52,47 +45,8 @@ class ImporterFactory
      * @param ImportConfig $config
      * @throws Exception
      */
-    protected function fillInDefaults(ImportConfig $config)
-    {
-        if (is_null($config->magentoVersion)) {
-
-            // Note: this is the official version to determine the Magento version:
-            //
-            // $productMetadata = new \Magento\Framework\App\ProductMetadata();
-            // $version = $productMetadata->getVersion();
-            //
-            // But is takes 0.2 seconds to execute, this is too long
-            // See also https://magento.stackexchange.com/questions/96858/how-to-get-magento-version-in-magento2-equivalent-of-magegetversion
-
-            if (preg_match('/"version": "([^\"]+)"/',
-                file_get_contents(BP . '/vendor/magento/magento2-base/composer.json'), $matches)) {
-
-                $config->magentoVersion = $matches[1];
-            } else {
-                throw new Exception("Magento version could not be detected.");
-            }
-        }
-    }
-
-    protected function createValueSerializer(ImportConfig $config): ValueSerializer
-    {
-        if (version_compare($config->magentoVersion, '2.2.0') >= 0) {
-            return new JsonValueSerializer();
-        } else {
-            return new SerializeValueSerializer();
-        }
-    }
-
-    /**
-     * @param ImportConfig $config
-     * @throws Exception
-     */
     protected function validateConfig(ImportConfig $config)
     {
-        if (!preg_match('/^2\.\d/', $config->magentoVersion)) {
-            throw new Exception("config: invalid Magento version number");
-        }
-
         if (!is_integer($config->batchSize)) {
             throw new Exception("config: batchSize is not an integer");
         } else if ($config->batchSize <= 0) {

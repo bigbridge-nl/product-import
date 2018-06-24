@@ -11,7 +11,6 @@ use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
 use BigBridge\ProductImport\Model\Resource\Resolver\UrlKeyGenerator;
-use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Storage\BundleStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\CustomOptionStorage;
@@ -123,10 +122,9 @@ class ProductStorage
     /**
      * @param Product[] $products Sku-indexed products of various product types
      * @param ImportConfig $config
-     * @param ValueSerializer $valueSerializer
      * @throws Exception
      */
-    public function storeProducts(array $products, ImportConfig $config, ValueSerializer $valueSerializer)
+    public function storeProducts(array $products, ImportConfig $config)
     {
         if (empty($products)) {
             return;
@@ -139,7 +137,7 @@ class ProductStorage
         if (!$config->dryRun) {
 
             // store the products in the database
-            $this->saveProducts($validProducts, $valueSerializer, $config);
+            $this->saveProducts($validProducts, $config);
         }
 
         // call user defined functions to let them process the results
@@ -225,11 +223,10 @@ class ProductStorage
 
     /**
      * @param Product[] $validProducts
-     * @param ValueSerializer $valueSerializer
      * @param ImportConfig $config
      * @throws Exception
      */
-    protected function saveProducts(array $validProducts, ValueSerializer $valueSerializer, ImportConfig $config)
+    protected function saveProducts(array $validProducts, ImportConfig $config)
     {
         $validUpdateProducts = [];
         $validInsertProducts = [];
@@ -282,7 +279,9 @@ class ProductStorage
             $this->tierPriceStorage->updateTierPrices($validProducts);
 
             // url_rewrite (must be done after url_key and category_id)
-            $this->urlRewriteStorage->updateRewrites($validProducts, $valueSerializer);
+            $validProductIds = array_column($validProducts, 'id');
+            $nonGlobalStoreIds = $this->metaData->getNonGlobalStoreViewIds();
+            $this->urlRewriteStorage->updateRewrites($validProductIds, $nonGlobalStoreIds);
 
             $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
             $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);

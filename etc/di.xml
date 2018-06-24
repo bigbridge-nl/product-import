@@ -4,6 +4,7 @@
 		<arguments>
 			<argument name="commands" xsi:type="array">
 				<item name="bigbridge_product_import" xsi:type="object">BigBridge\ProductImport\Console\Command\ProductImportCommand</item>
+				<item name="bigbridge_product_urlrewrite" xsi:type="object">BigBridge\ProductImport\Console\Command\ProductUrlRewriteCommand</item>
 			</argument>
 		</arguments>
 	</type>

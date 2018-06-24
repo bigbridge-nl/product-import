@@ -28,7 +28,7 @@ class ProductImportCommand extends Command
     const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
     const OPTION_URL_KEY_SOURCE = "url-key-source";
     const OPTION_URL_KEY_STRATEGY = "url-key-strategy";
-    const SKIP_XSD = "skip-xsd";
+    const OPTION_SKIP_XSD = "skip-xsd";
 
     /** @var XmlProductReader */
     protected $xmlProductReader;
@@ -119,7 +119,7 @@ class ProductImportCommand extends Command
                 ImportConfig::TEMP_PRODUCT_IMAGE_PATH
             ),
             new InputOption(
-                self::SKIP_XSD,
+                self::OPTION_SKIP_XSD,
                 null,
                 InputOption::VALUE_NONE,
                 "Skip XSD validation of the XML file"
@@ -131,7 +131,6 @@ class ProductImportCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|null
-     * @throws \Magento\Setup\Exception
      * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -154,7 +153,7 @@ class ProductImportCommand extends Command
 
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 
-        $skipXsdValidation = $input->getOption(self::SKIP_XSD);
+        $skipXsdValidation = $input->getOption(self::OPTION_SKIP_XSD);
 
         // import!
         $this->xmlProductReader->import($fileName, $config, $skipXsdValidation, $logger);

@@ -701,13 +701,15 @@ Import by id always concerns updates, not inserts. When a non-existing id is use
 
 While the library's main purpose is to import products, it can delete products as well.
 
+Import ProductDeleter via constructor injection.
+
 Either specify an array of product ids:
 
-    $importer->deleteProductsByIds($ids);
+    $deleter->deleteProductsByIds($ids);
 
 or products skus:
 
-    $importer->deleteProductsBySkus($skus);
+    $deleter->deleteProductsBySkus($skus);
 
 ## Dry run
 

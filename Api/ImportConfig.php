@@ -2,8 +2,6 @@
 
 namespace BigBridge\ProductImport\Api;
 
-use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
-
 /**
  * @author Patrick van Bergen
  */
@@ -101,14 +99,6 @@ class ImportConfig
     const DUPLICATE_KEY_STRATEGY_ADD_SKU = 'add-sku';
     const DUPLICATE_KEY_STRATEGY_ADD_SERIAL = 'add-serial';
     const DUPLICATE_KEY_STRATEGY_ALLOW = 'allow';
-
-    /**
-     * The importer will use this version whether to use serialization or JSON for url_rewrite metadata.
-     * If left null, it will be auto-detected.
-     *
-     * @var null
-     */
-    public $magentoVersion = null;
 
     /**
      * Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials"

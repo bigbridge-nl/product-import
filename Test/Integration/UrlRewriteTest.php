@@ -4,6 +4,8 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
+use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;
+use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
 use Exception;
 use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -70,7 +72,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         list($c2c,) = $categoryImporter->importCategoryPath("Default Category/Colored Things/Containers/Large", true, '/');
 
         $config = new ImportConfig();
-        $config->magentoVersion = '2.1.8';
+        self::$metadata->valueSerializer = new SerializeValueSerializer();
 
         $importer = self::$factory->createImporter($config);
 
@@ -122,7 +124,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $metadata = ObjectManager::getInstance()->get(MetaData::class);
 
         $config = new ImportConfig();
-        $config->magentoVersion = '2.1.8';
+        self::$metadata->valueSerializer = new SerializeValueSerializer();
 
         $importer = self::$factory->createImporter($config);
 
@@ -187,7 +189,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
     public function testUrlRewritesGeneration()
     {
         $config = new ImportConfig();
-        $config->magentoVersion = "2.1.8";
+        self::$metadata->valueSerializer = new SerializeValueSerializer();
 
         $importer = self::$factory->createImporter($config);
 
@@ -331,7 +333,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
     public function testUrlRewritesWithJson()
     {
         $config = new ImportConfig();
-        $config->magentoVersion = "2.2.1";
+        self::$metadata->valueSerializer = new JsonValueSerializer();
 
         $importer = self::$factory->createImporter($config);
 
@@ -454,7 +456,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
     public function testSwitchUrlKeys()
     {
         $config = new ImportConfig();
-        $config->magentoVersion = "2.1.8";
+        self::$metadata->valueSerializer = new SerializeValueSerializer();
         $config->duplicateUrlKeyStrategy = ImportConfig::DUPLICATE_KEY_STRATEGY_ALLOW;
 
         $importer = self::$factory->createImporter($config);
@@ -546,9 +548,9 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
     {
         $keep = self::$metadata->saveRewritesHistory;
         self::$metadata->saveRewritesHistory = false;
+        self::$metadata->valueSerializer = new SerializeValueSerializer();
 
         $config = new ImportConfig();
-        $config->magentoVersion = "2.1.8";
 
         $importer = self::$factory->createImporter($config);
 

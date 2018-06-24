@@ -91,21 +91,7 @@ class ConfigTest extends \PHPUnit\Framework\TestCase
 
 
         // $config has copied, the original is unchanged
-        $this->assertEquals(null, $config->magentoVersion);
-
-        // ---
-
-        $importer = null;
-        $config = new ImportConfig();
-        $config->magentoVersion = '2';
-
-        try {
-            $importer = self::$factory->createImporter($config);
-        } catch (Exception $exception) {
-            $this->assertEquals("config: invalid Magento version number", $exception->getMessage());
-        }
-
-        $this->assertNull($importer);
+        $this->assertEquals(null, $config->dryRun);
 
     }
 }

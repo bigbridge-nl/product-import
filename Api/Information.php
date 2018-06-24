@@ -1,6 +1,6 @@
 <?php
 
-namespace BigBridge\ProductImport\Model\Resource;
+namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
@@ -8,7 +8,7 @@ use BigBridge\ProductImport\Model\Resource\MetaData;
 /**
  * @author Patrick van Bergen
  */
-class ProductDeleter
+class Information
 {
     /** @var MetaData */
     protected $metaData;
@@ -26,18 +26,10 @@ class ProductDeleter
     }
 
     /**
-     * @var string[] $ids
+     * Returns the codes of all store views, except for the global store view.
      */
-    public function deleteProductsByIds(array $ids)
+    public function getNonGlobalStoreViewCodes()
     {
-        $this->db->deleteMultiple($this->metaData->productEntityTable, "id", $ids);
-    }
-
-    /**
-     * @var string[] $ids
-     */
-    public function deleteProductsBySkus(array $skus)
-    {
-        $this->db->deleteMultiple($this->metaData->productEntityTable, "sku", $skus);
+        return $this->metaData->getNonGlobalStoreViewCodes();
     }
 }
