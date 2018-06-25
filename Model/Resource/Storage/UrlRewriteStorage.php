@@ -32,11 +32,19 @@ class UrlRewriteStorage
         $this->metaData = $metaData;
     }
 
+    public function updateRewrites(array $products)
+    {
+        $productIds = array_column($products, 'id');
+        $nonGlobalStoreIds = $this->metaData->getNonGlobalStoreViewIds();
+
+        $this->updateRewritesByProductIds($productIds, $nonGlobalStoreIds);
+    }
+
     /**
      * @param int[] $productIds
      * @param array $storeViewIds
      */
-    public function updateRewrites(array $productIds, array $storeViewIds)
+    public function updateRewritesByProductIds(array $productIds, array $storeViewIds)
     {
         $existingUrlRewrites = $this->getExistingUrlRewrites($productIds, $storeViewIds);
         $allProductCategoryIds = $this->getExistingProductCategoryIds($productIds);

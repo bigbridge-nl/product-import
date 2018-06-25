@@ -44,10 +44,11 @@ class UrlRewriteUpdater
     public function updateUrlRewrites(array $storeViewCodes)
     {
         $storeViewIds = $this->metaData->getStoreViewIds($storeViewCodes);
+        $productIds = $this->information->getProductIds();
 
         $i = 0;
-        while ($productIds = $this->information->getLimitedProductIds($i, self::BUNCH_SIZE)) {
-            $this->urlRewriteStorage->updateRewrites($productIds, $storeViewIds);
+        while ($chunkedIds = array_slice($productIds, $i, self::BUNCH_SIZE)) {
+            $this->urlRewriteStorage->updateRewritesByProductIds($chunkedIds, $storeViewIds);
             $i += self::BUNCH_SIZE;
 #todo: not here
 echo "\r" . $i;

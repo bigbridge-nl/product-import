@@ -35,19 +35,15 @@ class Information
     }
 
     /**
-     * Returns a range of product ids
+     * Returns all product ids
      *
-     * @param int $offset
-     * @param int $limit
      * @return array
      */
-    public function getLimitedProductIds(int $offset, int $limit)
+    public function getProductIds()
     {
         return $this->db->fetchSingleColumn("
             SELECT `entity_id`
             FROM `" . $this->metaData->productEntityTable . "`
-            ORDER BY `entity_id`
-            LIMIT $limit OFFSET $offset
         ");
     }
 }

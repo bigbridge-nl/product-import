@@ -279,9 +279,7 @@ class ProductStorage
             $this->tierPriceStorage->updateTierPrices($validProducts);
 
             // url_rewrite (must be done after url_key and category_id)
-            $validProductIds = array_column($validProducts, 'id');
-            $nonGlobalStoreIds = $this->metaData->getNonGlobalStoreViewIds();
-            $this->urlRewriteStorage->updateRewrites($validProductIds, $nonGlobalStoreIds);
+            $this->urlRewriteStorage->updateRewrites($validProducts);
 
             $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
             $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);
