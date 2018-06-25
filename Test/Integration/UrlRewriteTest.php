@@ -325,6 +325,39 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         ];
 
         $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+
+        // remove a category
+
+        self::$db->execute("
+            DELETE FROM " . self::$metadata->categoryProductTable . " 
+            WHERE product_id IN (" . $product1->id . ',' . $product3->id . ")
+                AND category_id = " . $categoryId . "
+        ");
+
+        $product1->addCategoriesByGlobalName([]);
+        $product3->addCategoriesByGlobalName([]);
+
+        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product3);
+
+        $importer->flush();
+
+        $expectedRewrites = [
+            ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
+
+            ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+
+            ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$newCategoryId])],
+        ];
+
+        $expectedIndexes = [
+            [(string)$newCategoryId, $product3->id],
+        ];
+
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
     }
 
     /**

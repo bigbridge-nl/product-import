@@ -186,6 +186,7 @@ note:
 * existing url_rewrites are not removed when a product changes to "not-visible-individually"
 * when a product or category has no url_key for a store view, it inherits its url_key from global
 * the metadata field was encoded with serialize before M2.2, and with JSON since M2.2
+* when a category is removed from a product, all its category-based rewrites are removed, including the 301's
 
 When the config value "save rewrites history", is on, old rewrites are never deleted, but just transformed into 301 entries. New entries are added to the list.
 Only non-301 rewrites get an entry in catalog_url_rewrite_product_category.
