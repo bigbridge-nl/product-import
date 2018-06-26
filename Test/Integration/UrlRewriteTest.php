@@ -580,7 +580,7 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
     public function testReplaceUrlKey()
     {
         $keep = self::$metadata->saveRewritesHistory;
-        self::$metadata->saveRewritesHistory = false;
+        self::$metadata->saveRewritesHistory = true;
         self::$metadata->valueSerializer = new SerializeValueSerializer();
 
         $config = new ImportConfig();
@@ -602,18 +602,26 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $product1 = new SimpleProduct('7-product-import');
         $product1->setAttributeSetByName("Default");
         $product1->addCategoriesByGlobalName(["Default Category/Names of Things"]);
-        $product1->global()->setName("The Old Name");
+        $product1->global()->setName("The Oldest Name");
         $product1->global()->setPrice("2.75");
         $product1->global()->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
         $product1->global()->generateUrlKey();
 
         $importer->importSimpleProduct($product1);
-
         $importer->flush();
 
-        // insert
+        // create a rewrite
+
+        $product1->global()->setName("The Old Name");
+        $product1->global()->generateUrlKey();
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
 
         $expectedRewrites = [
+            ["product", "the-oldest-name.html", "the-old-name.html", "301", "1", "0", serialize([])],
+            ["product", "names-of-things/the-oldest-name.html", "names-of-things/the-old-name.html", "301", "1", "0",
+                serialize(['category_id' => (string)$categoryId])],
+
             ["product", "the-old-name.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
             ["product", "names-of-things/the-old-name.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
@@ -625,7 +633,9 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
 
         $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product1);
 
-        // update url_key
+        // do not save rewrite history => earlier rewrites must still be updated
+
+        self::$metadata->saveRewritesHistory = false;
 
         $product1->global()->setName('The New Name');
         $product1->global()->generateUrlKey();
@@ -635,6 +645,10 @@ class UrlRewriteTest extends \PHPUnit\Framework\TestCase
         $importer->flush();
 
         $expectedRewrites = [
+
+            ["product", "the-oldest-name.html", "the-new-name.html", "301", "1", "0", serialize([])],
+            ["product", "names-of-things/the-oldest-name.html", "names-of-things/the-new-name.html", "301", "1", "0",
+                serialize(['category_id' => (string)$categoryId])],
 
             ["product", "the-new-name.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
             ["product", "names-of-things/the-new-name.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
