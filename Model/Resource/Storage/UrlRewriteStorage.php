@@ -46,7 +46,7 @@ class UrlRewriteStorage
      */
     public function updateRewritesByProductIds(array $productIds, array $storeViewIds)
     {
-        $existingUrlRewrites = $this->getExistingUrlRewrites($productIds, $storeViewIds);
+        $allExistingUrlRewrites = $this->getExistingUrlRewrites($productIds, $storeViewIds);
         $allProductCategoryIds = $this->getExistingProductCategoryIds($productIds);
         $allProductUrlKeys = $this->getExistingProductUrlKeys($productIds);
         $allVisibilities = $this->getExistingVisibilities($productIds);
@@ -69,6 +69,8 @@ class UrlRewriteStorage
                     continue;
                 }
 
+                $existingUrlRewrites = isset($allExistingUrlRewrites[$storeViewId][$productId]) ? $allExistingUrlRewrites[$storeViewId][$productId] : [];
+
                 $this->updateRewriteGroup($productId, $storeViewId, $existingUrlRewrites, $productCategoryIds, $allProductUrlKeys);
             }
         }
@@ -81,10 +83,6 @@ class UrlRewriteStorage
      */
     protected function getExistingUrlRewrites(array $productIds, array $allStoreIds)
     {
-        if (empty($productIds)) {
-            return [];
-        }
-
         // group products by store view
         $collection = [];
         foreach ($productIds as $productId) {
@@ -122,10 +120,6 @@ class UrlRewriteStorage
         return $data;
     }
 
-    /**
-     * @param int[] $productIds
-     * @return array
-     */
     protected function getExistingProductCategoryIds(array $productIds)
     {
         if (empty($productIds)) {
@@ -184,12 +178,12 @@ class UrlRewriteStorage
                 attribute_id = ?
         ", array_merge($productIds, [$attributeId]));
 
-        $urlKeys = [];
+        $visibilities = [];
         foreach ($rows as $row) {
-            $urlKeys[$row['entity_id']][$row['store_id']] = (int)$row['value'];
+            $visibilities[$row['entity_id']][$row['store_id']] = (int)$row['value'];
         }
 
-        return $urlKeys;
+        return $visibilities;
     }
 
     /**
@@ -199,8 +193,7 @@ class UrlRewriteStorage
      * @param array $categoryIds
      * @param array $allProductUrlKeys
      */
-    protected function updateRewriteGroup(int $productId, int $storeViewId, array $existingUrlRewrites, array $categoryIds,
-                                          array $allProductUrlKeys)
+    protected function updateRewriteGroup(int $productId, int $storeViewId, array $existingUrlRewrites, array $categoryIds, array $allProductUrlKeys)
     {
         $this->updateRewrite($productId, $storeViewId, null, $existingUrlRewrites, $allProductUrlKeys);
 
@@ -211,22 +204,19 @@ class UrlRewriteStorage
         }
 
         // rewrites for categories that are no longer linked to the product are removed
-        $this->removeObsoleteCategoryRewrites($productId, $storeViewId, $productCategoryIds, $existingUrlRewrites);
+        $this->removeObsoleteCategoryRewrites($productCategoryIds, $existingUrlRewrites);
     }
 
-    protected function removeObsoleteCategoryRewrites(int $productId, int $storeViewId, array $productCategoryIds, array $existingUrlRewrites)
+    protected function removeObsoleteCategoryRewrites(array $productCategoryIds, array $existingUrlRewrites)
     {
-        if (isset($existingUrlRewrites[$storeViewId][$productId])) {
+        // find the categories of all existing rewrites
+        // and remove from these the actual categories, and 0 (for no category)
+        $obsoleteCategoryIds = array_diff(array_keys($existingUrlRewrites), $productCategoryIds, [0]);
 
-            // find the categories of all existing rewrites
-            // and remove from these the actual categories, and 0 (for no category)
-            $obsoleteCategoryIds = array_diff(array_keys($existingUrlRewrites[$storeViewId][$productId]), $productCategoryIds, [0]);
-
-            foreach ($obsoleteCategoryIds as $categoriesId) {
-                foreach ($existingUrlRewrites[$storeViewId][$productId][$categoriesId] as $urlRewrite) {
-                    /** @var UrlRewrite $urlRewrite */
-                    $this->removeUrlRewrite($urlRewrite->getUrlRewriteId());
-                }
+        foreach ($obsoleteCategoryIds as $categoriesId) {
+            foreach ($existingUrlRewrites[$categoriesId] as $urlRewrite) {
+                /** @var UrlRewrite $urlRewrite */
+                $this->removeUrlRewrite($urlRewrite->getUrlRewriteId());
             }
         }
     }
@@ -313,8 +303,7 @@ class UrlRewriteStorage
     protected function updateRewrite(int $productId, int $storeViewId, $categoryId, array $existingUrlRewrites, array $allProductUrlKeys)
     {
         /** @var UrlRewrite $existingRewrite */
-        $existingRewrite = isset($existingUrlRewrites[$storeViewId][$productId][(int)$categoryId])
-            ? $existingUrlRewrites[$storeViewId][$productId][(int)$categoryId][0] : null;
+        $existingRewrite = isset($existingUrlRewrites[(int)$categoryId]) ? $existingUrlRewrites[(int)$categoryId][0] : null;
 
         // build new item
         $requestPath = $this->createRequestPaths($productId, $storeViewId, $categoryId, $allProductUrlKeys);
@@ -349,7 +338,7 @@ class UrlRewriteStorage
                 } else {
 
                     //rewrite the redirects that lead to this rewrite
-                    $this->updateRedirectRewrites($storeViewId, $productId, $categoryId, $existingRewrite->getRequestPath(), $newRewrite->getRequestPath(), $existingUrlRewrites);
+                    $this->updateRedirectRewrites($categoryId, $existingRewrite->getRequestPath(), $newRewrite->getRequestPath(), $existingUrlRewrites);
 
                     // replace existing rewrite
                     $replacedRewrite = new UrlRewrite($existingRewrite->getUrlRewriteId(), $existingRewrite->getProductId(), $newRewrite->getRequestPath(),
@@ -369,16 +358,15 @@ class UrlRewriteStorage
     }
 
     /**
-     * @param $storeViewId
-     * @param $productId
      * @param $categoryId
+     * @param $oldTargetPath
      * @param $newTargetPath
      * @param array $existingUrlRewrites
      */
-    protected function updateRedirectRewrites($storeViewId, $productId, $categoryId, $oldTargetPath, $newTargetPath, array $existingUrlRewrites)
+    protected function updateRedirectRewrites($categoryId, $oldTargetPath, $newTargetPath, array $existingUrlRewrites)
     {
-        if (isset($existingUrlRewrites[$storeViewId][$productId][(int)$categoryId])) {
-            foreach ($existingUrlRewrites[$storeViewId][$productId][(int)$categoryId] as $i => $existingRewrite) {
+        if (isset($existingUrlRewrites[(int)$categoryId])) {
+            foreach ($existingUrlRewrites[(int)$categoryId] as $i => $existingRewrite) {
 
                 if ($i === 0) {
                     continue;
