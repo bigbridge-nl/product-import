@@ -198,6 +198,9 @@ On conflicts:
 * this constraint causes problems on updates where url_keys move from one product to another
 * product request_paths shared the same space with category paths and cms paths
 
+The table catalog_url_rewrite_product_category is rarely used by Magento, but where it is, it is joined to url_rewrite in order to efficiently put a restriction on a category,
+since url_rewrite's category information is encoded in the metadata field.
+
 ## Nice to know
 
 * When concatenating sets of values "(a, b, c)" "(d, e, f)" etc, implode(", ", $values) is faster than just string concatenation, even though an array of 1000 items needs to be created

@@ -2,13 +2,13 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
+use Exception;
+use Magento\Framework\App\ObjectManager;
+use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
 use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
-use Exception;
-use Magento\Framework\App\ObjectManager;
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Api\ImportConfig;
