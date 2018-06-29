@@ -31,6 +31,12 @@ class ProductDeleter
     public function deleteProductsByIds(array $ids)
     {
         $this->db->deleteMultiple($this->metaData->productEntityTable, "id", $ids);
+
+        foreach ($this->metaData->getNonGlobalStoreViewIds() as $storeViewId) {
+            $this->db->deleteMultipleWithWhere($this->metaData->urlRewriteTable, "id", $ids, "
+                `store_id` = {$storeViewId}
+            ");
+        }
     }
 
     /**

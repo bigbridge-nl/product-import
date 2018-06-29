@@ -26,12 +26,12 @@ url_rewrites are created for all store views. No attempt is made to check if the
 
 ## Extra
 
-* an url-rewrite tool
 * setAllWebsiteIds() adds the product to all websites
 
 ## Testing
 
 * test custom options
+* test product deleter
 * test database code, especially the change detection code
 * tests may only be run in a special shop (not production)
 - remove created test-records

@@ -59,7 +59,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
             $skus[$i] = uniqid("bb");
         }
 
-        $categories = ['Test category 1', 'Test category 2', 'Test category 3'];
+        $categories = ['Default Category/Test category 1', 'Default Category/Test category 2', 'Default Category/Test category 3'];
 
         $beforePeakMemory = memory_get_peak_usage();
 
@@ -143,7 +143,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
             $global->setMetaDescription("Wonderful product, life changer");
             $global->setMetaKeywords("wonderful, life changer");
             $global->setWeight("6");
-            $global->setStatus(ProductStoreView::STATUS_ENABLED);
+            $global->setStatus(ProductStoreView::STATUS_DISABLED);
             $global->setPrice("1.39");
             $global->setSpecialPrice("1.25");
             $global->setSpecialFromDate("2017-10-22");
@@ -151,7 +151,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
             $global->setNewsFromDate("2017-12-10");
             $global->setNewsToDate("2017-12-20");
             $global->setCost("0.1");
-            $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
+            $global->setVisibility(ProductStoreView::VISIBILITY_IN_CATALOG);
             $global->setTaxClassName('Taxable Goods');
             $global->generateUrlKey();
             $global->setCountryOfManufacture('NL');
@@ -191,7 +191,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
             $global->setMetaDescription("Wonderful product, lifechanger");
             $global->setMetaKeywords("wonderful, lifechanger");
             $global->setWeight("5.80");
-            $global->setStatus(ProductStoreView::STATUS_DISABLED);
+            $global->setStatus(ProductStoreView::STATUS_ENABLED);
             $global->setPrice("1.39");
             $global->setSpecialPrice("1.15");
             $global->setSpecialFromDate("2017-12-10");
@@ -199,7 +199,7 @@ class MemoryTest extends \PHPUnit\Framework\TestCase
             $global->setNewsFromDate("2017-12-10");
             $global->setNewsToDate("2017-12-20");
             $global->setCost("0.2");
-            $global->setVisibility(ProductStoreView::VISIBILITY_NOT_VISIBLE);
+            $global->setVisibility(ProductStoreView::VISIBILITY_BOTH);
             $global->setTaxClassName('Retail Customer');
             $global->generateUrlKey();
 
