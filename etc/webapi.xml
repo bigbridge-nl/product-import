@@ -3,7 +3,7 @@
 	<route url="/V1/bigbridge/products" method="POST">
 		<service class="BigBridge\ProductImport\Api\ProductImportWebApi" method="process"/>
 		<resources>
-			<resource ref="anonymous"/>
+			<resource ref="Magento_Catalog::products" />
 		</resources>
 	</route>
 </routes>

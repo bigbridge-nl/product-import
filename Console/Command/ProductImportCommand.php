@@ -29,6 +29,8 @@ class ProductImportCommand extends Command
     const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
     const OPTION_URL_KEY_SOURCE = "url-key-source";
     const OPTION_URL_KEY_STRATEGY = "url-key-strategy";
+    const OPTION_EMPTY_TEXT = "empty-text";
+    const OPTION_EMPTY_NON_TEXT = "empty-non-text";
     const OPTION_SKIP_XSD = "skip-xsd";
 
     /** @var XmlProductReader */
@@ -120,6 +122,20 @@ class ProductImportCommand extends Command
                 ImportConfig::TEMP_PRODUCT_IMAGE_PATH
             ),
             new InputOption(
+                self::OPTION_EMPTY_TEXT,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Handle empty textual values: ignore, remove',
+                ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE
+            ),
+            new InputOption(
+                self::OPTION_EMPTY_NON_TEXT,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Handle empty non-textual values: ignore, remove',
+                ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE
+            ),
+            new InputOption(
                 self::OPTION_SKIP_XSD,
                 null,
                 InputOption::VALUE_NONE,
@@ -151,6 +167,8 @@ class ProductImportCommand extends Command
         $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
         $config->urlKeyScheme = $input->getOption(self::OPTION_URL_KEY_SOURCE);
         $config->duplicateUrlKeyStrategy = $input->getOption(self::OPTION_URL_KEY_STRATEGY);
+        $config->emptyTextValueStrategy = $input->getOption(self::OPTION_EMPTY_TEXT);
+        $config->emptyNonTextValueStrategy = $input->getOption(self::OPTION_EMPTY_NON_TEXT);
 
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 
