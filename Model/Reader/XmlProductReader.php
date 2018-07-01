@@ -115,14 +115,6 @@ class XmlProductReader
     {
         $elementHandler = new ElementHandler($importer);
 
-        if (!preg_match('/.xml$/i', $xmlPath)) {
-            throw new Exception("Input file '{$xmlPath}' should be an .xml file");
-        }
-
-        if (!file_exists($xmlPath)) {
-            throw new Exception("Input file '{$xmlPath}' does not exist");
-        }
-
         // open stream
         $stream = fopen($xmlPath, 'r');
         $parser = xml_parser_create("UTF-8");

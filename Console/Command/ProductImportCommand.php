@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -154,6 +155,14 @@ class ProductImportCommand extends Command
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 
         $skipXsdValidation = $input->getOption(self::OPTION_SKIP_XSD);
+
+        if (!preg_match('/.xml$/i', $fileName)) {
+            throw new Exception("Input file '{$fileName}' should be an .xml file");
+        }
+
+        if (!file_exists($fileName)) {
+            throw new Exception("Input file '{$fileName}' does not exist");
+        }
 
         // import!
         $this->xmlProductReader->import($fileName, $config, $skipXsdValidation, $logger);
