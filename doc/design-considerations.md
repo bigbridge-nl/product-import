@@ -339,3 +339,9 @@ multiple children, each child 0+ times
     <xs:choice maxOccurs="unbounded" minOccurs="0"><xs:element minOccurs="0"/>
 
 This is very unrestrictive. Use it sparingly.
+
+## Webapi import
+
+The webapi is not suited for mass import. To follow the standard use of the webapi, all products would be instantiated before the actual import began. The memory usage would be huge. Therefore I choose to bend the rules a little and have the service read from the POST body directly.
+
+This way it efficiently imports many many products and we still have the use Magento's ACL security framework.
