@@ -8,4 +8,5 @@
 			</argument>
 		</arguments>
 	</type>
+	<preference for="BigBridge\ProductImport\Api\ProductImportWebApiInterface" type="BigBridge\ProductImport\Api\ProductImportWebApi" />
 </config>

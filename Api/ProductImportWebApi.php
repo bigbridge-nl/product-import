@@ -9,7 +9,7 @@ use Exception;
 /**
  * @author Patrick van Bergen
  */
-class ProductImportWebApi
+class ProductImportWebApi implements ProductImportWebApiInterface
 {
     const OPTION_DRY_RUN = 'dry-run';
     const OPTION_AUTO_CREATE_OPTION = 'auto-create-option';
@@ -44,7 +44,7 @@ class ProductImportWebApi
      * Imports products from XML
      *
      * @api
-     * @return \BigBridge\ProductImport\Model\Reader\ProductImportWebApiLogger
+     * @return \BigBridge\ProductImport\Api\ProductImportWebApiLoggerInterface
      * @throws Exception
      */
     public function process()

@@ -1,4 +1,4 @@
-# XML import
+# XML file import
 
 The XML import provided allows you to import products from an XML file.
 
@@ -10,7 +10,7 @@ All options are listed with --help
 
     bin/magento bigbridge:product:import --help
 
-## Examples
+## Example XML
 
 See doc/example for some examples of import files.
 

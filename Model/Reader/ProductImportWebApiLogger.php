@@ -4,12 +4,13 @@ namespace BigBridge\ProductImport\Model\Reader;
 
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\ProductImportLogger;
+use BigBridge\ProductImport\Api\ProductImportWebApiLoggerInterface;
 
 /**
  * @api
  * @author Patrick van Bergen
  */
-class ProductImportWebApiLogger implements ProductImportLogger
+class ProductImportWebApiLogger implements ProductImportLogger, ProductImportWebApiLoggerInterface
 {
     /** @var string */
     protected $output = "";

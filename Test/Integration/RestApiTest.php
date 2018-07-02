@@ -61,6 +61,8 @@ class RestApiTest extends \PHPUnit\Framework\TestCase
 
         $response = $client->send($request);
 
+#die($response);
+
         $xml = new SimpleXMLElement($response->getBody());
 
         $this->assertEquals("1", $xml->ok_product_count);

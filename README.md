@@ -5,7 +5,8 @@ Hi! My name is Patrick van Bergen. I created this library because I needed produ
 This library imports product data into Magento 2 via direct database queries. It has these main features
 
 * A programming library to import products
-* An XML-file import tool for products
+* An CLI command for product import via XML file
+* An Web API service for product import via Post Request with XML
 * A tool to update url_rewrites
 
 ## Disclaimer
@@ -16,7 +17,7 @@ However, the library bypasses all of Magento's API's to insert data directly int
 
 * The library creator is not perfectly knowledgeable of all Magento's ins and outs (even though he tries hard to be). It is possible that the data is not entered in exactly the same way that Magento 2 does it.
 * The library is still new and brings with it its own set of bugs and problems.
-* Magento may change its data structure in the future. The library may not follow.
+* Magento may change its data structure in the future. The library will have to be updated to follow.
 
 Experiment with the library in a safe webshop. Make sure to create a database backup before you start.
 
@@ -26,7 +27,7 @@ Experiment with the library in a safe webshop. Make sure to create a database ba
 * Requires >= PHP 7.0
 * Input in UTF-8 (Magento standard)
 * MySQL max_packet_size on both MySQL client and MySQL server must be at least 1 MB (Which will be the case if the value wasn't deliberately lowered from the default)
-* Unix system (not tested on Windows)
+* Unix family system
 
 ## Features of the Import Library
 
@@ -54,10 +55,20 @@ Continue to read about [all importer features](doc/importer.md)
 The XML import tool allows you to import product data with an XML file. It is fast and has a fixed, low memory footprint.
 
 ~~~
-    bin/magento bigbridge:product:import --help
+    bin/magento bigbridge:product:import
 ~~~
 
-Continue to read about  [XML file import](doc/xml-import.md)
+Continue to read about  [XML file import](doc/xml-file-import.md)
+
+## Web API import service
+
+The web api service performs the same service as the file import tool. But it is accessible via an XML REST call.
+
+    /rest/V1/bigbridge/products
+
+It is a POST call and the XML is passed in the request body.
+
+Continue to read about [XML webapi import](doc/xml-webapi-import.md)
 
 ## The url_rewrite tool
 
@@ -75,7 +86,7 @@ This tool has the following features:
 * Products with a visibility of "not-visible-individually" get no url_rewrite (since they would have no use; this is Magento 2 policy)
 
 ~~~
-    bin/magento bigbridge:product:urlrewrite --help
+    bin/magento bigbridge:product:urlrewrite
 ~~~
 
 ## Changes to Magento
