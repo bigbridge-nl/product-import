@@ -37,16 +37,13 @@ class EavAttributeInfo
     /** @var  string */
     public $frontendInput;
 
-    /** @var array  */
-    public $optionValues;
-
     /** @var  string */
     public $tableName;
 
     /** @var int */
     public $scope;
 
-    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string  $backendType, string $tableName, $frontendInput, array $optionValues, int $scope)
+    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string  $backendType, string $tableName, $frontendInput, int $scope)
     {
         $this->attributeCode = $attributeCode;
         $this->attributeId = $attributeId;
@@ -54,7 +51,6 @@ class EavAttributeInfo
         $this->backendType = $backendType;
         $this->tableName = $tableName;
         $this->frontendInput = $frontendInput;
-        $this->optionValues = $optionValues;
         $this->scope = $scope;
     }
 

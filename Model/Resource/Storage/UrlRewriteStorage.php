@@ -6,6 +6,7 @@ use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\UrlRewrite;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
+use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
 
 /**
  * Updates / fixes url_rewrite and catalog_url_rewrite_product_category tables.
@@ -33,10 +34,17 @@ class UrlRewriteStorage
     /** @var  MetaData */
     protected $metaData;
 
-    public function __construct(Magento2DbConnection $db, MetaData $metaData)
+    /** @var CategoryImporter */
+    protected $categoryImporter;
+
+    public function __construct(
+        Magento2DbConnection $db,
+        MetaData $metaData,
+        CategoryImporter $categoryImporter)
     {
         $this->db = $db;
         $this->metaData = $metaData;
+        $this->categoryImporter = $categoryImporter;
     }
 
     public function updateRewrites(array $products)
@@ -335,7 +343,7 @@ class UrlRewriteStorage
         $subCategories = [];
 
         foreach ($categoryIds as $categoryId) {
-            $categoryInfo = $this->metaData->allCategoryInfo[$categoryId];
+            $categoryInfo = $this->categoryImporter->allCategoryInfo[$categoryId];
             $categoriesWithUrlKeysIds = array_slice($categoryInfo->path, 2);
             $subCategories = array_merge($subCategories, $categoriesWithUrlKeysIds);
         }
@@ -356,19 +364,19 @@ class UrlRewriteStorage
 
         if ($categoryId !== 0) {
 
-            $categoryInfo = $this->metaData->allCategoryInfo[$categoryId];
+            $categoryInfo = $this->categoryImporter->allCategoryInfo[$categoryId];
             $parentIds = $categoryInfo->path;
 
             for ($i = 2; $i < count($parentIds); $i++) {
 
                 $parentId = $parentIds[$i];
 
-                if (!array_key_exists($parentId, $this->metaData->allCategoryInfo)) {
+                if (!array_key_exists($parentId, $this->categoryImporter->allCategoryInfo)) {
                     // parent category in path (no longer) exists
                     return null;
                 }
 
-                $parentCategoryInfo = $this->metaData->allCategoryInfo[$parentId];
+                $parentCategoryInfo = $this->categoryImporter->allCategoryInfo[$parentId];
 
                 if (array_key_exists($storeViewId, $parentCategoryInfo->urlKeys)) {
                     $section = $parentCategoryInfo->urlKeys[$storeViewId];

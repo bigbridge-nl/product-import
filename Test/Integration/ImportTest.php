@@ -37,7 +37,7 @@ use Exception;
  *
  * @author Patrick van Bergen
  */
-class ImportTest extends \PHPUnit\Framework\TestCase
+class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 {
     /** @var  ImporterFactory */
     private static $factory;
@@ -53,9 +53,6 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass()
     {
-        // include Magento
-        require_once __DIR__ . '/../../../../../index.php';
-
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
 
@@ -95,7 +92,7 @@ class ImportTest extends \PHPUnit\Framework\TestCase
                 is_global = 1
         ");
 
-        self::$metaData->productEavAttributeInfo['color_group_product_importer'] = new EavAttributeInfo('color_group_product_importer', $insertId, false, 'varchar', 'catalog_product_entity_varchar', 'multiselect', [], 1);
+        self::$metaData->productEavAttributeInfo['color_group_product_importer'] = new EavAttributeInfo('color_group_product_importer', $insertId, false, 'varchar', 'catalog_product_entity_varchar', 'multiselect', 1);
     }
 
     public static function tearDownAfterClass()
@@ -975,7 +972,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         // option value color
 
         $colorAttributeId = self::$metaData->productEavAttributeInfo['color']->attributeId;
-        $colorOptionId =  self::$metaData->productEavAttributeInfo['color']->optionValues['grey'];
+
+        $colorOptionId =  $this->getOptionValue('color', 'grey');
 
         $value = self::$db->fetchSingleCell("
             SELECT value
@@ -989,8 +987,8 @@ class ImportTest extends \PHPUnit\Framework\TestCase
 
         $colorGroupAttributeId = self::$metaData->productEavAttributeInfo['color_group_product_importer']->attributeId;
 
-        $colorGroupOptionId1 =  self::$metaData->productEavAttributeInfo['color_group_product_importer']->optionValues['red'];
-        $colorGroupOptionId2 =  self::$metaData->productEavAttributeInfo['color_group_product_importer']->optionValues['blue'];
+        $colorGroupOptionId1 =  $this->getOptionValue('color_group_product_importer', 'red');
+        $colorGroupOptionId2 =  $this->getOptionValue('color_group_product_importer', 'blue');
 
         $value = self::$db->fetchSingleCell("
             SELECT value
@@ -999,6 +997,24 @@ class ImportTest extends \PHPUnit\Framework\TestCase
         ");
 
         $this->assertEquals($colorGroupOptionId1 . ',' . $colorGroupOptionId2, $value);
+    }
+
+    protected function getOptionValue($attributeCode, $name)
+    {
+        return self::$db->fetchSingleCell("
+            SELECT O.`option_id`
+            FROM " . self::$metaData->attributeTable . " A
+            INNER JOIN " . self::$metaData->attributeOptionTable . " O ON O.attribute_id = A.attribute_id
+            INNER JOIN " . self::$metaData->attributeOptionValueTable . " V ON V.option_id = O.option_id
+            WHERE A.`entity_type_id` = ? AND V.store_id = 0
+                AND A.attribute_code = ?
+                AND V.value = ?
+        ", [
+            self::$metaData->productEntityTypeId,
+            $attributeCode,
+            $name
+        ]);
+
     }
 
     /**

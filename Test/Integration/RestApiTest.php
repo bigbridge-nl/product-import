@@ -7,23 +7,22 @@ use SimpleXMLElement;
 /**
  * @author Patrick van Bergen
  */
-class RestApiTest extends \PHPUnit\Framework\TestCase
+class RestApiTest extends \Magento\TestFramework\TestCase\AbstractController
 {
-    // integration test with my own username / password; sorry about that :}
-    const TEST_ADMIN_USER_USERNAME = "admin";
-    const TEST_ADMIN_USER_PASSWORD = "admin123";
+    const TEST_ADMIN_USER_USERNAME = \Magento\TestFramework\Bootstrap::ADMIN_NAME;
+    const TEST_ADMIN_USER_PASSWORD = \Magento\TestFramework\Bootstrap::ADMIN_PASSWORD;
 
     public function testRestApi()
     {
-        // include Magento
-        require_once __DIR__ . '/../../../../../index.php';
-
         // http://mydomain/index.php/rest/V1/bigbridge/products
         $om = \Magento\Framework\App\ObjectManager::getInstance();
         $storeManager = $om->get(\Magento\Store\Model\StoreManagerInterface::class);
 
         // create base url for webshop
         $baseUrl = $storeManager->getStore()->getUrl();
+
+#var_dump($baseUrl);
+
         // remove phphar section that is added in test
         $baseUrl = preg_replace('#/phpunit[^/]+#', '', $baseUrl);
 
@@ -61,7 +60,7 @@ class RestApiTest extends \PHPUnit\Framework\TestCase
 
         $response = $client->send($request);
 
-#die($response);
+#var_dump($response);
 
         $xml = new SimpleXMLElement($response->getBody());
 

@@ -130,8 +130,6 @@ class ProductStorage
             return;
         }
 
-        $this->metaData->refresh();
-
         // transform and validate products
         $validProducts = $this->preProcessProducts($products, $config);
 

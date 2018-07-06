@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\Data\Product;
-use BigBridge\ProductImport\Model\Data\CategoryInfo;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
@@ -257,14 +256,12 @@ class MetaData
     /** @var bool Create 301 rewrite for older url_rewrite entries */
     public $saveRewritesHistory;
 
-    /** @var CategoryInfo[] */
-    public $allCategoryInfo;
-
     /** @var LinkInfo[] */
     public $linkInfo;
 
     /**
      * MetaData constructor.
+     *
      * @param Magento2DbConnection $db
      * @throws Exception
      */
@@ -272,25 +269,37 @@ class MetaData
     {
         $this->db = $db;
 
+        $this->init();
+    }
+
+    /**
+     * Makes Magento product table names and ids quickly available.
+     * These values do not change as a result of the import,
+     * but some of these values may changed by your custom code. So init() allows you to reload these values.
+     *
+     * @throws Exception
+     */
+    public function init()
+    {
         $this->magentoVersion = $this->detectMagentoVersion();
         $this->valueSerializer = $this->getValueSerializer();
 
         $this->entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
-        $this->productEntityTable = $db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
-        $this->categoryEntityTable = $db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
-        $this->urlRewriteTable = $db->getFullTableName(self::URL_REWRITE_TABLE);
-        $this->urlRewriteProductCategoryTable = $db->getFullTableName(self::URL_REWRITE_PRODUCT_CATEGORY_TABLE);
-        $this->categoryProductTable = $db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
-        $this->configDataTable = $db->getFullTableName(self::CONFIG_DATA_TABLE);
-        $this->productWebsiteTable = $db->getFullTableName(self::PRODUCT_WEBSITE_TABLE);
-        $this->mediaGalleryTable = $db->getFullTableName(self::MEDIA_GALLERY_TABLE);
-        $this->mediaGalleryValueToEntityTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE);
-        $this->mediaGalleryValueTable = $db->getFullTableName(self::MEDIA_GALLERY_VALUE_TABLE);
-        $this->stockItemTable = $db->getFullTableName(self::STOCK_ITEM_TABLE);
-        $this->superAttributeTable = $db->getFullTableName(self::SUPER_ATTRIBUTE_TABLE);
-        $this->superAttributeLabelTable = $db->getFullTableName(self::SUPER_ATTRIBUTE_LABEL_TABLE);
-        $this->superLinkTable = $db->getFullTableName(self::SUPER_LINK_TABLE);
-        $this->relationTable = $db->getFullTableName(self::RELATION_TABLE);
+        $this->productEntityTable = $this->db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
+        $this->categoryEntityTable = $this->db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
+        $this->urlRewriteTable = $this->db->getFullTableName(self::URL_REWRITE_TABLE);
+        $this->urlRewriteProductCategoryTable = $this->db->getFullTableName(self::URL_REWRITE_PRODUCT_CATEGORY_TABLE);
+        $this->categoryProductTable = $this->db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
+        $this->configDataTable = $this->db->getFullTableName(self::CONFIG_DATA_TABLE);
+        $this->productWebsiteTable = $this->db->getFullTableName(self::PRODUCT_WEBSITE_TABLE);
+        $this->mediaGalleryTable = $this->db->getFullTableName(self::MEDIA_GALLERY_TABLE);
+        $this->mediaGalleryValueToEntityTable = $this->db->getFullTableName(self::MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE);
+        $this->mediaGalleryValueTable = $this->db->getFullTableName(self::MEDIA_GALLERY_VALUE_TABLE);
+        $this->stockItemTable = $this->db->getFullTableName(self::STOCK_ITEM_TABLE);
+        $this->superAttributeTable = $this->db->getFullTableName(self::SUPER_ATTRIBUTE_TABLE);
+        $this->superAttributeLabelTable = $this->db->getFullTableName(self::SUPER_ATTRIBUTE_LABEL_TABLE);
+        $this->superLinkTable = $this->db->getFullTableName(self::SUPER_LINK_TABLE);
+        $this->relationTable = $this->db->getFullTableName(self::RELATION_TABLE);
         $this->attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
         $this->catalogAttributeTable = $this->db->getFullTableName(self::CATALOG_ATTRIBUTE_TABLE);
         $this->attributeOptionTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_TABLE);
@@ -340,15 +349,7 @@ class MetaData
         $this->categoryAttributeMap = $this->getCategoryAttributeMap();
         $this->productAttributeSetMap = $this->getProductAttributeSetMap();
         $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
-
-        // these change during import
-        $this->refresh();
-    }
-
-    public function refresh()
-    {
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
-        $this->allCategoryInfo = $this->getAllCategoryInfo();
     }
 
     /**
@@ -535,21 +536,6 @@ class MetaData
      */
     protected function getProductEavAttributeInfo()
     {
-        $optionValueRows = $this->db->fetchAllAssoc("
-            SELECT A.`attribute_code`, O.`option_id`, V.`value`
-            FROM {$this->attributeTable} A
-            INNER JOIN {$this->attributeOptionTable} O ON O.attribute_id = A.attribute_id
-            INNER JOIN {$this->attributeOptionValueTable} V ON V.option_id = O.option_id
-            WHERE A.`entity_type_id` = ? AND A.frontend_input IN ('select', 'multiselect') AND V.store_id = 0
-        ", [
-            $this->productEntityTypeId
-        ]);
-
-        $allOptionValues = [];
-        foreach ($optionValueRows as $row) {
-            $allOptionValues[$row['attribute_code']][$row['value']] = $row['option_id'];
-        }
-
         $rows = $this->db->fetchAllAssoc("
             SELECT A.`attribute_id`, A.`attribute_code`, A.`is_required`, A.`backend_type`, A.`frontend_input`, C.`is_global` 
             FROM {$this->attributeTable} A
@@ -562,8 +548,6 @@ class MetaData
         $info = [];
         foreach ($rows as $row) {
 
-            $optionValues = array_key_exists($row['attribute_code'], $allOptionValues) ? $allOptionValues[$row['attribute_code']] : [];
-
             $info[$row['attribute_code']] = new EavAttributeInfo(
                 $row['attribute_code'],
                 (int)$row['attribute_id'],
@@ -571,47 +555,10 @@ class MetaData
                 $row['backend_type'],
                 $this->productEntityTable . '_' . $row['backend_type'],
                 $row['frontend_input'],
-                $optionValues,
                 $row['is_global']);
         }
 
         return $info;
-    }
-
-    public function addAttributeOption(string $attributeCode, string $optionName): int
-    {
-        $attributeId = $this->productEavAttributeInfo[$attributeCode]->attributeId;
-
-        $lastOrderIndex = $this->db->fetchSingleCell("
-            SELECT MAX(sort_order)
-            FROM {$this->attributeOptionTable}
-            WHERE attribute_id = $attributeId
-        ");
-
-        $sortOrder = is_null($lastOrderIndex) ? 1 : ($lastOrderIndex + 1);
-
-        $this->db->execute("
-            INSERT INTO {$this->attributeOptionTable}
-            SET attribute_id = ?, sort_order = ?
-        ", [
-            $attributeId,
-            $sortOrder
-        ]);
-
-        $optionId = $this->db->getLastInsertId();
-
-        // update cached values
-        $this->productEavAttributeInfo[$attributeCode]->optionValues[$optionName] = $optionId;
-
-        $this->db->execute("
-            INSERT INTO {$this->attributeOptionValueTable}
-            SET option_id = ?, store_id = 0, value = ?
-        ", [
-            $optionId,
-            $optionName
-        ]);
-
-        return $optionId;
     }
 
     protected function getMediaGalleryAttributeId()
@@ -668,83 +615,6 @@ class MetaData
         ");
 
         return is_null($value) ? ".html" : $value;
-    }
-
-    /**
-     * @return CategoryInfo[]
-     */
-    protected function getAllCategoryInfo()
-    {
-        $urlKeyAttributeId = $this->categoryAttributeMap['url_key'];
-
-        $categoryData = $this->db->fetchAllAssoc("
-            SELECT E.`entity_id`, E.`path`, URL_KEY.`value` as url_key, URL_KEY.`store_id`
-            FROM `{$this->categoryEntityTable}` E
-            LEFT JOIN `{$this->categoryEntityTable}_varchar` URL_KEY ON URL_KEY.`entity_id` = E.`entity_id` 
-                AND URL_KEY.`attribute_id` = ? 
-        ", [
-            $urlKeyAttributeId
-        ]);
-
-        /** @var CategoryInfo[] $categories */
-        $categories = [];
-
-        foreach ($categoryData as $categoryDatum) {
-
-            $categoryId = $categoryDatum['entity_id'];
-            $storeId = (int)$categoryDatum['store_id'];
-            $urlKey = (string)$categoryDatum['url_key'];
-
-            if (array_key_exists($categoryId, $categories)) {
-
-                $categories[$categoryId]->urlKeys[$storeId] = $urlKey;
-
-            } else {
-
-                $categories[$categoryId] = new CategoryInfo(
-                    explode('/', $categoryDatum['path']),
-                    [$storeId => $urlKey]
-                );
-
-            }
-        }
-
-        return $categories;
-    }
-
-    /**
-     * Return the url_keys of all child categories of the given parent.
-     *
-     * @param int $parentCategoryId
-     * @param int $storeViewId
-     * @return array
-     */
-    public function getExistingCategoryUrlKeys(int $parentCategoryId, int $storeViewId)
-    {
-        $urlKeys = [];
-
-        foreach ($this->allCategoryInfo as $categoryInfo) {
-            $pathLength = count($categoryInfo->path);
-            if ($pathLength > 1) {
-                if ($parentCategoryId == $categoryInfo->path[$pathLength - 2]) {
-                    if (array_key_exists($storeViewId, $categoryInfo->urlKeys)) {
-                        $urlKeys[] = $categoryInfo->urlKeys[$storeViewId];
-                    }
-                }
-            }
-        }
-
-        return $urlKeys;
-    }
-
-    /**
-     * @param int $categoryId
-     * @param int[] $idPath The ids of the parent categories, including $categoryId
-     * @param array $urlKeys A store-id => url_key array
-     */
-    public function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
-    {
-        $this->allCategoryInfo[$categoryId] = new CategoryInfo($idPath, $urlKeys);
     }
 
     protected function getLinkInfo()

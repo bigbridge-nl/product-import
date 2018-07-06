@@ -10,16 +10,13 @@ use Exception;
 /**
  * @author Patrick van Bergen
  */
-class ConfigTest extends \PHPUnit\Framework\TestCase
+class ConfigTest extends \Magento\TestFramework\TestCase\AbstractController
 {
     /** @var  ImporterFactory */
     private static $factory;
 
     public static function setUpBeforeClass()
     {
-        // include Magento
-        require_once __DIR__ . '/../../../../../index.php';
-
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
     }

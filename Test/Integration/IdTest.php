@@ -13,7 +13,7 @@ use Magento\Framework\App\ObjectManager;
 /**
  * @author Patrick van Bergen
  */
-class IdTest extends \PHPUnit\Framework\TestCase
+class IdTest extends \Magento\TestFramework\TestCase\AbstractController
 {
     /** @var  ImporterFactory */
     private static $factory;
@@ -26,9 +26,6 @@ class IdTest extends \PHPUnit\Framework\TestCase
 
     public static function setUpBeforeClass()
     {
-        // include Magento
-        require_once __DIR__ . '/../../../../../index.php';
-
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
 

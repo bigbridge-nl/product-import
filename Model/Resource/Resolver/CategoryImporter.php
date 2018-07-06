@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
+use BigBridge\ProductImport\Model\Data\CategoryInfo;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
@@ -23,6 +24,9 @@ class CategoryImporter
     /** @var array  */
     protected $categoryCache = [];
 
+    /** @var CategoryInfo[] */
+    public $allCategoryInfo;
+
     /** @var NameToUrlKeyConverter */
     protected $nameToUrlKeyConverter;
 
@@ -31,6 +35,90 @@ class CategoryImporter
         $this->db = $db;
         $this->metaData = $metaData;
         $this->nameToUrlKeyConverter = $nameToUrlKeyConverter;
+
+        $this->refresh();
+    }
+
+    public function refresh()
+    {
+        $this->allCategoryInfo = $this->getAllCategoryInfo();
+    }
+
+    /**
+     * @return CategoryInfo[]
+     */
+    protected function getAllCategoryInfo()
+    {
+        $urlKeyAttributeId = $this->metaData->categoryAttributeMap['url_key'];
+
+        $categoryData = $this->db->fetchAllAssoc("
+            SELECT E.`entity_id`, E.`path`, URL_KEY.`value` as url_key, URL_KEY.`store_id`
+            FROM `{$this->metaData->categoryEntityTable}` E
+            LEFT JOIN `{$this->metaData->categoryEntityTable}_varchar` URL_KEY ON URL_KEY.`entity_id` = E.`entity_id` 
+                AND URL_KEY.`attribute_id` = ? 
+        ", [
+            $urlKeyAttributeId
+        ]);
+
+        /** @var CategoryInfo[] $categories */
+        $categories = [];
+
+        foreach ($categoryData as $categoryDatum) {
+
+            $categoryId = $categoryDatum['entity_id'];
+            $storeId = (int)$categoryDatum['store_id'];
+            $urlKey = (string)$categoryDatum['url_key'];
+
+            if (array_key_exists($categoryId, $categories)) {
+
+                $categories[$categoryId]->urlKeys[$storeId] = $urlKey;
+
+            } else {
+
+                $categories[$categoryId] = new CategoryInfo(
+                    explode('/', $categoryDatum['path']),
+                    [$storeId => $urlKey]
+                );
+
+            }
+        }
+
+        return $categories;
+    }
+
+    /**
+     * Return the url_keys of all child categories of the given parent.
+     *
+     * @param int $parentCategoryId
+     * @param int $storeViewId
+     * @return array
+     */
+    public function getExistingCategoryUrlKeys(int $parentCategoryId, int $storeViewId)
+    {
+        $urlKeys = [];
+
+        foreach ($this->allCategoryInfo as $categoryInfo) {
+            $pathLength = count($categoryInfo->path);
+            if ($pathLength > 1) {
+                if ($parentCategoryId == $categoryInfo->path[$pathLength - 2]) {
+                    if (array_key_exists($storeViewId, $categoryInfo->urlKeys)) {
+                        $urlKeys[] = $categoryInfo->urlKeys[$storeViewId];
+                    }
+                }
+            }
+        }
+
+        return $urlKeys;
+    }
+
+    /**
+     * @param int $categoryId
+     * @param int[] $idPath The ids of the parent categories, including $categoryId
+     * @param array $urlKeys A store-id => url_key array
+     */
+    public function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
+    {
+        $this->allCategoryInfo[$categoryId] = new CategoryInfo($idPath, $urlKeys);
     }
 
     /**
@@ -196,7 +284,7 @@ class CategoryImporter
         if (count($idPath) >= 2) {
 
             // url
-            $existingUrlKeys = $this->metaData->getExistingCategoryUrlKeys($parentId, 0);
+            $existingUrlKeys = $this->getExistingCategoryUrlKeys($parentId, 0);
 
             $urlKey = $this->nameToUrlKeyConverter->createUniqueUrlKeyFromName($categoryName, $existingUrlKeys);
             if (count($idPath) === 2) {
@@ -247,7 +335,7 @@ class CategoryImporter
         // !important: add this new category to the metadata collected
         $newIdPath = $idPath;
         $newIdPath[] = $categoryId;
-        $this->metaData->addCategoryInfo($categoryId, $newIdPath, [0 => $urlKey]);
+        $this->addCategoryInfo($categoryId, $newIdPath, [0 => $urlKey]);
 
         return $categoryId;
     }

@@ -12,16 +12,13 @@ use Magento\Framework\App\ObjectManager;
 /**
  * @author Patrick van Bergen
  */
-class ReferenceResolverTest extends \PHPUnit\Framework\TestCase
+class ReferenceResolverTest extends \Magento\TestFramework\TestCase\AbstractController
 {
     /** @var  ImporterFactory */
     private static $factory;
 
     public static function setUpBeforeClass()
     {
-        // include Magento
-        require_once __DIR__ . '/../../../../../index.php';
-
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
     }

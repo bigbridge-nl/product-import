@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\CustomOption;
-use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\ImportConfig;
 use IntlChar;
 use Magento\Framework\App\ObjectManager;
@@ -18,16 +17,13 @@ use BigBridge\ProductImport\Api\ImporterFactory;
 /**
  * @author Patrick van Bergen
  */
-class ValidatorTest extends \PHPUnit\Framework\TestCase
+class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
 {
     /** @var  ImporterFactory */
     private static $factory;
 
     public static function setUpBeforeClass()
     {
-        // include Magento
-        require_once __DIR__ . '/../../../../../index.php';
-
         /** @var ImporterFactory $factory */
         self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
     }
