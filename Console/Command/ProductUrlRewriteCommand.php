@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Console\Command;
 use BigBridge\ProductImport\Api\Information;
 use BigBridge\ProductImport\Api\UrlRewriteUpdater;
 use Exception;
+use Magento\Framework\ObjectManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -17,26 +18,23 @@ class ProductUrlRewriteCommand extends Command
 {
     const ARGUMENT_STOREVIEW_CODE = 'storeview';
 
-    /** @var UrlRewriteUpdater */
-    protected $urlRewriteUpdater;
-
-    /** @var Information */
-    protected $information;
+    /** @var ObjectManagerInterface */
+    protected $objectManager;
 
     public function __construct(
-        UrlRewriteUpdater $urlRewriteUpdater,
-        Information $information,
+        ObjectManagerInterface $objectManager,
         string $name = null
     )
     {
-        $this->urlRewriteUpdater = $urlRewriteUpdater;
-        $this->information = $information;
+        $this->objectManager = $objectManager;
 
         parent::__construct($name);
     }
 
     protected function configure()
     {
+//        $information = $this->objectManager->create(Information::class);
+
         $this->setName('bigbridge:product:urlrewrite');
         $this->setDescription('Updates url_rewrite to reflect the current state of the products.');
         $this->setDefinition([
@@ -45,7 +43,9 @@ class ProductUrlRewriteCommand extends Command
                 's',
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
                 'storeview code',
-                $this->information->getNonGlobalStoreViewCodes()
+#todo
+[]
+//                $information->getNonGlobalStoreViewCodes()
             )
         ]);
     }
@@ -57,10 +57,11 @@ class ProductUrlRewriteCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $urlRewriteUpdater = $this->objectManager->create(UrlRewriteUpdater::class);
         $storeViewCodes = $input->getOption(self::ARGUMENT_STOREVIEW_CODE);
 
         try {
-            $this->urlRewriteUpdater->updateUrlRewrites($storeViewCodes);
+            $urlRewriteUpdater->updateUrlRewrites($storeViewCodes);
         } catch (Exception $e) {
             $output->writeln("<error>" . $e->getMessage() . "</error>");
             return \Magento\Framework\Console\Cli::RETURN_FAILURE;

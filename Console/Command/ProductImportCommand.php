@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Console\Command;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Reader\ProductImportCommandLogger;
 use BigBridge\ProductImport\Model\Reader\XmlProductReader;
+use Magento\Framework\ObjectManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -33,15 +34,16 @@ class ProductImportCommand extends Command
     const OPTION_EMPTY_NON_TEXT = "empty-non-text";
     const OPTION_SKIP_XSD = "skip-xsd";
 
-    /** @var XmlProductReader */
-    protected $xmlProductReader;
+    /** @var ObjectManagerInterface */
+    protected $objectManager;
 
     public function __construct(
-        XmlProductReader $xmlProductReader,
+        ObjectManagerInterface $objectManager,
         string $name = null)
     {
+        $this->objectManager = $objectManager;
+
         parent::__construct($name);
-        $this->xmlProductReader = $xmlProductReader;
     }
 
     protected function configure()
@@ -152,6 +154,7 @@ class ProductImportCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $xmlProductReader = $this->objectManager->create(XmlProductReader::class);
         $fileName = $input->getArgument(self::ARGUMENT_FILENAME);
 
         $logger = new ProductImportCommandLogger($output);
@@ -183,7 +186,7 @@ class ProductImportCommand extends Command
         }
 
         // import!
-        $this->xmlProductReader->import($fileName, $config, $skipXsdValidation, $logger);
+        $xmlProductReader->import($fileName, $config, $skipXsdValidation, $logger);
 
         if (!$logger->hasErrorOccurred() && $logger->getFailedProductCount() === 0) {
             return \Magento\Framework\Console\Cli::RETURN_SUCCESS;

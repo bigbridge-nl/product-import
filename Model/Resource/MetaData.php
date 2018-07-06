@@ -327,24 +327,28 @@ class MetaData
         $this->defaultCategoryAttributeSetId = $this->getDefaultCategoryAttributeSetId();
         $this->defaultProductAttributeSetId = $this->getDefaultProductAttributeSetId();
 
-        $this->categoryAttributeMap = $this->getCategoryAttributeMap();
-        $this->productAttributeSetMap = $this->getProductAttributeSetMap();
-        $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
-        $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
+        $this->productUrlSuffix = $this->getProductUrlSuffix();
+        $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
+        $this->saveRewritesHistory  = $this->getSaveRewritesHistory();
 
         $this->storeViewMap = $this->getStoreViewMap();
         $this->storeViewWebsiteMap = $this->getStoreViewWebsiteMap();
         $this->websiteMap = $this->getWebsiteMap();
         $this->taxClassMap = $this->getTaxClassMap();
         $this->customerGroupMap = $this->getCustomerGroupMap();
-
-        $this->productUrlSuffix = $this->getProductUrlSuffix();
-        $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
-        $this->saveRewritesHistory  = $this->getSaveRewritesHistory();
-
-        $this->allCategoryInfo = $this->getAllCategoryInfo();
-
         $this->linkInfo = $this->getLinkInfo();
+        $this->categoryAttributeMap = $this->getCategoryAttributeMap();
+        $this->productAttributeSetMap = $this->getProductAttributeSetMap();
+        $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
+
+        // these change during import
+        $this->refresh();
+    }
+
+    public function refresh()
+    {
+        $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
+        $this->allCategoryInfo = $this->getAllCategoryInfo();
     }
 
     /**

@@ -8,6 +8,10 @@ Please read the text below if you do.
 
 Unit tests require PHPUnit 7 with namespaces.
 
+### Integration tests
+
+To run the integration tests, see [Integration testing](integration-tests.md)
+
 ### Speed benchmark
 
 The speed benchmark is important, because speed is one of the main targets of this library. The class MemoryTest is the benchmark.
