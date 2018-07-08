@@ -343,7 +343,7 @@ class UrlRewriteStorage
         $subCategories = [];
 
         foreach ($categoryIds as $categoryId) {
-            $categoryInfo = $this->categoryImporter->allCategoryInfo[$categoryId];
+            $categoryInfo = $this->categoryImporter->getCategoryInfo($categoryId);
             $categoriesWithUrlKeysIds = array_slice($categoryInfo->path, 2);
             $subCategories = array_merge($subCategories, $categoriesWithUrlKeysIds);
         }
@@ -364,19 +364,17 @@ class UrlRewriteStorage
 
         if ($categoryId !== 0) {
 
-            $categoryInfo = $this->categoryImporter->allCategoryInfo[$categoryId];
+            $categoryInfo = $this->categoryImporter->getCategoryInfo($categoryId);
             $parentIds = $categoryInfo->path;
 
             for ($i = 2; $i < count($parentIds); $i++) {
 
                 $parentId = $parentIds[$i];
 
-                if (!array_key_exists($parentId, $this->categoryImporter->allCategoryInfo)) {
+                if (($parentCategoryInfo = $this->categoryImporter->getCategoryInfo($parentId)) === null) {
                     // parent category in path (no longer) exists
                     return null;
                 }
-
-                $parentCategoryInfo = $this->categoryImporter->allCategoryInfo[$parentId];
 
                 if (array_key_exists($storeViewId, $parentCategoryInfo->urlKeys)) {
                     $section = $parentCategoryInfo->urlKeys[$storeViewId];

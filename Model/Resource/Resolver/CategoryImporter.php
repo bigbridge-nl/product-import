@@ -13,6 +13,7 @@ use Magento\Catalog\Model\Category;
  */
 class CategoryImporter
 {
+    /** @var string Internal category path separator, i.e. 1/2/18/125 */
     const CATEGORY_ID_PATH_SEPARATOR = '/';
 
     /**  @var Magento2DbConnection */
@@ -21,14 +22,14 @@ class CategoryImporter
     /** @var MetaData */
     protected $metaData;
 
-    /** @var array  */
-    protected $categoryCache = [];
-
-    /** @var CategoryInfo[] */
-    public $allCategoryInfo;
-
     /** @var NameToUrlKeyConverter */
     protected $nameToUrlKeyConverter;
+
+    /** @var array A category-path =>  category-id map */
+    protected $categoryCache = [];
+
+    /** @var CategoryInfo[] A category-id => CategoryInfo map */
+    protected $allCategoryInfo;
 
     public function __construct(Magento2DbConnection $db, MetaData $metaData, NameToUrlKeyConverter $nameToUrlKeyConverter)
     {
@@ -39,6 +40,9 @@ class CategoryImporter
         $this->refresh();
     }
 
+    /**
+     * Updates available category information from the database.
+     */
     public function refresh()
     {
         $this->allCategoryInfo = $this->getAllCategoryInfo();
@@ -84,6 +88,15 @@ class CategoryImporter
         }
 
         return $categories;
+    }
+
+    /**
+     * @param $categoryId
+     * @return CategoryInfo|null
+     */
+    public function getCategoryInfo($categoryId)
+    {
+        return array_key_exists($categoryId, $this->getAllCategoryInfo()) ? $this->allCategoryInfo[$categoryId] : null;
     }
 
     /**
