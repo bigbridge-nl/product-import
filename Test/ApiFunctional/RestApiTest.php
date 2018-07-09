@@ -45,38 +45,28 @@ class RestApiTest extends \PHPUnit_Framework_TestCase
 #echo $token;exit;
 #$token = '"pic5s5uqe2mx4yfdr03bv6p977ki6vnx"';
 
-        $httpHeaders = new \Zend\Http\Headers();
-        $httpHeaders->addHeaders([
-            'Authorization' => 'Bearer ' . json_decode($token),
-            'Accept' => 'text/xml',
-            'Content-Type' => 'text/xml'
-        ]);
-
-        $request = new \Zend\Http\Request();
-        $request->setHeaders($httpHeaders);
-        $request->setUri($baseUrl . 'rest/V1/bigbridge/products');//?dry-run=1
-        $request->setMethod(\Zend\Http\Request::METHOD_POST);
-
         $content = file_get_contents(__DIR__ . '/../../doc/example/a-basic-product.xml');
-        $request->setContent($content);
 
-        $client = new \Zend\Http\Client();
-        $options = [
-            'adapter'   => 'Zend\Http\Client\Adapter\Curl',
-            'curloptions' => [CURLOPT_FOLLOWLOCATION => true],
-            'maxredirects' => 0,
-            'timeout' => 30
-        ];
-        $client->setOptions($options);
+        $ch = curl_init($baseUrl . "rest/V1/bigbridge/products?dry-run=1");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . json_decode($token),
+            'Accept: text/xml',
+            'Content-Type: text/xml',
+            "Content-Length: " . strlen($content),
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        $response = $client->send($request);
+        $response = curl_exec($ch);
 
-#echo($response->getBody());exit;
+#echo($response);exit;
 
-        $xml = new SimpleXMLElement($response->getBody());
+        $xml = new SimpleXMLElement($response);
 
         $this->assertEquals("1", $xml->ok_product_count);
         $this->assertEquals("0", $xml->failed_product_count);
         $this->assertEquals("false", $xml->error_occurred);
+        $this->assertEquals(1, preg_match('/Dry run/', $xml->output));
     }
 }
