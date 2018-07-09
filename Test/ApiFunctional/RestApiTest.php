@@ -1,16 +1,24 @@
 <?php
 
-namespace BigBridge\ProductImport\Test\Integration;
+namespace BigBridge\ProductImport\Test\ApiFunctional;
 
 use SimpleXMLElement;
 
 /**
  * @author Patrick van Bergen
  */
-class RestApiTest extends \Magento\TestFramework\TestCase\AbstractController
+class RestApiTest extends \PHPUnit_Framework_TestCase
 {
-    const TEST_ADMIN_USER_USERNAME = \Magento\TestFramework\Bootstrap::ADMIN_NAME;
-    const TEST_ADMIN_USER_PASSWORD = \Magento\TestFramework\Bootstrap::ADMIN_PASSWORD;
+    const TEST_ADMIN_USER_USERNAME = 'admin';//\Magento\TestFramework\Bootstrap::ADMIN_NAME;
+    const TEST_ADMIN_USER_PASSWORD = 'admin123';//\Magento\TestFramework\Bootstrap::ADMIN_PASSWORD;
+
+    public static function setUpBeforeClass()
+    {
+        // include Magento
+        require_once __DIR__ . '/../../../../../index.php';
+
+        \Magento\Framework\App\ObjectManager::getInstance();
+    }
 
     public function testRestApi()
     {
@@ -21,10 +29,10 @@ class RestApiTest extends \Magento\TestFramework\TestCase\AbstractController
         // create base url for webshop
         $baseUrl = $storeManager->getStore()->getUrl();
 
-#var_dump($baseUrl);
-
         // remove phphar section that is added in test
-        $baseUrl = preg_replace('#/phpunit[^/]+#', '', $baseUrl);
+        $baseUrl = preg_replace('#/(ide-)?phpunit[^/]+#', '', $baseUrl);
+
+#var_dump($baseUrl);
 
         $userData = array("username" => self::TEST_ADMIN_USER_USERNAME, "password" => self::TEST_ADMIN_USER_PASSWORD);
         $ch = curl_init($baseUrl . "rest/V1/integration/admin/token");
@@ -33,6 +41,9 @@ class RestApiTest extends \Magento\TestFramework\TestCase\AbstractController
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen(json_encode($userData))));
         $token = curl_exec($ch);
+
+#echo $token;exit;
+#$token = '"pic5s5uqe2mx4yfdr03bv6p977ki6vnx"';
 
         $httpHeaders = new \Zend\Http\Headers();
         $httpHeaders->addHeaders([
@@ -43,7 +54,7 @@ class RestApiTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $request = new \Zend\Http\Request();
         $request->setHeaders($httpHeaders);
-        $request->setUri($baseUrl . 'rest/V1/bigbridge/products');
+        $request->setUri($baseUrl . 'rest/V1/bigbridge/products');//?dry-run=1
         $request->setMethod(\Zend\Http\Request::METHOD_POST);
 
         $content = file_get_contents(__DIR__ . '/../../doc/example/a-basic-product.xml');
@@ -60,7 +71,7 @@ class RestApiTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $response = $client->send($request);
 
-#var_dump($response);
+#echo($response->getBody());exit;
 
         $xml = new SimpleXMLElement($response->getBody());
 
