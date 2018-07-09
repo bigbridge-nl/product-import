@@ -106,7 +106,7 @@ class CategoryImporter
      * @param int $storeViewId
      * @return array
      */
-    public function getExistingCategoryUrlKeys(int $parentCategoryId, int $storeViewId)
+    protected function getExistingCategoryUrlKeys(int $parentCategoryId, int $storeViewId)
     {
         $urlKeys = [];
 
@@ -129,7 +129,7 @@ class CategoryImporter
      * @param int[] $idPath The ids of the parent categories, including $categoryId
      * @param array $urlKeys A store-id => url_key array
      */
-    public function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
+    protected function addCategoryInfo(int $categoryId, array $idPath, array $urlKeys)
     {
         $this->allCategoryInfo[$categoryId] = new CategoryInfo($idPath, $urlKeys);
     }
