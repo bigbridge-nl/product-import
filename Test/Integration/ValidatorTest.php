@@ -4,8 +4,6 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\CustomOption;
 use BigBridge\ProductImport\Api\ImportConfig;
-use IntlChar;
-use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
 use BigBridge\ProductImport\Model\Resource\Validation\Validator;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
@@ -13,6 +11,7 @@ use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Api\ImporterFactory;
+use IntlChar;
 
 /**
  * @author Patrick van Bergen
@@ -24,14 +23,18 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
 
     public static function setUpBeforeClass()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
     }
 
     public function testValidation()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var Validator $validator */
-        $validator = ObjectManager::getInstance()->get(Validator::class);
+        $validator = $objectManager->get(Validator::class);
 
         $tests = [
 
@@ -167,8 +170,10 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
      */
     public function testImageValidation()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        $factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        $factory = $objectManager->get(ImporterFactory::class);
         $config = new ImportConfig();
 
 $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
@@ -203,8 +208,10 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
     public function testImageRoleValidation()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var Validator $validator */
-        $validator = ObjectManager::getInstance()->get(Validator::class);
+        $validator = $objectManager->get(Validator::class);
 
         $product = new SimpleProduct('validator-product-import');
         $product->setAttributeSetId(4);
@@ -226,8 +233,10 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
     public function testStockItemValidation()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var Validator $validator */
-        $validator = ObjectManager::getInstance()->get(Validator::class);
+        $validator = $objectManager->get(Validator::class);
 
         $tests = [
             [['qty' => 'nul'], "qty is not a decimal number with dot (nul)"],
@@ -260,8 +269,10 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
     public function testConfigurableValidator()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ConfigurableValidator $configurableValidator */
-        $configurableValidator = ObjectManager::getInstance()->get(ConfigurableValidator::class);
+        $configurableValidator = $objectManager->get(ConfigurableValidator::class);
 
         // ----
 
@@ -281,6 +292,8 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
     public function testTierPrices()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         $product = new SimpleProduct('big-blue-box');
         $product->setAttributeSetId(4);
 
@@ -291,7 +304,7 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
         $product->setTierPrices([[10, 12.95, "Not Logged In", "Clothing"], [20, 12.75, "Not Logged In", "Clothing"]]);
 
         /** @var Validator $validator */
-        $validator = ObjectManager::getInstance()->get(Validator::class);
+        $validator = $objectManager->get(Validator::class);
 
         $validator->validate($product);
 
@@ -300,6 +313,8 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
     public function testCustomOptions()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         $product = new SimpleProduct('big-blue-box');
         $product->setAttributeSetId(4);
 
@@ -316,7 +331,7 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
         $product->global()->setCustomOptionValue($color, "green", "0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green');
 
         /** @var Validator $validator */
-        $validator = ObjectManager::getInstance()->get(Validator::class);
+        $validator = $objectManager->get(Validator::class);
 
         $validator->validate($product);
 

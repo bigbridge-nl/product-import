@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use Exception;
-use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
@@ -37,16 +36,18 @@ class UrlKeyTest extends \Magento\TestFramework\TestCase\AbstractController
 
     public static function setUpBeforeClass()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
 
         /** @var ProductRepositoryInterface $repository */
-        self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
+        self::$repository = $objectManager->get(ProductRepositoryInterface::class);
 
         /** @var Magento2DbConnection $db */
-        self::$db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+        self::$db = $objectManager->get(Magento2DbConnection::class);
 
-        self::$metadata = ObjectManager::getInstance()->get(MetaData::class);
+        self::$metadata = $objectManager->get(MetaData::class);
 
         $table = self::$metadata->productEntityTable;
         self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE 'product-import-%'");

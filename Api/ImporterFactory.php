@@ -3,7 +3,7 @@
 namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Resource\MetaData;
-use Magento\Framework\App\ObjectManager;
+use Magento\Framework\ObjectManagerInterface;
 use Exception;
 
 /**
@@ -14,9 +14,15 @@ class ImporterFactory
     /** @var  MetaData */
     protected $metaData;
 
-    public function __construct(MetaData $metaData)
+    /** @var ObjectManagerInterface */
+    protected $objectManager;
+
+    public function __construct(
+        MetaData $metaData,
+        ObjectManagerInterface $objectManager)
     {
         $this->metaData = $metaData;
+        $this->objectManager = $objectManager;
     }
 
     /**
@@ -35,8 +41,7 @@ class ImporterFactory
 
         $this->validateConfig($config);
 
-        $om = ObjectManager::getInstance();
-        $importer = $om->create(Importer::class, ['config' => $config]);
+        $importer = $this->objectManager->create(Importer::class, ['config' => $config]);
 
         return $importer;
     }

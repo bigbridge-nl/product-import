@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\BundleProductSelection;
-use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
@@ -53,16 +52,18 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
     public static function setUpBeforeClass()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
 
         /** @var ProductRepositoryInterface $repository */
-        self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
+        self::$repository = $objectManager->get(ProductRepositoryInterface::class);
 
         /** @var Magento2DbConnection $db */
-        self::$db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+        self::$db = $objectManager->get(Magento2DbConnection::class);
 
-        self::$metaData = ObjectManager::getInstance()->get(MetaData::class);
+        self::$metaData = $objectManager->get(MetaData::class);
 
         $table = self::$metaData->productEntityTable;
         self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE '%-product-import'");

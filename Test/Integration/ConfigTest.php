@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use Exception;
@@ -17,8 +16,10 @@ class ConfigTest extends \Magento\TestFramework\TestCase\AbstractController
 
     public static function setUpBeforeClass()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
     }
 
     public function testConfig()

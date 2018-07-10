@@ -8,7 +8,6 @@ use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
-use Magento\Framework\App\ObjectManager;
 
 /**
  * @author Patrick van Bergen
@@ -26,13 +25,15 @@ class IdTest extends \Magento\TestFramework\TestCase\AbstractController
 
     public static function setUpBeforeClass()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
 
         /** @var Magento2DbConnection $db */
-        self::$db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+        self::$db = $objectManager->get(Magento2DbConnection::class);
 
-        self::$metadata = ObjectManager::getInstance()->get(MetaData::class);
+        self::$metadata = $objectManager->get(MetaData::class);
     }
 
     /**

@@ -7,7 +7,6 @@ use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Model\Resource\Resolver\NameToUrlKeyConverter;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
-use Magento\Framework\App\ObjectManager;
 
 /**
  * @author Patrick van Bergen
@@ -19,8 +18,10 @@ class ReferenceResolverTest extends \Magento\TestFramework\TestCase\AbstractCont
 
     public static function setUpBeforeClass()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
     }
 
     /**
@@ -28,10 +29,12 @@ class ReferenceResolverTest extends \Magento\TestFramework\TestCase\AbstractCont
      */
     public function testReferenceResolver()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         $config = new ImportConfig();
 
         /** @var ReferenceResolver $resolver */
-        $resolver = ObjectManager::getInstance()->get(ReferenceResolver::class);
+        $resolver = $objectManager->get(ReferenceResolver::class);
 
         $tests = [
 
@@ -96,10 +99,12 @@ class ReferenceResolverTest extends \Magento\TestFramework\TestCase\AbstractCont
      */
     public function testStoreViewResolver()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         $config = new ImportConfig();
 
         /** @var ReferenceResolver $resolver */
-        $resolver = ObjectManager::getInstance()->get(ReferenceResolver::class);
+        $resolver = $objectManager->get(ReferenceResolver::class);
 
         $tests = [
 

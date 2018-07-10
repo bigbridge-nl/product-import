@@ -3,7 +3,6 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use Exception;
-use Magento\Framework\App\ObjectManager;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Resource\Resolver\CategoryImporter;
@@ -35,16 +34,18 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
 
     public static function setUpBeforeClass()
     {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
 
         /** @var ProductRepositoryInterface $repository */
-        self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
+        self::$repository = $objectManager->get(ProductRepositoryInterface::class);
 
         /** @var Magento2DbConnection $db */
-        self::$db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+        self::$db = $objectManager->get(Magento2DbConnection::class);
 
-        $metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $metadata = $objectManager->get(MetaData::class);
 
         $table = $metadata->productEntityTable;
         self::$db->execute("DELETE FROM `{$table}` WHERE sku LIKE '%-product-import'");
@@ -54,7 +55,9 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
     
     public function __construct(string $name = null, array $data = array(), string $dataName = '')
     {
-        $this->metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        $this->metadata = $objectManager->get(MetaData::class);
         
         parent::__construct($name, $data, $dataName);
     }
@@ -64,12 +67,14 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
      */
     public function testUrlRewriteCompoundCategories()
     {
-        $this->metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        $this->metadata = $objectManager->get(MetaData::class);
 
         /** @var Magento2DbConnection $db */
-        $db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+        $db = $objectManager->get(Magento2DbConnection::class);
         /** @var CategoryImporter $categoryImporter */
-        $categoryImporter = ObjectManager::getInstance()->get(CategoryImporter::class);
+        $categoryImporter = $objectManager->get(CategoryImporter::class);
         list($c1,) = $categoryImporter->importCategoryPath("Default Category/Boxes", true, '/');
         list($c2a,) = $categoryImporter->importCategoryPath("Default Category/Colored Things", true, '/');
         list($c2b,) = $categoryImporter->importCategoryPath("Default Category/Colored Things/Containers", true, '/');
@@ -88,25 +93,18 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->setAttributeSetByName("Default");
         $product->addCategoriesByGlobalName(["Default Category/Boxes", "Default Category/Colored Things/Containers/Large", "Default Category/Colored Things/Containers"]);
 
-
-
         // give this category a Dutch name
-//        $this->metadata->allCategoryInfo[$categoryId]->urlKeys[1] = 'dozen';
-
         $urlKeyAttributeId = $this->metadata->categoryAttributeMap['url_key'];
 
         self::$db->execute("
-INSERT IGNORE INTO `{$this->metadata->categoryEntityTable}_varchar`
-SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
-", [
+            INSERT IGNORE INTO `{$this->metadata->categoryEntityTable}_varchar`
+            SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
+            ", [
             $c1,
             1,
             $urlKeyAttributeId,
             'dozen'
         ]);
-
-
-
 
         $global = $product->global();
         $global->setName("Big Purple Box");
@@ -142,12 +140,14 @@ SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
      */
     public function testNoUrlRewrites()
     {
-        $this->metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        $this->metadata = $objectManager->get(MetaData::class);
 
         /** @var Magento2DbConnection $db */
-        $db = ObjectManager::getInstance()->get(Magento2DbConnection::class);
+        $db = $objectManager->get(Magento2DbConnection::class);
         /** @var MetaData $metadata */
-        $metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $metadata = $objectManager->get(MetaData::class);
 
         $config = new ImportConfig();
         $this->metadata->valueSerializer = new SerializeValueSerializer();
@@ -214,7 +214,9 @@ SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
      */
     public function testUrlRewritesGeneration()
     {
-        $this->metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        $this->metadata = $objectManager->get(MetaData::class);
 
         $config = new ImportConfig();
         $this->metadata->valueSerializer = new SerializeValueSerializer();
@@ -233,20 +235,17 @@ SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
         $categoryId = $productX->getCategoryIds()[0];
 
         // give this category a Dutch name
-//        $this->metadata->allCategoryInfo[$categoryId]->urlKeys[1] = 'dozen';
+        $urlKeyAttributeId = $this->metadata->categoryAttributeMap['url_key'];
 
-$urlKeyAttributeId = $this->metadata->categoryAttributeMap['url_key'];
-
-self::$db->execute("
-INSERT IGNORE INTO `{$this->metadata->categoryEntityTable}_varchar`
-SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
-", [
-    $categoryId,
-    1,
-    $urlKeyAttributeId,
-    'dozen'
-]);
-
+        self::$db->execute("
+        INSERT IGNORE INTO `{$this->metadata->categoryEntityTable}_varchar`
+        SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
+        ", [
+            $categoryId,
+            1,
+            $urlKeyAttributeId,
+            'dozen'
+        ]);
 
         // product
         $product1 = new SimpleProduct('1-product-import');
@@ -274,7 +273,6 @@ SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
         $product3->global()->generateUrlKey();
 
         $importer->importSimpleProduct($product3);
-
 
         $importer->flush();
 
@@ -406,7 +404,9 @@ SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
      */
     public function testUrlRewritesWithJson()
     {
-        $this->metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        $this->metadata = $objectManager->get(MetaData::class);
 
         $config = new ImportConfig();
         $this->metadata->valueSerializer = new JsonValueSerializer();
@@ -424,21 +424,18 @@ SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
 
         $categoryId = $productX->getCategoryIds()[0];
 
-$urlKeyAttributeId = $this->metadata->categoryAttributeMap['url_key'];
-
-self::$db->execute("
-    INSERT IGNORE INTO `{$this->metadata->categoryEntityTable}_varchar`
-    SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
-", [
-    $categoryId,
-    1,
-    $urlKeyAttributeId,
-    'dozen'
-]);
-
-
         // give this category a Dutch name
-//        $this->metadata->allCategoryInfo[$categoryId]->urlKeys[1] = 'dozen';
+        $urlKeyAttributeId = $this->metadata->categoryAttributeMap['url_key'];
+
+        self::$db->execute("
+            INSERT IGNORE INTO `{$this->metadata->categoryEntityTable}_varchar`
+            SET entity_id = ?, store_id = ?, attribute_id = ?, value = ?
+        ", [
+            $categoryId,
+            1,
+            $urlKeyAttributeId,
+            'dozen'
+        ]);
 
         // product
         $product1 = new SimpleProduct('3-product-import');
@@ -544,7 +541,9 @@ self::$db->execute("
      */
     public function testSwitchUrlKeys()
     {
-        $this->metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        $this->metadata = $objectManager->get(MetaData::class);
 
         $config = new ImportConfig();
         $this->metadata->valueSerializer = new SerializeValueSerializer();
@@ -637,7 +636,9 @@ self::$db->execute("
      */
     public function testReplaceUrlKey()
     {
-        $this->metadata = ObjectManager::getInstance()->get(MetaData::class);
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        $this->metadata = $objectManager->get(MetaData::class);
 
         $keep = $this->metadata->saveRewritesHistory;
         $this->metadata->saveRewritesHistory = true;

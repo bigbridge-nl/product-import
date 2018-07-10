@@ -1,9 +1,8 @@
 <?php
 
-namespace BigBridge\ProductImport\Test\Integration\Benchmark;
+namespace BigBridge\ProductImport\Test\Integration;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
-use Magento\Framework\App\ObjectManager;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
@@ -18,26 +17,19 @@ use BigBridge\ProductImport\Api\ImporterFactory;
  *
  * @author Patrick van Bergen
  */
-class MemoryTest extends \PHPUnit\Framework\TestCase
+class MemoryTest extends \Magento\TestFramework\TestCase\AbstractController
 {
     const PRODUCT_COUNT = 2500;
 
     /** @var  ImporterFactory */
     private static $factory;
 
-    /** @var ProductRepositoryInterface $repository */
-    private static $repository;
-
     public static function setUpBeforeClass()
     {
-        // include Magento
-        require_once __DIR__ . '/../../../../../index.php';
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
         /** @var ImporterFactory $factory */
-        self::$factory = ObjectManager::getInstance()->get(ImporterFactory::class);
-
-        /** @var ProductRepositoryInterface $repository */
-        self::$repository = ObjectManager::getInstance()->get(ProductRepositoryInterface::class);
+        self::$factory = $objectManager->get(ImporterFactory::class);
     }
 
     /**
