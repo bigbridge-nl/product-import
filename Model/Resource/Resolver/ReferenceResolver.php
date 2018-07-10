@@ -76,6 +76,15 @@ class ReferenceResolver
         $this->configurableProductReferenceResolver = $configurableProductReferenceResolver;
     }
 
+    public function updateCachedDatabaseData()
+    {
+        // reload category information
+        $this->categoryImporter->refresh();
+
+        // reload attribute option information
+        $this->optionResolver->refresh();
+    }
+
     /**
      * @param Product[] $products
      * @param ImportConfig $config
@@ -83,12 +92,6 @@ class ReferenceResolver
      */
     public function resolveExternalReferences(array $products, ImportConfig $config)
     {
-        // reload category information
-        $this->categoryImporter->refresh();
-
-        // reload attribute option information
-        $this->optionResolver->refresh();
-
         // resolve customer groups and websites in tier prices
         $this->tierPriceResolver->resolveReferences($products);
 
