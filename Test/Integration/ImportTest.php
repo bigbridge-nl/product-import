@@ -1717,7 +1717,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $product->setCustomOptions([
             $inscription = CustomOption::createCustomOptionTextField('inscription', true, 21),
-            $note = CustomOption::createCustomOptionTextField('note', true, 255),
+            $note = CustomOption::createCustomOptionTextArea('note', true, 255),
             $idCard = CustomOption::createCustomOptionFile("id-card", false, ".jpg .jpeg", 5000, 7000),
             $date = CustomOption::createCustomOptionDate("date", true),
             $dateTime = CustomOption::createCustomOptionDateTime("datetime", true),
@@ -1743,8 +1743,8 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->global()->setCustomOptionTitle($dateTime, "Date and time");
         $product->global()->setCustomOptionPrice($dateTime, "20", ProductStoreView::PRICE_TYPE_PERCENT);
 
-        $product->global()->setCustomOptionTitle($dateTime, "Time");
-        $product->global()->setCustomOptionPrice($dateTime, "30", ProductStoreView::PRICE_TYPE_PERCENT);
+        $product->global()->setCustomOptionTitle($time, "Time");
+        $product->global()->setCustomOptionPrice($time, "30", ProductStoreView::PRICE_TYPE_PERCENT);
 
         $product->global()->setCustomOptionTitle($color, "Color");
         $product->global()->setCustomOptionValue($color, "red", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red');
@@ -1752,8 +1752,8 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->global()->setCustomOptionValue($color, "blue", "0.25", ProductStoreView::PRICE_TYPE_FIXED, 'Blue');
 
         $product->global()->setCustomOptionTitle($frame, "Frame");
-        $product->global()->setCustomOptionValue($frame, "wood", "18.45", ProductStoreView::PRICE_TYPE_FIXED, 'Wood');
-        $product->global()->setCustomOptionValue($frame, "iron", "25.95", ProductStoreView::PRICE_TYPE_FIXED, 'Iron');
+        $product->global()->setCustomOptionValue($frame, "wood", "10", ProductStoreView::PRICE_TYPE_PERCENT, 'Wood');
+        $product->global()->setCustomOptionValue($frame, "iron", "15", ProductStoreView::PRICE_TYPE_PERCENT, 'Iron');
 
         $product->global()->setCustomOptionTitle($extras, "Extras");
         $product->global()->setCustomOptionValue($extras, "mayonaise", "0.05", ProductStoreView::PRICE_TYPE_FIXED, 'Mayonaise');
@@ -1770,6 +1770,59 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $this->assertEquals([], $errors);
 
+        $actual = self::$db->fetchAllNonAssoc("
+            SELECT type, is_require, sku, max_characters, file_extension, image_size_x, image_size_y, sort_order, T.store_id, T.title, P.store_id, P.price, P.price_type
+            FROM catalog_product_option O
+            LEFT JOIN catalog_product_option_title T ON T.option_id = O.option_id
+            LEFT JOIN catalog_product_option_price P ON P.option_id = O.option_id
+            WHERE product_id = {$product->id}
+            ORDER BY sort_order
+        ");
+
+        $expected = [
+            ['field', '1', 'inscription', '21', null,'0', '0', '1', '0', 'Inscription', '0', '0.5000', 'fixed'],
+            ['area', '1', 'note', 255, null, '0', '0', '2', '0', 'Note', '0', '0.1000', 'fixed'],
+            ['file', '0', 'id-card', '0', '.jpg .jpeg', '5000', '7000', '3', '0', 'Id card', '0', '0.0000', 'fixed'],
+            ['date', '1', 'date', 0, null, '0', '0', '4', '0', 'Date', '0', '10.0000', 'percent'],
+            ['date_time', '1', 'datetime', '0', null, '0', '0', '5', '0', 'Date and time', '0', '20.0000', 'percent'],
+            ['time', '1', 'time', '0', null, '0', '0', '6', '0', 'Time', '0', '30.0000', 'percent'],
+            ['drop_down', '1', null, '0', null, '0', '0', '7', '0', 'Color', null, null, null],
+            ['radio', '1', null, '0', null, '0', '0', '8', '0', 'Frame', null, null, null],
+            ['checkbox', '1', null, '0', null, '0', '0', '9', '0', 'Extras', null, null, null],
+            ['multiple', '1', null, '0', null, '0', '0', '10', '0', 'Toppings', null, null, null]
+        ];
+
+        $this->assertEquals($expected, $actual);
+
+        $optionIds = self::$db->fetchSingleColumn("
+            SELECT option_id FROM catalog_product_option 
+            WHERE product_id = {$product->id}
+        ");
+
+        $actual = self::$db->fetchAllNonAssoc("
+            SELECT V.sku, V.sort_order, T.store_id, T.title, P.store_id, P.price, P.price_type
+            FROM catalog_product_option_type_value V
+            LEFT JOIN catalog_product_option_type_title T ON T.option_type_id = V.option_type_id
+            LEFT JOIN catalog_product_option_type_price P ON P.option_type_id = V.option_type_id
+            WHERE V.option_id IN (" . implode(',', $optionIds) . ")
+            ORDER BY V.option_id, V.sort_order
+        ");
+
+        $expected = [
+            ["red", "1", "0", "Red", "0", "0.1000", "fixed"],
+            ["green", "2", "0", "Green", "0", "0.1500", "fixed"],
+            ["blue", "3", "0", "Blue", "0", "0.2500", "fixed"],
+            ["wood", "1", "0", "Wood", "0", "10.0000", "percent"],
+            ["iron", "2", "0", "Iron", "0", "15.0000", "percent"],
+            ["mayonaise", "1", "0", "Mayonaise", "0", "0.0500", "fixed"],
+            ["ketchup", "2", "0", "Ketchup", "0", "0.0500", "fixed"],
+            ["mosterd", "3", "0", "Mosterd", "0", "0.1000", "fixed"],
+            ["nuts", "1", "0", "Nuts", "0", "0.1000", "fixed"],
+            ["syrup", "2", "0", "Syrup", "0", "0.1000", "fixed"],
+            ["m-and-ms", "3", "0", "M & M's", "0", "0.1000", "fixed"],
+        ];
+
+        $this->assertEquals($expected, $actual);
     }
 
     /**
