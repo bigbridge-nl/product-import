@@ -30,11 +30,11 @@ class ProductDeleter
      */
     public function deleteProductsByIds(array $ids)
     {
-        $this->db->deleteMultiple($this->metaData->productEntityTable, "id", $ids);
+        $this->db->deleteMultiple($this->metaData->productEntityTable, "entity_id", $ids);
 
         foreach ($this->metaData->getNonGlobalStoreViewIds() as $storeViewId) {
-            $this->db->deleteMultipleWithWhere($this->metaData->urlRewriteTable, "id", $ids, "
-                `store_id` = {$storeViewId}
+            $this->db->deleteMultipleWithWhere($this->metaData->urlRewriteTable, "entity_id", $ids, "
+                `store_id` = {$storeViewId} AND `entity_type` = 'product'
             ");
         }
     }
@@ -44,6 +44,14 @@ class ProductDeleter
      */
     public function deleteProductsBySkus(array $skus)
     {
-        $this->db->deleteMultiple($this->metaData->productEntityTable, "sku", $skus);
+        if (empty($skus)) {
+            return;
+        }
+
+        $ids = $this->db->fetchSingleColumn("
+            SELECT `entity_id` FROM " . $this->metaData->productEntityTable . " WHERE `sku` IN (" . $this->db->getMarks($skus) . ")
+        ", $skus);
+
+        $this->deleteProductsByIds($ids);
     }
 }

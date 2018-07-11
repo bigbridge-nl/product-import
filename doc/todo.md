@@ -14,7 +14,6 @@
 
 * csv import
 * xlsx import
-* rest request
 
 * Support import of Magento export csv
 * Update table import_history
@@ -30,10 +29,7 @@ url_rewrites are created for all store views. No attempt is made to check if the
 
 ## Testing
 
-* test product deleter
 * test database code, especially the change detection code
-* tests may only be run in a special shop (not production)
-- remove created test-records
 - test with 500.000 records in the database
 
 ## Fields
