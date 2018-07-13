@@ -100,7 +100,6 @@ The webapi call follows Magento webapi standards. Here is example PHP code that 
         "password" => 'some-admin-password'
     );
 
-    // fetch authentication token
     $ch = curl_init($baseUrl . "rest/V1/integration/admin/token");
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($userData));
@@ -108,39 +107,24 @@ The webapi call follows Magento webapi standards. Here is example PHP code that 
     curl_setopt($ch, CURLOPT_HTTPHEADER, array("Content-Type: application/json", "Content-Length: " . strlen(json_encode($userData))));
     $token = curl_exec($ch);
 
-    // both input and output in XML
-    $httpHeaders = new \Zend\Http\Headers();
-    $httpHeaders->addHeaders([
-        'Authorization' => 'Bearer ' . json_decode($token),
-        'Accept' => 'text/xml',
-        'Content-Type' => 'text/xml'
+    $content = file_get_contents(__DIR__ . '/../../doc/example/a-basic-product.xml');
+
+    $ch = curl_init($baseUrl . "rest/V1/bigbridge/products?dry-run=1");
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . json_decode($token),
+        'Accept: text/xml',
+        'Content-Type: text/xml',
+        "Content-Length: " . strlen($content),
     ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    $request = new \Zend\Http\Request();
-    $request->setHeaders($httpHeaders);
-    $request->setUri($baseUrl . 'rest/V1/bigbridge/products');
-    $request->setMethod(\Zend\Http\Request::METHOD_POST);
+    $response = curl_exec($ch);
 
-    // place the xml in the POST body
-    $content = file_get_contents(__DIR__ . '/example/a-basic-product.xml');
-    $request->setContent($content);
+    $xml = new SimpleXMLElement($response);
 
-    $client = new \Zend\Http\Client();
-    $options = [
-        'adapter'   => 'Zend\Http\Client\Adapter\Curl',
-        'curloptions' => [CURLOPT_FOLLOWLOCATION => true],
-        'maxredirects' => 0,
-        'timeout' => 30
-    ];
-    $client->setOptions($options);
-
-    // the main request
-    $response = $client->send($request);
-
-    // process the response
-    $xml = new SimpleXMLElement($response->getBody());
-
-    $this->assertEquals("1", $xml->ok_product_count);
-    $this->assertEquals("0", $xml->failed_product_count);
-    $this->assertEquals("false", $xml->error_occurred);
-
+    echo $xml->ok_product_count;
+    echo $xml->failed_product_count;
+    echo $xml->error_occurred;
+    echo $xml->output;
