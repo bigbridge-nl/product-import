@@ -96,7 +96,7 @@ class CategoryImporter
      */
     public function getCategoryInfo($categoryId)
     {
-        return array_key_exists($categoryId, $this->getAllCategoryInfo()) ? $this->allCategoryInfo[$categoryId] : null;
+        return array_key_exists($categoryId, $this->allCategoryInfo) ? $this->allCategoryInfo[$categoryId] : null;
     }
 
     /**
