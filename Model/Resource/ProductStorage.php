@@ -261,49 +261,34 @@ class ProductStorage
 
         list($upsertAttributes, $deleteAttributes) = $this->separateUpsertsFromDeletes($validProducts, $config);
 
-        $this->db->execute("START TRANSACTION");
+        $this->productEntityStorage->insertMainTable($validInsertProducts);
+        $this->productEntityStorage->updateMainTable($validUpdateProducts);
 
-        try {
+        $this->referenceResolver->resolveProductReferences($validProducts, $config);
 
-            $this->productEntityStorage->insertMainTable($validInsertProducts);
-            $this->productEntityStorage->updateMainTable($validUpdateProducts);
-
-            $this->referenceResolver->resolveProductReferences($validProducts, $config);
-
-            foreach ($deleteAttributes as $eavAttribute => $storeViews) {
-                $this->productEntityStorage->removeEavAttribute($storeViews, $eavAttribute);
-            }
-
-            foreach ($upsertAttributes as $eavAttribute => $storeViews) {
-                $this->productEntityStorage->insertEavAttribute($storeViews, $eavAttribute);
-            }
-
-            $this->customOptionStorage->updateCustomOptions($validProducts);
-            $this->productEntityStorage->insertCategoryIds($validProducts);
-            $this->productEntityStorage->insertWebsiteIds($validProducts);
-            $this->stockItemStorage->storeStockItems($validProducts);
-            $this->linkedProductStorage->updateLinkedProducts($validProducts);
-            $this->imageStorage->storeProductImages($validProducts);
-            $this->tierPriceStorage->updateTierPrices($validProducts);
-
-            // url_rewrite (must be done after url_key and category_id)
-            $this->urlRewriteStorage->updateRewrites($validProducts);
-
-            $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
-            $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);
-            $this->bundleStorage->performTypeSpecificStorage($productsByType[BundleProduct::TYPE_BUNDLE]);
-            $this->configurableStorage->performTypeSpecificStorage($productsByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
-
-            $this->db->execute("COMMIT");
-
-        } catch (Exception $e) {
-
-            // rollback the transaction
-            try { $this->db->execute("ROLLBACK"); } catch (Exception $f) {}
-
-            // let the application handle the exception
-            throw $e;
+        foreach ($deleteAttributes as $eavAttribute => $storeViews) {
+            $this->productEntityStorage->removeEavAttribute($storeViews, $eavAttribute);
         }
+
+        foreach ($upsertAttributes as $eavAttribute => $storeViews) {
+            $this->productEntityStorage->insertEavAttribute($storeViews, $eavAttribute);
+        }
+
+        $this->customOptionStorage->updateCustomOptions($validProducts);
+        $this->productEntityStorage->insertCategoryIds($validProducts);
+        $this->productEntityStorage->insertWebsiteIds($validProducts);
+        $this->stockItemStorage->storeStockItems($validProducts);
+        $this->linkedProductStorage->updateLinkedProducts($validProducts);
+        $this->imageStorage->storeProductImages($validProducts);
+        $this->tierPriceStorage->updateTierPrices($validProducts);
+
+        // url_rewrite (must be done after url_key and category_id)
+        $this->urlRewriteStorage->updateRewrites($validProducts);
+
+        $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
+        $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);
+        $this->bundleStorage->performTypeSpecificStorage($productsByType[BundleProduct::TYPE_BUNDLE]);
+        $this->configurableStorage->performTypeSpecificStorage($productsByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
     }
 
     /**
