@@ -41,7 +41,7 @@ class UrlRewriteUpdater
      * @param array $storeViewCodes
      * @throws \Exception
      */
-    public function updateUrlRewrites(array $storeViewCodes)
+    public function updateUrlRewrites(array $storeViewCodes, UrlRewriteUpdateLogger $logger)
     {
         $storeViewIds = $this->metaData->getStoreViewIds($storeViewCodes);
         $productIds = $this->information->getProductIds();
@@ -50,9 +50,8 @@ class UrlRewriteUpdater
         while ($chunkedIds = array_slice($productIds, $i, self::BUNCH_SIZE)) {
             $this->urlRewriteStorage->updateRewritesByProductIds($chunkedIds, $storeViewIds);
             $i += self::BUNCH_SIZE;
-#todo: not here
-echo "\r" . $i;
 
+            $logger->info($i);
         }
     }
 }

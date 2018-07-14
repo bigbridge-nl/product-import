@@ -9,15 +9,15 @@ This library imports product data into Magento 2 via direct database queries. It
 * An Web API service for product import via Post Request with XML
 * A tool to update url_rewrites
 
-## Disclaimer
+## Warning!
 
 The aim of this library is speed. If you find that Magento 2's product importer is too slow, consider using this library.
 
-However, the library bypasses all of Magento's API's to insert data directly into the database. Possible problems with this approach are:
+However, the library bypasses all of Magento's API's to insert data directly into the database. Possible problems you may encounter:
 
+* The library is still new and brings with it its own set of bugs and problems!
 * The library creator is not perfectly knowledgeable of all Magento's ins and outs (even though he tries hard to be). It is possible that the data is not entered in exactly the same way that Magento 2 does it.
-* The library is still new and brings with it its own set of bugs and problems.
-* Magento may change its data structure in the future. The library will have to be updated to follow.
+* The library probably does not have all features you need and expect.
 
 Experiment with the library in a safe webshop. Make sure to create a database backup before you start.
 

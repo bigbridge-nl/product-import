@@ -2,14 +2,15 @@
 
 namespace BigBridge\ProductImport\Console\Command;
 
-use BigBridge\ProductImport\Api\Information;
-use BigBridge\ProductImport\Api\UrlRewriteUpdater;
 use Exception;
 use Magento\Framework\ObjectManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use BigBridge\ProductImport\Model\Updater\UrlRewriteUpdateCommandLogger;
+use BigBridge\ProductImport\Api\Information;
+use BigBridge\ProductImport\Api\UrlRewriteUpdater;
 
 /**
  * @author Patrick van Bergen
@@ -65,8 +66,10 @@ class ProductUrlRewriteCommand extends Command
             $storeViewCodes =  $information->getNonGlobalStoreViewCodes();
         }
 
+        $logger = new UrlRewriteUpdateCommandLogger($output);
+
         try {
-            $urlRewriteUpdater->updateUrlRewrites($storeViewCodes);
+            $urlRewriteUpdater->updateUrlRewrites($storeViewCodes, $logger);
         } catch (Exception $e) {
             $output->writeln("<error>" . $e->getMessage() . "</error>");
             return \Magento\Framework\Console\Cli::RETURN_FAILURE;

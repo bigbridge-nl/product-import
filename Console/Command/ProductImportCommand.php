@@ -154,6 +154,7 @@ class ProductImportCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        /** @var XmlProductReader $xmlProductReader */
         $xmlProductReader = $this->objectManager->create(XmlProductReader::class);
         $fileName = $input->getArgument(self::ARGUMENT_FILENAME);
 
