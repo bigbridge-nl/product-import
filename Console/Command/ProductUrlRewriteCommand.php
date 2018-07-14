@@ -33,8 +33,6 @@ class ProductUrlRewriteCommand extends Command
 
     protected function configure()
     {
-//        $information = $this->objectManager->create(Information::class);
-
         $this->setName('bigbridge:product:urlrewrite');
         $this->setDescription('Updates url_rewrite to reflect the current state of the products.');
         $this->setDefinition([
@@ -42,10 +40,8 @@ class ProductUrlRewriteCommand extends Command
                 self::ARGUMENT_STOREVIEW_CODE,
                 's',
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
-                'storeview code',
-#todo
-[]
-//                $information->getNonGlobalStoreViewCodes()
+                'Storeview code (default: all store views)',
+                []
             )
         ]);
     }
@@ -57,8 +53,17 @@ class ProductUrlRewriteCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        /** @var UrlRewriteUpdater $urlRewriteUpdater */
         $urlRewriteUpdater = $this->objectManager->create(UrlRewriteUpdater::class);
+
+        /** @var Information $information */
+        $information = $this->objectManager->create(Information::class);
+
         $storeViewCodes = $input->getOption(self::ARGUMENT_STOREVIEW_CODE);
+
+        if (empty($storeViewCodes)) {
+            $storeViewCodes =  $information->getNonGlobalStoreViewCodes();
+        }
 
         try {
             $urlRewriteUpdater->updateUrlRewrites($storeViewCodes);
