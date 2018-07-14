@@ -1,6 +1,8 @@
 # Todo
 
 * change of products type is actually performed in dry-run
+* image not found? ignore, error
+* resultCallback not an array
 
 # Validation
 
