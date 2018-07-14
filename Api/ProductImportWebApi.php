@@ -55,7 +55,7 @@ class ProductImportWebApi implements ProductImportWebApiInterface
 
         $importer = $this->importerFactory->createImporter($config);
         $logger = new ProductImportWebApiLogger();
-        $config->resultCallbacks = [[$logger, 'productImported']];
+        $config->resultCallback = [$logger, 'productImported'];
 
         $skipXsdValidation = !empty($parameters[self::OPTION_AUTO_CREATE_CATEGORIES]);
 

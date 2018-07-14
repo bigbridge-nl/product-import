@@ -160,7 +160,7 @@ class ProductImportCommand extends Command
         $logger = new ProductImportCommandLogger($output);
 
         $config = new ImportConfig();
-        $config->resultCallbacks = [[$logger, 'productImported']];
+        $config->resultCallback = [$logger, 'productImported'];
 
         $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
         $config->autoCreateCategories = $input->getOption(self::OPTION_AUTO_CREATE_CATEGORIES);

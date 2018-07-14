@@ -65,20 +65,6 @@ class ConfigTest extends \Magento\TestFramework\TestCase\AbstractController
 
         // ---
 
-        $importer = null;
-        $config = new ImportConfig();
-        $config->resultCallbacks = function() {};
-
-        try {
-            $importer = self::$factory->createImporter($config);
-        } catch (Exception $exception) {
-            $this->assertEquals("config: resultCallbacks should be an array of functions", $exception->getMessage());
-        }
-
-        $this->assertNull($importer);
-
-        // ---
-
         $config = new ImportConfig();
 
         try {

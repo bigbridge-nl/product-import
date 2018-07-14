@@ -39,7 +39,7 @@ class MemoryTest extends \Magento\TestFramework\TestCase\AbstractController
         $lastErrors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$success, &$lastErrors) {
+        $config->resultCallback = function (Product $product) use (&$success, &$lastErrors) {
             if ($product->getErrors()) {
                 $lastErrors = $product->getErrors();
             }

@@ -9,7 +9,7 @@ But if your aim is to stop the import after n errors have occurred and report on
 
     $errorCount = 0;
 
-    $config->resultCallback[] = function(Product $product) use (&$errorCount, &$log)) {
+    $config->resultCallback = function(Product $product) use (&$errorCount, &$log)) {
 
         if (!$product->isOk()) {
             $errorCount++;

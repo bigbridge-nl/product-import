@@ -115,7 +115,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$success, &$errors) {
+        $config->resultCallback = function (Product $product) use (&$success, &$errors) {
             $success = $success && $product->isOk();
             $errors = array_merge($errors, $product->getErrors());
         };
@@ -275,7 +275,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $lastId = null;
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function(Product $product) use (&$log, &$lastId) {
+        $config->resultCallback = function(Product $product) use (&$log, &$lastId) {
 
             if ($product->isOk()) {
                 $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->getSku(), $product->id);
@@ -319,7 +319,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $success = true;
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function(Product $product) use (&$success) {
+        $config->resultCallback = function(Product $product) use (&$success) {
             $success = $success && $product->isOk();
         };
 
@@ -358,7 +358,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
+        $config->resultCallback = function(Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -397,7 +397,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         // the essence of this test
         $config->autoCreateCategories = false;
 
-        $config->resultCallbacks[] = function(Product $product) use (&$success) {
+        $config->resultCallback = function(Product $product) use (&$success) {
             $success = $success && $product->isOk();
         };
 
@@ -435,7 +435,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $config = new ImportConfig();
 
-        $config->resultCallbacks[] = function(Product $product) use (&$errors) {
+        $config->resultCallback = function(Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -586,7 +586,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $config = new ImportConfig();
 
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -755,7 +755,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $config = new ImportConfig();
 
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -1172,7 +1172,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $config = new ImportConfig();
 
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -1389,7 +1389,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -1422,7 +1422,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -1561,7 +1561,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -1702,7 +1702,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -1898,7 +1898,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 

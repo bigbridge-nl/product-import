@@ -144,7 +144,7 @@ class ProductStorage
         }
 
         // call user defined functions to let them process the results
-        foreach ($config->resultCallbacks as $callback) {
+        if (($callback = $config->resultCallback) !== null) {
             foreach ($products as $product) {
                 if ($product->usedAsPlaceholder()) {
                     continue;

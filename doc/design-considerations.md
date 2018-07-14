@@ -109,7 +109,7 @@ I chose for the option to have the developer explicitly call convertNameToId() b
 
 ## Batch processing
 
-I only used batch processing because it is much faster than individual queries per product. For the developer, it is less comfortable, because the importer's process() function doesn't reply with the import results immediately. The resultCallbacks callback array is the only way the developer can get error feedback. It is not ideal, but I could think of no better method.
+I only used batch processing because it is much faster than individual queries per product. For the developer, it is less comfortable, because the importer's process() function doesn't reply with the import results immediately. The resultCallback callback is the only way the developer can get error feedback. It is not ideal, but I could think of no better method.
 
 ## Placeholders
 

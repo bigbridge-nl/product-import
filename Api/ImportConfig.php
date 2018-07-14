@@ -27,15 +27,15 @@ class ImportConfig
     public $batchSize = 1000;
 
     /**
-     * @var callable[]
+     * @var callable
      *
-     * These functions will be called with the result of the import.
+     * This function will be called with the result of the import.
      *
      * Function signature:
      *
      * function(BigBridge\ProductImport\Model\Data\Product $product, $ok, $error);
      */
-    public $resultCallbacks = [];
+    public $resultCallback = null;
 
     /**
      * Create categories if they do not exist.

@@ -1,7 +1,6 @@
 # Todo
 
 * image not found? ignore, error
-* resultCallback not an array
 
 # Validation
 

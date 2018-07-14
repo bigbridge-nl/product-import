@@ -44,7 +44,7 @@ class IdTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallbacks[] = function (Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 

@@ -23,7 +23,7 @@ The following example shows you a typical use case scenario for the library:
     $config = new ImportConfig();
 
     // a callback function to postprocess imported products
-    $config->resultCallback[] = function(Product $product) use (&$log) {
+    $config->resultCallback = function(Product $product) use (&$log) {
 
         if ($product->isOk()) {
             $log .= sprintf("%s: success! sku = %s, id = %s\n", $product->lineNumber, $product->getSku(), $product->id);
@@ -173,7 +173,7 @@ The library detects problems in the input in its id-resolution and validation ph
 
 A product that one or more errors is not imported. Errors can be inspected via a custom callback function you can provide.
 
-    $config->resultCallback[] = function(Product $product)) {
+    $config->resultCallback = function(Product $product)) {
         $errors = $product->getErrors();
     }
 
