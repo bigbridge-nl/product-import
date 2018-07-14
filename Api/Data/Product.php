@@ -70,6 +70,9 @@ abstract class Product
     /** @var string  */
     public $lineNumber = "";
 
+    /** @var string|null */
+    protected $storedType = null;
+
     public function __construct(string $sku)
     {
         $this->storeViews[self::GLOBAL_STORE_VIEW_CODE] = new ProductStoreView();
@@ -359,5 +362,21 @@ abstract class Product
     public function usedAsPlaceholder()
     {
         return $this->placeholder;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getStoredType()
+    {
+        return $this->storedType;
+    }
+
+    /**
+     * @param string $storedType
+     */
+    public function setStoredType(string $storedType)
+    {
+        $this->storedType = $storedType;
     }
 }

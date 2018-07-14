@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Test\Integration;
 
-use Magento\Catalog\Api\ProductRepositoryInterface;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;

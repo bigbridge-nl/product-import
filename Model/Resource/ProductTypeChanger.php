@@ -16,6 +16,7 @@ use BigBridge\ProductImport\Model\Resource\Storage\BundleStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ConfigurableStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\DownloadableStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\GroupedStorage;
+use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -56,7 +57,11 @@ class ProductTypeChanger
         $this->downloadableStorage = $downloadableStorage;
     }
 
-    public function handleTypeChanges(array $updatedProducts, ImportConfig $config)
+    /**
+     * @param Product[] $updatedProducts
+     * @param ImportConfig $config
+     */
+    public function checkTypeChanges(array $updatedProducts, ImportConfig $config)
     {
         if (empty($updatedProducts)) {
             return;
@@ -67,25 +72,28 @@ class ProductTypeChanger
         $oldTypes = $this->db->fetchMap("
             SELECT `entity_id`, `type_id`
             FROM `" . $this->metaData->productEntityTable . "`
-            WHERE `entity_id` IN (" . implode(',', $productIds) . ")
-        ");
+            WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ")
+        ", $productIds);
 
         foreach ($updatedProducts as $product) {
 
-            if (!array_key_exists($product->id, $oldTypes)) {
-                continue;
-            }
-
-            $oldType = $oldTypes[$product->id];
             $newType = $product->getType();
 
-            if ($oldType !== $newType) {
-                $this->convertProductType($product, $oldType, $config);
+            if (array_key_exists($product->id, $oldTypes)) {
+                $oldType = $oldTypes[$product->id];
+
+                if ($oldType !== $newType) {
+                    $this->checkTypeChangeAllowed($product, $oldType, $config);
+                }
             }
         }
     }
 
-    protected function convertProductType(Product $product, string $oldType, ImportConfig $config)
+    /**
+     * @param Product $product
+     * @param string $oldType
+     */
+    protected function checkTypeChangeAllowed(Product $product, string $oldType, ImportConfig $config)
     {
         $newType = $product->getType();
 
@@ -118,34 +126,61 @@ class ProductTypeChanger
             }
         }
 
-        // remove data from the old type
-        switch ($oldType) {
-            case SimpleProduct::TYPE_SIMPLE:
-            case VirtualProduct::TYPE_VIRTUAL:
-                break;
-            case DownloadableProduct::TYPE_DOWNLOADABLE:
-                $this->downloadableStorage->removeLinksAndSamples([$product]);
-                break;
-            case GroupedProduct::TYPE_GROUPED:
-                $this->groupedStorage->removeLinkedProducts([$product]);
-                break;
-            case BundleProduct::TYPE_BUNDLE:
-                $this->bundleStorage->removeOptions([$product]);
-                break;
-            case ConfigurableProduct::TYPE_CONFIGURABLE:
-                $this->configurableStorage->removeLinkedVariants([$product]);
-                break;
-            default:
-                $product->addError("Type conversion from {$oldType} to {$newType} is not supported");
-        }
+        // store the type to change it in the next function
+        $product->setStoredType($oldType);
+    }
 
-        // prepare for the new type
-        switch ($newType) {
-            case VirtualProduct::TYPE_VIRTUAL:
-                foreach ($product->getStoreViews() as $storeView) {
-                    $storeView->setWeight(null);
-                }
-                break;
+    /**
+     * @param Product[] $updatedProducts
+     * @throws Exception
+     */
+    public function performTypeChanges(array $updatedProducts)
+    {
+        foreach ($updatedProducts as $product) {
+
+            $oldType = $product->getStoredType();
+
+            // the old type was only stored if the type changed
+            if (!$oldType) {
+                continue;
+            }
+
+            $newType = $product->getType();
+
+            // make double sure the type actually changed!
+            if ($oldType === $newType) {
+                continue;
+            }
+
+            // remove data from the old type
+            switch ($oldType) {
+                case SimpleProduct::TYPE_SIMPLE:
+                case VirtualProduct::TYPE_VIRTUAL:
+                    break;
+                case DownloadableProduct::TYPE_DOWNLOADABLE:
+                    $this->downloadableStorage->removeLinksAndSamples([$product]);
+                    break;
+                case GroupedProduct::TYPE_GROUPED:
+                    $this->groupedStorage->removeLinkedProducts([$product]);
+                    break;
+                case BundleProduct::TYPE_BUNDLE:
+                    $this->bundleStorage->removeOptions([$product]);
+                    break;
+                case ConfigurableProduct::TYPE_CONFIGURABLE:
+                    $this->configurableStorage->removeLinkedVariants([$product]);
+                    break;
+                default:
+                    throw new Exception("Type conversion from {$oldType} to {$newType} is not supported");
+            }
+
+            // prepare for the new type
+            switch ($newType) {
+                case VirtualProduct::TYPE_VIRTUAL:
+                    foreach ($product->getStoreViews() as $storeView) {
+                        $storeView->setWeight(null);
+                    }
+                    break;
+            }
         }
     }
 }

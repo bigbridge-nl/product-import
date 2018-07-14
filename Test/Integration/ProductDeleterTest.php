@@ -12,7 +12,7 @@ use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 /**
  * @author Patrick van Bergen
  */
-class ProductDeleterClassTest extends \Magento\TestFramework\TestCase\AbstractController
+class ProductDeleterTest extends \Magento\TestFramework\TestCase\AbstractController
 {
     /**
      * @throws \Exception

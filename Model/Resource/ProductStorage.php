@@ -175,7 +175,7 @@ class ProductStorage
         $this->productEntityStorage->checkIfIdsExist($products);
 
         // distinguish between inserts and updates (and assign ids)
-        list(, $updateProducts) = $this->separateInsertsFromUpdates($products);
+        list(, $updateProducts) = $this->assignProductIds($products);
 
         // replace reference(s) with ids; changes $product->errors
         $this->referenceResolver->resolveExternalReferences($products, $config);
@@ -183,8 +183,8 @@ class ProductStorage
         // create url keys based on name and id; changes $product->errors
         $this->urlKeyGenerator->resolveAndValidateUrlKeys($products, $config->urlKeyScheme, $config->duplicateUrlKeyStrategy);
 
-        // handle products that changed type; changes $product->errors
-        $this->productTypeChanger->handleTypeChanges($updateProducts, $config);
+        // check for products that changed type; changes $product->errors
+        $this->productTypeChanger->checkTypeChanges($updateProducts, $config);
 
         // collect all images in temporary local directory; changes $product->errors
         $this->imageStorage->moveImagesToTemporaryLocation($products, $config);
@@ -207,7 +207,7 @@ class ProductStorage
      * @param Product[] $products
      * @return array
      */
-    protected function separateInsertsFromUpdates(array $products)
+    protected function assignProductIds(array $products)
     {
         // find existing products ids from their skus
         $sku2id = $this->productEntityStorage->getExistingProductIds($products);
@@ -258,6 +258,9 @@ class ProductStorage
                 $validInsertProducts[] = $product;
             }
         }
+
+        // start by removing old structures and setting attributes (virtual!)
+        $this->productTypeChanger->performTypeChanges($validUpdateProducts);
 
         list($upsertAttributes, $deleteAttributes) = $this->separateUpsertsFromDeletes($validProducts, $config);
 
