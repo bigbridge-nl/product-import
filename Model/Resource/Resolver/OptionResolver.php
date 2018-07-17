@@ -26,8 +26,6 @@ class OptionResolver
     {
         $this->db = $db;
         $this->metaData = $metaData;
-
-        $this->refresh();
     }
 
     public function refresh()

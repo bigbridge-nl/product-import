@@ -118,6 +118,24 @@ class Magento2DbConnection
         );
     }
 
+
+    /**
+     * Replace multiple rows at once, passing a single 1 dimensional array of $values
+     *
+     * @param string $table
+     * @param array $columns
+     * @param array $values
+     * @param int $magnitude
+     */
+    public function replaceMultiple(string $table, array $columns, array $values, int $magnitude)
+    {
+        $this->chunkedGroupExecute("
+            REPLACE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            VALUES {{marks}}",
+            $columns, $values, $magnitude
+        );
+    }
+
     /**
      * Insert multiple rows at once, passing a single 1 dimensional array of $values
      * Performs an ON DUPLICATE KEY UPDATE with $updateClause

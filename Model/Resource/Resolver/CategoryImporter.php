@@ -36,8 +36,6 @@ class CategoryImporter
         $this->db = $db;
         $this->metaData = $metaData;
         $this->nameToUrlKeyConverter = $nameToUrlKeyConverter;
-
-        $this->refresh();
     }
 
     /**

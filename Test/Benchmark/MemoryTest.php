@@ -106,7 +106,7 @@ class MemoryTest extends \Magento\TestFramework\TestCase\AbstractController
 
         // this not a good tool to measure actual memory use, but it does say something about the amount of memory the import takes
         $peakMemory = (int)(($afterPeakMemory - $beforePeakMemory) / 1000000);
-        $this->assertLessThan(15, $peakMemory);
+        $this->assertLessThan(40, $peakMemory);
 
         echo "Peak mem: " . $peakMemory . " MB \n";
     }

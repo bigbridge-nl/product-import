@@ -12,6 +12,12 @@ Unit tests require PHPUnit 7 with namespaces.
 
 To run the integration tests, see [Integration testing](integration-tests.md)
 
+### WebApi functional tests
+
+RestApiTest should be run without a PHPUnit configuration.
+
+Since it uses a nonstandard input (i.e. raw XML), it does not play well with Magento's functional testing framework.
+
 ### Speed benchmark
 
 The speed benchmark is important, because speed is one of the main targets of this library. The class MemoryTest is the benchmark.

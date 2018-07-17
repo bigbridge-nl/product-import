@@ -1,9 +1,8 @@
 # Todo
 
-* image not found? ignore, error
-
 # Validation
 
+* image not found? ignore, error
 * check attribute value uniqueness
 * check if reference ids exist
 * check for tierprice duplicates and make sure the import still works
@@ -29,7 +28,6 @@ url_rewrites are created for all store views. No attempt is made to check if the
 
 ## Testing
 
-* test database code, especially the change detection code
 - test with 500.000 records in the database
 
 ## Fields
@@ -49,5 +47,3 @@ product_options_container
 ## Ever?
 
 * allow access to low level functions to plugin that performs custom database queries
-* stop importing after x failed products, and not importing any in case of excess
-* replace products (i.e. delete and insert)
