@@ -234,7 +234,8 @@ class UrlRewriteStorage
         }
 
         // rewrites for categories that are no longer linked to the product are removed
-        $this->removeObsoleteCategoryRewrites($productCategoryIds, $existingUrlRewrites);
+        $newDeletes = $this->removeObsoleteCategoryRewrites($productCategoryIds, $existingUrlRewrites);
+        $deletes = array_merge($deletes, $newDeletes);
 
         return [$deletes, $inserts];
     }
@@ -330,13 +331,17 @@ class UrlRewriteStorage
 
     protected function removeObsoleteCategoryRewrites(array $productCategoryIds, array $existingUrlRewrites)
     {
+        $deletes = [];
+
         // find the categories of all existing rewrites
         // and remove from these the actual categories, and 0 (for no category)
         $obsoleteCategoryIds = array_diff(array_keys($existingUrlRewrites), $productCategoryIds, [0]);
 
         foreach ($obsoleteCategoryIds as $categoriesId) {
-            $this->removeUrlRewrites($existingUrlRewrites[$categoriesId]);
+            $deletes = array_merge($deletes, $existingUrlRewrites[$categoriesId]);
         }
+
+        return $deletes;
     }
 
     /**
