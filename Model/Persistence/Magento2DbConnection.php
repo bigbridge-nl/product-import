@@ -29,6 +29,9 @@ class Magento2DbConnection
     // 1 MB (smallest packet size) / 16 (bytes per id)
     const DELETES_PER_CHUNK = 65536;
 
+    // 1 MB / about 270 bytes per path
+    const REQUEST_PATHS_PER_CHUNK = 3500;
+
     /** @var ResourceConnection $connection */
     protected $connection;
 

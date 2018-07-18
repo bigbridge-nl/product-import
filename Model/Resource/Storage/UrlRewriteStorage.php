@@ -66,13 +66,13 @@ class UrlRewriteStorage
         $allProductUrlKeys = $this->getExistingProductUrlKeys($productIds);
         $allVisibilities = $this->getExistingVisibilities($productIds);
 
-        $inserts = $deletes = [];
+        foreach ($storeViewIds as $storeViewId) {
 
-        foreach ($productIds as $productId) {
+            $inserts = $deletes = [];
 
-            $productCategoryIds = array_key_exists($productId, $allProductCategoryIds) ? $allProductCategoryIds[$productId] : [];
+            foreach ($productIds as $productId) {
 
-            foreach ($storeViewIds as $storeViewId) {
+                $productCategoryIds = array_key_exists($productId, $allProductCategoryIds) ? $allProductCategoryIds[$productId] : [];
 
                 if (isset($allVisibilities[$productId][$storeViewId])) {
                     $visibility = $allVisibilities[$productId][$storeViewId];
@@ -93,10 +93,10 @@ class UrlRewriteStorage
                 $inserts = array_merge($inserts, $newInserts);
                 $deletes = array_merge($deletes, $newDeletes);
             }
-        }
 
-        $this->removeUrlRewrites($deletes);
-        $this->replaceUrlRewrites($inserts);
+            $this->removeUrlRewrites($deletes);
+            $this->replaceUrlRewrites($storeViewId, $inserts);
+        }
     }
 
     /**
@@ -410,111 +410,118 @@ class UrlRewriteStorage
     }
 
     /**
+     * @param int $storeViewId
      * @param UrlRewrite[] $urlRewrites
      */
-    protected function replaceUrlRewrites(array $urlRewrites)
+    protected function replaceUrlRewrites(int $storeViewId, array $urlRewrites)
     {
-        // collect existing url rewrites by request_path/store
-        $existingRewrites = [];
-        foreach ($urlRewrites as $urlRewrite) {
-            $result = $this->db->fetchRow("
-                SELECT `request_path`, `store_id`, `entity_type`, `redirect_type` 
+        // chunk, to keep the query size below 1MB
+
+        /** @var UrlRewrite[] $chunkedUrlRewrites */
+        foreach (array_chunk($urlRewrites, Magento2DbConnection::REQUEST_PATHS_PER_CHUNK) as $chunkedUrlRewrites) {
+
+            // collect existing url rewrites by request_path
+            $requestPaths = [];
+            foreach ($chunkedUrlRewrites as $urlRewrite) {
+                $requestPaths[] = $urlRewrite->getRequestPath();
+            }
+
+            $existingRewrites = $this->db->fetchGrouped("
+                SELECT `request_path`, `entity_type`, `redirect_type` 
                 FROM `{$this->metaData->urlRewriteTable}` 
-                WHERE `request_path` = ? and `store_id` = ?
-            ", [
-                $urlRewrite->getRequestPath(),
-                $urlRewrite->getStoreId()
-            ]);
-            $existingRewrites[$result['store_id']][$result['request_path']] = $result;
-        }
+                WHERE `store_id` = ? AND `request_path` IN (" . $this->db->getMarks($requestPaths) . ") 
+            ", array_merge([$storeViewId], $requestPaths),
+                ['request_path']);
 
-        /** @var UrlRewrite[] $replacingUrlRewrites */
-        $replacingUrlRewrites = [];
+            /** @var UrlRewrite[] $replacingUrlRewrites */
+            $replacingUrlRewrites = [];
 
-        // skip url rewrites that are less important then the existing values
-        foreach ($urlRewrites as $i => $urlRewrite) {
+            // skip url rewrites that are less important then the existing values
+            foreach ($chunkedUrlRewrites as $i => $urlRewrite) {
 
-            $storeId = $urlRewrite->getStoreId();
-            $requestPath = $urlRewrite->getRequestPath();
-            $redirectType = $urlRewrite->getRedirectType();
+                $requestPath = $urlRewrite->getRequestPath();
+                $redirectType = $urlRewrite->getRedirectType();
 
-            if (isset($existingRewrites[$storeId][$requestPath])) {
+                if (isset($existingRewrites[$requestPath])) {
 
-                $existing = $existingRewrites[$storeId][$requestPath];
+                    $existing = $existingRewrites[$requestPath];
 
-                if ((int)$existing['redirect_type'] === self::NO_REDIRECT) {
-                    // a redirect should not overwrite a non-redirect
-                    if ($urlRewrite->getRedirectType() === self::REDIRECT) {
+                    if ((int)$existing['redirect_type'] === self::NO_REDIRECT) {
+                        // a redirect should not overwrite a non-redirect
+                        if ($urlRewrite->getRedirectType() === self::REDIRECT) {
+                            continue;
+                        }
+                    }
+                    if ($existing['entity_type'] !== 'product') {
+                        // a product rewrite should not overwrite a cms-page or category rewrite
                         continue;
                     }
                 }
-                if ($existing['entity_type'] !== 'product') {
-                    // a product rewrite should not overwrite a cms-page or category rewrite
+
+                $existingRewrites[$requestPath] = ['redirect_type' => $redirectType, 'entity_type' => 'product'];
+
+                $replacingUrlRewrites[] = $urlRewrite;
+            }
+
+            if (empty($replacingUrlRewrites)) {
+                return;
+            }
+
+            // perform the REPLACE INTO url_rewrite
+            $values = [];
+            foreach ($replacingUrlRewrites as $urlRewrite) {
+                $values[] = $urlRewrite->getUrlRewriteId();
+                $values[] = 'product';
+                $values[] = $urlRewrite->getProductId();
+                $values[] = $urlRewrite->getRequestPath();
+                $values[] = $urlRewrite->getTargetPath();
+                $values[] = $urlRewrite->getRedirectType();
+                $values[] = $urlRewrite->getStoreId();
+                $values[] = $urlRewrite->getAutogenerated();
+                $values[] = $this->metaData->valueSerializer->serialize($urlRewrite->getMetadata());
+            }
+
+            // replace is needed, for example when two products swap their url_key
+            // otherwise a "duplicate key" error occurs
+            // and there are many other cases
+            // also, the old entry in catalog_url_rewrite_product_category must be replaced
+            $this->db->replaceMultiple($this->metaData->urlRewriteTable, [
+                'url_rewrite_id', 'entity_type', 'entity_id', 'request_path', 'target_path', 'redirect_type', 'store_id', 'is_autogenerated', 'metadata'
+            ], $values, Magento2DbConnection::_1_KB);
+
+            // collect the new url_rewrite_id's
+            $urlRewriteIds = $this->db->fetchMap("
+                    SELECT `request_path`, `url_rewrite_id`
+                    FROM {$this->metaData->urlRewriteTable}
+                    WHERE `store_id` = ? AND `request_path` IN (" . $this->db->getMarks($requestPaths) . ") 
+                ", array_merge([$storeViewId], $requestPaths));
+
+            // collect new url_rewrite_ids for the next INSERT
+            $values = [];
+            foreach ($replacingUrlRewrites as $urlRewrite) {
+
+                $requestPath = $urlRewrite->getRequestPath();
+                $categoryId = $urlRewrite->getCategoryId();
+                $productId = $urlRewrite->getProductId();
+
+                if ($categoryId === 0 || !$urlRewrite->hasExtension()) {
                     continue;
                 }
+
+                if (!array_key_exists($requestPath, $urlRewriteIds)) {
+                    continue;
+                }
+
+                $values[] = $urlRewriteIds[$requestPath];
+                $values[] = $categoryId;
+                $values[] = $productId;
             }
 
-            $existingRewrites[$storeId][$requestPath] = ['redirect_type' => $redirectType, 'entity_type' => 'product'];
-
-            $replacingUrlRewrites[] = $urlRewrite;
+            // perform the INSERT INTO catalog_url_rewrite_product_category
+            $this->db->insertMultiple($this->metaData->urlRewriteProductCategoryTable,
+                ['url_rewrite_id', 'category_id', 'product_id'],
+                $values, Magento2DbConnection::_1_KB);
         }
-
-        if (empty($replacingUrlRewrites)) {
-            return;
-        }
-
-        // perform the REPLACE INTO url_rewrite
-        $values = [];
-        foreach ($replacingUrlRewrites as $urlRewrite) {
-            $values[] = $urlRewrite->getUrlRewriteId();
-            $values[] = 'product';
-            $values[] = $urlRewrite->getProductId();
-            $values[] = $urlRewrite->getRequestPath();
-            $values[] = $urlRewrite->getTargetPath();
-            $values[] = $urlRewrite->getRedirectType();
-            $values[] = $urlRewrite->getStoreId();
-            $values[] = $urlRewrite->getAutogenerated();
-            $values[] = $this->metaData->valueSerializer->serialize($urlRewrite->getMetadata());
-        }
-
-        // replace is needed, for example when two products swap their url_key
-        // otherwise a "duplicate key" error occurs
-        // and there are many other cases
-        // also, the old entry in catalog_url_rewrite_product_category must be replaced
-        $this->db->replaceMultiple($this->metaData->urlRewriteTable, [
-            'url_rewrite_id', 'entity_type', 'entity_id', 'request_path', 'target_path', 'redirect_type', 'store_id', 'is_autogenerated', 'metadata'
-        ], $values, Magento2DbConnection::_1_KB);
-
-        // collect new url_rewrite_ids for the next INSERT
-        $values = [];
-        foreach ($replacingUrlRewrites as $urlRewrite) {
-
-            if ($urlRewrite->getCategoryId() === 0 || !$urlRewrite->hasExtension()) {
-                continue;
-            }
-
-            $urlRewriteDatum = $this->db->fetchRow("
-                SELECT `url_rewrite_id`, `entity_id`, `metadata`
-                FROM {$this->metaData->urlRewriteTable}
-                WHERE `request_path` = ? AND `store_id` = ?
-            ", [
-                $urlRewrite->getRequestPath(),
-                $urlRewrite->getStoreId()
-            ]);
-
-            if (!$urlRewriteDatum) {
-                continue;
-            }
-
-            $values[] = $urlRewriteDatum['url_rewrite_id'];
-            $values[] = $this->metaData->valueSerializer->extract($urlRewriteDatum['metadata'], 'category_id');
-            $values[] = $urlRewriteDatum['entity_id'];
-        }
-
-        // perform the INSERT INTO catalog_url_rewrite_product_category
-        $this->db->insertMultiple($this->metaData->urlRewriteProductCategoryTable,
-            ['url_rewrite_id', 'category_id', 'product_id'],
-            $values, Magento2DbConnection::_1_KB);
     }
 
     /**
