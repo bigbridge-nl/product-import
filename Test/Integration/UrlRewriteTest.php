@@ -397,6 +397,33 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         ];
 
         $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
+
+        // do not keep redirects
+
+        $config = new ImportConfig();
+        $config->handleRedirects = ImportConfig::DELETE_REDIRECTS;
+
+        $product3->global()->setUrlKey("b-" . $product3->global()->getUrlKey());
+
+        $importer = self::$factory->createImporter($config);
+        $importer->importSimpleProduct($product1);
+        $importer->importSimpleProduct($product3);
+        $importer->flush();
+
+        $expectedRewrites = [
+            ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+
+            ["product", "b-a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+
+            ["product", "containers/b-a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$newCategoryId])],
+        ];
+
+        $expectedIndexes = [
+            [(string)$newCategoryId, $product3->id],
+        ];
+
+        $this->doAsserts($expectedRewrites, $expectedIndexes, $product1, $product3);
     }
 
     /**

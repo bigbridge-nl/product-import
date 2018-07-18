@@ -146,4 +146,14 @@ class ImportConfig
     const PRODUCT_TYPE_CHANGE_ALLOWED = 'allowed'; // allow all product type changes
     const PRODUCT_TYPE_CHANGE_FORBIDDEN = 'forbidden'; // allow no product type changes
     const PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE = 'non-destructive'; // allow only product type changes that do not delete data
+
+    /**
+     * How to handle url_rewrite 301 redirects?
+     *
+     * @var string
+     */
+    public $handleRedirects = self::KEEP_REDIRECTS;
+
+    const KEEP_REDIRECTS = "keep"; // keep existing redirects, create new ones if the Magento settings is thus set
+    const DELETE_REDIRECTS = "delete"; // remove any existing redirects, and do not create new ones
 }

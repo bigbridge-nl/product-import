@@ -89,6 +89,8 @@ This tool has the following features:
     bin/magento bigbridge:product:urlrewrite
 ~~~
 
+Continue to read about [XML webapi import](doc/url-rewrite-tool.md)
+
 ## Changes to Magento
 
 The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to catalog_product_entity_varchar because it drastically speeds up checking for duplicate url_keys.

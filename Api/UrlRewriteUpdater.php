@@ -41,14 +41,14 @@ class UrlRewriteUpdater
      * @param array $storeViewCodes
      * @throws \Exception
      */
-    public function updateUrlRewrites(array $storeViewCodes, UrlRewriteUpdateLogger $logger)
+    public function updateUrlRewrites(array $storeViewCodes, UrlRewriteUpdateLogger $logger, bool $keepRedirects)
     {
         $storeViewIds = $this->metaData->getStoreViewIds($storeViewCodes);
         $productIds = $this->information->getProductIds();
 
         $i = 0;
         while ($chunkedIds = array_slice($productIds, $i, self::BUNCH_SIZE)) {
-            $this->urlRewriteStorage->updateRewritesByProductIds($chunkedIds, $storeViewIds);
+            $this->urlRewriteStorage->updateRewritesByProductIds($chunkedIds, $storeViewIds, $keepRedirects);
             $i += self::BUNCH_SIZE;
 
             $logger->info($i);

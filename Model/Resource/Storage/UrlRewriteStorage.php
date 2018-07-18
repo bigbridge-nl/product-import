@@ -47,19 +47,20 @@ class UrlRewriteStorage
         $this->categoryImporter = $categoryImporter;
     }
 
-    public function updateRewrites(array $products)
+    public function updateRewrites(array $products, bool $keepRedirects)
     {
         $productIds = array_column($products, 'id');
         $nonGlobalStoreIds = $this->metaData->getNonGlobalStoreViewIds();
 
-        $this->updateRewritesByProductIds($productIds, $nonGlobalStoreIds);
+        $this->updateRewritesByProductIds($productIds, $nonGlobalStoreIds, $keepRedirects);
     }
 
     /**
      * @param int[] $productIds
      * @param array $storeViewIds
+     * @param bool $keepRedirects
      */
-    public function updateRewritesByProductIds(array $productIds, array $storeViewIds)
+    public function updateRewritesByProductIds(array $productIds, array $storeViewIds, bool $keepRedirects)
     {
         $allExistingUrlRewrites = $this->getExistingUrlRewrites($productIds, $storeViewIds);
         $allProductCategoryIds = $this->getExistingProductCategoryIds($productIds);
@@ -88,7 +89,7 @@ class UrlRewriteStorage
 
                 $existingUrlRewrites = isset($allExistingUrlRewrites[$storeViewId][$productId]) ? $allExistingUrlRewrites[$storeViewId][$productId] : [];
 
-                list($newDeletes, $newInserts) = $this->updateRewriteGroup($productId, $storeViewId, $existingUrlRewrites, $productCategoryIds, $allProductUrlKeys);
+                list($newDeletes, $newInserts) = $this->updateRewriteGroup($productId, $storeViewId, $existingUrlRewrites, $productCategoryIds, $allProductUrlKeys, $keepRedirects);
 
                 $inserts = array_merge($inserts, $newInserts);
                 $deletes = array_merge($deletes, $newDeletes);
@@ -219,16 +220,17 @@ class UrlRewriteStorage
      * @param array $existingUrlRewrites
      * @param array $categoryIds
      * @param array $allProductUrlKeys
+     * @param bool $keepRedirects
      * @return array
      */
-    protected function updateRewriteGroup(int $productId, int $storeViewId, array $existingUrlRewrites, array $categoryIds, array $allProductUrlKeys)
+    protected function updateRewriteGroup(int $productId, int $storeViewId, array $existingUrlRewrites, array $categoryIds, array $allProductUrlKeys, bool $keepRedirects)
     {
-        list($deletes, $inserts) = $this->updateRewrite($productId, $storeViewId, 0, $existingUrlRewrites, $allProductUrlKeys);
+        list($deletes, $inserts) = $this->updateRewrite($productId, $storeViewId, 0, $existingUrlRewrites, $allProductUrlKeys, $keepRedirects);
 
         $productCategoryIds = $this->collectSubcategories($categoryIds);
 
         foreach ($productCategoryIds as $categoryId) {
-            list($newDeletes, $newInserts) = $this->updateRewrite($productId, $storeViewId, $categoryId, $existingUrlRewrites, $allProductUrlKeys);
+            list($newDeletes, $newInserts) = $this->updateRewrite($productId, $storeViewId, $categoryId, $existingUrlRewrites, $allProductUrlKeys, $keepRedirects);
             $deletes = array_merge($deletes, $newDeletes);
             $inserts = array_merge($inserts, $newInserts);
         }
@@ -248,12 +250,13 @@ class UrlRewriteStorage
      * @param int $categoryId
      * @param array $existingUrlRewrites
      * @param array $allProductUrlKeys
+     * @param bool $keepRedirects
      * @return array
      */
-    protected function updateRewrite(int $productId, int $storeViewId, int $categoryId, array $existingUrlRewrites, array $allProductUrlKeys)
+    protected function updateRewrite(int $productId, int $storeViewId, int $categoryId, array $existingUrlRewrites, array $allProductUrlKeys, bool $keepRedirects)
     {
         $oldRewrites = array_key_exists($categoryId, $existingUrlRewrites) ? $existingUrlRewrites[$categoryId] : [];
-        $newRewrites = $this->collectNewRewrites($productId, $storeViewId, $categoryId, $existingUrlRewrites, $allProductUrlKeys);
+        $newRewrites = $this->collectNewRewrites($productId, $storeViewId, $categoryId, $existingUrlRewrites, $allProductUrlKeys, $keepRedirects);
 
         if ($newRewrites === false) {
             return [[], []];
@@ -274,9 +277,10 @@ class UrlRewriteStorage
      * @param int $categoryId
      * @param array $existingUrlRewrites
      * @param array $allProductUrlKeys
+     * @param bool $keepRedirects
      * @return array|bool
      */
-    protected function collectNewRewrites(int $productId, int $storeViewId, int $categoryId, array $existingUrlRewrites, array $allProductUrlKeys)
+    protected function collectNewRewrites(int $productId, int $storeViewId, int $categoryId, array $existingUrlRewrites, array $allProductUrlKeys, bool $keepRedirects)
     {
         $targetPath = self::TARGET_PATH_BASE . $productId . ($categoryId === 0 ? '' : self::TARGET_PATH_EXT . $categoryId);
         $requestPath = $this->createRequestPath($productId, $storeViewId, $categoryId, $allProductUrlKeys);
@@ -296,7 +300,7 @@ class UrlRewriteStorage
                 if ($urlRewrite->getRedirectType() === self::NO_REDIRECT) {
                     // if there is more than one zero rewrites (should not occur), just pick (the last) one
                     $existingZeroRewrite = $urlRewrite;
-                } else {
+                } elseif ($keepRedirects) {
                     // if save history was used before, but not anymore, update existing rewrites that have the old request path as a target
                     if (!$this->metaData->saveRewritesHistory && $existingZeroRewrite && $urlRewrite->getTargetPath() === $existingZeroRewrite->getRequestPath()) {
                         $newRewrite = new UrlRewrite($urlRewrite->getUrlRewriteId(), $urlRewrite->getProductId(), $urlRewrite->getRequestPath(),
@@ -312,7 +316,7 @@ class UrlRewriteStorage
         }
 
         // Magento config says keep a copy of old url rewrites
-        if ($this->metaData->saveRewritesHistory) {
+        if ($this->metaData->saveRewritesHistory && $keepRedirects) {
             // has the non-redirect rewrite changed?
             if ($existingZeroRewrite && !$existingZeroRewrite->equals($currentZeroRewrite)) {
 

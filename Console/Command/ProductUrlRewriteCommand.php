@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Console\Command;
 
+use BigBridge\ProductImport\Api\ImportConfig;
 use Exception;
 use Magento\Framework\ObjectManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -18,6 +19,7 @@ use BigBridge\ProductImport\Api\UrlRewriteUpdater;
 class ProductUrlRewriteCommand extends Command
 {
     const ARGUMENT_STOREVIEW_CODE = 'storeview';
+    const ARGUMENT_REDIRECTS = 'redirects';
 
     /** @var ObjectManagerInterface */
     protected $objectManager;
@@ -43,7 +45,14 @@ class ProductUrlRewriteCommand extends Command
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
                 'Storeview code (default: all store views)',
                 []
-            )
+            ),
+            new InputOption(
+                self::ARGUMENT_REDIRECTS,
+                'r',
+                InputOption::VALUE_OPTIONAL,
+                'Handle 301 redirects (delete: delete all existing and new url-rewrite redirects)',
+                ImportConfig::KEEP_REDIRECTS
+            ),
         ]);
     }
 
@@ -51,6 +60,7 @@ class ProductUrlRewriteCommand extends Command
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|null
+     * @throws Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -61,15 +71,21 @@ class ProductUrlRewriteCommand extends Command
         $information = $this->objectManager->create(Information::class);
 
         $storeViewCodes = $input->getOption(self::ARGUMENT_STOREVIEW_CODE);
+        $handleRedirects = $input->getOption(self::ARGUMENT_REDIRECTS);
 
         if (empty($storeViewCodes)) {
             $storeViewCodes =  $information->getNonGlobalStoreViewCodes();
         }
 
+        if (!in_array($handleRedirects, [ImportConfig::KEEP_REDIRECTS, ImportConfig::DELETE_REDIRECTS])) {
+            $output->writeln("<error>" . "Unknown redirect option: " . $handleRedirects . "</error>");
+            return \Magento\Framework\Console\Cli::RETURN_FAILURE;
+        }
+
         $logger = new UrlRewriteUpdateCommandLogger($output);
 
         try {
-            $urlRewriteUpdater->updateUrlRewrites($storeViewCodes, $logger);
+            $urlRewriteUpdater->updateUrlRewrites($storeViewCodes, $logger, $handleRedirects === ImportConfig::KEEP_REDIRECTS);
         } catch (Exception $e) {
             $output->writeln("<error>" . $e->getMessage() . "</error>");
             return \Magento\Framework\Console\Cli::RETURN_FAILURE;
