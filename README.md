@@ -89,7 +89,7 @@ This tool has the following features:
     bin/magento bigbridge:product:urlrewrite
 ~~~
 
-Continue to read about [XML webapi import](doc/url-rewrite-tool.md)
+Continue to read about [the Url Rewrite Tool](doc/url-rewrite-tool.md)
 
 ## Changes to Magento
 

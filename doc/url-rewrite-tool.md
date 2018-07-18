@@ -16,12 +16,12 @@ You can specify one or more store views if you only want these updated:
 
 ## Delete 301 redirects
 
-The tool has another option that should be used with care:
+The tool has another option and it should be used with care
 
     bin/magento bigbridge:product:urlrewrite --redirects delete
 
 When the url of a product page changes, by default Magento keeps the old url and creates an HTTP response 301 REDIRECT when this url is requested. If this Magento option is turned off, no redirects will be stored.
 
-The number of redirects is a known source of database bloat. When a shop is set up, and many products move from one category to the next, the url_rewrite table may be filled with hundreds of thousands of senseless redirects. In this case, the "delete" option is handy. It removes all 301's from the database and creates no new 301's in this run.
+However, the number of redirects is a known source of database bloat. When a shop is set up, and many products move from one category to the next, the url_rewrite table may be filled with hundreds of thousands of senseless redirects. In this case, the "delete" option is handy. It removes all 301's from the database and creates no new 301's in this run.
 
 Use in a production shop is inadvisable. It is a SEO killer: products will no longer be accessible via old urls that may exist on the internet.
