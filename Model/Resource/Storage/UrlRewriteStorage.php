@@ -74,11 +74,15 @@ class UrlRewriteStorage
 
                 $productCategoryIds = array_key_exists($productId, $allProductCategoryIds) ? $allProductCategoryIds[$productId] : [];
 
-                if (isset($allVisibilities[$productId])) {
-                    if ($allVisibilities[$productId] === ProductStoreView::VISIBILITY_NOT_VISIBLE) {
-                        continue;
-                    }
+                if (isset($allVisibilities[$productId][$storeViewId])) {
+                    $visibility = $allVisibilities[$productId][$storeViewId];
+                } elseif (isset($allVisibilities[$productId][0])) {
+                    $visibility = $allVisibilities[$productId][0];
                 } else {
+                    $visibility = null;
+                }
+
+                if ($visibility === null || $visibility === ProductStoreView::VISIBILITY_NOT_VISIBLE) {
                     continue;
                 }
 
@@ -197,12 +201,11 @@ class UrlRewriteStorage
             FROM `{$this->metaData->productEntityTable}_int`
             WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ") AND
                 attribute_id = ?
-            ORDER BY `store_id` ASC    
         ", array_merge($productIds, [$attributeId]));
 
         $visibilities = [];
         foreach ($rows as $row) {
-            $visibilities[(int)$row['entity_id']] = (int)$row['value'];
+            $visibilities[(int)$row['entity_id']][(int)$row['store_id']] = (int)$row['value'];
         }
 
         return $visibilities;
