@@ -227,7 +227,7 @@ class UrlRewriteStorage
     {
         list($deletes, $inserts) = $this->updateRewrite($productId, $storeViewId, 0, $existingUrlRewrites, $allProductUrlKeys, $keepRedirects);
 
-        $productCategoryIds = $this->collectSubcategories($categoryIds);
+        $productCategoryIds = $this->collectParentCategories($categoryIds);
 
         foreach ($productCategoryIds as $categoryId) {
             list($newDeletes, $newInserts) = $this->updateRewrite($productId, $storeViewId, $categoryId, $existingUrlRewrites, $allProductUrlKeys, $keepRedirects);
@@ -352,17 +352,17 @@ class UrlRewriteStorage
      * @param int[] $categoryIds
      * @return array
      */
-    protected function collectSubcategories(array $categoryIds)
+    protected function collectParentCategories(array $categoryIds)
     {
-        $subCategories = [];
+        $parentCategories = [];
 
         foreach ($categoryIds as $categoryId) {
             $categoryInfo = $this->categoryImporter->getCategoryInfo($categoryId);
             $categoriesWithUrlKeysIds = array_slice($categoryInfo->path, 2);
-            $subCategories = array_merge($subCategories, $categoriesWithUrlKeysIds);
+            $parentCategories = array_merge($parentCategories, $categoriesWithUrlKeysIds);
         }
 
-        return array_unique($subCategories);
+        return array_unique($parentCategories);
     }
 
     /**
