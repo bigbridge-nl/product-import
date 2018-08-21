@@ -80,6 +80,7 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
             [['price' => '.99'], true, ""],
             // corrupt
             [['price' => '123,95'], false, "price is not a decimal number with dot (123,95)"],
+            [['price' => '-123.95'], false, "price must be positive (-123.9500)"],
 
             /* non-eav fields */
 
