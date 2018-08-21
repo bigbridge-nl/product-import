@@ -133,12 +133,12 @@ class CustomOption
         return $this->imageSizeY;
     }
 
-    public static function createCustomOptionTextField(string $sku, bool $required, int $maxCharacters)
+    public static function createCustomOptionTextField($sku, bool $required, int $maxCharacters)
     {
         return new CustomOption('field', $required, trim($sku), $maxCharacters, null, 0, 0, []);
     }
 
-    public static function createCustomOptionTextArea(string $sku, bool $required, int $maxCharacters)
+    public static function createCustomOptionTextArea($sku, bool $required, int $maxCharacters)
     {
         return new CustomOption('area', $required, trim($sku), $maxCharacters, null, 0, 0, []);
     }
@@ -151,22 +151,22 @@ class CustomOption
      * @param int $maxHeight Number of pixels (0 = no limit)
      * @return CustomOption
      */
-    public static function createCustomOptionFile(string $sku, bool $required, string $fileExtensions, int $maxWidth = 0, int $maxHeight = 0)
+    public static function createCustomOptionFile($sku, bool $required, string $fileExtensions, int $maxWidth = 0, int $maxHeight = 0)
     {
         return new CustomOption('file', $required, trim($sku), 0, trim($fileExtensions), $maxWidth, $maxHeight, []);
     }
 
-    public static function createCustomOptionDate(string $sku, bool $required)
+    public static function createCustomOptionDate($sku, bool $required)
     {
         return new CustomOption('date', $required, trim($sku), 0, null, 0, 0, []);
     }
 
-    public static function createCustomOptionDateTime(string $sku, bool $required)
+    public static function createCustomOptionDateTime($sku, bool $required)
     {
         return new CustomOption('date_time', $required, trim($sku), 0, null, 0, 0, []);
     }
 
-    public static function createCustomOptionTime(string $sku, bool $required)
+    public static function createCustomOptionTime($sku, bool $required)
     {
         return new CustomOption('time', $required, trim($sku), 0, null, 0, 0, []);
     }

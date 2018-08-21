@@ -605,7 +605,9 @@ Create the options. Here are are examples with all possible simple types:
     $option3 = CustomOption::createCustomOptionFile("id-card", true, ".jpg .jpeg", 5000, 7000);
     $option4 = CustomOption::createCustomOptionDate("date", true);
     $option5 = CustomOption::createCustomOptionDateTime("datetime", true);
-    $option6 = CustomOption::createCustomOptionTime("time", true);
+    $option6 = CustomOption::createCustomOptionTime(null, true);
+    
+Note, the last one is an example of a custom option that does not have an sku extension.
 
     $product->setCustomOptions([$option1, $option2, $option3, $option4, $option5, $option6]);
 
