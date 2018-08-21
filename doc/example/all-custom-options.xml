@@ -28,13 +28,17 @@
 				</sku_values>
 				<global>
 					<custom_option_title>Color</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					</custom_option_values>
 				</global>
 				<store_view code="default">
 					<custom_option_title>Kleur</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					</custom_option_values>
 				</store_view>
 			</custom_option_dropdown>
 			<custom_option_radio_buttons required="0">
@@ -44,13 +48,17 @@
 				</sku_values>
 				<global>
 					<custom_option_title>Color</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					</custom_option_values>
 				</global>
 				<store_view code="default">
 					<custom_option_title>Kleur</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					</custom_option_values>
 				</store_view>
 			</custom_option_radio_buttons>
 			<custom_option_checkbox_group required="0">
@@ -60,13 +68,17 @@
 				</sku_values>
 				<global>
 					<custom_option_title>Color</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					</custom_option_values>
 				</global>
 				<store_view code="default">
 					<custom_option_title>Kleur</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					</custom_option_values>
 				</store_view>
 			</custom_option_checkbox_group>
 			<custom_option_multiple_select required="0">
@@ -76,13 +88,17 @@
 				</sku_values>
 				<global>
 					<custom_option_title>Color</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Red" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Green" />
+					</custom_option_values>
 				</global>
 				<store_view code="default">
 					<custom_option_title>Kleur</custom_option_title>
-					<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
-					<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					<custom_option_values>
+						<custom_option_value sku="red" price="1.00" price_type="fixed" title="Rood" />
+						<custom_option_value sku="green" price="1.20" price_type="fixed" title="Groen" />
+					</custom_option_values>
 				</store_view>
 			</custom_option_multiple_select>
 		</custom_options>

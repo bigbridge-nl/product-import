@@ -626,7 +626,10 @@ Create the option. Here are are examples with all possible multiple value types:
     $option1 = CustomOption::createCustomOptionDropDown(true, ["red", "green"]);
     $option2 = CustomOption::createCustomOptionRadioButtons(true, ["red", "green"]);
     $option3 = CustomOption::createCustomOptionCheckboxGroup(true, ["red", "green"]);
-    $option4 = CustomOption::createCustomOptionMultipleSelect(true, ["red", "green"]);
+    $option4 = CustomOption::createCustomOptionMultipleSelect(true, [null, null]);
+    
+Note, the last one is an example of a custom option that does not have an sku extension. 
+Each value gets a null entry in the skus array.    
 
     $product->setCustomOptions([$option1, $option2, $option3, $option4]);
 
@@ -636,8 +639,10 @@ Set the title
 
 Set the the option sku, the price, the price type, and the title per value like this:
 
-    $product->global()->setCustomOptionValue($option1, "red", "1.00", ProductStoreView::PRICE_TYPE_FIXED, 'Red');
-    $product->global()->setCustomOptionValue($option1, "green", "1.20", ProductStoreView::PRICE_TYPE_FIXED, 'Green');
+    $product->global()->setCustomOptionValues($option1, [
+        new CustomOptionValue("1.00", ProductStoreView::PRICE_TYPE_FIXED, 'Red'),
+        new CustomOptionValue("1.20", ProductStoreView::PRICE_TYPE_FIXED, 'Green')
+    ]);
 
 Note that each of the value's sku's (here: red, green) must have a custom option value.
 

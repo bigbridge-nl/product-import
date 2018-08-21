@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\CustomOption;
+use BigBridge\ProductImport\Api\Data\CustomOptionValue;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
 use BigBridge\ProductImport\Model\Resource\Validation\Validator;
@@ -327,8 +328,10 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
         ]);
 
         $product->global()->setCustomOptionTitle($color, "Color");
-        $product->global()->setCustomOptionValue($color, "red", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red');
-        $product->global()->setCustomOptionValue($color, "green", "0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green');
+        $product->global()->setCustomOptionValues($color, [
+            new CustomOptionValue("0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red'),
+            new CustomOptionValue("0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green')
+        ]);
 
         /** @var Validator $validator */
         $validator = $objectManager->get(Validator::class);

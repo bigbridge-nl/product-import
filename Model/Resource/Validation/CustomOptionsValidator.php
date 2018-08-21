@@ -20,19 +20,12 @@ class CustomOptionsValidator
         }
 
         foreach ($customOptions as $customOption) {
-            $valueSkus = $customOption->getValueSkus();
-            if ($valueSkus) {
+            $values = $customOption->getValues();
+            if ($values) {
                 foreach ($product->getStoreViews() as $storeViewCode => $storeView) {
-                    $storeViewSkus = [];
-                    foreach ($storeView->getCustomOptionValues() as $customOptionValue) {
-                        if ($customOptionValue->getCustomOption() !== $customOption) {
-                            continue;
-                        }
-                        $sku = $customOptionValue->getSku();
-                        $storeViewSkus[$sku] = $sku;
-                    }
-                    if (count($storeViewSkus) != count($valueSkus)) {
-                        $product->addError("Custom option with values [" . implode(', ', $valueSkus) . "] has an incorrect number of values in store view '{$storeViewCode}'");
+                    $storeViewValues = $storeView->getCustomOptionValues($customOption);
+                    if (count($storeViewValues) != count($values)) {
+                        $product->addError("Custom option with values [" . implode(', ', $values) . "] has an incorrect number of values in store view '{$storeViewCode}'");
                     }
                 }
             }

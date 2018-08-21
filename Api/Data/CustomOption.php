@@ -34,6 +34,12 @@ class CustomOption
     /** @var int|null */
     protected $optionId;
 
+    /** @var int */
+    protected static $keyGen = 0;
+
+    /** @var int */
+    protected $uniqueKey;
+
     public function __construct(string $type, bool $required, $sku, int $maxCharacters, $fileExtensions, int $imageSizeX, int $imageSizeY, array $valueSkus)
     {
         $this->type = $type;
@@ -44,6 +50,13 @@ class CustomOption
         $this->imageSizeX = $imageSizeX;
         $this->imageSizeY = $imageSizeY;
         $this->setValueSkus($valueSkus);
+
+        $this->uniqueKey = ++self::$keyGen;
+    }
+
+    public function getUniqueKey()
+    {
+        return $this->uniqueKey;
     }
 
     /**
@@ -51,7 +64,17 @@ class CustomOption
      */
     public function setValueSkus(array $valueSkus)
     {
-        $this->valueSkus = array_values(array_map('trim', $valueSkus));
+        $skus = [];
+
+        foreach ($valueSkus as $sku) {
+            if ($sku === null) {
+                $skus[] = $sku;
+            } else {
+                $skus[] = trim($sku);
+            }
+        }
+
+        $this->valueSkus = $skus;
     }
 
     /**
@@ -187,7 +210,7 @@ class CustomOption
     /**
      * @return string[]
      */
-    public function getValueSkus(): array
+    public function getValues(): array
     {
         return $this->valueSkus;
     }
