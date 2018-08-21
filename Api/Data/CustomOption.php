@@ -147,11 +147,11 @@ class CustomOption
      * @param string $sku
      * @param bool $required
      * @param string $fileExtensions For example: ".jpg .jpeg"
-     * @param int $maxWidth Number of pixels
-     * @param int $maxHeight Number of pixels
+     * @param int $maxWidth Number of pixels (0 = no limit)
+     * @param int $maxHeight Number of pixels (0 = no limit)
      * @return CustomOption
      */
-    public static function createCustomOptionFile(string $sku, bool $required, string $fileExtensions, int $maxWidth, int $maxHeight)
+    public static function createCustomOptionFile(string $sku, bool $required, string $fileExtensions, int $maxWidth = 0, int $maxHeight = 0)
     {
         return new CustomOption('file', $required, trim($sku), 0, trim($fileExtensions), $maxWidth, $maxHeight, []);
     }
