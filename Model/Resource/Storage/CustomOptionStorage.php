@@ -134,24 +134,25 @@ class CustomOptionStorage
                     }
 
                     $customOptionValues = $storeView->getCustomOptionValues($customOption);
+                    if (!empty($customOptionValues)) {
 
-                    // option values per store view
-                    foreach ($optionTypeIds as $index => $optionTypeId) {
+                        // option values per store view
+                        foreach ($optionTypeIds as $index => $optionTypeId) {
 
-                        $value = $customOptionValues[$index];
+                            $value = $customOptionValues[$index];
 
-                        $this->db->execute("
+                            $this->db->execute("
                             INSERT INTO `{$this->metaData->customOptionTypeTitleTable}`
                             SET 
                                 `option_type_id` = ?,
                                 `store_id` = ?,
                                 `title` = ?
                         ", [
-                            $optionTypeId,
-                            $storeView->getStoreViewId(),
-                            $value->getTitle()
-                        ]);
-                        $this->db->execute("
+                                $optionTypeId,
+                                $storeView->getStoreViewId(),
+                                $value->getTitle()
+                            ]);
+                            $this->db->execute("
                             INSERT INTO `{$this->metaData->customOptionTypePriceTable}`
                             SET 
                                 `option_type_id` = ?,
@@ -159,11 +160,12 @@ class CustomOptionStorage
                                 `price` = ?,
                                 `price_type` = ?
                         ", [
-                            $optionTypeId,
-                            $storeView->getStoreViewId(),
-                            $value->getPrice(),
-                            $value->getPriceType()
-                        ]);
+                                $optionTypeId,
+                                $storeView->getStoreViewId(),
+                                $value->getPrice(),
+                                $value->getPriceType()
+                            ]);
+                        }
                     }
                 }
             }
