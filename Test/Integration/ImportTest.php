@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\BundleProductSelection;
 use BigBridge\ProductImport\Api\Data\CustomOptionValue;
+use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
@@ -648,7 +649,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $stock->setMinimumQuantity('1');
         $stock->setUseConfigMinimumQuantity(false);
         $stock->setIsQuantityDecimal(true);
-        $stock->setBackorders(true);
+        $stock->setBackorders(ProductStockItem::BACKORDERS_ALLOW_QTY_BELOW_0);
         $stock->setUseConfigBackorders(false);
         $stock->setMinimumSaleQuantity('0.1000');
         $stock->setUseConfigMinimumSaleQuantity(false);

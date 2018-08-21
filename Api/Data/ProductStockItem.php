@@ -23,7 +23,6 @@ class ProductStockItem
     // boolean
     const USE_CONFIG_MIN_QTY = 'use_config_min_qty';
     const IS_QTY_DECIMAL = 'is_qty_decimal';
-    const BACKORDERS = 'backorders';
     const USE_CONFIG_BACKORDERS = 'use_config_backorders';
     const USE_CONFIG_MIN_SALE_QTY = 'use_config_min_sale_qty';
     const USE_CONFIG_MAX_SALE_QTY = 'use_config_max_sale_qty';
@@ -36,6 +35,12 @@ class ProductStockItem
     const USE_CONFIG_ENABLE_QTY_INC = 'use_config_enable_qty_inc';
     const ENABLE_QTY_INCREMENTS = 'enable_qty_increments';
     const IS_DECIMAL_DIVIDED = 'is_decimal_divided';
+
+    // int
+    const BACKORDERS = 'backorders';
+    const BACKORDERS_NO_BACKORDERS = 0;
+    const BACKORDERS_ALLOW_QTY_BELOW_0 = 1;
+    const BACKORDERS_ALLOW_QTY_BELOW_0_AND_NOTIFY_CUSTOMER = 2;
 
     protected $attributes = [];
 
@@ -84,7 +89,12 @@ class ProductStockItem
         $this->attributes[self::IS_QTY_DECIMAL] = $isQuantityDecimal;
     }
 
-    public function setBackorders(bool $backorders)
+    /**
+     * Use BACKORDER_ constants in this class.
+     *
+     * @param int $backorders
+     */
+    public function setBackorders(int $backorders)
     {
         $this->attributes[self::BACKORDERS] = $backorders;
     }
