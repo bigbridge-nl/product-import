@@ -43,6 +43,12 @@ class UrlKeyGenerator
             foreach ($product->getStoreViews() as $code => $storeView) {
 
                 $storeViewId = $storeView->getStoreViewId();
+
+                if ($storeViewId === null) {
+                    $storeView->setUrlKey(null);
+                    continue;
+                }
+
                 $urlKey = $storeView->getUrlKey();
 
                 if (is_string($urlKey)) {

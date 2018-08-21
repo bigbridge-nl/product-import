@@ -73,7 +73,7 @@ class ProductStoreView
      */
     public $parent;
 
-    /** @var  int */
+    /** @var  int|null */
     protected $store_view_id;
 
     /** @var ImageGalleryInformation[] */
@@ -121,7 +121,7 @@ class ProductStoreView
         $this->store_view_id = $storeViewId;
     }
 
-    public function getStoreViewId(): int
+    public function getStoreViewId()
     {
         return $this->store_view_id;
     }

@@ -170,6 +170,39 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
     /**
      * @throws \Exception
      */
+    public function testStoreViewCode()
+    {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        /** @var ImporterFactory $factory */
+        $factory = $objectManager->get(ImporterFactory::class);
+        $config = new ImportConfig();
+
+        $importer = $factory->createImporter($config);
+
+        $product = new SimpleProduct('wherefrom');
+        $product->setAttributeSetId(4);
+
+        $global = $product->global();
+        $global->setName("Where from?");
+        $global->setPrice("123.00");
+        $global->generateUrlKey();
+
+        $greenRoom = $product->storeView('green-room');
+        $greenRoom->setPrice('18.00');
+        $greenRoom->setName("Waarheen?");
+        $greenRoom->generateUrlKey();
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertSame(["store view code not found: green-room"], $product->getErrors());
+
+    }
+
+    /**
+     * @throws \Exception
+     */
     public function testImageValidation()
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
