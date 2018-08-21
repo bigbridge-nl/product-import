@@ -140,5 +140,6 @@ class ReferenceResolverTest extends \Magento\TestFramework\TestCase\AbstractCont
         $this->assertSame("computers-software", $converter->createUrlKeyFromName("Computers & Software"));
         $this->assertSame("un-velocipede", $converter->createUrlKeyFromName("Un vélocipède"));
         $this->assertSame("500", $converter->createUrlKeyFromName("€ 500"));
+        $this->assertSame("plastic-vorken-deluxe-in-dispenserbox-6-boxen-a-250-st-ds", $converter->createUrlKeyFromName("Plastic Vorken DeLuxe in dispenserbox - 6 boxen à 250 st/ds"));
     }
 }
