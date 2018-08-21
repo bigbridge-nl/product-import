@@ -83,7 +83,7 @@ If you want to make sure the product appears on the store front, specify at leas
 These attributes are given with example values. You have to change them.
 
     $product->setAttributeSetByName("Default");
-    $product->setCategoriesByGlobalName(['Default Category/Desks', 'Default Category/Chairs', 'Default Category/Boards']);
+    $product->addCategoriesByGlobalName(['Default Category/Desks', 'Default Category/Chairs', 'Default Category/Boards']);
     $product->setWebsitesByCode(['base']);
 
     $global = $product->global();
