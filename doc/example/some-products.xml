@@ -106,7 +106,7 @@
 				</store_view>
 			</custom_option_textfield>
 			<custom_option_textarea sku="note" required="0" max_characters="250" />
-			<custom_option_file sku="id-card" required="1" file_extensions=".jpg .jpeg" max_width="5000" max_height="7000" />
+			<custom_option_file sku="id-card" required="1" file_extensions="jpg jpeg" max_width="5000" max_height="7000" />
 			<custom_option_date sku="date" required="0"/>
 			<custom_option_datetime sku="datetime" required="0" />
 			<custom_option_time sku="time" required="0" />

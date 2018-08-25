@@ -602,7 +602,7 @@ Create the options. Here are are examples with all possible simple types:
 
     $option1 = CustomOption::createCustomOptionTextField("inscription", true, 40);
     $option2 = CustomOption::createCustomOptionTextArea("note", true, 250);
-    $option3 = CustomOption::createCustomOptionFile("id-card", true, ".jpg .jpeg", 5000, 7000);
+    $option3 = CustomOption::createCustomOptionFile("id-card", true, "jpg jpeg", 5000, 7000);
     $option4 = CustomOption::createCustomOptionDate("date", true);
     $option5 = CustomOption::createCustomOptionDateTime("datetime", true);
     $option6 = CustomOption::createCustomOptionTime("time", true);
