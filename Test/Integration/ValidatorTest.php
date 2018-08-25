@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\CustomOption;
+use BigBridge\ProductImport\Api\Data\CustomOptionValue;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Validation\ConfigurableValidator;
 use BigBridge\ProductImport\Model\Resource\Validation\Validator;
@@ -79,6 +80,7 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
             [['price' => '.99'], true, ""],
             // corrupt
             [['price' => '123,95'], false, "price is not a decimal number with dot (123,95)"],
+            [['price' => '-123.95'], false, "price must be positive (-123.9500)"],
 
             /* non-eav fields */
 
@@ -163,6 +165,39 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
             $this->assertEquals($test[2], implode('; ', $product->getErrors()));
             $this->assertEquals($test[1], $product->isOk());
         }
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function testStoreViewCode()
+    {
+        $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+        /** @var ImporterFactory $factory */
+        $factory = $objectManager->get(ImporterFactory::class);
+        $config = new ImportConfig();
+
+        $importer = $factory->createImporter($config);
+
+        $product = new SimpleProduct('wherefrom');
+        $product->setAttributeSetId(4);
+
+        $global = $product->global();
+        $global->setName("Where from?");
+        $global->setPrice("123.00");
+        $global->generateUrlKey();
+
+        $greenRoom = $product->storeView('green-room');
+        $greenRoom->setPrice('18.00');
+        $greenRoom->setName("Waarheen?");
+        $greenRoom->generateUrlKey();
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertSame(["store view code not found: green-room"], $product->getErrors());
+
     }
 
     /**
@@ -327,8 +362,10 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
         ]);
 
         $product->global()->setCustomOptionTitle($color, "Color");
-        $product->global()->setCustomOptionValue($color, "red", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red');
-        $product->global()->setCustomOptionValue($color, "green", "0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green');
+        $product->global()->setCustomOptionValues($color, [
+            new CustomOptionValue("0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red'),
+            new CustomOptionValue("0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green')
+        ]);
 
         /** @var Validator $validator */
         $validator = $objectManager->get(Validator::class);

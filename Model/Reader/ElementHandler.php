@@ -8,6 +8,7 @@ use BigBridge\ProductImport\Api\Data\BundleProductSelection;
 use BigBridge\ProductImport\Api\Data\BundleProductStoreView;
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\CustomOption;
+use BigBridge\ProductImport\Api\Data\CustomOptionValue;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProductStoreView;
 use BigBridge\ProductImport\Api\Data\DownloadLink;
@@ -100,6 +101,9 @@ class ElementHandler
     /** @var CustomOption */
     protected $customOption;
 
+    /** @var CustomOptionValue[] */
+    protected $customOptionValues;
+
     /** @var string[] */
     protected $skuValues;
 
@@ -163,6 +167,7 @@ class ElementHandler
     const CUSTOM_OPTION_TITLE = "custom_option_title";
     const CUSTOM_OPTION_PRICE = "custom_option_price";
     const CUSTOM_OPTION_VALUE = "custom_option_value";
+    const CUSTOM_OPTION_VALUES = "custom_option_values";
     const SKU_VALUES = "sku_values";
     const DELETE = "delete";
 
@@ -265,6 +270,10 @@ class ElementHandler
                 }
             }
 
+        } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
+            if ($element === self::CUSTOM_OPTION_VALUES) {
+                $this->customOptionValues =[];
+            }
         } elseif ($scope === self::OPTIONS) {
             if ($element === self::OPTION) {
                 $this->option = new BundleProductOption($attributes['input_type'], $attributes['required']);
@@ -494,9 +503,8 @@ class ElementHandler
                 $this->storeView->setCustomOptionTitle($this->customOption, $value);
             } elseif ($element === self::CUSTOM_OPTION_PRICE) {
                 $this->storeView->setCustomOptionPrice($this->customOption, $attributes['price'], $attributes['price_type']);
-            } elseif ($element === self::CUSTOM_OPTION_VALUE) {
-                $this->storeView->setCustomOptionValue($this->customOption, $attributes['sku'], $attributes['price'],
-                    $attributes['price_type'], $attributes['title']);
+            } elseif ($element === self::CUSTOM_OPTION_VALUES) {
+                $this->storeView->setCustomOptionValues($this->customOption, $this->customOptionValues);
             }
 
             if ($this->storeView instanceof BundleProductStoreView) {
@@ -619,6 +627,11 @@ class ElementHandler
             if ($element === self::SKU_VALUES) {
                 $this->customOption->setValueSkus($this->items);
             }
+        } elseif ($scope === self::CUSTOM_OPTION_VALUES) {
+            if ($element === self::CUSTOM_OPTION_VALUE) {
+                $this->customOptionValues[] = new CustomOptionValue($attributes['price'],
+                    $attributes['price_type'], $attributes['title']);
+            }
         }
 
         array_pop($this->elementPath);
@@ -651,7 +664,7 @@ class ElementHandler
         } elseif ($type === GroupedProduct::TYPE_GROUPED) {
             $product = new GroupedProduct($sku);
         } else {
-            throw new Exception("Unknowne product: " . $type);
+            throw new Exception("Unknown product: " . $type);
         }
 
         if (isset($attributes['id'])) {

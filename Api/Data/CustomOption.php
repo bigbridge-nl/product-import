@@ -34,6 +34,12 @@ class CustomOption
     /** @var int|null */
     protected $optionId;
 
+    /** @var int */
+    protected static $keyGen = 0;
+
+    /** @var int */
+    protected $uniqueKey;
+
     public function __construct(string $type, bool $required, $sku, int $maxCharacters, $fileExtensions, int $imageSizeX, int $imageSizeY, array $valueSkus)
     {
         $this->type = $type;
@@ -44,6 +50,13 @@ class CustomOption
         $this->imageSizeX = $imageSizeX;
         $this->imageSizeY = $imageSizeY;
         $this->setValueSkus($valueSkus);
+
+        $this->uniqueKey = ++self::$keyGen;
+    }
+
+    public function getUniqueKey()
+    {
+        return $this->uniqueKey;
     }
 
     /**
@@ -51,7 +64,17 @@ class CustomOption
      */
     public function setValueSkus(array $valueSkus)
     {
-        $this->valueSkus = array_values(array_map('trim', $valueSkus));
+        $skus = [];
+
+        foreach ($valueSkus as $sku) {
+            if ($sku === null) {
+                $skus[] = $sku;
+            } else {
+                $skus[] = trim($sku);
+            }
+        }
+
+        $this->valueSkus = $skus;
     }
 
     /**
@@ -110,12 +133,12 @@ class CustomOption
         return $this->imageSizeY;
     }
 
-    public static function createCustomOptionTextField(string $sku, bool $required, int $maxCharacters)
+    public static function createCustomOptionTextField($sku, bool $required, int $maxCharacters)
     {
         return new CustomOption('field', $required, trim($sku), $maxCharacters, null, 0, 0, []);
     }
 
-    public static function createCustomOptionTextArea(string $sku, bool $required, int $maxCharacters)
+    public static function createCustomOptionTextArea($sku, bool $required, int $maxCharacters)
     {
         return new CustomOption('area', $required, trim($sku), $maxCharacters, null, 0, 0, []);
     }
@@ -124,26 +147,26 @@ class CustomOption
      * @param string $sku
      * @param bool $required
      * @param string $fileExtensions For example: "jpg jpeg"
-     * @param int $maxWidth Number of pixels
-     * @param int $maxHeight Number of pixels
+     * @param int $maxWidth Number of pixels (0 = no limit)
+     * @param int $maxHeight Number of pixels (0 = no limit)
      * @return CustomOption
      */
-    public static function createCustomOptionFile(string $sku, bool $required, string $fileExtensions, int $maxWidth, int $maxHeight)
+    public static function createCustomOptionFile($sku, bool $required, string $fileExtensions, int $maxWidth = 0, int $maxHeight = 0)
     {
         return new CustomOption('file', $required, trim($sku), 0, trim($fileExtensions), $maxWidth, $maxHeight, []);
     }
 
-    public static function createCustomOptionDate(string $sku, bool $required)
+    public static function createCustomOptionDate($sku, bool $required)
     {
         return new CustomOption('date', $required, trim($sku), 0, null, 0, 0, []);
     }
 
-    public static function createCustomOptionDateTime(string $sku, bool $required)
+    public static function createCustomOptionDateTime($sku, bool $required)
     {
         return new CustomOption('date_time', $required, trim($sku), 0, null, 0, 0, []);
     }
 
-    public static function createCustomOptionTime(string $sku, bool $required)
+    public static function createCustomOptionTime($sku, bool $required)
     {
         return new CustomOption('time', $required, trim($sku), 0, null, 0, 0, []);
     }
@@ -187,7 +210,7 @@ class CustomOption
     /**
      * @return string[]
      */
-    public function getValueSkus(): array
+    public function getValues(): array
     {
         return $this->valueSkus;
     }

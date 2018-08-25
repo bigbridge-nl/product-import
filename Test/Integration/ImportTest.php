@@ -3,6 +3,8 @@
 namespace BigBridge\ProductImport\Test\Integration;
 
 use BigBridge\ProductImport\Api\Data\BundleProductSelection;
+use BigBridge\ProductImport\Api\Data\CustomOptionValue;
+use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
@@ -647,7 +649,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $stock->setMinimumQuantity('1');
         $stock->setUseConfigMinimumQuantity(false);
         $stock->setIsQuantityDecimal(true);
-        $stock->setBackorders(true);
+        $stock->setBackorders(ProductStockItem::BACKORDERS_ALLOW_QTY_BELOW_0);
         $stock->setUseConfigBackorders(false);
         $stock->setMinimumSaleQuantity('0.1000');
         $stock->setUseConfigMinimumSaleQuantity(false);
@@ -1720,10 +1722,10 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             $note = CustomOption::createCustomOptionTextArea('note', true, 255),
             $idCard = CustomOption::createCustomOptionFile("id-card", false, "jpg jpeg", 5000, 7000),
             $date = CustomOption::createCustomOptionDate("date", true),
-            $dateTime = CustomOption::createCustomOptionDateTime("datetime", true),
+            $dateTime = CustomOption::createCustomOptionDateTime(null, true),
             $time = CustomOption::createCustomOptionTime("time", true),
-            $color = CustomOption::createCustomOptionDropDown(true, ["red", "green", "blue"]),
-            $frame = CustomOption::createCustomOptionRadioButtons(true, ["wood", "iron"]),
+            $colors = CustomOption::createCustomOptionDropDown(true, ["red", "green", "blue"]),
+            $frames = CustomOption::createCustomOptionRadioButtons(true, [null, null]),
             $extras = CustomOption::createCustomOptionCheckboxGroup(true, ["mayonaise", "ketchup", "mosterd"]),
             $toppings = CustomOption::createCustomOptionMultipleSelect(true, ["nuts", "syrup", "m-and-ms"])
         ]);
@@ -1746,24 +1748,32 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->global()->setCustomOptionTitle($time, "Time");
         $product->global()->setCustomOptionPrice($time, "30", ProductStoreView::PRICE_TYPE_PERCENT);
 
-        $product->global()->setCustomOptionTitle($color, "Color");
-        $product->global()->setCustomOptionValue($color, "red", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red');
-        $product->global()->setCustomOptionValue($color, "green", "0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green');
-        $product->global()->setCustomOptionValue($color, "blue", "0.25", ProductStoreView::PRICE_TYPE_FIXED, 'Blue');
+        $product->global()->setCustomOptionTitle($colors, "Color");
+        $product->global()->setCustomOptionValues($colors, [
+            new CustomOptionValue("0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Red'),
+            new CustomOptionValue("0.15", ProductStoreView::PRICE_TYPE_FIXED, 'Green'),
+            new CustomOptionValue("0.25", ProductStoreView::PRICE_TYPE_FIXED, 'Blue')
+        ]);
 
-        $product->global()->setCustomOptionTitle($frame, "Frame");
-        $product->global()->setCustomOptionValue($frame, "wood", "10", ProductStoreView::PRICE_TYPE_PERCENT, 'Wood');
-        $product->global()->setCustomOptionValue($frame, "iron", "15", ProductStoreView::PRICE_TYPE_PERCENT, 'Iron');
+        $product->global()->setCustomOptionTitle($frames, "Frame");
+        $product->global()->setCustomOptionValues($frames, [
+            new CustomOptionValue("10", ProductStoreView::PRICE_TYPE_PERCENT, 'Wood'),
+            new CustomOptionValue("15", ProductStoreView::PRICE_TYPE_PERCENT, 'Iron')
+        ]);
 
         $product->global()->setCustomOptionTitle($extras, "Extras");
-        $product->global()->setCustomOptionValue($extras, "mayonaise", "0.05", ProductStoreView::PRICE_TYPE_FIXED, 'Mayonaise');
-        $product->global()->setCustomOptionValue($extras, "ketchup", "0.05", ProductStoreView::PRICE_TYPE_FIXED, 'Ketchup');
-        $product->global()->setCustomOptionValue($extras, "mosterd", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Mosterd');
+        $product->global()->setCustomOptionValues($extras, [
+            new CustomOptionValue("0.05", ProductStoreView::PRICE_TYPE_FIXED, 'Mayonaise'),
+            new CustomOptionValue("0.05", ProductStoreView::PRICE_TYPE_FIXED, 'Ketchup'),
+            new CustomOptionValue("0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Mosterd')
+        ]);
 
         $product->global()->setCustomOptionTitle($toppings, "Toppings");
-        $product->global()->setCustomOptionValue($toppings, "nuts", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Nuts');
-        $product->global()->setCustomOptionValue($toppings, "syrup", "0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Syrup');
-        $product->global()->setCustomOptionValue($toppings, "m-and-ms", "0.10", ProductStoreView::PRICE_TYPE_FIXED, "M & M's");
+        $product->global()->setCustomOptionValues($toppings, [
+            new CustomOptionValue("0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Nuts'),
+            new CustomOptionValue("0.10", ProductStoreView::PRICE_TYPE_FIXED, 'Syrup'),
+            new CustomOptionValue("0.10", ProductStoreView::PRICE_TYPE_FIXED, "M & M's")
+        ]);
 
         $importer->importSimpleProduct($product);
         $importer->flush();
@@ -1784,7 +1794,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             ['area', '1', 'note', 255, null, '0', '0', '2', '0', 'Note', '0', '0.1000', 'fixed'],
             ['file', '0', 'id-card', '0', 'jpg jpeg', '5000', '7000', '3', '0', 'Id card', '0', '0.0000', 'fixed'],
             ['date', '1', 'date', 0, null, '0', '0', '4', '0', 'Date', '0', '10.0000', 'percent'],
-            ['date_time', '1', 'datetime', '0', null, '0', '0', '5', '0', 'Date and time', '0', '20.0000', 'percent'],
+            ['date_time', '1', null, '0', null, '0', '0', '5', '0', 'Date and time', '0', '20.0000', 'percent'],
             ['time', '1', 'time', '0', null, '0', '0', '6', '0', 'Time', '0', '30.0000', 'percent'],
             ['drop_down', '1', null, '0', null, '0', '0', '7', '0', 'Color', null, null, null],
             ['radio', '1', null, '0', null, '0', '0', '8', '0', 'Frame', null, null, null],
@@ -1812,8 +1822,8 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             ["red", "1", "0", "Red", "0", "0.1000", "fixed"],
             ["green", "2", "0", "Green", "0", "0.1500", "fixed"],
             ["blue", "3", "0", "Blue", "0", "0.2500", "fixed"],
-            ["wood", "1", "0", "Wood", "0", "10.0000", "percent"],
-            ["iron", "2", "0", "Iron", "0", "15.0000", "percent"],
+            [null, "1", "0", "Wood", "0", "10.0000", "percent"],
+            [null, "2", "0", "Iron", "0", "15.0000", "percent"],
             ["mayonaise", "1", "0", "Mayonaise", "0", "0.0500", "fixed"],
             ["ketchup", "2", "0", "Ketchup", "0", "0.0500", "fixed"],
             ["mosterd", "3", "0", "Mosterd", "0", "0.1000", "fixed"],

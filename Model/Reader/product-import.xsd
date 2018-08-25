@@ -89,7 +89,7 @@
 				<xs:element ref="samples_title" minOccurs="0"/>
 				<xs:element ref="custom_option_title" minOccurs="0"/>
 				<xs:element ref="custom_option_price" minOccurs="0"/>
-				<xs:element ref="custom_option_value" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="custom_option_values" minOccurs="0"/>
 				<xs:element ref="delete" minOccurs="0"/>
 				<xs:element ref="select" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="multi_select" minOccurs="0" maxOccurs="unbounded"/>
@@ -139,7 +139,7 @@
 				<xs:element ref="samples_title" minOccurs="0"/>
 				<xs:element ref="custom_option_title" minOccurs="0"/>
 				<xs:element ref="custom_option_price" minOccurs="0"/>
-				<xs:element ref="custom_option_value" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="custom_option_values" minOccurs="0"/>
 				<xs:element ref="delete" minOccurs="0"/>
 				<xs:element ref="select" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="multi_select" minOccurs="0" maxOccurs="unbounded"/>
@@ -238,6 +238,13 @@
 					<xs:attribute type="xs:string" name="title" use="required"/>
 				</xs:extension>
 			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="custom_option_values">
+		<xs:complexType>
+			<xs:sequence maxOccurs="unbounded" minOccurs="0">
+				<xs:element ref="custom_option_value" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="sku_values">

@@ -73,7 +73,7 @@ class ProductStoreView
      */
     public $parent;
 
-    /** @var  int */
+    /** @var  int|null */
     protected $store_view_id;
 
     /** @var ImageGalleryInformation[] */
@@ -100,7 +100,7 @@ class ProductStoreView
     /** @var CustomOptionPrice[] */
     protected $customOptionPrices = [];
 
-    /** @var CustomOptionValue[] */
+    /** @var CustomOptionValue[][] */
     protected $customOptionValues = [];
 
     public function setName(string $name = null)
@@ -121,7 +121,7 @@ class ProductStoreView
         $this->store_view_id = $storeViewId;
     }
 
-    public function getStoreViewId(): int
+    public function getStoreViewId()
     {
         return $this->store_view_id;
     }
@@ -470,15 +470,11 @@ class ProductStoreView
     }
 
     /**
-     * @param CustomOption $customOption
-     * @param string $sku
-     * @param string $price
-     * @param string $priceType One of the PRICE_TYPE_ constants in this class
-     * @param string $title
+     * @param CustomOptionValue[] $values
      */
-    public function setCustomOptionValue(CustomOption $customOption, string $sku, string $price, string $priceType, string $title)
+    public function setCustomOptionValues(CustomOption $customOption, array $values)
     {
-        $this->customOptionValues[] = new CustomOptionValue($customOption, $sku, $price, $priceType, $title);
+        $this->customOptionValues[$customOption->getUniqueKey()] = $values;
     }
 
     /**
@@ -498,10 +494,13 @@ class ProductStoreView
     }
 
     /**
+     * @param CustomOption $customOption
      * @return CustomOptionValue[]
      */
-    public function getCustomOptionValues(): array
+    public function getCustomOptionValues(CustomOption $customOption): array
     {
-        return $this->customOptionValues;
+        $key = $customOption->getUniqueKey();
+
+        return isset($this->customOptionValues[$key]) ? $this->customOptionValues[$key] : [];
     }
 }

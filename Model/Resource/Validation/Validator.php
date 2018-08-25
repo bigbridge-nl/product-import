@@ -7,6 +7,7 @@ use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\TierPrice;
 use BigBridge\ProductImport\Helper\Decimal;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
@@ -156,6 +157,10 @@ class Validator
                     case EavAttributeInfo::TYPE_DECIMAL:
                         if (!preg_match(Decimal::DECIMAL_PATTERN, $value)) {
                             $product->addError($eavAttribute . " is not a decimal number with dot (" . $value . ")");
+                        } elseif ($value < 0.00) {
+                            if (in_array($eavAttribute, [ProductStoreView::ATTR_PRICE, ProductStoreView::ATTR_SPECIAL_PRICE, ProductStoreView::ATTR_COST, ProductStoreView::ATTR_WEIGHT, ProductStoreView::ATTR_MSRP])) {
+                                $product->addError($eavAttribute . " must be positive (" . $value . ")");
+                            }
                         }
                         break;
                     case EavAttributeInfo::TYPE_DATETIME:

@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 
 /**
  * @author Patrick van Bergen
@@ -20,19 +21,24 @@ class CustomOptionsValidator
         }
 
         foreach ($customOptions as $customOption) {
-            $valueSkus = $customOption->getValueSkus();
-            if ($valueSkus) {
+            $values = $customOption->getValues();
+            if ($values) {
+                $count = count($values);
                 foreach ($product->getStoreViews() as $storeViewCode => $storeView) {
-                    $storeViewSkus = [];
-                    foreach ($storeView->getCustomOptionValues() as $customOptionValue) {
-                        if ($customOptionValue->getCustomOption() !== $customOption) {
-                            continue;
+                    $storeViewValues = $storeView->getCustomOptionValues($customOption);
+                    $storeViewCount = count($storeViewValues);
+                    $error = false;
+                    if ($storeViewCode === Product::GLOBAL_STORE_VIEW_CODE) {
+                        if ($storeViewCount != $count) {
+                            $error = true;
                         }
-                        $sku = $customOptionValue->getSku();
-                        $storeViewSkus[$sku] = $sku;
+                    } else {
+                        if (($storeViewCount > 0) && ($storeViewCount != $count)) {
+                            $error = true;
+                        }
                     }
-                    if (count($storeViewSkus) != count($valueSkus)) {
-                        $product->addError("Custom option with values [" . implode(', ', $valueSkus) . "] has an incorrect number of values in store view '{$storeViewCode}'");
+                    if ($error) {
+                        $product->addError("Custom option with values [" . implode(', ', $values) . "] has an incorrect number of values in store view '{$storeViewCode}'");
                     }
                 }
             }

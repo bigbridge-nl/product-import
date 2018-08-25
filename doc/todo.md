@@ -6,7 +6,6 @@
 * check attribute value uniqueness
 * check if reference ids exist
 * check for tierprice duplicates and make sure the import still works
-* some decimal numbers may not be negative
 * import category-ids: check if the ids exist
 
 ## CSV import
