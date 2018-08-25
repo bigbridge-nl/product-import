@@ -113,20 +113,34 @@ abstract class Product
 
     /**
      * Used in catalog_product_entity table
-     * @return string
+     * @return bool|null
      */
     public function getHasOptions()
     {
-        return '0';
+        if ($this->customOptions === null) {
+            return null;
+        } else {
+            return !empty($this->customOptions);
+        }
     }
 
     /**
      * Used in catalog_product_entity table
-     * @return string
+     * @return bool|null
      */
     public function getRequiredOptions()
     {
-        return '0';
+        if ($this->customOptions === null) {
+            return null;
+        } else {
+            $present = false;
+            foreach ($this->customOptions as $customOption) {
+                if ($customOption->isRequired()) {
+                    $present = true;
+                }
+            }
+            return $present;
+        }
     }
 
     /**

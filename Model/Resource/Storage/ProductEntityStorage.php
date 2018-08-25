@@ -119,8 +119,8 @@ class ProductEntityStorage
             $vals[] = $product->getAttributeSetId();
             $vals[] = $product->getType();
             $vals[] = $sku;
-            $vals[] = $product->getHasOptions();
-            $vals[] = $product->getRequiredOptions();
+            $vals[] = (int)$product->getHasOptions();
+            $vals[] = (int)$product->getRequiredOptions();
         }
 
         if (count($vals) > 0) {
@@ -146,33 +146,46 @@ class ProductEntityStorage
      */
     public function updateMainTable(array $products)
     {
+        if (empty($products)) {
+            return;
+        }
+
         $dateTime = date('Y-m-d H:i:s');
+        $productIds = array_column($products, 'id');
+
+        $existingValues = $this->db->fetchGrouped("
+            SELECT
+                `entity_id`, `has_options`, `required_options`, `attribute_set_id`
+            FROM {$this->metaData->productEntityTable}
+            WHERE `entity_id` IN (" . $this->db->getMarks($productIds) . ")     
+        ", $productIds, [
+            'entity_id'
+        ]);
 
         $attributeSetUpdates = [];
-        $otherUpdates = [];
+
         foreach ($products as $product) {
             $sku = $product->getSku();
             $type = $product->getType();
             $attributeSetId = $product->getAttributeSetId();
-            if ($attributeSetId !== null) {
-                $attributeSetUpdates[] = $product->id;
-                $attributeSetUpdates[] = $type;
-                $attributeSetUpdates[] = $sku;
-                $attributeSetUpdates[] = $attributeSetId;
-                $attributeSetUpdates[] = $dateTime;
-            } else {
-                $otherUpdates[] = $product->id;
-                $otherUpdates[] = $type;
-                $otherUpdates[] = $sku;
-                $otherUpdates[] = $dateTime;
-            }
+            $hasOptions = $product->getHasOptions();
+            $requiredOptions = $product->getRequiredOptions();
+
+            $attributeSetUpdates[] = $product->id;
+            $attributeSetUpdates[] = $type;
+            $attributeSetUpdates[] = $sku;
+            $attributeSetUpdates[] = $attributeSetId !== null ? $attributeSetId : $existingValues[$product->id]['attribute_set_id'];
+            $attributeSetUpdates[] = $dateTime;
+            $attributeSetUpdates[] = $hasOptions !== null ? (int)$hasOptions : $existingValues[$product->id]['has_options'];
+            $attributeSetUpdates[] = $requiredOptions !== null ? (int)$requiredOptions : $existingValues[$product->id]['required_options'];
         }
 
-        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'type_id', 'sku', 'attribute_set_id', 'updated_at'], $attributeSetUpdates,
-            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `type_id` = VALUES(`type_id`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`)");
-
-        $this->db->insertMultipleWithUpdate($this->metaData->productEntityTable, ['entity_id', 'type_id', 'sku', 'updated_at'], $otherUpdates,
-            Magento2DbConnection::_1_KB, "`sku` = VALUES(`sku`), `type_id` = VALUES(`type_id`), `updated_at`= VALUES(`updated_at`)");
+        $this->db->insertMultipleWithUpdate(
+            $this->metaData->productEntityTable,
+            ['entity_id', 'type_id', 'sku', 'attribute_set_id', 'updated_at', 'has_options', 'required_options'],
+            $attributeSetUpdates,
+            Magento2DbConnection::_1_KB,
+            "`sku` = VALUES(`sku`), `type_id` = VALUES(`type_id`), `attribute_set_id` = VALUES(`attribute_set_id`), `updated_at`= VALUES(`updated_at`), `has_options` = VALUES(`has_options`), `required_options` = VALUES(`required_options`)");
     }
 
     /**

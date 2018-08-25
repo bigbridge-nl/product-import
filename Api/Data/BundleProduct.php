@@ -24,12 +24,12 @@ class BundleProduct extends Product
 
     public function getHasOptions()
     {
-        return '1';
+        return true;
     }
 
     public function getRequiredOptions()
     {
-        return '1';
+        return false;
     }
 
     /**
