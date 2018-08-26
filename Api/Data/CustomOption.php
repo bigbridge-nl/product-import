@@ -44,7 +44,7 @@ class CustomOption
     {
         $this->type = $type;
         $this->required = $required;
-        $this->sku = $sku;
+        $this->sku = $sku === "" ? null : $sku;
         $this->maxCharacters = $maxCharacters;
         $this->fileExtensions = $fileExtensions;
         $this->imageSizeX = $imageSizeX;
@@ -68,7 +68,9 @@ class CustomOption
 
         foreach ($valueSkus as $sku) {
             if ($sku === null) {
-                $skus[] = $sku;
+                $skus[] = null;
+            } elseif ($sku === "") {
+                $skus[] = null;
             } else {
                 $skus[] = trim($sku);
             }

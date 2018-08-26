@@ -1721,11 +1721,11 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             $inscription = CustomOption::createCustomOptionTextField('inscription', true, 21),
             $note = CustomOption::createCustomOptionTextArea('note', true, 255),
             $idCard = CustomOption::createCustomOptionFile("id-card", false, "jpg jpeg", 5000, 7000),
-            $date = CustomOption::createCustomOptionDate("date", true),
+            $date = CustomOption::createCustomOptionDate("", true),
             $dateTime = CustomOption::createCustomOptionDateTime(null, true),
             $time = CustomOption::createCustomOptionTime("time", true),
             $colors = CustomOption::createCustomOptionDropDown(true, ["red", "green", "blue"]),
-            $frames = CustomOption::createCustomOptionRadioButtons(true, [null, null]),
+            $frames = CustomOption::createCustomOptionRadioButtons(true, [null, ""]),
             $extras = CustomOption::createCustomOptionCheckboxGroup(true, ["mayonaise", "ketchup", "mosterd"]),
             $toppings = CustomOption::createCustomOptionMultipleSelect(true, ["nuts", "syrup", "m-and-ms"])
         ]);
@@ -1793,7 +1793,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             ['field', '1', 'inscription', '21', null,'0', '0', '1', '0', 'Inscription', '0', '0.5000', 'fixed'],
             ['area', '1', 'note', 255, null, '0', '0', '2', '0', 'Note', '0', '0.1000', 'fixed'],
             ['file', '0', 'id-card', '0', 'jpg jpeg', '5000', '7000', '3', '0', 'Id card', '0', '0.0000', 'fixed'],
-            ['date', '1', 'date', 0, null, '0', '0', '4', '0', 'Date', '0', '10.0000', 'percent'],
+            ['date', '1', null, 0, null, '0', '0', '4', '0', 'Date', '0', '10.0000', 'percent'],
             ['date_time', '1', null, '0', null, '0', '0', '5', '0', 'Date and time', '0', '20.0000', 'percent'],
             ['time', '1', 'time', '0', null, '0', '0', '6', '0', 'Time', '0', '30.0000', 'percent'],
             ['drop_down', '1', null, '0', null, '0', '0', '7', '0', 'Color', null, null, null],
