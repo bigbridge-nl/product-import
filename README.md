@@ -21,7 +21,12 @@ However, the library bypasses all of Magento's API's to insert data directly int
 
 Experiment with the library in a safe webshop. Make sure to create a database backup before you start.
 
-## Assumptions
+## Installation
+
+    composer config repositories.bigbridge-product-import git https://github.com/bigbridge-nl/product-import.git
+    composer require bigbridge/product-import
+
+## Requirements
 
 * For Magento 2.1+ Opensource Edition
 * Requires >= PHP 7.0
