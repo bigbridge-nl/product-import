@@ -104,4 +104,6 @@ The extension adds an index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE to
 
 Thanks to Marco de Vries for telling me about the intricacies of product import.
 
+Thanks to Martijn van Berkel for first volunteering to use the importer in production environments and for providing valuable feedback.
+
 This project owes a great deal of ideas and inspiration from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)
