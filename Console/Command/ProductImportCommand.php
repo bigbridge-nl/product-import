@@ -33,6 +33,8 @@ class ProductImportCommand extends Command
     const OPTION_EMPTY_TEXT = "empty-text";
     const OPTION_EMPTY_NON_TEXT = "empty-non-text";
     const OPTION_SKIP_XSD = "skip-xsd";
+    const OPTION_REDIRECTS = 'redirects';
+    const OPTION_CATEGORY_PATH_URLS = "category-path-urls";
 
     /** @var ObjectManagerInterface */
     protected $objectManager;
@@ -138,6 +140,20 @@ class ProductImportCommand extends Command
                 ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE
             ),
             new InputOption(
+                self::OPTION_REDIRECTS,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'url_rewrite: Handle 301 redirects (delete: delete all existing and new url-rewrite redirects)',
+                ImportConfig::KEEP_REDIRECTS
+            ),
+            new InputOption(
+                self::OPTION_CATEGORY_PATH_URLS,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'url_rewrite: Handle category paths (delete: delete all existing and new category url-rewrites)',
+                ImportConfig::KEEP_CATEGORY_REWRITES
+            ),
+            new InputOption(
                 self::OPTION_SKIP_XSD,
                 null,
                 InputOption::VALUE_NONE,
@@ -173,6 +189,8 @@ class ProductImportCommand extends Command
         $config->duplicateUrlKeyStrategy = $input->getOption(self::OPTION_URL_KEY_STRATEGY);
         $config->emptyTextValueStrategy = $input->getOption(self::OPTION_EMPTY_TEXT);
         $config->emptyNonTextValueStrategy = $input->getOption(self::OPTION_EMPTY_NON_TEXT);
+        $config->handleRedirects = $input->getOption(self::OPTION_REDIRECTS);
+        $config->handleCategoryRewrites = $input->getOption(self::OPTION_CATEGORY_PATH_URLS);
 
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 

@@ -25,3 +25,17 @@ When the url of a product page changes, by default Magento keeps the old url and
 However, the number of redirects is a known source of database bloat. When a shop is set up, and many products move from one category to the next, the url_rewrite table may be filled with hundreds of thousands of senseless redirects. In this case, the "delete" option is handy. It removes all 301's from the database and creates no new 301's in this run.
 
 Use in a production shop is inadvisable. It is a SEO killer: products will no longer be accessible via old urls that may exist on the internet.
+
+## Delete category path urls
+
+If your shop has "Use Categories Path for Product URLs" (Configuration / Catalog / Search Engine Optimization) turned off, there is no sense creating url_rewrites with category paths (i.e. gear/bags/joust-duffie-bag.html), they are not used. But Magento and this library will create them anyway.
+
+This takes a lot of time in url_rewrite creation and it takes up most of the records in the url_rewrite table.
+
+This is how to get rid of these rewrites:
+
+    bin/magento bigbridge:product:urlrewrite --categories delete
+
+It makes sure these are not created, and will be removed if they are exist.
+
+Note that this will also remove existing category path product url redirects.

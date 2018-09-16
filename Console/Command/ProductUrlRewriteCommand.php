@@ -19,7 +19,9 @@ use BigBridge\ProductImport\Api\UrlRewriteUpdater;
 class ProductUrlRewriteCommand extends Command
 {
     const ARGUMENT_STOREVIEW_CODE = 'storeview';
-    const ARGUMENT_REDIRECTS = 'redirects';
+
+    const OPTION_REDIRECTS = 'redirects';
+    const OPTION_CATEGORY_PATH_URLS = "category-path-urls";
 
     /** @var ObjectManagerInterface */
     protected $objectManager;
@@ -47,11 +49,19 @@ class ProductUrlRewriteCommand extends Command
                 []
             ),
             new InputOption(
-                self::ARGUMENT_REDIRECTS,
+                self::OPTION_REDIRECTS,
                 'r',
                 InputOption::VALUE_OPTIONAL,
                 'Handle 301 redirects (delete: delete all existing and new url-rewrite redirects)',
                 ImportConfig::KEEP_REDIRECTS
+            ),
+            new InputOption(
+                self::OPTION_CATEGORY_PATH_URLS,
+                'c',
+                InputOption::VALUE_OPTIONAL,
+                'Handle category paths (delete: delete all existing and new category url-rewrites)',
+                ImportConfig::KEEP_CATEGORY_REWRITES
+
             ),
         ]);
     }
@@ -71,7 +81,8 @@ class ProductUrlRewriteCommand extends Command
         $information = $this->objectManager->create(Information::class);
 
         $storeViewCodes = $input->getOption(self::ARGUMENT_STOREVIEW_CODE);
-        $handleRedirects = $input->getOption(self::ARGUMENT_REDIRECTS);
+        $handleRedirects = $input->getOption(self::OPTION_REDIRECTS);
+        $handleCategories = $input->getOption(self::OPTION_CATEGORY_PATH_URLS);
 
         if (empty($storeViewCodes)) {
             $storeViewCodes =  $information->getNonGlobalStoreViewCodes();
@@ -85,7 +96,11 @@ class ProductUrlRewriteCommand extends Command
         $logger = new UrlRewriteUpdateCommandLogger($output);
 
         try {
-            $urlRewriteUpdater->updateUrlRewrites($storeViewCodes, $logger, $handleRedirects === ImportConfig::KEEP_REDIRECTS);
+            $urlRewriteUpdater->updateUrlRewrites(
+                $storeViewCodes,
+                $logger,
+                $handleRedirects === ImportConfig::KEEP_REDIRECTS,
+                $handleCategories === ImportConfig::KEEP_CATEGORY_REWRITES);
         } catch (Exception $e) {
             $output->writeln("<error>" . $e->getMessage() . "</error>");
             return \Magento\Framework\Console\Cli::RETURN_FAILURE;

@@ -583,6 +583,26 @@ Entries in the table url_rewrite are automatically generated, but only if the at
 
 This is default Magento behaviour. Invisible products (like most configurable variants) need no urls.
 
+The following config options are applicable; use with care.
+
+When the url of a product page changes, by default Magento keeps the old url and creates an HTTP response 301 REDIRECT when this url is requested. If this Magento option is turned off, no redirects will be stored.
+
+However, the number of redirects is a known source of database bloat. When a shop is set up, and many products move from one category to the next, the url_rewrite table may be filled with hundreds of thousands of senseless redirects. In this case, the "delete" option is handy. It removes all 301's from the database and creates no new 301's in this run.
+
+Use in a production shop is inadvisable. It is a SEO killer: products will no longer be accessible via old urls that may exist on the internet.
+
+    $config->handleRedirects = "delete";
+
+If your shop has "Use Categories Path for Product URLs" (Configuration / Catalog / Search Engine Optimization) turned off, there is no sense creating url_rewrites with category paths (i.e. gear/bags/joust-duffie-bag.html), they are not used. But Magento and this library will create them anyway.
+
+This takes a lot of time in url_rewrite creation and it takes up most of the records in the url_rewrite table.
+
+This is how to get rid of these rewrites:
+
+    $config->handleCategoryRewrites = "delete";
+
+Note that this will also remove existing category path product url redirects.
+
 ## Custom options
 
 Magento allows you to specify unique "attributes" to a product that are applicable to that single product alone. These are called custom options.

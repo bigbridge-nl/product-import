@@ -100,7 +100,7 @@ class MemoryTest extends \Magento\TestFramework\TestCase\AbstractController
         echo "Updates: " . sprintf('%.1f', $time) . " seconds; " . $memory . " kB \n";
 
         $this->assertSame([], $lastErrors);
-        $this->assertLessThan(66, $memory);
+        $this->assertLessThan(67, $memory);
 
         $afterPeakMemory = memory_get_peak_usage();
 

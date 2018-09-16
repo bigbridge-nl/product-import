@@ -156,4 +156,14 @@ class ImportConfig
 
     const KEEP_REDIRECTS = "keep"; // keep existing redirects, create new ones if the Magento settings is thus set
     const DELETE_REDIRECTS = "delete"; // remove any existing redirects, and do not create new ones
+
+    /**
+     * How to handle product url_rewrites with category paths?
+     *
+     * @string
+     */
+    public $handleCategoryRewrites = self::KEEP_CATEGORY_REWRITES;
+
+    const KEEP_CATEGORY_REWRITES = "keep"; // keep url_rewrites with category paths, create new ones
+    const DELETE_CATEGORY_REWRITES = "delete"; // remove any existing redirects, and do not create new ones
 }

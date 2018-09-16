@@ -286,7 +286,9 @@ class ProductStorage
         $this->tierPriceStorage->updateTierPrices($validProducts);
 
         // url_rewrite (must be done after url_key and category_id)
-        $this->urlRewriteStorage->updateRewrites($validProducts, $config->handleRedirects === ImportConfig::KEEP_REDIRECTS);
+        $this->urlRewriteStorage->updateRewrites($validProducts,
+            $config->handleRedirects === ImportConfig::KEEP_REDIRECTS,
+            $config->handleCategoryRewrites === ImportConfig::KEEP_CATEGORY_REWRITES);
 
         $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
         $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);
