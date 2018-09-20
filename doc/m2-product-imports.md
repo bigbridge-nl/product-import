@@ -12,6 +12,12 @@ http://firegento-fastsimpleimport2.readthedocs.io/en/latest/
 * Import categories
 * Import bundles
 
+### Magmi for Magento 2
+
+https://github.com/macopedia/magmi-m2/tree/magento2
+
+* simple and configurable products, categories, images and simple-configurable links
+
 ### H&O Import
 
 https://github.com/ho-nl/magento2-Ho_Import
@@ -20,16 +26,16 @@ https://github.com/ho-nl/magento2-Ho_Import
 
 https://github.com/techdivision/import
 
-### Commercial
+## Commercial
 
-## Firebear
+### Firebear
 
 https://firebearstudio.com/the-improved-import.html
 
 * Creation of product attributes
 * Import jobs
 
-## Commerce Extensions
+### Commerce Extensions
 
 https://www.commerceextensions.com/magento-product-import-export-magento-2.html
 
@@ -40,33 +46,33 @@ https://www.commerceextensions.com/magento-product-import-export-magento-2.html
 * Explicit choice of insert/update and replace for images, websites, tier prices, categories
 * Auto create categories
 
-## Mage Bees
+### Mage Bees
 
 https://www.magebees.com/magento-2-import-export-products-extension.html
 
 * Extended user manual
 * Custom options
 
-## Magesales
+### Magesales
 
 https://www.magesales.com/magento-2-product-import-export.html
 
 * Super attribute pricing for configurable product (?)
 
-## BSS
+### BSS
 
 https://bsscommerce.com/magento-2-import-export-product-attributes.html
 
 * Import of extra image information
 
-## CED Commerce
+### CED Commerce
 
 https://cedcommerce.com/magento-2-extensions/marketplace/vendor-mass-import-export-addon
 
 * No technical details given
 * For vendors (?)
 
-## VNEComs
+### VNEComs
 
 https://www.vnecoms.com/magento2-marketplace/vendor-mass-import-export-magento2.html
 
