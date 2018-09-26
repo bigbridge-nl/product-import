@@ -246,7 +246,7 @@ class ImageStorage
             foreach ($imageData as $imageDatum) {
 
                 $storagePath = $imageDatum['value'];
-                $simpleStoragePath = preg_replace('/_\d+\./', '.', $storagePath);
+                $simpleStoragePath = preg_replace('/_\d+\.([^\.]+)$/', '.$1', $storagePath);
 
                 if ($simpleStoragePath === $image->getDefaultStoragePath()) {
                     $found = true;
