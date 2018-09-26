@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2 : Remove version from composer.json
+
+composer.json should not contain a version number 
+
+see [getcomposer](https://getcomposer.org/doc/04-schema.md#version)
+
 ## 1.1.1 : Fix for duplicate images
 
 Images with _[d]. (where [d] is a series of decimals) in the filename were duplicated on updates.

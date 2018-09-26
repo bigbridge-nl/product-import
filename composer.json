@@ -2,7 +2,6 @@
     "name": "bigbridge/product-import",
     "description": "Imports products with raw database queries",
     "type": "magento2-module",
-    "version": "1.0.0",
     "require": {
       "php": "~7.0"
     },
