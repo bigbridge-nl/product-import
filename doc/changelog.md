@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1 : Fix for duplicate images
+
+Images with _[d]. (where [d] is a series of decimals) in the filename were duplicated on updates.
+
 ## 1.1.0 : Category path url-rewrites - 16-09-2018
 
 Added the option to remove category path url-rewrites.
