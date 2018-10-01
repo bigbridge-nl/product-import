@@ -179,6 +179,30 @@ class Importer
     }
 
     /**
+     * Creates a Product object for an existing product, whose product type is unknown.
+     * Returns false if no product with $sku exists.
+     *
+     * @param string $sku
+     * @return BundleProduct|ConfigurableProduct|DownloadableProduct|GroupedProduct|SimpleProduct|VirtualProduct|false
+     */
+    public function getExistingProductBySku(string $sku)
+    {
+        return $this->productEntityStorage->getExistingProductBySku($sku);
+    }
+
+    /**
+     * Creates a Product object for an existing product, whose product type is unknown.
+     * Returns false if no product with $id exists.
+     *
+     * @param int $id
+     * @return BundleProduct|ConfigurableProduct|DownloadableProduct|GroupedProduct|SimpleProduct|VirtualProduct|false
+     */
+    public function getExistingProductById(int $id)
+    {
+        return $this->productEntityStorage->getExistingProductById($id);
+    }
+
+    /**
      * @param Product $product
      * @throws \Exception
      */

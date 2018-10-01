@@ -682,6 +682,18 @@ When the id is specified, it is treated as the identifier of an object. The sku 
 
 Import by id always concerns updates, not inserts. When a non-existing id is used, an error is added to the product.
 
+## Product type unknown
+
+If the product type is unknown, you can ask the library for the Product, by giving the sku:
+
+    $product = $importer->getExistingProductBySku($sku);
+    
+or the id
+
+    $product = $importer->getExistingProductById($id);    
+    
+The importer will return an object with the correct class, or false if no product with the id or sku could be found.    
+
 ## Delete products
 
 While the library's main purpose is to import products, it can delete products as well.

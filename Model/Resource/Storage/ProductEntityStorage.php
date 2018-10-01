@@ -2,8 +2,14 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
+use BigBridge\ProductImport\Api\Data\BundleProduct;
+use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\DownloadableProduct;
+use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
@@ -59,6 +65,103 @@ class ProductEntityStorage
         }
 
         return $this->getExistingSkus($skus);
+    }
+
+    /**
+     * Use this function to create a Product object for an existing product when its type is not given in the import.
+     *
+     * @param string $sku
+     * @return BundleProduct|ConfigurableProduct|DownloadableProduct|GroupedProduct|SimpleProduct|VirtualProduct|false
+     */
+    public function getExistingProductBySku(string $sku)
+    {
+        $type = $this->db->fetchSingleCell("
+            SELECT `type_id`
+            FROM {$this->metaData->productEntityTable}
+            WHERE `sku` = ?
+        ", [
+            $sku
+        ]);
+
+        if (!$type) {
+            return false;
+        }
+
+        switch ($type) {
+            case SimpleProduct::TYPE_SIMPLE:
+                $product = new SimpleProduct($sku);
+                break;
+            case VirtualProduct::TYPE_VIRTUAL:
+                $product = new VirtualProduct($sku);
+                break;
+            case DownloadableProduct::TYPE_DOWNLOADABLE:
+                $product = new DownloadableProduct($sku);
+                break;
+            case GroupedProduct::TYPE_GROUPED:
+                $product = new GroupedProduct($sku);
+                break;
+            case ConfigurableProduct::TYPE_CONFIGURABLE:
+                $product = new ConfigurableProduct($sku);
+                break;
+            case BundleProduct::TYPE_BUNDLE:
+                $product = new BundleProduct($sku);
+                break;
+            default:
+                die('Unknown product type: ' . $type);
+        }
+
+        return $product;
+    }
+
+    /**
+     * Use this function to create a Product object for an existing product when its type is not given in the import.
+     *
+     * @param string $sku
+     * @return BundleProduct|ConfigurableProduct|DownloadableProduct|GroupedProduct|SimpleProduct|VirtualProduct|false
+     */
+    public function getExistingProductById(int $id)
+    {
+        $row = $this->db->fetchRow("
+            SELECT `type_id`, `sku`
+            FROM {$this->metaData->productEntityTable}
+            WHERE `entity_id` = ?
+        ", [
+            $id
+        ]);
+
+        if (!$row) {
+            return false;
+        }
+
+        $type = $row['type_id'];
+        $sku = $row['sku'];
+
+        switch ($type) {
+            case SimpleProduct::TYPE_SIMPLE:
+                $product = new SimpleProduct($sku);
+                break;
+            case VirtualProduct::TYPE_VIRTUAL:
+                $product = new VirtualProduct($sku);
+                break;
+            case DownloadableProduct::TYPE_DOWNLOADABLE:
+                $product = new DownloadableProduct($sku);
+                break;
+            case GroupedProduct::TYPE_GROUPED:
+                $product = new GroupedProduct($sku);
+                break;
+            case ConfigurableProduct::TYPE_CONFIGURABLE:
+                $product = new ConfigurableProduct($sku);
+                break;
+            case BundleProduct::TYPE_BUNDLE:
+                $product = new BundleProduct($sku);
+                break;
+            default:
+                die('Unknown product type: ' . $type);
+        }
+
+        $product->id = $id;
+
+        return $product;
     }
 
     /**
