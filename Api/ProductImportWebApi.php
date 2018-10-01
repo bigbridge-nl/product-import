@@ -17,6 +17,7 @@ class ProductImportWebApi implements ProductImportWebApiInterface
     const OPTION_IMAGE_CACHING = "image-caching";
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
     const OPTION_PATH_SEPARATOR = 'path-separator';
+    const OPTION_IMAGE = 'image';
     const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
     const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
     const OPTION_URL_KEY_SOURCE = "url-key-source";
@@ -88,6 +89,10 @@ class ProductImportWebApi implements ProductImportWebApiInterface
 
         if (isset($parameters[self::OPTION_IMAGE_SOURCE_DIR])) {
             $config->imageSourceDir = $parameters[self::OPTION_IMAGE_SOURCE_DIR];
+        }
+
+        if (isset($parameters[self::OPTION_IMAGE])) {
+            $config->imageStrategy = $parameters[self::OPTION_IMAGE];
         }
 
         if (isset($parameters[self::OPTION_IMAGE_CACHE_DIR])) {

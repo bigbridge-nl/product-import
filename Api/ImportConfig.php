@@ -137,6 +137,18 @@ class ImportConfig
     const EXISTING_IMAGE_STRATEGY_HTTP_CACHING = 'http-caching';
 
     /**
+     * How to deal with the imported images?
+     * - add: only add new images and replace existing images with the same name
+     * - set: like add, but delete existing images that are not named in the import
+     *
+     * @var string
+     */
+    public $imageStrategy = self::IMAGE_STRATEGY_ADD;
+
+    const IMAGE_STRATEGY_ADD = 'add'; // Only add and update images
+    const IMAGE_STRATEGY_SET = 'set'; // Add and update images; and also remove existing product images not named in the import
+
+    /**
      * How to handle products that change type?
      *
      * @var string

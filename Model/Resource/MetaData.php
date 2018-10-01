@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
@@ -259,6 +260,9 @@ class MetaData
     /** @var LinkInfo[] */
     public $linkInfo;
 
+    /** @var int[] */
+    public $imageAttributeIds;
+
     /**
      * MetaData constructor.
      *
@@ -350,6 +354,7 @@ class MetaData
         $this->productAttributeSetMap = $this->getProductAttributeSetMap();
         $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
+        $this->imageAttributeIds = $this->getImageAttributeIds();
     }
 
     /**
@@ -559,6 +564,16 @@ class MetaData
         }
 
         return $info;
+    }
+
+    protected function getImageAttributeIds()
+    {
+        return [
+            $this->productEavAttributeInfo[ProductStoreView::BASE_IMAGE]->attributeId,
+            $this->productEavAttributeInfo[ProductStoreView::SMALL_IMAGE]->attributeId,
+            $this->productEavAttributeInfo[ProductStoreView::SWATCH_IMAGE]->attributeId,
+            $this->productEavAttributeInfo[ProductStoreView::THUMBNAIL_IMAGE]->attributeId,
+        ];
     }
 
     protected function getMediaGalleryAttributeId()

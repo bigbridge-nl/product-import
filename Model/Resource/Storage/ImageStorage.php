@@ -184,26 +184,34 @@ class ImageStorage
 
     /**
      * @param Product[] $products
+     * @param bool $removeObsoleteImages
      */
-    public function storeProductImages(array $products)
+    public function storeProductImages(array $products, bool $removeObsoleteImages)
     {
         foreach ($products as $product) {
-
-            if (empty($product->getImages())) {
-                continue;
-            }
-
-            $this->storeImages($product);
+            $this->storeImages($product, $removeObsoleteImages);
         }
 
         $this->insertImageRoles($products);
     }
 
-    protected function storeImages(Product $product)
+    protected function storeImages(Product $product, bool $removeObsoleteImages)
     {
+        // important! if no images are specified, do not remove all images
+        if (empty($product->getImages())) {
+            return;
+        }
+
+        $imageData = $this->loadExistingImageData($product);
+
         // separates new from existing images
         // add valueId and actualStoragePath to existing images
-        list($existingImages, $newImages) = $this->splitNewAndExistingImages($product);
+        list($existingImages, $newImages) = $this->splitNewAndExistingImages($product, $imageData);
+
+        // if specified in the config, remove obsolete images
+        if ($removeObsoleteImages) {
+            $this->removeObsoleteImages($product, $existingImages, $imageData);
+        }
 
         // stores images and metadata
         // add valueId and actualStoragePath to new images
@@ -223,10 +231,65 @@ class ImageStorage
         }
     }
 
-    public function splitNewAndExistingImages(Product $product)
+    /**
+     * Removes all images in $imageData (raw database information) that are not found in $existingImages (new import values)
+     * from gallery tables, product attributes, and file system.
+     *
+     * @param Product $product
+     * @param array $existingImages
+     * @param array $imageData
+     */
+    protected function removeObsoleteImages(Product $product, array $existingImages, array $imageData)
     {
-        // get data from existing product images
-        $imageData = $this->db->fetchAllAssoc("
+        $obsoleteValueIds = [];
+
+        // walk through existing raw database information
+        foreach ($imageData as $imageDatum) {
+
+            $storagePath = $imageDatum['value'];
+
+            // check if available in current import (new or update)
+            $found = false;
+            foreach ($existingImages as $image) {
+                if ($image->getActualStoragePath() === $storagePath) {
+                    $found = true;
+                }
+            }
+
+            if (!$found) {
+
+                // entry from gallery tables
+                $obsoleteValueIds[] = $imageDatum['value_id'];
+
+                // remove from all image role attributes
+                $this->db->execute("
+                    DELETE FROM `{$this->metaData->productEntityTable}_varchar`
+                    WHERE 
+                        entity_id = ? AND
+                        attribute_id IN (" . $this->db->getMarks($this->metaData->imageAttributeIds) . ") AND
+                        value = ?
+                ", array_merge(
+                    [$product->id],
+                    $this->metaData->imageAttributeIds,
+                    [$storagePath]
+                ));
+
+                // remove from file system
+                @unlink(self::PRODUCT_IMAGE_PATH . $storagePath);
+            }
+        }
+
+        $this->db->deleteMultiple($this->metaData->mediaGalleryTable, 'value_id', $obsoleteValueIds);
+    }
+
+    /**
+     * Load data from existing product images
+     *
+     * @param Product $product
+     */
+    protected function loadExistingImageData(Product $product)
+    {
+        return $this->db->fetchAllAssoc("
             SELECT M.`value_id`, M.`value`, M.`disabled` 
             FROM {$this->metaData->mediaGalleryTable} M
             INNER JOIN {$this->metaData->mediaGalleryValueToEntityTable} E ON E.`value_id` = M.`value_id`
@@ -235,7 +298,10 @@ class ImageStorage
             $product->id,
             $this->metaData->mediaGalleryAttributeId
         ]);
+    }
 
+    public function splitNewAndExistingImages(Product $product, array $imageData)
+    {
         $existingImages = [];
         $newImages = [];
 

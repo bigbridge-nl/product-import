@@ -502,6 +502,16 @@ Again, this can be store on the store view level:
 
 Note: the library does not remove existing images that are not mentioned by any of your addImage calls.
 
+### Image strategy
+
+By default, the importer does not delete images. Images are only added and updated.
+
+If you want the importer to delete existing product images that are not present in the current import, use this
+
+     $config->imageStrategy = ImportConfig::IMAGE_STRATEGY_SET;
+     
+However, the importer will still not remove all images if none are added to a product. This is a safety precaution.       
+
 ### Image caching
 
 Downloading images can be a slow process. That's why the library offers different strategies of dealing with images.

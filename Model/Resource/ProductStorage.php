@@ -282,7 +282,8 @@ class ProductStorage
         $this->productEntityStorage->insertWebsiteIds($validProducts);
         $this->stockItemStorage->storeStockItems($validProducts);
         $this->linkedProductStorage->updateLinkedProducts($validProducts);
-        $this->imageStorage->storeProductImages($validProducts);
+        $this->imageStorage->storeProductImages($validProducts,
+            $config->imageStrategy === ImportConfig::IMAGE_STRATEGY_SET);
         $this->tierPriceStorage->updateTierPrices($validProducts);
 
         // url_rewrite (must be done after url_key and category_id)

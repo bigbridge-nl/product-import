@@ -35,6 +35,7 @@ class ProductImportCommand extends Command
     const OPTION_SKIP_XSD = "skip-xsd";
     const OPTION_REDIRECTS = 'redirects';
     const OPTION_CATEGORY_PATH_URLS = "category-path-urls";
+    const OPTION_IMAGE = "image";
 
     /** @var ObjectManagerInterface */
     protected $objectManager;
@@ -89,6 +90,13 @@ class ProductImportCommand extends Command
                 InputOption::VALUE_OPTIONAL,
                 'Changing product type: allowed, forbidden, non-destructive',
                 ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE
+            ),
+            new InputOption(
+                self::OPTION_IMAGE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Image handling: add (add or update), set (add, update and delete)',
+                ImportConfig::IMAGE_STRATEGY_ADD
             ),
             new InputOption(
                 self::OPTION_IMAGE_CACHING,
@@ -182,6 +190,7 @@ class ProductImportCommand extends Command
         $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
         $config->autoCreateCategories = $input->getOption(self::OPTION_AUTO_CREATE_CATEGORIES);
         $config->productTypeChange = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE);
+        $config->imageStrategy = $input->getOption(self::OPTION_IMAGE);
         $config->existingImageStrategy = $input->getOption(self::OPTION_IMAGE_CACHING);
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);

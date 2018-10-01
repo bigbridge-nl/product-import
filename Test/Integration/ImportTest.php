@@ -545,6 +545,85 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $importer->flush();
 
         $this->checkImageData($product2, $media, $values);
+
+        // remove two images
+        // image strategy: set
+
+        $config = new ImportConfig();
+        $config->imageStrategy = ImportConfig::IMAGE_STRATEGY_SET;
+
+        $config->resultCallback = function(Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $product3 = new SimpleProduct("ducky1-product-import");
+        $product3->setAttributeSetByName("Default");
+        $global = $product3->global();
+        $global->setName("Ducky 1");
+        $global->setPrice('1.00');
+
+        $image = $product3->addImage(__DIR__ . '/../images/duck1.jpg');
+        $product3->global()->setImageGalleryInformation($image, "First duck", 1, true);
+        $product3->global()->setImageRole($image, ProductStoreView::THUMBNAIL_IMAGE);
+
+        $importer->importSimpleProduct($product3);
+        $importer->flush();
+
+        $attributeId = self::$metaData->mediaGalleryAttributeId;
+
+        $this->assertEquals([], $errors);
+        $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck1.jpg'));
+        $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck2.png'));
+
+        $media = [
+            [$attributeId, '/d/u/duck1.jpg', 'image', '0'],
+        ];
+
+        $values = [
+            ['0', $product3->id, 'First duck', '1', '0']
+        ];
+
+        $this->checkImageData($product3, $media, $values);
+
+        $productS = self::$repository->get("ducky1-product-import", false, 0, true);
+        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());
+        $this->assertEquals(null, $productS->getImage());
+        $this->assertEquals(null, $productS->getSmallImage());
+        
+        // no images? do not remove images
+
+        $product4 = new SimpleProduct("ducky1-product-import");
+        $product4->setAttributeSetByName("Default");
+        $global = $product4->global();
+        $global->setName("Ducky 1");
+        $global->setPrice('1.00');
+
+        $importer->importSimpleProduct($product4);
+        $importer->flush();
+
+        $attributeId = self::$metaData->mediaGalleryAttributeId;
+
+        $this->assertEquals([], $errors);
+        $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck1.jpg'));
+        $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck2.png'));
+
+        $media = [
+            [$attributeId, '/d/u/duck1.jpg', 'image', '0'],
+        ];
+
+        $values = [
+            ['0', $product4->id, 'First duck', '1', '0']
+        ];
+
+        $this->checkImageData($product4, $media, $values);
+
+        $productS = self::$repository->get("ducky1-product-import", false, 0, true);
+        $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());
+        $this->assertEquals(null, $productS->getImage());
+        $this->assertEquals(null, $productS->getSmallImage());
+        
     }
 
     private function checkImageData($product, $mediaData, $valueData)
@@ -577,6 +656,50 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         ");
 
         $this->assertEquals($valueData, $results);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testGetExistingProduct()
+    {
+        $errors = [];
+
+        $config = new ImportConfig();
+
+        $config->resultCallback = function (Product $product) use (&$errors) {
+            $errors = array_merge($errors, $product->getErrors());
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $product1 = new VirtualProduct("spooky-action-at-distance");
+        $product1->setAttributeSetByName("Default");
+        $global = $product1->global();
+        $global->setName("Spooky");
+        $global->setPrice('1.11');
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->assertEquals([], $errors);
+
+        // update by sku
+        $product2 = $importer->getExistingProductBySku("spooky-action-at-distance");
+        $importer->importSimpleProduct($product2);
+        $importer->flush();
+
+        $this->assertEquals(VirtualProduct::class, get_class($product2));
+        $this->assertEquals([], $errors);
+
+        // update by id
+        $product3 = $importer->getExistingProductById($product1->id);
+        $importer->importSimpleProduct($product3);
+        $importer->flush();
+
+        $this->assertEquals(VirtualProduct::class, get_class($product3));
+        $this->assertEquals($product1->id, $product3->id);
+        $this->assertEquals([], $errors);
     }
 
     /**
