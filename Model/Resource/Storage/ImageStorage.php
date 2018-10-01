@@ -385,14 +385,22 @@ class ImageStorage
 
         $targetPath = self::PRODUCT_IMAGE_PATH . $image->getActualStoragePath();
 
-        // only if the file is different in content will the old file be removed
-        if (!$this->filesAreEqual($targetPath, $image->getTemporaryStoragePath())) {
+        if (file_exists($targetPath)) {
 
-            unlink($targetPath);
+            // only if the file is different in content will the old file be removed
+            if (!$this->filesAreEqual($targetPath, $image->getTemporaryStoragePath())) {
 
-            // link image from its temporary position to its final position
+                unlink($targetPath);
+
+                // link image from its temporary position to its final position
+                link($image->getTemporaryStoragePath(), $targetPath);
+
+            }
+
+        } else {
+
+            // the file that should have been there was removed
             link($image->getTemporaryStoragePath(), $targetPath);
-
         }
     }
 
