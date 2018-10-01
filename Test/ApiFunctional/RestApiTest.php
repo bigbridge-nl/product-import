@@ -7,7 +7,7 @@ use SimpleXMLElement;
 /**
  * @author Patrick van Bergen
  */
-class RestApiTest extends \PHPUnit_Framework_TestCase
+class RestApiTest extends \PHPUnit\Framework\TestCase
 {
     const TEST_ADMIN_USER_USERNAME = 'admin';//\Magento\TestFramework\Bootstrap::ADMIN_NAME;
     const TEST_ADMIN_USER_PASSWORD = 'admin123';//\Magento\TestFramework\Bootstrap::ADMIN_PASSWORD;
