@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.2.0 : Set images; import with unknown type - 01-10-2018
+
+1) By default, the importer does not delete images. Images are only added and updated.
+
+If you want the importer to delete existing product images that are not present in the current import, use this
+
+     $config->imageStrategy = ImportConfig::IMAGE_STRATEGY_SET;
+     
+This will set images as they are named in the import. However, the importer will still not remove all images if none are added to a product. This is a safety precaution.
+
+2) If the product type is unknown, you can ask the library for the Product, by giving the sku:
+
+    $product = $importer->getExistingProductBySku($sku);
+
+or the id
+
+    $product = $importer->getExistingProductById($id);    
+    
+The importer will return an object with the correct class, or false if no product with the id or sku could be found.    
+
 ## 1.1.2 : Remove version from composer.json
 
 composer.json should not contain a version number 

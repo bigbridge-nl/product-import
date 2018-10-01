@@ -510,7 +510,7 @@ If you want the importer to delete existing product images that are not present 
 
      $config->imageStrategy = ImportConfig::IMAGE_STRATEGY_SET;
      
-However, the importer will still not remove all images if none are added to a product. This is a safety precaution.       
+This will set images as they are named in the import. However, the importer will still not remove all images if none are added to a product. This is a safety precaution.       
 
 ### Image caching
 
