@@ -400,7 +400,7 @@ class ImageStorage
         } else {
 
             // the file that should have been there was removed
-            $targetDir = dirname(self::PRODUCT_IMAGE_PATH . $targetPath);
+            $targetDir = dirname($targetPath);
             if (!file_exists($targetDir)) {
                 mkdir($targetDir, 0777, true);
             }
