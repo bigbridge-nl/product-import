@@ -48,9 +48,6 @@ class ImageStorage
         if (!file_exists($config->imageCacheDir)) {
             mkdir($config->imageCacheDir, 0777, true);
         }
-        if (!file_exists(self::PRODUCT_IMAGE_PATH)) {
-            mkdir(self::PRODUCT_IMAGE_PATH, 0777, true);
-        }
 
         foreach ($products as $product) {
             foreach ($product->getImages() as $image) {
