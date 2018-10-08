@@ -56,7 +56,7 @@ class LinkedProductReferenceResolver
                     if (array_key_exists($sku, $sku2id)) {
                         $ids[] = $sku2id[$sku];
                     } else {
-                        throw new Exception("Referenced product with sku " . $sku . " should have been created before, but it cannot be found");
+                        $product->addError("Referenced product with sku " . $sku . " should have been created before, but it cannot be found");
                     }
                 }
 

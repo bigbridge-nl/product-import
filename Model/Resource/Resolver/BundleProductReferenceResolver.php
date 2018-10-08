@@ -57,7 +57,7 @@ class BundleProductReferenceResolver
                         if (array_key_exists($sku, $sku2id)) {
                             $selection->setProductId($sku2id[$sku]);
                         } else {
-                            throw new Exception("Bundle product selection with sku " . $sku . " should have been created before, but it cannot be found");
+                            $product->addError("Bundle product selection with sku " . $sku . " should have been created before, but it cannot be found");
                         }
                     }
                 }

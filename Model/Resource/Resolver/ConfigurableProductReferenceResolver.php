@@ -51,7 +51,7 @@ class ConfigurableProductReferenceResolver
                 if (array_key_exists($sku, $sku2id)) {
                     $variantIds[] = $sku2id[$sku];
                 } else {
-                    throw new Exception("Configurable product variant with sku " . $sku . " should have been created before, but it cannot be found");
+                    $product->addError("Configurable product variant with sku " . $sku . " should have been created before, but it cannot be found");
                 }
             }
 

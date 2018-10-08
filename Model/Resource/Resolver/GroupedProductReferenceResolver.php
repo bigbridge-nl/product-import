@@ -56,7 +56,7 @@ class GroupedProductReferenceResolver
                 if (array_key_exists($sku, $sku2id)) {
                     $member->setProductId($sku2id[$sku]);
                 } else {
-                    throw new Exception("Grouped product member with sku " . $sku . " should have been created before, but it cannot be found");
+                    $product->addError("Grouped product member with sku " . $sku . " should have been created before, but it cannot be found");
                 }
             }
         }
