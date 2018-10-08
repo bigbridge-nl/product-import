@@ -429,6 +429,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
     public function testImages()
     {
         @unlink(BP . '/pub/media/catalog/product/d/u/duck1.jpg');
+        @unlink(BP . '/pub/media/catalog/product/d/u/duck1_1.jpg');
         @unlink(BP . '/pub/media/catalog/product/d/u/duck2.png');
         @unlink(BP . '/pub/media/catalog/product/d/u/duck3.png');
         @unlink(BP . '/pub/media/catalog/product/d/u/duck3_1.png');
@@ -468,6 +469,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $this->assertEquals([], $errors);
         $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck1.jpg'));
+        $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck1_1.jpg'));
         $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck2.png'));
 
         $media = [
@@ -536,6 +538,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $productS = self::$repository->get("ducky1-product-import", false, 0, true);
         $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());
+        $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck1_1.jpg'));
         $this->assertEquals('/d/u/duck2.png', $productS->getImage());
         $this->assertEquals('/d/u/duck3_1.png', $productS->getSmallImage());
 
@@ -575,6 +578,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $this->assertEquals([], $errors);
         $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck1.jpg'));
+        $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck1_1.jpg'));
         $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck2.png'));
 
         $media = [
@@ -607,6 +611,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $this->assertEquals([], $errors);
         $this->assertTrue(file_exists(BP . '/pub/media/catalog/product/d/u/duck1.jpg'));
+        $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck1_1.jpg'));
         $this->assertFalse(file_exists(BP . '/pub/media/catalog/product/d/u/duck2.png'));
 
         $media = [
@@ -623,7 +628,6 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());
         $this->assertEquals(null, $productS->getImage());
         $this->assertEquals(null, $productS->getSmallImage());
-        
     }
 
     private function checkImageData($product, $mediaData, $valueData)
@@ -1676,6 +1680,10 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertTrue(file_exists(BP . "/pub/media/downloadable/files/samples/d/u/duck3.png"));
 
         $this->assertTrue(!file_exists(BP . "/pub/media/downloadable/files/links/d/u/duck1_1.jpg"));
+
+        @unlink(BP . '/pub/media/downloadable/files/links/d/u/duck1.jpg');
+        @unlink(BP . '/pub/media/downloadable/files/link_samples/d/u/duck2.png');
+        @unlink(BP . '/pub/media/downloadable/files/samples/d/u/duck3.png');
     }
 
     /**

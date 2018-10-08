@@ -274,8 +274,27 @@ class ImageStorage
                     [$storagePath]
                 ));
 
-                // remove from file system
-                @unlink(self::PRODUCT_IMAGE_PATH . $storagePath);
+                // check if the image is used by other products
+                // (this cannot be the case in standard Magento)
+                $usageCount = $this->db->fetchSingleCell("
+                    SELECT COUNT(*)
+                    FROM `{$this->metaData->productEntityTable}_varchar`
+                    WHERE 
+                        attribute_id IN (" . $this->db->getMarks($this->metaData->imageAttributeIds) . ") AND
+                        value = ?
+                ", array_merge(
+                    $this->metaData->imageAttributeIds,
+                    [$storagePath]
+                ));
+
+                // only remove image from filesystem if it is not used by other products
+                // note! this only checks if the image has a role in a product, not if it is used in a gallery
+                // the real check would be too slow
+                if ($usageCount == 0) {
+                    // remove from file system
+                    @unlink(self::PRODUCT_IMAGE_PATH . $storagePath);
+                }
+
             }
         }
 
@@ -284,6 +303,7 @@ class ImageStorage
 
     /**
      * Load data from existing product images
+     * Returns image.jpg before image_1.jpg, image_2.jpg, ...
      *
      * @param Product $product
      */
@@ -293,13 +313,22 @@ class ImageStorage
             SELECT M.`value_id`, M.`value`, M.`disabled` 
             FROM {$this->metaData->mediaGalleryTable} M
             INNER JOIN {$this->metaData->mediaGalleryValueToEntityTable} E ON E.`value_id` = M.`value_id`
-            WHERE E.`entity_id` = ? AND M.`attribute_id` = ? 
+            WHERE E.`entity_id` = ? AND M.`attribute_id` = ?
+            ORDER BY M.`value_id`
         ", [
             $product->id,
             $this->metaData->mediaGalleryAttributeId
         ]);
     }
 
+    /**
+     * An image "exists" if its path is stored in the database gallery for this product (perhaps with a suffix)
+     * otherwise it is "new".
+     *
+     * @param Product $product
+     * @param array $imageData
+     * @return array
+     */
     public function splitNewAndExistingImages(Product $product, array $imageData)
     {
         $existingImages = [];
@@ -317,7 +346,7 @@ class ImageStorage
                 if ($simpleStoragePath === $image->getDefaultStoragePath()) {
                     $found = true;
                     $image->valueId = $imageDatum['value_id'];
-                    $image->setActualStoragePath($imageDatum['value']);
+                    $image->setActualStoragePath($storagePath);
                     break;
                 }
             }

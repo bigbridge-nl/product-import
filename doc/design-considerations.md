@@ -219,8 +219,10 @@ https://sourceforge.net/p/magmi/patches/23/
 
 ## Images
 
-All images are places in a temporary location in the validation phase, before being processed  further. This ensures that all images are valid when being processed.
+All images are placed in a temporary location in the validation phase, before being processed  further. This ensures that all images are valid when being processed.
 Make sure to remove all images from their temporary location later.
+
+When an image is updated, the library must check if a database entry exists for this image and if the file still exists that belongs to this database entry. 
 
 ## Default values
 

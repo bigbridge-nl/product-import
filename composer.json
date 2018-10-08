@@ -1,6 +1,6 @@
 {
     "name": "bigbridge/product-import",
-    "description": "Imports products with raw database queries",
+    "description": "Fast product import library for Magento 2",
     "type": "magento2-module",
     "require": {
       "php": "~7.0"

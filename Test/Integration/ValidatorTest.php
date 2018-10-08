@@ -243,6 +243,8 @@ $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACH
 
     public function testImageRoleValidation()
     {
+        @unlink(BP . '/pub/media/catalog/product/d/u/duck1.jpg');
+
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
         /** @var Validator $validator */
