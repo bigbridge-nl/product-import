@@ -23,7 +23,6 @@ Experiment with the library in a safe webshop. Make sure to create a database ba
 
 ## Installation
 
-    composer config repositories.bigbridge-product-import git https://github.com/bigbridge-nl/product-import.git
     composer require bigbridge/product-import
 
 ## Requirements
