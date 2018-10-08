@@ -5,7 +5,6 @@ namespace BigBridge\ProductImport\Model\Resource\Resolver;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
-use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -26,7 +25,7 @@ class BundleProductReferenceResolver
      * @param ImportConfig $config
      * @throws \Exception
      */
-    public function resolveIds(array $products, ImportConfig $config)
+    public function resolveIds(array $products)
     {
         // collect all selection skus
         $selectionSkus = [];

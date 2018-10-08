@@ -116,7 +116,7 @@ class ProductEntityStorage
     /**
      * Use this function to create a Product object for an existing product when its type is not given in the import.
      *
-     * @param string $sku
+     * @param int $id
      * @return BundleProduct|ConfigurableProduct|DownloadableProduct|GroupedProduct|SimpleProduct|VirtualProduct|false
      */
     public function getExistingProductById(int $id)

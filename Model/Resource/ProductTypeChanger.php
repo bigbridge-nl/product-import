@@ -92,6 +92,7 @@ class ProductTypeChanger
     /**
      * @param Product $product
      * @param string $oldType
+     * @param ImportConfig $config
      */
     protected function checkTypeChangeAllowed(Product $product, string $oldType, ImportConfig $config)
     {

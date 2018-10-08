@@ -267,7 +267,7 @@ class ProductStorage
         $this->productEntityStorage->insertMainTable($validInsertProducts);
         $this->productEntityStorage->updateMainTable($validUpdateProducts);
 
-        $this->referenceResolver->resolveProductReferences($validProducts, $config);
+        $this->referenceResolver->resolveProductReferences($validProducts);
 
         foreach ($deleteAttributes as $eavAttribute => $storeViews) {
             $this->productEntityStorage->removeEavAttribute($storeViews, $eavAttribute);

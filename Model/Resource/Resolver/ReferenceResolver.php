@@ -191,10 +191,9 @@ class ReferenceResolver
 
     /**
      * @param array $products
-     * @param ImportConfig $config
      * @throws \Exception
      */
-    public function resolveProductReferences(array $products, ImportConfig $config)
+    public function resolveProductReferences(array $products)
     {
         // linked product references (related, up sell, cross sell
         $this->linkedProductReferenceResolver->resolveLinkedProductReferences($products);
@@ -206,7 +205,7 @@ class ReferenceResolver
         }
 
         if (!empty($productsByType[BundleProduct::TYPE_BUNDLE])) {
-            $this->bundleProductReferenceResolver->resolveIds($productsByType[BundleProduct::TYPE_BUNDLE], $config);
+            $this->bundleProductReferenceResolver->resolveIds($productsByType[BundleProduct::TYPE_BUNDLE]);
         }
 
         if (!empty($productsByType[GroupedProduct::TYPE_GROUPED])) {

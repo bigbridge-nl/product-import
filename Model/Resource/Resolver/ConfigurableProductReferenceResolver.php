@@ -4,7 +4,6 @@ namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
-use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -22,7 +21,6 @@ class ConfigurableProductReferenceResolver
 
     /**
      * @param ConfigurableProduct[] $products
-     * @throws \Exception
      */
     public function resolveIds(array $products)
     {
