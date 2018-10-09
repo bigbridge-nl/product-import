@@ -2078,6 +2078,70 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
     }
 
     /**
+     * @throws Exception
+     */
+    public function testEmptyValuesStoreView()
+    {
+        $attributeId = self::$metaData->productEavAttributeInfo['name']->attributeId;
+        $type = self::$metaData->productEavAttributeInfo['name']->backendType;
+
+        $config = new ImportConfig();
+        $importer = self::$factory->createImporter($config);
+
+        $product1 = new SimpleProduct('test-product1');
+        $product1->setAttributeSetByName("Default");
+        $global = $product1->global();
+        $global->setName("Test Product 1");
+        $global->setPrice('0');
+        $default = $product1->storeView('default');
+        $default->setName("Test Product 1 Default");
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->assertSame([], $product1->getErrors());
+
+        $value = self::$db->fetchSingleCell("
+                SELECT `value` 
+                FROM `" . self::$metaData->productEntityTable . "_" . $type . "`
+                WHERE entity_id = ? AND attribute_id = ? AND store_id = ? 
+            ", [
+            $product1->id,
+            $attributeId,
+            self::$metaData->storeViewMap['default']
+        ]);
+
+        $this->assertSame("Test Product 1 Default", $value);
+
+        // set name to null
+
+        $product1 = new SimpleProduct('test-product1');
+        $product1->setAttributeSetByName("Default");
+        $global = $product1->global();
+        $global->setName("Test Product 1");
+        $global->setPrice('0');
+        $default = $product1->storeView('default');
+        $default->setName(NULL);
+
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+
+        $this->assertSame([], $product1->getErrors());
+
+        $value = self::$db->fetchSingleCell("
+                SELECT `value` 
+                FROM `" . self::$metaData->productEntityTable . "_" . $type . "`
+                WHERE entity_id = ? AND attribute_id = ? AND store_id = ? 
+            ", [
+            $product1->id,
+            $attributeId,
+            self::$metaData->storeViewMap['default']
+        ]);
+
+        $this->assertSame(null, $value);
+    }
+
+    /**
      * @param ImportConfig $config
      * @param SimpleProduct $product
      * @param array $set
