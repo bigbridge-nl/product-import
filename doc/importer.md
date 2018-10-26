@@ -227,7 +227,7 @@ Entering values by option id is possible as well.
 
 The library will create options for attributes if they do not exist, but only for attributes listed in the config array:
 
-    $config->autoCreateAttributeOptions(['color_group', 'length']);
+    $config->autoCreateOptionAttributes(['color_group', 'length']);
 
 ## Stock items
 
