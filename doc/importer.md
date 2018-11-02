@@ -725,3 +725,9 @@ If you want to see what errors an import produces without actually adding produc
     $config->dryRun = true;
 
 Note that dry run does not imply that no changes are made to the database in a dry run. Categories may be added and attribute options may be created.
+
+## More
+
+* [Tips and tricks to speed things up](tips.md)
+* [How to program certain imports](how-to.md)
+* [Design considerations](design-considerations.md)
