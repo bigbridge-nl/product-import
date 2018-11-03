@@ -227,7 +227,7 @@ Entering values by option id is possible as well.
 
 The library will create options for attributes if they do not exist, but only for attributes listed in the config array:
 
-    $config->autoCreateAttributeOptions(['color_group', 'length']);
+    $config->autoCreateOptionAttributes(['color_group', 'length']);
 
 ## Stock items
 
@@ -725,3 +725,9 @@ If you want to see what errors an import produces without actually adding produc
     $config->dryRun = true;
 
 Note that dry run does not imply that no changes are made to the database in a dry run. Categories may be added and attribute options may be created.
+
+## More
+
+* [Tips and tricks to speed things up](tips.md)
+* [How to program certain imports](how-to.md)
+* [Design considerations](design-considerations.md)

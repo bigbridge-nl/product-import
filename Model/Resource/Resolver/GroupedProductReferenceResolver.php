@@ -4,7 +4,6 @@ namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
-use Exception;
 
 /**
  * @author Patrick van Bergen
@@ -22,7 +21,6 @@ class GroupedProductReferenceResolver
 
     /**
      * @param GroupedProduct[] $products
-     * @throws \Exception
      */
     public function resolveIds(array $products)
     {

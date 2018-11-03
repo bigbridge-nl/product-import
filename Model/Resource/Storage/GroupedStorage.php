@@ -21,8 +21,7 @@ class GroupedStorage
 
     public function __construct(
         Magento2DbConnection $db,
-        MetaData $metaData,
-        ImageStorage $imageStorage)
+        MetaData $metaData)
     {
         $this->db = $db;
         $this->metaData = $metaData;

@@ -470,6 +470,7 @@ class ProductStoreView
     }
 
     /**
+     * @param CustomOption $customOption
      * @param CustomOptionValue[] $values
      */
     public function setCustomOptionValues(CustomOption $customOption, array $values)

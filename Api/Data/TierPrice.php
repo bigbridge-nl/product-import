@@ -30,7 +30,7 @@ class TierPrice
     /**
      * TierPrice constructor.
      *
-     * @param int $quantity
+     * @param string $quantity
      * @param string $value
      * @param string|null $customerGroupName The name (code) of a customer group. Null means: all customer groups
      * @param string|null $websiteCode The code of the website. Null means: all websites
@@ -44,7 +44,7 @@ class TierPrice
     }
 
     /**
-     * @return int
+     * @return string
      */
     public function getQuantity(): string
     {

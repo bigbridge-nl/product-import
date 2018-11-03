@@ -34,6 +34,8 @@ class UrlKeyGenerator
 
     /**
      * @param Product[] $products
+     * @param string $urlKeyScheme
+     * @param string $duplicateUrlKeyStrategy
      */
     public function resolveAndValidateUrlKeys(array $products, string $urlKeyScheme, string $duplicateUrlKeyStrategy)
     {
@@ -116,9 +118,9 @@ class UrlKeyGenerator
 
     /**
      * @param ProductStoreView $storeView
-     * @param array $urlKey2Id
      * @param string $urlKeyScheme
      * @param string $duplicateUrlKeyStrategy
+     * @param array $newUrlKeys
      * @return string|null
      */
     protected function generateUrlKey(ProductStoreView $storeView, string $urlKeyScheme, string $duplicateUrlKeyStrategy, array $newUrlKeys)

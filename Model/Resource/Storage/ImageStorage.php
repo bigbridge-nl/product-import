@@ -306,6 +306,7 @@ class ImageStorage
      * Returns image.jpg before image_1.jpg, image_2.jpg, ...
      *
      * @param Product $product
+     * @return array
      */
     protected function loadExistingImageData(Product $product)
     {

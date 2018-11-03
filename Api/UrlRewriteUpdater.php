@@ -39,6 +39,9 @@ class UrlRewriteUpdater
 
     /**
      * @param array $storeViewCodes
+     * @param UrlRewriteUpdateLogger $logger
+     * @param bool $keepRedirects
+     * @param bool $keepCategories
      * @throws \Exception
      */
     public function updateUrlRewrites(array $storeViewCodes, UrlRewriteUpdateLogger $logger, bool $keepRedirects, bool $keepCategories)

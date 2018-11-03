@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
-use Exception;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
@@ -27,7 +26,6 @@ class LinkedProductReferenceResolver
 
     /**
      * @param Product[] $products
-     * @throws Exception
      */
     public function resolveLinkedProductReferences(array $products)
     {

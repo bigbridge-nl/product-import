@@ -27,10 +27,10 @@ class OptionResolver
         $this->db = $db;
         $this->metaData = $metaData;
 
-        $this->refresh();
+        $this->allOptionValues = $this->loadOptionValues();
     }
 
-    public function refresh()
+    public function loadOptionValues()
     {
         $optionValueRows = $this->db->fetchAllAssoc("
             SELECT A.`attribute_code`, O.`option_id`, V.`value`
@@ -47,20 +47,15 @@ class OptionResolver
             $allOptionValues[$row['attribute_code']][$row['value']] = $row['option_id'];
         }
 
-        $this->allOptionValues = $allOptionValues;
+        return $allOptionValues;
     }
 
     public function addAttributeOption(string $attributeCode, string $optionName): int
     {
         $attributeId = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
 
-        $lastOrderIndex = $this->db->fetchSingleCell("
-            SELECT MAX(sort_order)
-            FROM {$this->metaData->attributeOptionTable}
-            WHERE attribute_id = $attributeId
-        ");
-
-        $sortOrder = is_null($lastOrderIndex) ? 1 : ($lastOrderIndex + 1);
+        // place new options at the end (presuming there are no more than 10000 options)
+        $sortOrder = 10000;
 
         $this->db->execute("
             INSERT INTO {$this->metaData->attributeOptionTable}

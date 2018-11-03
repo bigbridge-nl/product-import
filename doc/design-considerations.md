@@ -347,3 +347,7 @@ This is very unrestrictive. Use it sparingly.
 The webapi is not suited for mass import. To follow the standard use of the webapi, all products would be instantiated before the actual import began. The memory usage would be huge. Therefore I choose to bend the rules a little and have the service read from the POST body directly.
 
 This way it efficiently imports many many products and we still have the use Magento's ACL security framework.
+
+## Option value sort order
+
+New option values are given a sort order of 10000 by the importer. Querying the highest current sort_order value takes much time, because the field has no index. This way new options are placed at the end, and when they are reordered by the user in the backend, the natural sort order is restored.
