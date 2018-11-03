@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.3 : Option value speed up - 03-11-2018
+
+Category info and option values are no longer reloaded from the database every batch.
+Newly created option values are given a fixed sort order of 10000.
+
 ## 1.2.2 : Make missing links non-fatal - 08-10-2018
 
 Special case: if product A links to product B (for instance upsell), A and B in the same batch, and product B could not be created, the importer threw an exception up until now. I thought this could only occur in case of importer error, but apparently it also occurs when the input data is wrong. Therefore adding an error to product A suffices. Product A is still imported, but without the reference to the non-existing product B.
