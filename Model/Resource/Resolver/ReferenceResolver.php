@@ -76,15 +76,6 @@ class ReferenceResolver
         $this->configurableProductReferenceResolver = $configurableProductReferenceResolver;
     }
 
-    public function updateCachedDatabaseData()
-    {
-        // reload category information
-        $this->categoryImporter->refresh();
-
-        // reload attribute option information
-        $this->optionResolver->refresh();
-    }
-
     /**
      * @param Product[] $products
      * @param ImportConfig $config

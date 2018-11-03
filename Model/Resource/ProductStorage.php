@@ -130,9 +130,6 @@ class ProductStorage
             return;
         }
 
-        // update cached database data before all kinds of processes start to use it
-        $this->updateCachedDatabaseData();
-
         // transform and validate products
         $validProducts = $this->preProcessProducts($products, $config);
 
@@ -152,11 +149,6 @@ class ProductStorage
                 call_user_func($callback, $product);
             }
         }
-    }
-
-    public function updateCachedDatabaseData()
-    {
-        $this->referenceResolver->updateCachedDatabaseData();
     }
 
     /**

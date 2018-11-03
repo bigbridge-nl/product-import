@@ -27,10 +27,10 @@ class OptionResolver
         $this->db = $db;
         $this->metaData = $metaData;
 
-        $this->refresh();
+        $this->allOptionValues = $this->loadOptionValues();
     }
 
-    public function refresh()
+    public function loadOptionValues()
     {
         $optionValueRows = $this->db->fetchAllAssoc("
             SELECT A.`attribute_code`, O.`option_id`, V.`value`
@@ -47,7 +47,7 @@ class OptionResolver
             $allOptionValues[$row['attribute_code']][$row['value']] = $row['option_id'];
         }
 
-        $this->allOptionValues = $allOptionValues;
+        return $allOptionValues;
     }
 
     public function addAttributeOption(string $attributeCode, string $optionName): int

@@ -37,21 +37,13 @@ class CategoryImporter
         $this->metaData = $metaData;
         $this->nameToUrlKeyConverter = $nameToUrlKeyConverter;
 
-        $this->refresh();
-    }
-
-    /**
-     * Updates available category information from the database.
-     */
-    public function refresh()
-    {
-        $this->allCategoryInfo = $this->getAllCategoryInfo();
+        $this->allCategoryInfo = $this->loadCategoryInfo();
     }
 
     /**
      * @return CategoryInfo[]
      */
-    protected function getAllCategoryInfo()
+    protected function loadCategoryInfo()
     {
         $urlKeyAttributeId = $this->metaData->categoryAttributeMap['url_key'];
 
