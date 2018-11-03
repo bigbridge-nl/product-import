@@ -54,13 +54,8 @@ class OptionResolver
     {
         $attributeId = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
 
-        $lastOrderIndex = $this->db->fetchSingleCell("
-            SELECT MAX(sort_order)
-            FROM {$this->metaData->attributeOptionTable}
-            WHERE attribute_id = $attributeId
-        ");
-
-        $sortOrder = is_null($lastOrderIndex) ? 1 : ($lastOrderIndex + 1);
+        // place new options at the end (presuming there are no more than 10000 options)
+        $sortOrder = 10000;
 
         $this->db->execute("
             INSERT INTO {$this->metaData->attributeOptionTable}
