@@ -17,7 +17,7 @@ class OptionResolver
     protected $metaData;
 
     /** @var array */
-    protected $allOptionValues;
+    protected $allOptionValues = [];
 
     public function __construct(
         Magento2DbConnection $db,
@@ -26,36 +26,30 @@ class OptionResolver
     {
         $this->db = $db;
         $this->metaData = $metaData;
-
-        $this->allOptionValues = $this->loadOptionValues();
     }
 
-    public function loadOptionValues()
+    protected function loadOptionValues(string $attributeCode)
     {
-        $optionValueRows = $this->db->fetchAllAssoc("
-            SELECT A.`attribute_code`, O.`option_id`, V.`value`
-            FROM {$this->metaData->attributeTable} A
-            INNER JOIN {$this->metaData->attributeOptionTable} O ON O.attribute_id = A.attribute_id
-            INNER JOIN {$this->metaData->attributeOptionValueTable} V ON V.option_id = O.option_id
-            WHERE A.`entity_type_id` = ? AND A.frontend_input IN ('select', 'multiselect') AND V.store_id = 0
-        ", [
-            $this->metaData->productEntityTypeId
-        ]);
+        if (!array_key_exists($attributeCode, $this->allOptionValues)) {
 
-        $allOptionValues = [];
-        foreach ($optionValueRows as $row) {
-            $allOptionValues[$row['attribute_code']][$row['value']] = $row['option_id'];
+            $this->allOptionValues[$attributeCode] = $this->db->fetchMap("
+                SELECT V.`value`, O.`option_id`
+                FROM {$this->metaData->attributeTable} A
+                INNER JOIN {$this->metaData->attributeOptionTable} O ON O.attribute_id = A.attribute_id
+                INNER JOIN {$this->metaData->attributeOptionValueTable} V ON V.option_id = O.option_id
+                WHERE A.`attribute_code` = ? AND A.`entity_type_id` = ? AND V.store_id = 0
+            ", [
+                $attributeCode,
+                $this->metaData->productEntityTypeId
+            ]);
         }
-
-        return $allOptionValues;
     }
 
-    public function addAttributeOption(string $attributeCode, string $optionName): int
+    protected function addAttributeOption(string $attributeCode, string $optionName): int
     {
         $attributeId = $this->metaData->productEavAttributeInfo[$attributeCode]->attributeId;
 
-        // place new options at the end (presuming there are no more than 10000 options)
-        $sortOrder = 10000;
+        $sortOrder = count($this->allOptionValues[$attributeCode]) + 1;
 
         $this->db->execute("
             INSERT INTO {$this->metaData->attributeOptionTable}
@@ -89,7 +83,11 @@ class OptionResolver
         if (!array_key_exists($attributeCode, $this->metaData->productEavAttributeInfo)) {
             $error = "attribute code not found: " . $attributeCode;
         } else {
-            if (!isset($this->allOptionValues[$attributeCode][$optionName])) {
+
+            // lazy load option values
+            $this->loadOptionValues($attributeCode);
+
+            if (!array_key_exists($optionName, $this->allOptionValues[$attributeCode])) {
 
                 if (in_array($attributeCode, $autoCreateOptionAttributes)) {
                     $id = $this->addAttributeOption($attributeCode, $optionName);
@@ -113,10 +111,14 @@ class OptionResolver
         if (!array_key_exists($attributeCode, $this->metaData->productEavAttributeInfo)) {
             $error = "attribute code not found: " . $attributeCode;
         } else {
+
+            // lazy load option values
+            $this->loadOptionValues($attributeCode);
+
             $missingOptions = [];
             foreach ($optionNames as $optionName) {
 
-                if (!isset($this->allOptionValues[$attributeCode][$optionName])) {
+                if (!array_key_exists($optionName, $this->allOptionValues[$attributeCode])) {
                     if (in_array($attributeCode, $autoCreateOptionAttributes)) {
                         $ids[] = $this->addAttributeOption($attributeCode, $optionName);
                     } else {
