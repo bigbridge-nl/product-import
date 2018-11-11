@@ -22,7 +22,7 @@ Since it uses a nonstandard input (i.e. raw XML), it does not play well with Mag
 
 The speed benchmark is important, because speed is one of the main targets of this library. The class MemoryTest is the benchmark.
 
-Before you decide to change something, run the test MemoryTest in your own test environment. Or maybe even after the second or third run. These tests have the habit of passing only the second time. The benchmark currently looks like this on my laptop:
+Before you decide to change something, run the test MemoryTest in your own test environment. Or maybe even after the second or third run. These tests have the habit of passing only the second time. Example output:
 
     Factory: 0.023 seconds; 858 kB
     Inserts: 13.2 seconds; 569 kB
