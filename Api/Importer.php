@@ -37,16 +37,21 @@ class Importer
     /** @var MetaData */
     protected $metaData;
 
+    /** @var CacheManager */
+    protected $cacheManager;
+
     public function __construct(
         ImportConfig $config,
         ProductEntityStorage $productEntityStorage,
         ProductStorage $productStorage,
-        MetaData $metaData)
+        MetaData $metaData,
+        CacheManager $cacheManager)
     {
         $this->config = $config;
         $this->productEntityStorage = $productEntityStorage;
         $this->productStorage = $productStorage;
         $this->metaData = $metaData;
+        $this->cacheManager = $cacheManager;
     }
 
     /**
@@ -234,6 +239,14 @@ class Importer
                 $this->importGroupedProduct($product);
                 break;
         }
+    }
+
+    /**
+     * @return CacheManager
+     */
+    public function getCacheManager()
+    {
+        return $this->cacheManager;
     }
 
     /**

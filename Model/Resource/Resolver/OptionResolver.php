@@ -28,6 +28,11 @@ class OptionResolver
         $this->metaData = $metaData;
     }
 
+    public function clearCache()
+    {
+        $this->allOptionValues = [];
+    }
+
     protected function loadOptionValues(string $attributeCode)
     {
         if (!array_key_exists($attributeCode, $this->allOptionValues)) {

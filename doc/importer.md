@@ -718,6 +718,25 @@ or products skus:
 
     $deleter->deleteProductsBySkus($skus);
 
+## Manage cached data
+
+The importer stores some data in caches for speed: categories, product options and metadata.
+
+If you have changed some of these values from within the callback function $resultCallback, or if you suspect that another process has changed any of this data,
+you may like to tell the importer that its cache has become stale and needs to be rebuilt.
+
+You can do this by calling any of these
+
+    $importer->getCacheManager()->clearOptionResolverCache();
+    $importer->getCacheManager()->clearCategoryCache();
+    $importer->getCacheManager()->reloadMetaData();
+
+or even
+
+    $importer->getCacheManager()->resetAll();
+
+Using these functions excessively affects the performance of the library negatively.
+
 ## Dry run
 
 If you want to see what errors an import produces without actually adding products to the database, set the config to "dry run"

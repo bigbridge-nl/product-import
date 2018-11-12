@@ -106,6 +106,8 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
             'dozen'
         ]);
 
+        $importer->getCacheManager()->clearCategoryCache();
+
         $global = $product->global();
         $global->setName("Big Purple Box");
         $global->setPrice("1.25");

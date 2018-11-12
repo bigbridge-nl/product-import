@@ -27,8 +27,6 @@ class ProductReaderTest extends \Magento\TestFramework\TestCase\AbstractControll
 
         $productReader->import($path, $config, false, $logger);
 
-        echo $logger->getOutput();
-
         $this->assertSame(1, $logger->getOkProductCount());
     }
 }

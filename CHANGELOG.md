@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.4 : Lazy loading option values and cache manager - 09-11-2018
+
+Existing option values are now only loaded per attribute, when it is needed.
+Newly created option values are given the sort order that matches their position.
+
+The cache manager allows you to refresh any of product importer's caches.
+
 ## 1.2.3 : Option value speed up - 03-11-2018
 
 Category info and option values are no longer reloaded from the database every batch.

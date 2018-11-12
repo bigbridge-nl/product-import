@@ -347,3 +347,13 @@ This is very unrestrictive. Use it sparingly.
 The webapi is not suited for mass import. To follow the standard use of the webapi, all products would be instantiated before the actual import began. The memory usage would be huge. Therefore I choose to bend the rules a little and have the service read from the POST body directly.
 
 This way it efficiently imports many many products and we still have the use Magento's ACL security framework.
+
+## Caches
+
+An importer needs caches to run efficiently. Category metadata caches for example, greatly speed up the import process.
+The drawback of caching is that their information can become outdated. Processes independent from the import can create or modify categories for example.
+More importantly, the callback functions inside of an import may change categories while the import is running.
+
+Therefore it is important that the caches of an importer are clearly marked can be reset by the user.
+This product import library assumes no caches need to emptied during product import. Cache management is the responsibility of the user.
+The user has access to all caches via the CacheManager class.

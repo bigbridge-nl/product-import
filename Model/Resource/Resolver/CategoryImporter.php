@@ -29,15 +29,18 @@ class CategoryImporter
     protected $categoryCache = [];
 
     /** @var CategoryInfo[] A category-id => CategoryInfo map */
-    protected $allCategoryInfo;
+    protected $allCategoryInfo = null;
 
     public function __construct(Magento2DbConnection $db, MetaData $metaData, NameToUrlKeyConverter $nameToUrlKeyConverter)
     {
         $this->db = $db;
         $this->metaData = $metaData;
         $this->nameToUrlKeyConverter = $nameToUrlKeyConverter;
+    }
 
-        $this->allCategoryInfo = $this->loadCategoryInfo();
+    public function clearCache()
+    {
+        $this->allCategoryInfo = null;
     }
 
     /**
@@ -45,41 +48,46 @@ class CategoryImporter
      */
     protected function loadCategoryInfo()
     {
-        $urlKeyAttributeId = $this->metaData->categoryAttributeMap['url_key'];
+        if ($this->allCategoryInfo === null) {
 
-        $categoryData = $this->db->fetchAllAssoc("
-            SELECT E.`entity_id`, E.`path`, URL_KEY.`value` as url_key, URL_KEY.`store_id`
-            FROM `{$this->metaData->categoryEntityTable}` E
-            LEFT JOIN `{$this->metaData->categoryEntityTable}_varchar` URL_KEY ON URL_KEY.`entity_id` = E.`entity_id` 
-                AND URL_KEY.`attribute_id` = ? 
-        ", [
-            $urlKeyAttributeId
-        ]);
+            $urlKeyAttributeId = $this->metaData->categoryAttributeMap['url_key'];
 
-        /** @var CategoryInfo[] $categories */
-        $categories = [];
+            $categoryData = $this->db->fetchAllAssoc("
+                SELECT E.`entity_id`, E.`path`, URL_KEY.`value` as url_key, URL_KEY.`store_id`
+                FROM `{$this->metaData->categoryEntityTable}` E
+                LEFT JOIN `{$this->metaData->categoryEntityTable}_varchar` URL_KEY ON URL_KEY.`entity_id` = E.`entity_id` 
+                    AND URL_KEY.`attribute_id` = ? 
+            ", [
+                $urlKeyAttributeId
+            ]);
 
-        foreach ($categoryData as $categoryDatum) {
+            /** @var CategoryInfo[] $categories */
+            $categories = [];
 
-            $categoryId = $categoryDatum['entity_id'];
-            $storeId = (int)$categoryDatum['store_id'];
-            $urlKey = (string)$categoryDatum['url_key'];
+            foreach ($categoryData as $categoryDatum) {
 
-            if (array_key_exists($categoryId, $categories)) {
+                $categoryId = $categoryDatum['entity_id'];
+                $storeId = (int)$categoryDatum['store_id'];
+                $urlKey = (string)$categoryDatum['url_key'];
 
-                $categories[$categoryId]->urlKeys[$storeId] = $urlKey;
+                if (array_key_exists($categoryId, $categories)) {
 
-            } else {
+                    $categories[$categoryId]->urlKeys[$storeId] = $urlKey;
 
-                $categories[$categoryId] = new CategoryInfo(
-                    explode('/', $categoryDatum['path']),
-                    [$storeId => $urlKey]
-                );
+                } else {
 
+                    $categories[$categoryId] = new CategoryInfo(
+                        explode('/', $categoryDatum['path']),
+                        [$storeId => $urlKey]
+                    );
+
+                }
             }
+
+            $this->allCategoryInfo = $categories;
         }
 
-        return $categories;
+        return $this->allCategoryInfo;
     }
 
     /**
@@ -88,6 +96,9 @@ class CategoryImporter
      */
     public function getCategoryInfo($categoryId)
     {
+        // lazy load categories
+        $this->loadCategoryInfo();
+
         return array_key_exists($categoryId, $this->allCategoryInfo) ? $this->allCategoryInfo[$categoryId] : null;
     }
 
@@ -137,6 +148,9 @@ class CategoryImporter
      */
     public function importCategoryPaths(array $categoryPaths, bool $autoCreateCategories, string $categoryNamePathSeparator)
     {
+        // lazy load categories
+        $this->loadCategoryInfo();
+
         $ids = [];
         $error = "";
 
@@ -170,6 +184,9 @@ class CategoryImporter
      */
     public function importCategoryPath(string $namePath, bool $autoCreateCategories, string $categoryNamePathSeparator): array
     {
+        // lazy load categories
+        $this->loadCategoryInfo();
+
         $categoryId = Category::TREE_ROOT_ID;
         $error = "";
 

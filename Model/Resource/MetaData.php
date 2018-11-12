@@ -273,7 +273,8 @@ class MetaData
     {
         $this->db = $db;
 
-        $this->init();
+        $this->loadTables();
+        $this->reloadCache();
     }
 
     /**
@@ -283,11 +284,8 @@ class MetaData
      *
      * @throws Exception
      */
-    public function init()
+    public function loadTables()
     {
-        $this->magentoVersion = $this->detectMagentoVersion();
-        $this->valueSerializer = $this->getValueSerializer();
-
         $this->entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $this->productEntityTable = $this->db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
         $this->categoryEntityTable = $this->db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
@@ -333,9 +331,15 @@ class MetaData
         $this->customOptionTypeTitleTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_TITLE_TABLE);
         $this->customOptionTypePriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_PRICE_TABLE);
         $this->customOptionTypeValueTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_VALUE_TABLE);
+    }
 
+    public function reloadCache()
+    {
         $this->productEntityTypeId = $this->getProductEntityTypeId();
         $this->categoryEntityTypeId = $this->getCategoryEntityTypeId();
+
+        $this->magentoVersion = $this->detectMagentoVersion();
+        $this->valueSerializer = $this->getValueSerializer();
 
         $this->defaultCategoryAttributeSetId = $this->getDefaultCategoryAttributeSetId();
         $this->defaultProductAttributeSetId = $this->getDefaultProductAttributeSetId();
