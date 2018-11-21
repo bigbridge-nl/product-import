@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5 : FIX impossible to import custom attributes via XML - 21-11-2018
+
+Pull request by Antonino Bonumore / Emergento
+
 ## 1.2.4 : Lazy loading option values and cache manager - 09-11-2018
 
 Existing option values are now only loaded per attribute, when it is needed.
