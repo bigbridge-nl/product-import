@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.5 : FIX impossible to import custom attributes via XML - 21-11-2018
+## 1.2.6 : FIX impossible to import custom attributes via XML - 21-11-2018
 
 Pull request by Antonino Bonumore / Emergento
 
