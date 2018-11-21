@@ -92,6 +92,7 @@
 				<xs:element ref="custom_option_values" minOccurs="0"/>
 				<xs:element ref="delete" minOccurs="0"/>
 				<xs:element ref="select" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="custom" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="multi_select" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="role" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:choice>
@@ -142,6 +143,7 @@
 				<xs:element ref="custom_option_values" minOccurs="0"/>
 				<xs:element ref="delete" minOccurs="0"/>
 				<xs:element ref="select" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="custom" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="multi_select" minOccurs="0" maxOccurs="unbounded"/>
 				<xs:element ref="role" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:choice>
