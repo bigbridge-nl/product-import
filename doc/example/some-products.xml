@@ -83,18 +83,18 @@
 		<website_ids>
 			<item>1</item>
 		</website_ids>
-		<cross_sell_products>
+		<cross_sell_product_skus>
 			<item>services-104-b1</item>
 			<item>services-104-b2</item>
-		</cross_sell_products>
-		<up_sell_products>
+		</cross_sell_product_skus>
+		<up_sell_product_skus>
 			<item>services-104-c1</item>
 			<item>services-104-c2</item>
-		</up_sell_products>
-		<related_products>
+		</up_sell_product_skus>
+		<related_product_skus>
 			<item>services-104-e1</item>
 			<item>services-104-e2</item>
-		</related_products>
+		</related_product_skus>
 		<custom_options>
 			<custom_option_textfield sku="inscription" required="0" max_characters="40">
 				<global>

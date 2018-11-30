@@ -383,21 +383,21 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="cross_sell_products">
+	<xs:element name="cross_sell_product_skus">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="up_sell_products">
+	<xs:element name="up_sell_product_skus">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="related_products">
+	<xs:element name="related_product_skus">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="item" maxOccurs="unbounded" minOccurs="0"/>
@@ -611,9 +611,9 @@
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
 				<xs:element ref="website_ids" minOccurs="0"/>
-				<xs:element ref="cross_sell_products" minOccurs="0"/>
-				<xs:element ref="up_sell_products" minOccurs="0"/>
-				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="cross_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="up_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
@@ -633,9 +633,9 @@
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
 				<xs:element ref="website_ids" minOccurs="0"/>
-				<xs:element ref="cross_sell_products" minOccurs="0"/>
-				<xs:element ref="up_sell_products" minOccurs="0"/>
-				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="cross_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="up_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
@@ -657,9 +657,9 @@
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
 				<xs:element ref="website_ids" minOccurs="0"/>
-				<xs:element ref="cross_sell_products" minOccurs="0"/>
-				<xs:element ref="up_sell_products" minOccurs="0"/>
-				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="cross_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="up_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
@@ -681,9 +681,9 @@
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
 				<xs:element ref="website_ids" minOccurs="0"/>
-				<xs:element ref="cross_sell_products" minOccurs="0"/>
-				<xs:element ref="up_sell_products" minOccurs="0"/>
-				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="cross_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="up_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
@@ -704,9 +704,9 @@
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
 				<xs:element ref="website_ids" minOccurs="0"/>
-				<xs:element ref="cross_sell_products" minOccurs="0"/>
-				<xs:element ref="up_sell_products" minOccurs="0"/>
-				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="cross_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="up_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
@@ -727,9 +727,9 @@
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
 				<xs:element ref="website_ids" minOccurs="0"/>
-				<xs:element ref="cross_sell_products" minOccurs="0"/>
-				<xs:element ref="up_sell_products" minOccurs="0"/>
-				<xs:element ref="related_products" minOccurs="0"/>
+				<xs:element ref="cross_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="up_sell_product_skus" minOccurs="0"/>
+				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
