@@ -6,17 +6,17 @@
 			<name>Filling in tax form</name>
 			<price>79.95</price>
 		</global>
-		<cross_sell_products>
+		<cross_sell_product_skus>
 			<item>services-104-b1</item>
 			<item>services-104-b2</item>
-		</cross_sell_products>
-		<up_sell_products>
+		</cross_sell_product_skus>
+		<up_sell_product_skus>
 			<item>services-104-c1</item>
 			<item>services-104-c2</item>
-		</up_sell_products>
-		<related_products>
+		</up_sell_product_skus>
+		<related_product_skus>
 			<item>services-104-e1</item>
 			<item>services-104-e2</item>
-		</related_products>
+		</related_product_skus>
 	</simple>
 </import>
