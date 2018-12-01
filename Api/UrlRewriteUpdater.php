@@ -6,6 +6,9 @@ use BigBridge\ProductImport\Model\Resource\MetaData;
 use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
 
 /**
+ * Updates (fixes) url_rewrite and catalog_url_rewrite_product_category tables,
+ * when they are corrupt.
+ *
  * @author Patrick van Bergen
  */
 class UrlRewriteUpdater

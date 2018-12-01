@@ -16,7 +16,7 @@ use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
 
 /**
  * This is the main class for API based imports.
- * It implements the batch operation.
+ * It implements the batch operation and creates placeholders.
  *
  * @author Patrick van Bergen
  */

@@ -6,6 +6,8 @@ use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
+ * Provides a view to some of the importer's internal data to external classes that should not have direct access.
+ *
  * @author Patrick van Bergen
  */
 class Information

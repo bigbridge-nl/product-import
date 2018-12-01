@@ -8,6 +8,7 @@ use BigBridge\ProductImport\Model\Resource\Resolver\OptionResolver;
 
 /**
  * This class has access to all caches of the importer.
+ * Use it (sparingly) to flush caches when you know that other processes have modified the same data.
  *
  * @author Patrick van Bergen
  */

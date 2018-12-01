@@ -26,6 +26,8 @@ use BigBridge\ProductImport\Model\Data\Image;
 use Exception;
 
 /**
+ * Processes all xml elements.
+ *
  * @author Patrick van Bergen
  */
 class ElementHandler

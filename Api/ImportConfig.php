@@ -3,6 +3,8 @@
 namespace BigBridge\ProductImport\Api;
 
 /**
+ * Configuration settings that affect the working of the importer.
+ *
  * @author Patrick van Bergen
  */
 class ImportConfig
@@ -20,7 +22,7 @@ class ImportConfig
     /**
      * The number of products sent to the database at once
      * The number is a tested optimal balance between speed and database load.
-     * Making the number larger will speed up import only marginally, and will create large transactions.
+     * Making the number larger will speed up import only marginally, and will create very large queries.
      *
      * @var int
      */
@@ -33,7 +35,7 @@ class ImportConfig
      *
      * Function signature:
      *
-     * function(BigBridge\ProductImport\Model\Data\Product $product, $ok, $error);
+     * function(\BigBridge\ProductImport\Api\Data\Product);
      */
     public $resultCallback = null;
 
