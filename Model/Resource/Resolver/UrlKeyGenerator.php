@@ -72,9 +72,8 @@ class UrlKeyGenerator
 
                         $storeView->setUrlKey($urlKey);
 
-                    // generate a key
                     } else {
-
+                        // generate a key
                         $urlKey = $this->generateUrlKey($storeView, $urlKeyScheme, $duplicateUrlKeyStrategy, $newUrlKeys);
                         $storeView->setUrlKey($urlKey);
 
@@ -210,7 +209,7 @@ class UrlKeyGenerator
      */
     protected function urlKeyExists(string $urlKey, int $storeViewId, array $newUrlKeys)
     {
-        list($found, ) = $this->findUrlKeyProductId($urlKey, $storeViewId, $newUrlKeys);
+        list($found,) = $this->findUrlKeyProductId($urlKey, $storeViewId, $newUrlKeys);
 
         return $found;
     }

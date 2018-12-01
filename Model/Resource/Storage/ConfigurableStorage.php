@@ -217,7 +217,7 @@ class ConfigurableStorage
     /**
      * @param Product[] $products
      */
-    public  function removeLinkedVariants(array $products)
+    public function removeLinkedVariants(array $products)
     {
         $productIds = array_column($products, 'id');
 

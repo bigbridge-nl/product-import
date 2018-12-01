@@ -416,9 +416,9 @@ class UrlRewriteStorage
         // product url_key for store view (inherits from global)
 
         if (isset($allProductUrlKeys[$productId][$storeViewId])) {
-            $productUrlKey =  $allProductUrlKeys[$productId][$storeViewId];
+            $productUrlKey = $allProductUrlKeys[$productId][$storeViewId];
         } elseif (isset($allProductUrlKeys[$productId][0])) {
-            $productUrlKey =  $allProductUrlKeys[$productId][0];
+            $productUrlKey = $allProductUrlKeys[$productId][0];
         } else {
             return null;
         }

@@ -177,7 +177,7 @@ class ProductEntityStorage
         $productIds = [];
         foreach ($products as $product) {
             if ($product->id) {
-                $productsWithId[]= $product;
+                $productsWithId[] = $product;
                 $productIds[] = $product->id;
             }
         }
@@ -335,9 +335,9 @@ class ProductEntityStorage
                 DELETE FROM `" . $tableName . "`
                 WHERE `entity_id` = ? AND `attribute_id` = ? AND `store_id` = ?
             ", [
-                    $storeView->parent->id,
-                    $attributeId,
-                    $storeView->getStoreViewId()
+                $storeView->parent->id,
+                $attributeId,
+                $storeView->getStoreViewId()
             ]);
         }
     }

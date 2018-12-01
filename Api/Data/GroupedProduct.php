@@ -9,7 +9,7 @@ class GroupedProduct extends Product
 {
     const TYPE_GROUPED = "grouped";
 
-    /** @var GroupedProductMember[]  */
+    /** @var GroupedProductMember[] */
     protected $members;
 
     /**

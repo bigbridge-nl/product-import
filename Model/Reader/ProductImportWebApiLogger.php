@@ -15,13 +15,13 @@ class ProductImportWebApiLogger implements ProductImportLogger, ProductImportWeb
     /** @var string */
     protected $output = "";
 
-    /** @var int  */
+    /** @var int */
     protected $failedProductCount = 0;
 
-    /** @var int  */
+    /** @var int */
     protected $okProductCount = 0;
 
-    /** @var bool  */
+    /** @var bool */
     protected $errorOccurred = false;
 
     /**

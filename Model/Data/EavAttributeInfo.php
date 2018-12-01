@@ -31,7 +31,7 @@ class EavAttributeInfo
     /** @var  bool */
     public $isRequired;
 
-    /** @var string  */
+    /** @var string */
     public $backendType;
 
     /** @var  string */
@@ -43,7 +43,7 @@ class EavAttributeInfo
     /** @var int */
     public $scope;
 
-    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string  $backendType, string $tableName, $frontendInput, int $scope)
+    public function __construct(string $attributeCode, int $attributeId, bool $isRequired, string $backendType, string $tableName, $frontendInput, int $scope)
     {
         $this->attributeCode = $attributeCode;
         $this->attributeId = $attributeId;

@@ -164,7 +164,9 @@ class ReferenceResolver
                 }
 
                 foreach ($storeView->getUnresolvedMultipleSelects() as $attribute => $optionNames) {
-                    $nonEmptyNames = array_filter($optionNames, function($val) { return $val !== ""; });
+                    $nonEmptyNames = array_filter($optionNames, function ($val) {
+                        return $val !== "";
+                    });
                     if (empty($nonEmptyNames)) {
                         continue;
                     }

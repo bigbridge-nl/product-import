@@ -85,7 +85,7 @@ class ProductUrlRewriteCommand extends Command
         $handleCategories = $input->getOption(self::OPTION_CATEGORY_PATH_URLS);
 
         if (empty($storeViewCodes)) {
-            $storeViewCodes =  $information->getNonGlobalStoreViewCodes();
+            $storeViewCodes = $information->getNonGlobalStoreViewCodes();
         }
 
         if (!in_array($handleRedirects, [ImportConfig::KEEP_REDIRECTS, ImportConfig::DELETE_REDIRECTS])) {

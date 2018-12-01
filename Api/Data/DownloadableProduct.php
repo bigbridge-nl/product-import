@@ -34,7 +34,8 @@ class DownloadableProduct extends SimpleProduct
      * @param string $storeViewCode
      * @return DownloadableProductStoreView
      */
-    public function storeView(string $storeViewCode) {
+    public function storeView(string $storeViewCode)
+    {
         $storeViewCode = trim($storeViewCode);
         if (!array_key_exists($storeViewCode, $this->storeViews)) {
             $storeView = new DownloadableProductStoreView();
@@ -48,7 +49,8 @@ class DownloadableProduct extends SimpleProduct
     /**
      * @return DownloadableProductStoreView
      */
-    public function global() {
+    public function global()
+    {
         return $this->storeViews[self::GLOBAL_STORE_VIEW_CODE];
     }
 

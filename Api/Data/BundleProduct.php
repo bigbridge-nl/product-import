@@ -46,7 +46,8 @@ class BundleProduct extends Product
      * @param string $storeViewCode
      * @return BundleProductStoreView
      */
-    public function storeView(string $storeViewCode) {
+    public function storeView(string $storeViewCode)
+    {
         $storeViewCode = trim($storeViewCode);
         if (!array_key_exists($storeViewCode, $this->storeViews)) {
             $storeView = new BundleProductStoreView();
@@ -60,7 +61,8 @@ class BundleProduct extends Product
     /**
      * @return BundleProductStoreView
      */
-    public function global() {
+    public function global()
+    {
         return $this->storeViews[self::GLOBAL_STORE_VIEW_CODE];
     }
 

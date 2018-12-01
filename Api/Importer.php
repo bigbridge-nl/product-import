@@ -136,7 +136,7 @@ class Importer
             $this->flush();
         }
     }
-    
+
     /**
      * @param GroupedProduct $product
      * @throws \Exception

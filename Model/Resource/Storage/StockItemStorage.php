@@ -61,7 +61,7 @@ class StockItemStorage
         foreach ($productsWithStockItems as $product) {
             foreach ($product->getStockItems() as $stockItem) {
 
-                $attributes =  $stockItem->getAttributes();
+                $attributes = $stockItem->getAttributes();
                 if (!empty($attributes)) {
 
                     $attributeNames = [];

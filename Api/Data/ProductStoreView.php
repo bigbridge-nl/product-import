@@ -79,19 +79,19 @@ class ProductStoreView
     /** @var ImageGalleryInformation[] */
     protected $imageGalleryInformation = [];
 
-    /** @var array  */
+    /** @var array */
     protected $imageRoles = [];
 
-    /** @var array  */
+    /** @var array */
     protected $attributes = [];
 
-    /** @var array  */
+    /** @var array */
     protected $unresolvedSelects = [];
 
-    /** @var array  */
+    /** @var array */
     protected $unresolvedMultipleSelects = [];
 
-    /** @var array  */
+    /** @var array */
     protected $unresolvedAttributes = [];
 
     /** @var CustomOptionTitle[] */

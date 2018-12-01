@@ -211,7 +211,7 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
         $factory = $objectManager->get(ImporterFactory::class);
         $config = new ImportConfig();
 
-$config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
+        $config->existingImageStrategy = ImportConfig::EXISTING_IMAGE_STRATEGY_HTTP_CACHING;
 
         $importer = $factory->createImporter($config);
 
