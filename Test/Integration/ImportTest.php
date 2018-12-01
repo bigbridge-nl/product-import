@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 use BigBridge\ProductImport\Api\Data\BundleProductSelection;
 use BigBridge\ProductImport\Api\Data\CustomOptionValue;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
+use BigBridge\ProductImport\Api\Importer;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
@@ -1127,6 +1128,60 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         ");
 
         $this->assertEquals($colorGroupOptionId1 . ',' . $colorGroupOptionId2, $value);
+
+        // set to "", [] => ignore
+        $result = $this->getSelectValues($importer, $product1, "", []);
+        $this->assertEquals([$colorOptionId, $colorGroupOptionId1 . ',' . $colorGroupOptionId2], $result);
+
+        // set to null, null
+        $result = $this->getSelectValues($importer, $product1, null, null);
+        $this->assertSame([null, null], $result);
+
+        // reset to 'grey', ['red', 'blue']
+        $result = $this->getSelectValues($importer, $product1, "grey", ['red', 'blue']);
+        $this->assertEquals([$colorOptionId, $colorGroupOptionId1 . ',' . $colorGroupOptionId2], $result);
+
+        // set config to treat "" as null
+        $config->emptyNonTextValueStrategy = ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE;
+        $importer = self::$factory->createImporter($config);
+
+        $result = $this->getSelectValues($importer, $product1, "", []);
+        $this->assertSame([null, null], $result);
+    }
+
+    /**
+     * @param Importer $importer
+     * @param SimpleProduct $product
+     * @return array
+     * @throws Exception
+     */
+    protected function getSelectValues(Importer $importer, SimpleProduct $product, $color, $colGroup)
+    {
+        $colorAttributeId = self::$metaData->productEavAttributeInfo['color']->attributeId;
+        $colorGroupAttributeId = self::$metaData->productEavAttributeInfo['color_group_product_importer']->attributeId;
+
+        $product->global()->setSelectAttribute('color', $color);
+        // note: empty value
+        $product->global()->setMultipleSelectAttribute('color_group_product_importer', $colGroup);
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertEquals([], $product->getErrors());
+
+        $value1 = self::$db->fetchSingleCell("
+            SELECT value
+            FROM " . self::$metaData->productEntityTable . "_int
+            WHERE entity_id = {$product->id} AND attribute_id = {$colorAttributeId} AND store_id = 0
+        ");
+
+        $value2 = self::$db->fetchSingleCell("
+            SELECT value
+            FROM " . self::$metaData->productEntityTable . "_varchar
+            WHERE entity_id = {$product->id} AND attribute_id = {$colorGroupAttributeId} AND store_id = 0
+        ");
+
+        return [$value1, $value2];
     }
 
     protected function getOptionValue($attributeCode, $name)

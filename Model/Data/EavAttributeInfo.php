@@ -54,8 +54,16 @@ class EavAttributeInfo
         $this->scope = $scope;
     }
 
+    /**
+     * This flag determines if this field contains free-form text. Text that may just be an empty string.
+     *
+     * @return bool
+     */
     public function isTextual()
     {
-        return in_array($this->backendType, [self::TYPE_TEXT, self::TYPE_VARCHAR]);
+        return
+            in_array($this->backendType, [self::TYPE_TEXT, self::TYPE_VARCHAR])
+            // a multiselect field is stored in a varchar table, as a comma separated list of ids
+            && ($this->frontendInput != "multiselect");
     }
 }

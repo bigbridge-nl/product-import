@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.2.7 : FIX XSD related products - 1-12-2018
+## 1.2.7 : FIX XSD related products / empty select values - 1-12-2018
 
 Pull request by Jeroen Nijhuis / Epartment
 
@@ -8,6 +8,10 @@ Pull request by Jeroen Nijhuis / Epartment
 - Adjusted samples to reflect changes
 
 Updated integration test to import all example xml files.
+
+I made the importer's behaviour for empty values more explicit in import.md, especially for empty select and multiselect attributes.
+
+Fixed the fatal error that occurred when a select was set to null.
 
 ## 1.2.6 : FIX impossible to import custom attributes via XML - 21-11-2018
 

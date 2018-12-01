@@ -151,31 +151,33 @@ class ReferenceResolver
                 }
 
                 foreach ($storeView->getUnresolvedSelects() as $attribute => $optionName) {
-                    if ($optionName === "") {
-                        continue;
-                    }
-                    list ($id, $error) = $this->optionResolver->resolveOption($attribute, $optionName, $config->autoCreateOptionAttributes);
-                    if ($error === "") {
-                        $storeView->setSelectAttributeOptionId($attribute, $id);
+                    if ($optionName === "" || $optionName === null) {
+                        $storeView->setSelectAttributeOptionId($attribute, $optionName);
                     } else {
-                        $product->addError($error);
-                        $storeView->removeAttribute($attribute);
+                        list ($id, $error) = $this->optionResolver->resolveOption($attribute, $optionName, $config->autoCreateOptionAttributes);
+                        if ($error === "") {
+                            $storeView->setSelectAttributeOptionId($attribute, $id);
+                        } else {
+                            $product->addError($error);
+                            $storeView->removeAttribute($attribute);
+                        }
                     }
                 }
 
                 foreach ($storeView->getUnresolvedMultipleSelects() as $attribute => $optionNames) {
-                    $nonEmptyNames = array_filter($optionNames, function ($val) {
-                        return $val !== "";
-                    });
-                    if (empty($nonEmptyNames)) {
-                        continue;
-                    }
-                    list ($ids, $error) = $this->optionResolver->resolveOptions($attribute, $nonEmptyNames, $config->autoCreateOptionAttributes);
-                    if ($error === "") {
-                        $storeView->setMultiSelectAttributeOptionIds($attribute, $ids);
+                    if ($optionNames === null) {
+                        $storeView->setMultiSelectAttributeOptionIds($attribute, null);
                     } else {
-                        $product->addError($error);
-                        $storeView->removeAttribute($attribute);
+                        $nonEmptyNames = array_filter($optionNames, function ($val) {
+                            return ($val !== "") && ($val !== null);
+                        });
+                        list ($ids, $error) = $this->optionResolver->resolveOptions($attribute, $nonEmptyNames, $config->autoCreateOptionAttributes);
+                        if ($error === "") {
+                            $storeView->setMultiSelectAttributeOptionIds($attribute, $ids);
+                        } else {
+                            $product->addError($error);
+                            $storeView->removeAttribute($attribute);
+                        }
                     }
                 }
             }
