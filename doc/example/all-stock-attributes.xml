@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <import>
-	<simple sku="skinny-jeans-811" id="354861">
+	<simple sku="skinny-jeans-811">
 		<attribute_set_name>Default</attribute_set_name>
 		<global>
 			<name>Skinny Jeans 811</name>

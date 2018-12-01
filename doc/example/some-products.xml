@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <import>
-	<simple sku="skinny-jeans-811" id="354861">
+	<simple sku="skinny-jeans-811">
 		<attribute_set_name>Default</attribute_set_name>
 		<global>
 			<name>Skinny Jeans 811</name>
@@ -63,12 +63,12 @@
 			<is_decimal_divided>1</is_decimal_divided>
 		</stock>
 	</simple>
-	<virtual sku="services-104-ax">
+	<virtual sku="services-6546">
 		<attribute_set_name>Default</attribute_set_name>
 		<global>
 			<name>Filling in tax form</name>
 			<price>79.95</price>
-			<url_key>filling-in-tax-form</url_key>
+			<url_key>filling-in-tax-form-2</url_key>
 			<delete code="msrp" />
 			<delete code="manufacturer" />
 			<select code="color">Blue</select>
