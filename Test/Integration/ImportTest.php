@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 use BigBridge\ProductImport\Api\Data\BundleProductSelection;
 use BigBridge\ProductImport\Api\Data\CustomOptionValue;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
+use BigBridge\ProductImport\Api\Importer;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use BigBridge\ProductImport\Api\Data\BundleProduct;
@@ -321,7 +322,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $success = true;
 
         $config = new ImportConfig();
-        $config->resultCallback = function(Product $product) use (&$success) {
+        $config->resultCallback = function (Product $product) use (&$success) {
             $success = $success && $product->isOk();
         };
 
@@ -360,7 +361,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $errors = [];
 
         $config = new ImportConfig();
-        $config->resultCallback = function(Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -399,7 +400,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         // the essence of this test
         $config->autoCreateCategories = false;
 
-        $config->resultCallback = function(Product $product) use (&$success) {
+        $config->resultCallback = function (Product $product) use (&$success) {
             $success = $success && $product->isOk();
         };
 
@@ -438,7 +439,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $config = new ImportConfig();
 
-        $config->resultCallback = function(Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -555,7 +556,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $config = new ImportConfig();
         $config->imageStrategy = ImportConfig::IMAGE_STRATEGY_SET;
 
-        $config->resultCallback = function(Product $product) use (&$errors) {
+        $config->resultCallback = function (Product $product) use (&$errors) {
             $errors = array_merge($errors, $product->getErrors());
         };
 
@@ -595,7 +596,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertEquals('/d/u/duck1.jpg', $productS->getThumbnail());
         $this->assertEquals(null, $productS->getImage());
         $this->assertEquals(null, $productS->getSmallImage());
-        
+
         // no images? do not remove images
 
         $product4 = new SimpleProduct("ducky1-product-import");
@@ -1103,11 +1104,11 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $colorAttributeId = self::$metaData->productEavAttributeInfo['color']->attributeId;
 
-        $colorOptionId =  $this->getOptionValue('color', 'grey');
+        $colorOptionId = $this->getOptionValue('color', 'grey');
 
         $value = self::$db->fetchSingleCell("
             SELECT value
-            FROM " . self::$metaData->productEntityTable ."_int
+            FROM " . self::$metaData->productEntityTable . "_int
             WHERE entity_id = {$product1->id} AND attribute_id = {$colorAttributeId} AND store_id = 0
         ");
 
@@ -1117,16 +1118,70 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $colorGroupAttributeId = self::$metaData->productEavAttributeInfo['color_group_product_importer']->attributeId;
 
-        $colorGroupOptionId1 =  $this->getOptionValue('color_group_product_importer', 'red');
-        $colorGroupOptionId2 =  $this->getOptionValue('color_group_product_importer', 'blue');
+        $colorGroupOptionId1 = $this->getOptionValue('color_group_product_importer', 'red');
+        $colorGroupOptionId2 = $this->getOptionValue('color_group_product_importer', 'blue');
 
         $value = self::$db->fetchSingleCell("
             SELECT value
-            FROM " . self::$metaData->productEntityTable ."_varchar
+            FROM " . self::$metaData->productEntityTable . "_varchar
             WHERE entity_id = {$product1->id} AND attribute_id = {$colorGroupAttributeId} AND store_id = 0
         ");
 
         $this->assertEquals($colorGroupOptionId1 . ',' . $colorGroupOptionId2, $value);
+
+        // set to "", [] => ignore
+        $result = $this->getSelectValues($importer, $product1, "", []);
+        $this->assertEquals([$colorOptionId, $colorGroupOptionId1 . ',' . $colorGroupOptionId2], $result);
+
+        // set to null, null
+        $result = $this->getSelectValues($importer, $product1, null, null);
+        $this->assertSame([null, null], $result);
+
+        // reset to 'grey', ['red', 'blue']
+        $result = $this->getSelectValues($importer, $product1, "grey", ['red', 'blue']);
+        $this->assertEquals([$colorOptionId, $colorGroupOptionId1 . ',' . $colorGroupOptionId2], $result);
+
+        // set config to treat "" as null
+        $config->emptyNonTextValueStrategy = ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE;
+        $importer = self::$factory->createImporter($config);
+
+        $result = $this->getSelectValues($importer, $product1, "", []);
+        $this->assertSame([null, null], $result);
+    }
+
+    /**
+     * @param Importer $importer
+     * @param SimpleProduct $product
+     * @return array
+     * @throws Exception
+     */
+    protected function getSelectValues(Importer $importer, SimpleProduct $product, $color, $colGroup)
+    {
+        $colorAttributeId = self::$metaData->productEavAttributeInfo['color']->attributeId;
+        $colorGroupAttributeId = self::$metaData->productEavAttributeInfo['color_group_product_importer']->attributeId;
+
+        $product->global()->setSelectAttribute('color', $color);
+        // note: empty value
+        $product->global()->setMultipleSelectAttribute('color_group_product_importer', $colGroup);
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertEquals([], $product->getErrors());
+
+        $value1 = self::$db->fetchSingleCell("
+            SELECT value
+            FROM " . self::$metaData->productEntityTable . "_int
+            WHERE entity_id = {$product->id} AND attribute_id = {$colorAttributeId} AND store_id = 0
+        ");
+
+        $value2 = self::$db->fetchSingleCell("
+            SELECT value
+            FROM " . self::$metaData->productEntityTable . "_varchar
+            WHERE entity_id = {$product->id} AND attribute_id = {$colorGroupAttributeId} AND store_id = 0
+        ");
+
+        return [$value1, $value2];
     }
 
     protected function getOptionValue($attributeCode, $name)
@@ -1189,20 +1244,20 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $importer->flush();
 
         $links =
-        [
-            LinkInfo::RELATED => [
-                [$product1->id, $a->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 1],
-                [$product1->id, $b->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 2]
-            ],
-            LinkInfo::UP_SELL => [
-                [$product1->id, $b->id, self::$metaData->linkInfo[LinkInfo::UP_SELL]->typeId, 1],
-                [$product1->id, $c->id, self::$metaData->linkInfo[LinkInfo::UP_SELL]->typeId, 2]
-            ],
-            LinkInfo::CROSS_SELL => [
-                [$product1->id, $a->id, self::$metaData->linkInfo[LinkInfo::CROSS_SELL]->typeId, 1],
-                [$product1->id, $c->id, self::$metaData->linkInfo[LinkInfo::CROSS_SELL]->typeId, 2]
-            ]
-        ];
+            [
+                LinkInfo::RELATED => [
+                    [$product1->id, $a->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 1],
+                    [$product1->id, $b->id, self::$metaData->linkInfo[LinkInfo::RELATED]->typeId, 2]
+                ],
+                LinkInfo::UP_SELL => [
+                    [$product1->id, $b->id, self::$metaData->linkInfo[LinkInfo::UP_SELL]->typeId, 1],
+                    [$product1->id, $c->id, self::$metaData->linkInfo[LinkInfo::UP_SELL]->typeId, 2]
+                ],
+                LinkInfo::CROSS_SELL => [
+                    [$product1->id, $a->id, self::$metaData->linkInfo[LinkInfo::CROSS_SELL]->typeId, 1],
+                    [$product1->id, $c->id, self::$metaData->linkInfo[LinkInfo::CROSS_SELL]->typeId, 2]
+                ]
+            ];
 
         $this->assertEquals($links, $this->getLinks($product1));
 
@@ -1605,7 +1660,8 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->checkDownloadable($downloadable);
     }
 
-    private function checkDownloadable($downloadable) {
+    private function checkDownloadable($downloadable)
+    {
 
         $linkResults = self::$db->fetchAllNonAssoc("
             SELECT sort_order, number_of_downloads, is_shareable, link_url, link_file, link_type, sample_url, sample_file, sample_type
@@ -1921,7 +1977,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         ");
 
         $expected = [
-            ['field', '1', 'inscription', '21', null,'0', '0', '1', '0', 'Inscription', '0', '0.5000', 'fixed'],
+            ['field', '1', 'inscription', '21', null, '0', '0', '1', '0', 'Inscription', '0', '0.5000', 'fixed'],
             ['area', '1', 'note', 255, null, '0', '0', '2', '0', 'Note', '0', '0.1000', 'fixed'],
             ['file', '0', 'id-card', '0', 'jpg jpeg', '5000', '7000', '3', '0', 'Id card', '0', '0.0000', 'fixed'],
             ['date', '1', null, 0, null, '0', '0', '4', '0', 'Date', '0', '10.0000', 'percent'],

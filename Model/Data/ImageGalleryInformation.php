@@ -7,7 +7,7 @@ namespace BigBridge\ProductImport\Model\Data;
  */
 class ImageGalleryInformation
 {
-    /** @var Image*/
+    /** @var Image */
     protected $image;
 
     /**@var string */

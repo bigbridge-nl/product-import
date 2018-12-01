@@ -62,7 +62,7 @@ class Magento2DbConnection
     protected function calculateMaxAllowedPacket()
     {
         // ask MySQL server about its biggest allowed packet (convert to kB)
-        $maxAllowedPacket = (int)floor($this->fetchSingleCell("SELECT @@max_allowed_packet")  / self::kB);
+        $maxAllowedPacket = (int)floor($this->fetchSingleCell("SELECT @@max_allowed_packet") / self::kB);
 
         // between 1024 kB and 16384 kB
         $maxAllowedPacket = max(self::kB, $maxAllowedPacket);
@@ -327,7 +327,8 @@ class Magento2DbConnection
      * @param array $groupColumns
      * @return array
      */
-    public function fetchGrouped(string $query, array $params, array $groupColumns) {
+    public function fetchGrouped(string $query, array $params, array $groupColumns)
+    {
         $all = $this->execute($query, $params)->fetchAll(PDO::FETCH_ASSOC);
 
         $grouped = [];

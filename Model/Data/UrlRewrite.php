@@ -47,7 +47,8 @@ class UrlRewrite
         $this->extension = (bool)$hasExtension;
     }
 
-    public function equals(UrlRewrite $urlRewrite) {
+    public function equals(UrlRewrite $urlRewrite)
+    {
         return (
             ($this->productId === $urlRewrite->productId) &&
             ($this->requestPath === $urlRewrite->requestPath) &&

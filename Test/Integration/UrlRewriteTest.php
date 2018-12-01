@@ -52,13 +52,13 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         $table = $metadata->urlRewriteTable;
         self::$db->execute("DELETE FROM `{$table}` WHERE request_path LIKE '%product-import.html'");
     }
-    
+
     public function __construct(string $name = null, array $data = array(), string $dataName = '')
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
         $this->metadata = $objectManager->get(MetaData::class);
-        
+
         parent::__construct($name, $data, $dataName);
     }
 

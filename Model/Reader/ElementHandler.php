@@ -26,6 +26,8 @@ use BigBridge\ProductImport\Model\Data\Image;
 use Exception;
 
 /**
+ * Processes all xml elements.
+ *
  * @author Patrick van Bergen
  */
 class ElementHandler
@@ -37,7 +39,7 @@ class ElementHandler
      * XML processing
      */
 
-    /** @var string  */
+    /** @var string */
     protected $characterData;
 
     /** @var string[] */
@@ -272,7 +274,7 @@ class ElementHandler
 
         } elseif ($scope === self::GLOBAL || $scope === self::STORE_VIEW) {
             if ($element === self::CUSTOM_OPTION_VALUES) {
-                $this->customOptionValues =[];
+                $this->customOptionValues = [];
             }
         } elseif ($scope === self::OPTIONS) {
             if ($element === self::OPTION) {

@@ -144,19 +144,27 @@ When Magento 2 uses "name" where I would use "code", I follow Magento. "attribut
 
 ## Empty values and removing attributes
 
-Any simple (scalar) attribute may be removed from the database (on a global level, or per store view) by setting it to null. For example:
+Imports often contain empty fields. When this happens this can mean one of two things:
 
-    $global->setMsrp(null);
+- IGNORE: the value of the attribute is not given and should not be imported
+- REMOVE: the attribute should not have a value, remove the existing value
 
-Attributes with the empty string value ("") are ignored by default. They are not imported.
+It is up to you, the writer of the import, how the empty value "" is being treated.
+Check if the value is "", and select your approach:
 
-If that to remove the attribute value, you have two options:
+- IGNORE: just skip the attribute, do not call setMyAttribute()
+- REMOVE: call setMyAttribute(null)
+
+If you decide to import "" as is, the importer will opt for the safest choice: IGNORE, because it prevents unwanted data destruction.
+Note: even an empty array of multiple select values will be ignored.
+
+However, you can still use config options to change the behaviour of the importer.
 
 For textual attributes (datatype varchar and text):
 
     $config->emptyTextValueStrategy = ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_REMOVE;
 
-For non-textual attributes (datetime, decimal and integer):
+For non-textual attributes (datetime, decimal and integer), including selects and multiple selects:
 
     $config->emptyNonTextValueStrategy = ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_REMOVE;
 

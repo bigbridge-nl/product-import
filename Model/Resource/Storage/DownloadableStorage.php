@@ -22,7 +22,7 @@ class DownloadableStorage
     /** @var  MetaData */
     protected $metaData;
 
-    /** @var ImageStorage  */
+    /** @var ImageStorage */
     protected $imageStorage;
 
     public function __construct(

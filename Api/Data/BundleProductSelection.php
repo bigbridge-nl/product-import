@@ -11,7 +11,7 @@ class BundleProductSelection
 {
     /** @var string */
     protected $sku;
-    
+
     /** @var bool */
     protected $isDefault;
 

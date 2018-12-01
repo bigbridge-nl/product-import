@@ -6,6 +6,8 @@ use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
+ * Deletes products.
+ *
  * @author Patrick van Bergen
  */
 class ProductDeleter

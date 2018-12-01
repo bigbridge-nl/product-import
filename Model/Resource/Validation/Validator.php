@@ -77,13 +77,13 @@ class Validator
             }
 
             // name
-            if (!array_key_exists('name', $globalAttributes) || $globalAttributes['name'] === ""  || $globalAttributes['name'] === null) {
+            if (!array_key_exists('name', $globalAttributes) || $globalAttributes['name'] === "" || $globalAttributes['name'] === null) {
                 $product->addError("missing name");
             }
 
             // price
             if (!($product instanceof GroupedProduct) && !($product instanceof BundleProduct)) {
-                if (!array_key_exists('price', $globalAttributes) || $globalAttributes['price'] === ""  || $globalAttributes['price'] === null) {
+                if (!array_key_exists('price', $globalAttributes) || $globalAttributes['price'] === "" || $globalAttributes['price'] === null) {
                     $product->addError("missing price");
                 }
             }
@@ -191,7 +191,7 @@ class Validator
 
             $decimalAttributes =
                 [ProductStockItem::QTY, ProductStockItem::MIN_QTY, ProductStockItem::NOTIFY_STOCK_QTY,
-                ProductStockItem::MIN_SALE_QTY, ProductStockItem::MAX_SALE_QTY, ProductStockItem::QTY_INCREMENTS];
+                    ProductStockItem::MIN_SALE_QTY, ProductStockItem::MAX_SALE_QTY, ProductStockItem::QTY_INCREMENTS];
 
 
             // decimals

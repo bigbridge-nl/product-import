@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.7 : FIX XSD related products / empty select values - 1-12-2018
+
+Pull request by Jeroen Nijhuis / Epartment
+
+- Updated product-import.xsd to use correct element names for linked product types (related, cross-sell, up-sell)
+- Adjusted samples to reflect changes
+
+Updated integration test to import all example xml files.
+
+I made the importer's behaviour for empty values more explicit in import.md, especially for empty select and multiselect attributes.
+
+Fixed the fatal error that occurred when a select was set to null.
+
+## 1.2.6 : FIX impossible to import custom attributes via XML - 21-11-2018
+
+Pull request by Antonino Bonumore / Emergento
+
 ## 1.2.4 : Lazy loading option values and cache manager - 09-11-2018
 
 Existing option values are now only loaded per attribute, when it is needed.

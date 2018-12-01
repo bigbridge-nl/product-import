@@ -79,19 +79,19 @@ class ProductStoreView
     /** @var ImageGalleryInformation[] */
     protected $imageGalleryInformation = [];
 
-    /** @var array  */
+    /** @var array */
     protected $imageRoles = [];
 
-    /** @var array  */
+    /** @var array */
     protected $attributes = [];
 
-    /** @var array  */
+    /** @var array */
     protected $unresolvedSelects = [];
 
-    /** @var array  */
+    /** @var array */
     protected $unresolvedMultipleSelects = [];
 
-    /** @var array  */
+    /** @var array */
     protected $unresolvedAttributes = [];
 
     /** @var CustomOptionTitle[] */
@@ -431,7 +431,7 @@ class ProductStoreView
         $this->unresolvedSelects[trim($attributeCode)] = ($option === null) ? null : trim($option);
     }
 
-    public function setSelectAttributeOptionId(string $attributeCode, int $optionId)
+    public function setSelectAttributeOptionId(string $attributeCode, $optionId = null)
     {
         $this->attributes[$attributeCode] = $optionId;
     }
@@ -440,14 +440,14 @@ class ProductStoreView
      * @param string $attributeCode
      * @param array $options The admin names of the attribute options
      */
-    public function setMultipleSelectAttribute(string $attributeCode, array $options)
+    public function setMultipleSelectAttribute(string $attributeCode, array $options = null)
     {
-        $this->unresolvedMultipleSelects[trim($attributeCode)] = array_map('trim', $options);
+        $this->unresolvedMultipleSelects[trim($attributeCode)] = ($options === null) ? null : array_map('trim', $options);
     }
 
-    public function setMultiSelectAttributeOptionIds(string $attributeCode, array $optionIds)
+    public function setMultiSelectAttributeOptionIds(string $attributeCode, array $optionIds = null)
     {
-        $this->attributes[$attributeCode] = implode(',', array_map('trim', $optionIds));
+        $this->attributes[$attributeCode] = ($optionIds === null) ? null : implode(',', array_map('trim', $optionIds));
     }
 
     /**

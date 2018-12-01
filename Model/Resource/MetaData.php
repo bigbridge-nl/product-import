@@ -74,10 +74,10 @@ class MetaData
     /** @var ValueSerializer */
     public $valueSerializer;
 
-    /** @var string  */
+    /** @var string */
     public $entityTypeTable;
 
-    /** @var  string  */
+    /** @var string */
     public $productEntityTable;
 
     /** @var string */
@@ -89,13 +89,13 @@ class MetaData
     /** @var string */
     public $urlRewriteProductCategoryTable;
 
-    /** @var  string */
+    /** @var string */
     public $categoryProductTable;
 
-    /** @var  string */
+    /** @var string */
     public $configDataTable;
 
-    /** @var  string */
+    /** @var string */
     public $productWebsiteTable;
 
     /** @var string */
@@ -122,13 +122,13 @@ class MetaData
     /** @var string */
     public $relationTable;
 
-    /** @var string  */
+    /** @var string */
     public $attributeTable;
 
-    /** @var string  */
+    /** @var string */
     public $catalogAttributeTable;
 
-    /** @var string  */
+    /** @var string */
     public $attributeOptionTable;
 
     /** @var string */
@@ -209,10 +209,10 @@ class MetaData
     /** @var string */
     public $customOptionTypeValueTable;
 
-    /** @var  int */
+    /** @var int */
     public $defaultCategoryAttributeSetId;
 
-    /** @var int  */
+    /** @var int */
     public $defaultProductAttributeSetId;
 
     /** @var array Maps attribute set name to id */
@@ -233,13 +233,13 @@ class MetaData
     /** @var array Maps customer group name to id */
     public $customerGroupMap;
 
-    /** @var int  */
+    /** @var int */
     public $productEntityTypeId;
 
-    /** @var int  */
+    /** @var int */
     public $categoryEntityTypeId;
 
-    /** @var  EavAttributeInfo[] */
+    /** @var EavAttributeInfo[] */
     public $productEavAttributeInfo;
 
     /** @var int */
@@ -248,10 +248,10 @@ class MetaData
     /** @var array */
     public $categoryAttributeMap;
 
-    /** @var  string */
+    /** @var string */
     public $productUrlSuffix;
 
-    /** @var  string */
+    /** @var string */
     public $categoryUrlSuffix;
 
     /** @var bool Create 301 rewrite for older url_rewrite entries */
@@ -346,7 +346,7 @@ class MetaData
 
         $this->productUrlSuffix = $this->getProductUrlSuffix();
         $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
-        $this->saveRewritesHistory  = $this->getSaveRewritesHistory();
+        $this->saveRewritesHistory = $this->getSaveRewritesHistory();
 
         $this->storeViewMap = $this->getStoreViewMap();
         $this->storeViewWebsiteMap = $this->getStoreViewWebsiteMap();
@@ -441,7 +441,7 @@ class MetaData
         return $this->db->fetchMap(
             "SELECT `attribute_set_name`, `attribute_set_id` FROM {$this->attributeSetTable} WHERE `entity_type_id` = ?
         ", [
-                $this->productEntityTypeId
+            $this->productEntityTypeId
         ]);
     }
 
@@ -539,7 +539,7 @@ class MetaData
             $this->categoryEntityTypeId
         ]);
     }
-    
+
     /**
      * @return array An attribute code indexed array of AttributeInfo
      */

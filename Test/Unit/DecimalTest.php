@@ -7,7 +7,7 @@ use BigBridge\ProductImport\Helper\Decimal;
 /**
  * @author Patrick van Bergen
  */
-class DecimalTest  extends \PHPUnit\Framework\TestCase
+class DecimalTest extends \PHPUnit\Framework\TestCase
 {
     public static function setUpBeforeClass()
     {
