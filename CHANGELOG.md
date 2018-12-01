@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.7 : FIX XSD related products - 1-12-2018
+
+Pull request by Jeroen Nijhuis / Epartment
+
+- Updated product-import.xsd to use correct element names for linked product types (related, cross-sell, up-sell)
+- Adjusted samples to reflect changes
+
+Updated integration test to import all example xml files.
+
 ## 1.2.6 : FIX impossible to import custom attributes via XML - 21-11-2018
 
 Pull request by Antonino Bonumore / Emergento
