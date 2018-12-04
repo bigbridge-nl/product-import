@@ -32,6 +32,7 @@ class MetaData
     const ATTRIBUTE_OPTION_VALUE_TABLE = 'eav_attribute_option_value';
     const CATALOG_ATTRIBUTE_TABLE = 'catalog_eav_attribute';
     const STORE_TABLE = 'store';
+    const SOURCE_TABLE = 'inventory_source';
     const WEBSITE_TABLE = 'store_website';
     const TAX_CLASS_TABLE = 'tax_class';
     const CUSTOMER_GROUP_TABLE = 'customer_group';
@@ -64,6 +65,8 @@ class MetaData
     const CUSTOM_OPTION_TYPE_PRICE_TABLE = 'catalog_product_option_type_price';
     const CUSTOM_OPTION_TYPE_TITLE_TABLE = 'catalog_product_option_type_title';
     const CUSTOM_OPTION_TYPE_VALUE_TABLE = 'catalog_product_option_type_value';
+    const INVENTORY_SOURCE_ITEM = 'inventory_source_item';
+    const INVENTORY_LOW_STOCK_NOTIFICATION_CONFIGURATION = 'inventory_low_stock_notification_configuration';
 
     /** @var  Magento2DbConnection */
     protected $db;
@@ -141,6 +144,9 @@ class MetaData
     public $storeTable;
 
     /** @var string */
+    public $sourceTable;
+
+    /** @var string */
     public $websiteTable;
 
     /** @var string */
@@ -209,6 +215,12 @@ class MetaData
     /** @var string */
     public $customOptionTypeValueTable;
 
+    /** @var string */
+    public $inventorySourceItem;
+
+    /** @var string */
+    public $inventoryLowStockNotificationConfiguration;
+
     /** @var int */
     public $defaultCategoryAttributeSetId;
 
@@ -223,6 +235,9 @@ class MetaData
 
     /** @var array Maps store view code to id */
     public $storeViewMap;
+
+    /** @var array Maps source code to source code */
+    public $sourceCodeMap;
 
     /** @var array Maps store view id to website id */
     public $storeViewWebsiteMap;
@@ -308,6 +323,7 @@ class MetaData
         $this->attributeOptionValueTable = $this->db->getFullTableName(self::ATTRIBUTE_OPTION_VALUE_TABLE);
         $this->attributeSetTable = $this->db->getFullTableName(self::ATTRIBUTE_SET_TABLE);
         $this->storeTable = $this->db->getFullTableName(self::STORE_TABLE);
+        $this->sourceTable = $this->db->getFullTableName(self::SOURCE_TABLE);
         $this->websiteTable = $this->db->getFullTableName(self::WEBSITE_TABLE);
         $this->taxClassTable = $this->db->getFullTableName(self::TAX_CLASS_TABLE);
         $this->linkTable = $this->db->getFullTableName(self::LINK_TABLE);
@@ -331,8 +347,13 @@ class MetaData
         $this->customOptionTypeTitleTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_TITLE_TABLE);
         $this->customOptionTypePriceTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_PRICE_TABLE);
         $this->customOptionTypeValueTable = $this->db->getFullTableName(self::CUSTOM_OPTION_TYPE_VALUE_TABLE);
+        $this->inventorySourceItem = $this->db->getFullTableName(self::INVENTORY_SOURCE_ITEM);
+        $this->inventoryLowStockNotificationConfiguration = $this->db->getFullTableName(self::INVENTORY_LOW_STOCK_NOTIFICATION_CONFIGURATION);
     }
 
+    /**
+     * @throws Exception
+     */
     public function reloadCache()
     {
         $this->productEntityTypeId = $this->getProductEntityTypeId();
@@ -350,6 +371,7 @@ class MetaData
 
         $this->storeViewMap = $this->getStoreViewMap();
         $this->storeViewWebsiteMap = $this->getStoreViewWebsiteMap();
+        $this->sourceCodeMap = $this->getSourceCodeMap();
         $this->websiteMap = $this->getWebsiteMap();
         $this->taxClassMap = $this->getTaxClassMap();
         $this->customerGroupMap = $this->getCustomerGroupMap();
@@ -494,6 +516,11 @@ class MetaData
     protected function getStoreViewWebsiteMap()
     {
         return $this->db->fetchMap("SELECT `store_id`, `website_id` FROM {$this->storeTable}");
+    }
+
+    protected function getSourceCodeMap()
+    {
+        return $this->db->fetchMap("SELECT `source_code`, `source_code` FROM {$this->sourceTable}");
     }
 
     /**

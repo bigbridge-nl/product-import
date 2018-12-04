@@ -85,6 +85,11 @@ Tables that will be changed by the importer (insert, update, delete)
 * catalog_product_option_type_title
 * catalog_product_option_type_value
 
+### Multi-Source Inventory
+
+* inventory_source_item
+* inventory_low_stock_notification_configuration
+
 ## Remarks
 
 * The fields 'deferred_stock_update' and 'use_config_deferred_stock_update' that are available in the ui of 'Advanced Inventory' are not stored and not used by Magento [https://community.magento.com/t5/Admin-Configuration-Questions/Use-Deferred-Stock-Update/td-p/67547]

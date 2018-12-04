@@ -19,6 +19,7 @@ use BigBridge\ProductImport\Model\Resource\Storage\GroupedStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\LinkedProductStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\ProductEntityStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\SourceItemStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\StockItemStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
@@ -63,6 +64,9 @@ class ProductStorage
     /** @var StockItemStorage */
     protected $stockItemStorage;
 
+    /** @var SourceItemStorage */
+    protected $sourceItemStorage;
+
     /** @var CustomOptionStorage */
     protected $customOptionStorage;
 
@@ -93,6 +97,7 @@ class ProductStorage
         LinkedProductStorage $linkedProductStorage,
         TierPriceStorage $tierPriceStorage,
         StockItemStorage $stockItemStorage,
+        SourceItemStorage $sourceItemStorage,
         CustomOptionStorage $customOptionStorage,
         DownloadableStorage $downloadableStorage,
         ConfigurableStorage $configurableStorage,
@@ -111,6 +116,7 @@ class ProductStorage
         $this->linkedProductStorage = $linkedProductStorage;
         $this->tierPriceStorage = $tierPriceStorage;
         $this->stockItemStorage = $stockItemStorage;
+        $this->sourceItemStorage = $sourceItemStorage;
         $this->customOptionStorage = $customOptionStorage;
         $this->downloadableStorage = $downloadableStorage;
         $this->configurableStorage = $configurableStorage;

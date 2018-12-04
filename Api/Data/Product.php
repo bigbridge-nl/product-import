@@ -39,6 +39,9 @@ abstract class Product
     /** @var ProductStockItem[] */
     protected $stockItems = [];
 
+    /** @var SourceItem[] */
+    protected $sourceItems = [];
+
     /** @var Image[] */
     protected $images = [];
 
@@ -189,6 +192,27 @@ abstract class Product
     public function getStockItems()
     {
         return $this->stockItems;
+    }
+
+    /**
+     * @param string $sourceCode
+     * @return SourceItem
+     */
+    public function sourceItem(string $sourceCode)
+    {
+        $sourceCode = trim($sourceCode);
+        if (!array_key_exists($sourceCode, $this->sourceItems)) {
+            $this->sourceItems[$sourceCode] = new SourceItem();
+        }
+        return $this->sourceItems[$sourceCode];
+    }
+
+    /**
+     * @return SourceItem[]
+     */
+    public function getSourceItems(): array
+    {
+        return $this->sourceItems;
     }
 
     public function addCategoryIds(array $categoryIds)

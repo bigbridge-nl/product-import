@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0 : Multi-Source Inventory - ??-??-2018
+
+Magento 2.3: imports into inventory_source_item and inventory_low_stock_notification_configuration.
+
 ## 1.2.7 : FIX XSD related products / empty select values - 1-12-2018
 
 Pull request by Jeroen Nijhuis / Epartment

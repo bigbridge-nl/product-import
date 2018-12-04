@@ -28,6 +28,9 @@ class ReferenceResolver
     /** @var StoreViewResolver */
     protected $storeViewResolver;
 
+    /** @var SourceResolver */
+    protected $sourceResolver;
+
     /** @var WebsiteResolver */
     protected $websiteResolver;
 
@@ -54,6 +57,7 @@ class ReferenceResolver
         TaxClassResolver $taxClassResolver,
         AttributeSetResolver $attributeSetResolver,
         StoreViewResolver $storeViewResolver,
+        SourceResolver $sourceResolver,
         WebsiteResolver $websiteResolver,
         OptionResolver $optionResolver,
         LinkedProductReferenceResolver $linkedProductReferenceResolver,
@@ -67,6 +71,7 @@ class ReferenceResolver
         $this->taxClassResolver = $taxClassResolver;
         $this->attributeSetResolver = $attributeSetResolver;
         $this->storeViewResolver = $storeViewResolver;
+        $this->sourceResolver = $sourceResolver;
         $this->websiteResolver = $websiteResolver;
         $this->optionResolver = $optionResolver;
         $this->linkedProductReferenceResolver = $linkedProductReferenceResolver;
@@ -121,6 +126,13 @@ class ReferenceResolver
                             $product->removeWebsiteIds();
                         }
                         break;
+                }
+            }
+
+            foreach ($product->getSourceItems() as $sourceCode => $sourceItem) {
+                $error = $this->sourceResolver->resolveName($sourceCode);
+                if ($error !== "") {
+                    $product->addError($error);
                 }
             }
 

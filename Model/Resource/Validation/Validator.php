@@ -8,6 +8,7 @@ use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Api\Data\SourceItem;
 use BigBridge\ProductImport\Api\Data\TierPrice;
 use BigBridge\ProductImport\Helper\Decimal;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
@@ -115,6 +116,24 @@ class Validator
                 if (!($tierPrice instanceof TierPrice)) {
                     $product->addError("tierprices should be an array of TierPrice");
                     break;
+                }
+            }
+        }
+
+        // source items
+        foreach ($product->getSourceItems() as $sourceItem) {
+
+            $sourceItemAttributes = $sourceItem->getAttributes();
+
+            foreach ([SourceItem::QTY, SourceItem::NOTIFY_STOCK_QTY] as $sourceItemAttribute) {
+
+                if (array_key_exists($sourceItemAttribute, $sourceItemAttributes)) {
+
+                    $value = $sourceItemAttributes[$sourceItemAttribute];
+
+                    if (!preg_match(Decimal::DECIMAL_PATTERN, $value)) {
+                        $product->addError("source item " . $sourceItemAttribute . " is not a decimal number with dot (" . $value . ")");
+                    }
                 }
             }
         }

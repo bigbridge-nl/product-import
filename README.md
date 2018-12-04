@@ -51,6 +51,7 @@ Experiment with the library in a safe webshop. Make sure to create a database ba
 * product type changes
 * importing links to products have not been imported yet
 * dry run (no products are written to the database)
+* multi-source inventory (msi)
 
 Continue to read about [all importer features](doc/importer.md)
 

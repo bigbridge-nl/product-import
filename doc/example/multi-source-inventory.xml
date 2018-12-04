@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<simple sku="my-msi-product">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>My MSI Product</name>
+			<price>12.45</price>
+		</global>
+	</simple>
+</import>

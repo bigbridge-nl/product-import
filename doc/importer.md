@@ -248,6 +248,14 @@ Stock information can be entered this way:
 
 The other 20 stock info attributes are available as well.
 
+## Multi-Source Inventory
+
+Since Magento 2.3 it is possible to keep multiple sources of stock. Each source has a source code and per product you can set several properties of a source item.
+
+        $product->sourceItem("default")->setQty(100);
+        $product->sourceItem("default")->setIsInStock(true);
+        $product->sourceItem("default")->setNotifyStockQuantity(20);
+
 ## Related, Up Sell, and Cross Sell Products
 
 These so called "linked" products are stored as references to other products. When entering them, specify a product with an sku.
