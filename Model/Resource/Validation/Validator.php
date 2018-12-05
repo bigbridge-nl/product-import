@@ -121,18 +121,25 @@ class Validator
         }
 
         // source items
-        foreach ($product->getSourceItems() as $sourceItem) {
+        $sourceItems = $product->getSourceItems();
+        if (!empty($sourceItems)) {
+            if (version_compare($this->metaData->magentoVersion, "2.3.0") < 0) {
+                $product->addError("source items are supported only in Magento 2.3");
+            } else {
+                foreach ($sourceItems as $sourceItem) {
 
-            $sourceItemAttributes = $sourceItem->getAttributes();
+                    $sourceItemAttributes = $sourceItem->getAttributes();
 
-            foreach ([SourceItem::QTY, SourceItem::NOTIFY_STOCK_QTY] as $sourceItemAttribute) {
+                    foreach ([SourceItem::QTY, SourceItem::NOTIFY_STOCK_QTY] as $sourceItemAttribute) {
 
-                if (array_key_exists($sourceItemAttribute, $sourceItemAttributes)) {
+                        if (array_key_exists($sourceItemAttribute, $sourceItemAttributes)) {
 
-                    $value = $sourceItemAttributes[$sourceItemAttribute];
+                            $value = $sourceItemAttributes[$sourceItemAttribute];
 
-                    if (!preg_match(Decimal::DECIMAL_PATTERN, $value)) {
-                        $product->addError("source item " . $sourceItemAttribute . " is not a decimal number with dot (" . $value . ")");
+                            if (!preg_match(Decimal::DECIMAL_PATTERN, $value)) {
+                                $product->addError("source item " . $sourceItemAttribute . " is not a decimal number with dot (" . $value . ")");
+                            }
+                        }
                     }
                 }
             }

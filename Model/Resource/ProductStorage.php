@@ -293,6 +293,10 @@ class ProductStorage
         $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);
         $this->bundleStorage->performTypeSpecificStorage($productsByType[BundleProduct::TYPE_BUNDLE]);
         $this->configurableStorage->performTypeSpecificStorage($productsByType[ConfigurableProduct::TYPE_CONFIGURABLE]);
+
+        if (version_compare($this->metaData->magentoVersion, "2.3.0") >= 0) {
+            $this->sourceItemStorage->storeSourceItems($validProducts);
+        }
     }
 
     /**

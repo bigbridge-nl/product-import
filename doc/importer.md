@@ -256,6 +256,10 @@ Since Magento 2.3 it is possible to keep multiple sources of stock. Each source 
         $product->sourceItem("default")->setIsInStock(true);
         $product->sourceItem("default")->setNotifyStockQuantity(20);
 
+If you update the "default" source of a product, make sure to call the functions on defaultStockItem() as described in the previous section (Stock items) as well. Magento keeps them in sync, so you should too.
+
+It is not possible to remove source items.
+
 ## Related, Up Sell, and Cross Sell Products
 
 These so called "linked" products are stored as references to other products. When entering them, specify a product with an sku.

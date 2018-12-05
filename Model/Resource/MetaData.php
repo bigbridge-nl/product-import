@@ -371,7 +371,6 @@ class MetaData
 
         $this->storeViewMap = $this->getStoreViewMap();
         $this->storeViewWebsiteMap = $this->getStoreViewWebsiteMap();
-        $this->sourceCodeMap = $this->getSourceCodeMap();
         $this->websiteMap = $this->getWebsiteMap();
         $this->taxClassMap = $this->getTaxClassMap();
         $this->customerGroupMap = $this->getCustomerGroupMap();
@@ -381,6 +380,10 @@ class MetaData
         $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
         $this->imageAttributeIds = $this->getImageAttributeIds();
+
+        if (version_compare($this->magentoVersion, "2.3.0") >= 0) {
+            $this->sourceCodeMap = $this->getSourceCodeMap();
+        }
     }
 
     /**

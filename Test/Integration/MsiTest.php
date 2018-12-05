@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Test\Integration;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Api\ImporterFactory;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
+use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
 /**
@@ -18,6 +19,9 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
     /** @var MetaData */
     private static $metaData;
 
+    /** @var Magento2DbConnection */
+    protected static $db;
+
     public static function setUpBeforeClass()
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
@@ -27,6 +31,9 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
 
         /** @var MetaData metaData */
         self::$metaData = $objectManager->get(MetaData::class);
+
+        /** @var Magento2DbConnection db */
+        self::$db = $objectManager->get(Magento2DbConnection::class);
     }
 
     /**
@@ -51,10 +58,48 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->sourceItem("default")->setNotifyStockQuantity(20);
 
         $importer->importSimpleProduct($product);
-
         $importer->flush();
 
-        $this->assertEquals([], $product->getErrors());
+        $this->assertEquals(['quantity' => 100, 'status' => 1], $this->loadSourceItemData("my-msi-product"));
+        $this->assertEquals(['notify_stock_qty' => 20], $this->loadNotificationData("my-msi-product"));
+
+        $product->sourceItem("default")->setNotifyStockQuantity(30);
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertEquals(['quantity' => 100, 'status' => 1], $this->loadSourceItemData("my-msi-product"));
+        $this->assertEquals(['notify_stock_qty' => 30], $this->loadNotificationData("my-msi-product"));
+
+        $product->sourceItem("default")->setIsInStock(false);
+
+        $importer->importSimpleProduct($product);
+        $importer->flush();
+
+        $this->assertEquals(['quantity' => 100, 'status' => 0], $this->loadSourceItemData("my-msi-product"));
+        $this->assertEquals(['notify_stock_qty' => 30], $this->loadNotificationData("my-msi-product"));
+    }
+
+    protected function loadSourceItemData(string $sku)
+    {
+        return self::$db->fetchRow("
+            SELECT quantity, status
+            FROM " . self::$metaData->inventorySourceItem . "
+            WHERE sku = ? and source_code = ?
+        ", [
+            $sku, "default"
+        ]);
+    }
+
+    protected function loadNotificationData(string $sku)
+    {
+        return self::$db->fetchRow("
+            SELECT notify_stock_qty
+            FROM " . self::$metaData->inventoryLowStockNotificationConfiguration . "
+            WHERE sku = ? and source_code = ?
+        ", [
+            $sku, "default"
+        ]);
     }
 
     /**
