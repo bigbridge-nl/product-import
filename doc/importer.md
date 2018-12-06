@@ -256,6 +256,8 @@ Since Magento 2.3 it is possible to keep multiple sources of stock. Each source 
         $product->sourceItem("default")->setIsInStock(true);
         $product->sourceItem("default")->setNotifyStockQuantity(20);
 
+The importer will not automatically set is_in_stock to true if the quantity is positive. You have to do this explicitly.
+
 If you update the "default" source of a product, make sure to call the functions on defaultStockItem() as described in the previous section (Stock items) as well. Magento keeps them in sync, so you should too.
 
 It is not possible to remove source items.

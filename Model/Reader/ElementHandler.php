@@ -16,6 +16,7 @@ use BigBridge\ProductImport\Api\Data\DownloadSample;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProductMember;
 use BigBridge\ProductImport\Api\Data\ProductStockItem;
+use BigBridge\ProductImport\Api\Data\SourceItem;
 use BigBridge\ProductImport\Api\Data\TierPrice;
 use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use BigBridge\ProductImport\Api\Data\Product;
@@ -63,6 +64,9 @@ class ElementHandler
 
     /** @var ProductStockItem */
     protected $defaultStockItem;
+
+    /** @var SourceItem */
+    protected $sourceItem;
 
     /** @var GroupedProductMember[] */
     protected $members;
@@ -130,6 +134,7 @@ class ElementHandler
     const SELECT = "select";
     const MULTI_SELECT = "multi_select";
     const STOCK = "stock";
+    const SOURCE_ITEM = "source_item";
     const ITEM = "item";
     const CROSS_SELL_PRODUCT_SKUS = "cross_sell_product_skus";
     const UP_SELL_PRODUCT_SKUS = "up_sell_product_skus";
@@ -247,6 +252,8 @@ class ElementHandler
                 $this->storeView = $this->product->storeView($attributes['code']);
             } elseif ($element === self::STOCK) {
                 $this->defaultStockItem = $this->product->defaultStockItem();
+            } elseif ($element === self::SOURCE_ITEM) {
+                $this->sourceItem = $this->product->sourceItem($attributes['code']);
             } elseif ($element === self::IMAGES) {
                 $this->images = [];
             } elseif ($element === self::TIER_PRICES) {
@@ -593,6 +600,14 @@ class ElementHandler
                 $this->defaultStockItem->setEnableQuantityIncrements($value);
             } elseif ($element === ProductStockItem::IS_DECIMAL_DIVIDED) {
                 $this->defaultStockItem->setIsDecimalDivided($value);
+            }
+        } elseif ($scope === self::SOURCE_ITEM) {
+            if ($element === SourceItem::QTY) {
+                $this->sourceItem->setQty($value);
+            } elseif ($element === SourceItem::IS_IN_STOCK) {
+                $this->sourceItem->setIsInStock($value);
+            } elseif ($element === SourceItem::NOTIFY_STOCK_QTY) {
+                $this->sourceItem->setNotifyStockQuantity($value);
             }
         } elseif ($scope === self::MEMBERS) {
             if ($element === self::MEMBER) {

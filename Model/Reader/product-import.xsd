@@ -192,6 +192,16 @@
 			</xs:all>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="source_item">
+		<xs:complexType>
+			<xs:all>
+				<xs:element ref="qty" minOccurs="0"/>
+				<xs:element ref="is_in_stock" minOccurs="0"/>
+				<xs:element ref="notify_stock_qty" minOccurs="0"/>
+			</xs:all>
+			<xs:attribute type="xs:string" name="code" use="required"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="url_key" type="xs:string"/>
 	<xs:element name="delete">
 		<xs:complexType>
@@ -607,6 +617,7 @@
 				<xs:element ref="global" minOccurs="0"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="source_item" minOccurs="0"/>
 				<xs:element ref="category_global_names" minOccurs="0"/>
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
@@ -629,6 +640,7 @@
 				<xs:element ref="global" minOccurs="0"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="source_item" minOccurs="0"/>
 				<xs:element ref="category_global_names" minOccurs="0"/>
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
@@ -653,6 +665,7 @@
 				<xs:element ref="global" minOccurs="0"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="source_item" minOccurs="0"/>
 				<xs:element ref="category_global_names" minOccurs="0"/>
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
@@ -677,6 +690,7 @@
 				<xs:element ref="global" minOccurs="0"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="source_item" minOccurs="0"/>
 				<xs:element ref="category_global_names" minOccurs="0"/>
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
@@ -700,6 +714,7 @@
 				<xs:element ref="global" minOccurs="0"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="source_item" minOccurs="0"/>
 				<xs:element ref="category_global_names" minOccurs="0"/>
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>
@@ -723,6 +738,7 @@
 				<xs:element ref="global" minOccurs="0"/>
 				<xs:element ref="store_view" minOccurs="0"/>
 				<xs:element ref="stock" minOccurs="0"/>
+				<xs:element ref="source_item" minOccurs="0"/>
 				<xs:element ref="category_global_names" minOccurs="0"/>
 				<xs:element ref="website_codes" minOccurs="0"/>
 				<xs:element ref="category_ids" minOccurs="0"/>

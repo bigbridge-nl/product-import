@@ -52,6 +52,8 @@ class ProductReaderTest extends \Magento\TestFramework\TestCase\AbstractControll
                 echo "\n";
                 echo "Error in " . $xmlFile . ":\n";
                 echo $logger->getOutput() . "\n";
+            } elseif ($logger->getOkProductCount() == 0) {
+                echo $logger->getOutput();
             }
 
             $this->assertSame(0, $logger->getFailedProductCount());
