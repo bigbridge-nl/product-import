@@ -20,12 +20,21 @@ class ProductReaderTest extends \Magento\TestFramework\TestCase\AbstractControll
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
+        /** @var MetaData $metaData */
+        $metaData = $objectManager->create(MetaData::class);
+
         $this->setupAttributes($objectManager);
 
         /** @var XmlProductReader $productReader */
         $productReader = $objectManager->create(XmlProductReader::class);
 
         foreach (glob(__DIR__ . '/../../doc/example/*.xml') as $xmlFile) {
+
+            if (basename($xmlFile) === "multi-source-inventory.xml") {
+                if (version_compare($metaData->magentoVersion, "2.3.0") < 0) {
+                    continue;
+                }
+            }
 
             $success = true;
 

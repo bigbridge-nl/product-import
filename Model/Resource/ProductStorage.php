@@ -169,6 +169,9 @@ class ProductStorage
      */
     public function preProcessProducts(array $products, ImportConfig $config): array
     {
+        // start filtering out products that use features that are not part of this Magento version
+        $products = $this->checkForVersionSpecificFeatures($products);
+
         // check if the pre-specified ids exist; changes $product->errors
         $this->productEntityStorage->checkIfIdsExist($products);
 
@@ -196,6 +199,29 @@ class ProductStorage
             if ($product->isOk()) {
                 $validProducts[] = $product;
             }
+        }
+
+        return $validProducts;
+    }
+
+    /**
+     * @param Product[] $products
+     */
+    protected function checkForVersionSpecificFeatures(array $products): array
+    {
+        $validProducts = [];
+
+        if (version_compare($this->metaData->magentoVersion, "2.3.0") < 0) {
+
+            foreach ($products as $product) {
+                if (!empty($product->getSourceItems())) {
+                    $product->addError("source items are supported only in Magento 2.3");
+                } else {
+                    $validProducts[] = $product;
+                }
+            }
+        } else {
+            $validProducts = $products;
         }
 
         return $validProducts;

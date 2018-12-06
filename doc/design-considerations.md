@@ -360,5 +360,5 @@ The user has access to all caches via the CacheManager class.
 
 ## Version-specific functionality
 
-Some import functions are available only from a certain version of Magento. Multi-source inventory is available from Magento 2.3 for example. The importer tackles this with by version checking at several points. Perhaps it would be better if this could be restricted to one test per feature, but presently this is not feasible.
+Some import functions are available only from a certain version of Magento. Multi-source inventory is available from Magento 2.3 for example. The importer tackles this with by version checking at the beginning of the preprocessing phase. This way it won't need to check at each step of the import.
 

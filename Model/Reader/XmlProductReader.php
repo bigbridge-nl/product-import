@@ -63,6 +63,7 @@ class XmlProductReader
 
         } catch (\Exception $e) {
             $output->error($e->getMessage());
+            $output->error($e->getTraceAsString());
         }
 
         $time = date('H:i:s');
