@@ -1,10 +1,10 @@
 # Changelog
 
-## 1.3.0 : Multi-Source Inventory - ??-??-2018
+## 1.3.0 : Multi-Source Inventory - 07-12-2018
 
-Magento 2.3: Support for source item import.
+Magento 2.3: Import of source items.
 
-## 1.2.7 : FIX XSD related products / empty select values - 1-12-2018
+## 1.2.7 : FIX XSD related products / empty select values - 01-12-2018
 
 Pull request by Jeroen Nijhuis / Epartment
 
