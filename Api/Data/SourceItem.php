@@ -11,20 +11,23 @@ use BigBridge\ProductImport\Helper\Decimal;
  */
 class SourceItem
 {
-    const QTY = 'quantity';
-    const IS_IN_STOCK = 'status';
+    const QUANTITY = 'quantity';
+    const STATUS = 'status';
     const NOTIFY_STOCK_QTY = 'notify_stock_qty';
 
     protected $attributes = [];
 
-    public function setIsInStock(bool $isInStock)
+    /**
+     * @param int $status 0: not in stock, 1: in stock
+     */
+    public function setStatus(int $status)
     {
-        $this->attributes[self::IS_IN_STOCK] = $isInStock;
+        $this->attributes[self::STATUS] = $status;
     }
 
-    public function setQty(string $quantity)
+    public function setQuantity(string $quantity)
     {
-        $this->attributes[self::QTY] = Decimal::format($quantity);
+        $this->attributes[self::QUANTITY] = Decimal::format($quantity);
     }
 
     public function setNotifyStockQuantity(string $quantity)

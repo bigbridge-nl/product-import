@@ -125,7 +125,7 @@ class Validator
 
             $sourceItemAttributes = $sourceItem->getAttributes();
 
-            foreach ([SourceItem::QTY, SourceItem::NOTIFY_STOCK_QTY] as $sourceItemAttribute) {
+            foreach ([SourceItem::QUANTITY, SourceItem::NOTIFY_STOCK_QTY] as $sourceItemAttribute) {
 
                 if (array_key_exists($sourceItemAttribute, $sourceItemAttributes)) {
 

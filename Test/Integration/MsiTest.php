@@ -53,8 +53,8 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->global()->setName("My MSI Product");
         $product->global()->setPrice("12.35");
 
-        $product->sourceItem("default")->setQty(100);
-        $product->sourceItem("default")->setIsInStock(true);
+        $product->sourceItem("default")->setQuantity(100);
+        $product->sourceItem("default")->setStatus(1);
         $product->sourceItem("default")->setNotifyStockQuantity(20);
 
         $importer->importSimpleProduct($product);
@@ -71,7 +71,7 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertEquals(['quantity' => 100, 'status' => 1], $this->loadSourceItemData("my-msi-product"));
         $this->assertEquals(['notify_stock_qty' => 30], $this->loadNotificationData("my-msi-product"));
 
-        $product->sourceItem("default")->setIsInStock(false);
+        $product->sourceItem("default")->setStatus(0);
 
         $importer->importSimpleProduct($product);
         $importer->flush();
@@ -119,8 +119,8 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->global()->setName("My MSI Product");
         $product->global()->setPrice("12.35");
 
-        $product->sourceItem("japan")->setQty(100);
-        $product->sourceItem("default")->setQty("100,25");
+        $product->sourceItem("japan")->setQuantity(100);
+        $product->sourceItem("default")->setQuantity("100,25");
         $product->sourceItem("default")->setNotifyStockQuantity("five");
 
         $importer->importSimpleProduct($product);

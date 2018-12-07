@@ -252,11 +252,11 @@ The other 20 stock info attributes are available as well.
 
 Since Magento 2.3 it is possible to keep multiple sources of stock. Each source has a source code and per product you can set several properties of a source item.
 
-        $product->sourceItem("default")->setQty(100);
-        $product->sourceItem("default")->setIsInStock(true);
+        $product->sourceItem("default")->setQuantity(100);
+        $product->sourceItem("default")->setStatus(1); // in stock
         $product->sourceItem("default")->setNotifyStockQuantity(20);
 
-The importer will not automatically set is_in_stock to true if the quantity is positive. You have to do this explicitly.
+The importer will not automatically set status to 1 if the quantity is positive. You have to do this explicitly.
 
 If you update the "default" source of a product, make sure to call the functions on defaultStockItem() as described in the previous section (Stock items) as well. Magento keeps them in sync, so you should too.
 

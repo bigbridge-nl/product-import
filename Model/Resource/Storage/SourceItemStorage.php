@@ -45,16 +45,16 @@ class SourceItemStorage
 
                 $attributes = $sourceItem->getAttributes();
 
-                if (array_key_exists(SourceItem::QTY, $attributes)) {
+                if (array_key_exists(SourceItem::QUANTITY, $attributes)) {
                     $quantities[] = $sourceCode;
                     $quantities[] = $sku;
-                    $quantities[] = $attributes[SourceItem::QTY];
+                    $quantities[] = $attributes[SourceItem::QUANTITY];
                 }
 
-                if (array_key_exists(SourceItem::IS_IN_STOCK, $attributes)) {
+                if (array_key_exists(SourceItem::STATUS, $attributes)) {
                     $statuses[] = $sourceCode;
                     $statuses[] = $sku;
-                    $statuses[] = $attributes[SourceItem::IS_IN_STOCK];
+                    $statuses[] = $attributes[SourceItem::STATUS];
                 }
 
                 if (array_key_exists(SourceItem::NOTIFY_STOCK_QTY, $attributes)) {

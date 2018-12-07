@@ -7,7 +7,7 @@
 			<price>12.45</price>
 		</global>
 		<source_item code="default">
-			<qty>98</qty>
+			<quantity>98</quantity>
 		</source_item>
 	</simple>
 	<simple sku="my-msi-product2">
@@ -17,8 +17,8 @@
 			<price>12.45</price>
 		</global>
 		<source_item code="default">
-			<qty>137</qty>
-			<is_in_stock>1</is_in_stock>
+			<quantity>137</quantity>
+			<status>1</status>
 			<notify_stock_qty>10</notify_stock_qty>
 		</source_item>
 	</simple>

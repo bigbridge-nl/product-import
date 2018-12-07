@@ -47,6 +47,7 @@
 	<xs:element name="enable_qty_increments" type="xs:string"/>
 	<xs:element name="is_decimal_divided" type="xs:string"/>
 	<xs:element name="attribute_set_name" type="xs:string"/>
+	<xs:element name="quantity" type="xs:string"/>
 	<xs:element name="global">
 		<xs:complexType>
 			<xs:choice maxOccurs="unbounded" minOccurs="0">
@@ -195,8 +196,8 @@
 	<xs:element name="source_item">
 		<xs:complexType>
 			<xs:all>
-				<xs:element ref="qty" minOccurs="0"/>
-				<xs:element ref="is_in_stock" minOccurs="0"/>
+				<xs:element ref="quantity" minOccurs="0"/>
+				<xs:element ref="status" minOccurs="0"/>
 				<xs:element ref="notify_stock_qty" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="code" use="required"/>

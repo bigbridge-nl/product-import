@@ -602,10 +602,10 @@ class ElementHandler
                 $this->defaultStockItem->setIsDecimalDivided($value);
             }
         } elseif ($scope === self::SOURCE_ITEM) {
-            if ($element === SourceItem::QTY) {
-                $this->sourceItem->setQty($value);
-            } elseif ($element === SourceItem::IS_IN_STOCK) {
-                $this->sourceItem->setIsInStock($value);
+            if ($element === SourceItem::QUANTITY) {
+                $this->sourceItem->setQuantity($value);
+            } elseif ($element === SourceItem::STATUS) {
+                $this->sourceItem->setStatus($value);
             } elseif ($element === SourceItem::NOTIFY_STOCK_QTY) {
                 $this->sourceItem->setNotifyStockQuantity($value);
             }
