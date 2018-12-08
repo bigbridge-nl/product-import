@@ -30,75 +30,47 @@ class StockItemStorage
      */
     public function storeStockItems(array $products)
     {
-        /** @var Product[] $productsWithStockItems */
-        $productsWithStockItems = [];
-        foreach ($products as $product) {
-            if ($product->getStockItems() !== []) {
-                $productsWithStockItems[] = $product;
-            }
-        }
-
-        if (empty($productsWithStockItems)) {
-            return;
-        }
-
         // NB: just the default stock item is inserted for now (is all Magento currently supports)
         // the code presumes 1 stock and 1 website id (0)
         $stockId = '1';
         $websiteId = '0';
 
-        $productIds = array_column($productsWithStockItems, 'id');
-
-        $stockItems = $this->db->fetchMap("
-            SELECT `product_id`, `item_id`
-            FROM `{$this->metaData->stockItemTable}`
-            WHERE `stock_id` = ? AND `website_id` = ? AND `product_id` IN (" . $this->db->getMarks($productIds) . ")
-        ", array_merge([
-            $stockId,
-            $websiteId
-        ], $productIds));
-
-        foreach ($productsWithStockItems as $product) {
+        // collect values by attributes
+        $values = [];
+        foreach ($products as $product) {
             foreach ($product->getStockItems() as $stockItem) {
-
-                $attributes = $stockItem->getAttributes();
-                if (!empty($attributes)) {
-
-                    $attributeNames = [];
-                    $attributeValues = [];
-
-                    foreach ($attributes as $name => $value) {
-                        if ($value === false) {
-                            $text = '0';
-                        } elseif ($value === true) {
-                            $text = '1';
-                        } else {
-                            $text = $value;
-                        }
-                        $attributeNames[] = "{$name} = ?";
-                        $attributeValues[] = $text;
-                    }
-
-                    if (!array_key_exists($product->id, $stockItems)) {
-
-                        $this->db->execute("
-                            INSERT INTO `{$this->metaData->stockItemTable}`
-                            SET `stock_id` = ?, `product_id` = ?, `website_id` = ?, " . implode(',', $attributeNames) . "
-                        ", array_merge([$stockId, $product->id, $websiteId], $attributeValues));
-
-                    } else {
-
-                        $itemId = $stockItems[$product->id];
-
-                        $this->db->execute("
-                            UPDATE `{$this->metaData->stockItemTable}`
-                            SET " . implode(',', $attributeNames) . "
-                            WHERE `item_id` = ?
-                        ", array_merge($attributeValues, [$itemId]));
-
-                    }
+                foreach ($stockItem->getAttributes() as $attributeCode => $attributeValue) {
+                    $values[$attributeCode][$product->id] = $attributeValue;
                 }
             }
+        }
+
+        foreach ($values as $attributeCode => $attributeValues) {
+
+            $values = [];
+            foreach ($attributeValues as $productId => $attributeValue) {
+
+                if ($attributeValue === false) {
+                    $text = '0';
+                } elseif ($attributeValue === true) {
+                    $text = '1';
+                } else {
+                    $text = $attributeValue;
+                }
+
+                $values[] = $stockId;
+                $values[] = $websiteId;
+                $values[] = $productId;
+                $values[] = $text;
+            }
+
+            $this->db->insertMultipleWithUpdate(
+                $this->metaData->stockItemTable,
+                ['stock_id', 'website_id', 'product_id', $attributeCode],
+                $values,
+                Magento2DbConnection::_1_KB,
+                "{$attributeCode} = VALUES({$attributeCode})"
+            );
         }
     }
 }

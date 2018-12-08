@@ -2,7 +2,11 @@
 
 ## ?
 
-- source items speed: import quantity and status together
+Speed optimizations:
+
+- msi, source items: import quantity and status together
+
+- stock items (qty, is_in_stock, ...) large speed gain by bundling queries per attribute code
 
 ## 1.3.0 : Multi-Source Inventory - 07-12-2018
 
