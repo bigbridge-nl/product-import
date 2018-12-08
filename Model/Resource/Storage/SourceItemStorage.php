@@ -35,6 +35,7 @@ class SourceItemStorage
     {
         $quantities = [];
         $statuses = [];
+        $both = [];
         $notifies = [];
 
         foreach ($products as $product) {
@@ -45,16 +46,23 @@ class SourceItemStorage
 
                 $attributes = $sourceItem->getAttributes();
 
-                if (array_key_exists(SourceItem::QUANTITY, $attributes)) {
-                    $quantities[] = $sourceCode;
-                    $quantities[] = $sku;
-                    $quantities[] = $attributes[SourceItem::QUANTITY];
-                }
+                if (array_key_exists(SourceItem::QUANTITY, $attributes) && array_key_exists(SourceItem::STATUS, $attributes)) {
+                    $both[] = $sourceCode;
+                    $both[] = $sku;
+                    $both[] = $attributes[SourceItem::QUANTITY];
+                    $both[] = $attributes[SourceItem::STATUS];
+                } else {
+                    if (array_key_exists(SourceItem::QUANTITY, $attributes)) {
+                        $quantities[] = $sourceCode;
+                        $quantities[] = $sku;
+                        $quantities[] = $attributes[SourceItem::QUANTITY];
+                    }
 
-                if (array_key_exists(SourceItem::STATUS, $attributes)) {
-                    $statuses[] = $sourceCode;
-                    $statuses[] = $sku;
-                    $statuses[] = $attributes[SourceItem::STATUS];
+                    if (array_key_exists(SourceItem::STATUS, $attributes)) {
+                        $statuses[] = $sourceCode;
+                        $statuses[] = $sku;
+                        $statuses[] = $attributes[SourceItem::STATUS];
+                    }
                 }
 
                 if (array_key_exists(SourceItem::NOTIFY_STOCK_QTY, $attributes)) {
@@ -63,6 +71,14 @@ class SourceItemStorage
                     $notifies[] = $attributes[SourceItem::NOTIFY_STOCK_QTY];
                 }
             }
+        }
+
+        if (!empty($both)) {
+            $this->db->insertMultipleWithUpdate($this->metaData->inventorySourceItem,
+                ['source_code', 'sku', 'quantity', 'status'],
+                $both,
+                Magento2DbConnection::_1_KB,
+                "quantity = VALUES(quantity), status = VALUES(status)");
         }
 
         if (!empty($quantities)) {

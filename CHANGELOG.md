@@ -1,5 +1,9 @@
 # Changelog
 
+## ?
+
+- source items speed: import quantity and status together
+
 ## 1.3.0 : Multi-Source Inventory - 07-12-2018
 
 Magento 2.3: Import of source items.
