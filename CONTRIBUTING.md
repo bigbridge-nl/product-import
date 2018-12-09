@@ -10,7 +10,7 @@ Unit tests require PHPUnit 7 with namespaces.
 
 ### Integration tests
 
-To run the integration tests, see [Integration testing](integration-tests.md)
+To run the integration tests, see [Integration testing](doc/integration-tests.md)
 
 ### WebApi functional tests
 

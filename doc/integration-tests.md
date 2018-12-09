@@ -43,6 +43,12 @@ Change the 'testsuites' element in phpunit.xml into
         </testsuite>
     </testsuites>
 
+## Add the index
+
+Since this extension is not installed in the test installation, you must at least add the index, needed for the speed tests.
+
+    alter table catalog_product_entity_varchar add index CATALOG_PRODUCT_ENTITY_VARCHAR_ATTRIBUTE_ID_VALUE (attribute_id, value);
+
 ## Run dev:tests:run
 
 Run the integration tests from command line with this command:
