@@ -1,6 +1,6 @@
 # Changelog
 
-## ?
+## 1.3.1 : Speed optimization for stock
 
 Speed optimizations:
 
