@@ -1,18 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <import>
+	<simple sku="scottish-table-red-2st">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Scottish table - red</name>
+			<price>1150</price>
+			<status>1</status>
+			<visibility>1</visibility>
+			<tax_class_name>Taxable Goods</tax_class_name>
+			<color>red</color>
+		</global>
+		<website_codes>
+			<item>base</item>
+		</website_codes>
+		<stock>
+			<qty>2</qty>
+			<is_in_stock>1</is_in_stock>
+		</stock>
+	</simple>
+	<simple sku="scottish-table-brown-2st">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>Scottish table - brown</name>
+			<price>1200</price>
+			<status>1</status>
+			<visibility>1</visibility>
+			<tax_class_name>Taxable Goods</tax_class_name>
+			<color>brown</color>
+		</global>
+		<website_codes>
+			<item>base</item>
+		</website_codes>
+		<stock>
+			<qty>3</qty>
+			<is_in_stock>1</is_in_stock>
+		</stock>
+	</simple>
 	<configurable sku="scottish-table">
 		<attribute_set_name>Default</attribute_set_name>
 		<global>
-			<name>Scotting Table</name>
-			<price>1190</price>
+			<name>Scottish Table</name>
+			<status>1</status>
+			<visibility>4</visibility>
+			<tax_class_name>Taxable Goods</tax_class_name>
+			<generate_url_key>1</generate_url_key>
 		</global>
+		<stock>
+			<is_in_stock>1</is_in_stock>
+		</stock>
+		<website_codes>
+			<item>base</item>
+		</website_codes>
+		<category_global_names>
+			<item>Default Category/Tables</item>
+		</category_global_names>
 		<super_attribute_codes>
 			<item>color</item>
 		</super_attribute_codes>
 		<variant_skus>
 			<item>scottish-table-red-2st</item>
 			<item>scottish-table-brown-2st</item>
-			<item>scottish-table-brown-3st</item>
 		</variant_skus>
 	</configurable>
 </import>
