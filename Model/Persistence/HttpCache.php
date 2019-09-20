@@ -43,16 +43,20 @@ class HttpCache
                 // stored headers must exist
                 if (file_exists($headerFile)) {
 
-                    $headers = json_decode(file_get_contents($headerFile), true);
-                    $now = time();
-                    $useCache = $this->useCache($headers, $now);
+                    $fileContent = file_get_contents($headerFile);
+                    if (!empty($fileContent)) {
 
-                    if ($useCache === true) {
-                        // $temporaryStoragePath still holds fresh data
-                        return "";
-                    } elseif ($useCache !== false) {
-                        // use an e-tag while fetching image
-                        $conditions = $useCache;
+                        $headers = json_decode($fileContent, true);
+                        $now = time();
+                        $useCache = $this->useCache($headers, $now);
+
+                        if ($useCache === true) {
+                            // $temporaryStoragePath still holds fresh data
+                            return "";
+                        } elseif ($useCache !== false) {
+                            // use an e-tag while fetching image
+                            $conditions = $useCache;
+                        }
                     }
                 }
             }
