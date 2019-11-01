@@ -7,6 +7,7 @@ use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
 use BigBridge\ProductImport\Api\Data\DownloadableProduct;
 use BigBridge\ProductImport\Api\Data\GroupedProduct;
 use BigBridge\ProductImport\Api\Data\Product;
+use BigBridge\ProductImport\Api\Data\SimpleProduct;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Resource\Resolver\ReferenceResolver;
@@ -190,15 +191,27 @@ class ProductStorage
         // collect all images in temporary local directory; changes $product->errors
         $this->imageStorage->moveImagesToTemporaryLocation($products, $config);
 
-        $validProducts = [];
+        $almostValidProducts = [];
         foreach ($products as $product) {
 
             // checks all attributes, changes $product->errors
             $this->validator->validate($product);
 
             if ($product->isOk()) {
-                $validProducts[] = $product;
+                $almostValidProducts[] = $product;
             }
+        }
+
+        // compound product specific validation (must be done after all members have been evaluated)
+        $validProducts = [];
+        foreach ($almostValidProducts as $product) {
+            if (!($product instanceof SimpleProduct)) {
+                $this->validator->validateCompound($product, $products);
+                if (!$product->isOk()) {
+                    continue;
+                }
+            }
+            $validProducts[] = $product;
         }
 
         return $validProducts;

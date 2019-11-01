@@ -319,10 +319,10 @@ class ValidatorTest extends \Magento\TestFramework\TestCase\AbstractController
         $global->setName("Bricks");
         $global->setPrice('90.00');
 
-        $configurableValidator->validate($configurable);
+        $configurableValidator->validate($configurable, []);
 
         $this->assertSame([
-            "specify the super attributes with setSuperAttrbuteCodes()",
+            "specify the super attributes with setSuperAttributeCodes()",
             "specify the variants with setVariantSkus()"
         ], $configurable->getErrors());
     }

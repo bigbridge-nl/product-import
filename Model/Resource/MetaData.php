@@ -523,6 +523,10 @@ class MetaData
 
     protected function getSourceCodeMap()
     {
+        if (!$this->db->fetchSingleCell("SHOW TABLES LIKE '{$this->sourceTable}'")) {
+            return [];
+        }
+
         return $this->db->fetchMap("SELECT `source_code`, `source_code` FROM {$this->sourceTable}");
     }
 
@@ -624,9 +628,41 @@ class MetaData
 
     }
 
+    protected function getProductUrlSuffix()
+    {
+        // value in core_config_data may be:
+        // - absent, in which case the default from config.xml must be taken
+        // - null, in which case it is ""
+        // - an actual value
+
+        $values = $this->db->fetchRow("
+            SELECT `value`
+            FROM `{$this->configDataTable}`
+            WHERE
+                `scope` = 'default' AND
+                `scope_id` = 0 AND
+                `path` = 'catalog/seo/product_url_suffix'
+        ");
+
+        if (!empty($values)) {
+            $value = (string)reset($values);
+        } else {
+
+            $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
+            if (file_exists($file)) {
+                $dom = simplexml_load_file($file);
+                if ($values = $dom->xpath('default/catalog/seo/product_url_suffix')) {
+                    $value = (string)reset($values);
+                }
+            }
+        }
+
+        return $value;
+    }
+
     protected function getCategoryUrlSuffix()
     {
-        $value = $this->db->fetchSingleCell("
+        $values = $this->db->fetchRow("
             SELECT `value`
             FROM `{$this->configDataTable}`
             WHERE
@@ -635,7 +671,20 @@ class MetaData
                 `path` = 'catalog/seo/category_url_suffix'
         ");
 
-        return is_null($value) ? ".html" : $value;
+        if (!empty($values)) {
+            $value = (string)reset($values);
+        } else {
+
+            $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
+            if (file_exists($file)) {
+                $dom = simplexml_load_file($file);
+                if ($values = $dom->xpath('default/catalog/seo/category_url_suffix')) {
+                    $value = (string)reset($values);
+                }
+            }
+        }
+
+        return $value;
     }
 
     protected function getSaveRewritesHistory()
@@ -650,20 +699,6 @@ class MetaData
         ");
 
         return is_null($value) ? true : (bool)$value;
-    }
-
-    protected function getProductUrlSuffix()
-    {
-        $value = $this->db->fetchSingleCell("
-            SELECT `value`
-            FROM `{$this->configDataTable}`
-            WHERE
-                `scope` = 'default' AND
-                `scope_id` = 0 AND
-                `path` = 'catalog/seo/product_url_suffix'
-        ");
-
-        return is_null($value) ? ".html" : $value;
     }
 
     protected function getLinkInfo()

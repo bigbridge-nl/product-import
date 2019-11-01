@@ -1398,6 +1398,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         // look up id for simple3 that must have been created as a placeholder
         $simple3 = new SimpleProduct("spoon-product-import");
         $simple3->setAttributeSetByName("Default");
+
         $importer->importSimpleProduct($simple3);
         $importer->flush();
 
@@ -1470,6 +1471,40 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             ];
 
         $this->assertEquals($memberData, $this->getMemberData($group));
+
+        // one member is invalid
+
+        $simple1 = new SimpleProduct("leaf-product-import");
+        $simple1->setAttributeSetByName("Default");
+        $global = $simple1->global();
+        $global->setName("Knife");
+        $global->setPrice('2.25');
+
+        $simple2 = new SimpleProduct("stem-product-import");
+        $simple2->setAttributeSetByName("Default");
+        // attributes missing
+
+        $group = new GroupedProduct("tree-product-import");
+        $group->setMembers([
+            new GroupedProductMember("leaf-product-import", 2),
+            new GroupedProductMember("stem-product-import", 3),
+        ]);
+        $group->setAttributeSetByName("Default");
+
+        $global = $group->global();
+        $global->setName("Tree");
+        $global->setPrice('25.00');
+
+        $importer->importSimpleProduct($simple1);
+        $importer->importSimpleProduct($simple2);
+        $importer->importGroupedProduct($group);
+        $importer->flush();
+
+        $this->assertSame([
+            'missing name',
+            'missing price',
+            'A member product is invalid: stem-product-import'
+        ], $errors);
     }
 
     private function getMemberData($group)

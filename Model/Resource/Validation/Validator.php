@@ -34,6 +34,9 @@ class Validator
     /** @var ConfigurableValidator */
     protected $configurableValidator;
 
+    /** @var BundleValidator */
+    protected $bundleValidator;
+
     /** @var GroupedValidator */
     protected $groupedValidator;
 
@@ -42,6 +45,7 @@ class Validator
         ImageValidator $imageValidator,
         CustomOptionsValidator $customOptionsValidator,
         ConfigurableValidator $configurableValidator,
+        BundleValidator $bundleValidator,
         GroupedValidator $groupedValidator)
     {
         $this->metaData = $metaData;
@@ -49,6 +53,7 @@ class Validator
         $this->customOptionsValidator = $customOptionsValidator;
         $this->configurableValidator = $configurableValidator;
         $this->groupedValidator = $groupedValidator;
+        $this->bundleValidator = $bundleValidator;
     }
 
     /**
@@ -223,15 +228,26 @@ class Validator
                 }
             }
         }
+    }
 
+    /**
+     * @param Product $product
+     * @param Product[] $batchProducts
+     */
+    public function validateCompound(Product $product, array $batchProducts)
+    {
         switch ($product->getType()) {
             case ConfigurableProduct::TYPE_CONFIGURABLE:
                 /** @var ConfigurableProduct $product */
-                $this->configurableValidator->validate($product);
+                $this->configurableValidator->validate($product, $batchProducts);
                 break;
             case GroupedProduct::TYPE_GROUPED:
                 /** @var GroupedProduct $product */
-                $this->groupedValidator->validate($product);
+                $this->groupedValidator->validate($product, $batchProducts);
+                break;
+            case BundleProduct::TYPE_BUNDLE:
+                /** @var BundleProduct $product */
+                $this->bundleValidator->validate($product, $batchProducts);
         }
     }
 }

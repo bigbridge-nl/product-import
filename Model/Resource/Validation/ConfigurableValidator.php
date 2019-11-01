@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Validation;
 
 use BigBridge\ProductImport\Api\Data\ConfigurableProduct;
+use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Resource\MetaData;
 
@@ -22,11 +23,12 @@ class ConfigurableValidator
 
     /**
      * @param ConfigurableProduct $product
+     * @param Product[] $batchProducts
      */
-    public function validate(ConfigurableProduct $product)
+    public function validate(ConfigurableProduct $product, array $batchProducts)
     {
         $this->validateSuperAttributes($product);
-        $this->validateVariants($product);
+        $this->validateVariants($product, $batchProducts);
     }
 
     /**
@@ -37,7 +39,7 @@ class ConfigurableValidator
         if ($product->getSuperAttributeCodes() === null) {
 
             if ($product->id === null) {
-                $product->addError("specify the super attributes with setSuperAttrbuteCodes()");
+                $product->addError("specify the super attributes with setSuperAttributeCodes()");
                 return;
             }
 
@@ -52,7 +54,7 @@ class ConfigurableValidator
                     if ($info->scope !== EavAttributeInfo::SCOPE_GLOBAL) {
                         $product->addError("attribute does not have global scope: " . $superAttributeCode);
                     }
-                    if ($info->frontendInput !== EavAttributeInfo::FRONTEND_SELECT) {
+                    if (!in_array($info->frontendInput, [EavAttributeInfo::FRONTEND_SELECT, EavAttributeInfo::FRONTEND_BOOLEAN])) {
                         $product->addError("attribute input type is not dropdown: " . $superAttributeCode);
                     }
                 }
@@ -63,10 +65,21 @@ class ConfigurableValidator
     /**
      * @param ConfigurableProduct $product
      */
-    protected function validateVariants(ConfigurableProduct $product)
+    protected function validateVariants(ConfigurableProduct $product, array $batchProducts)
     {
         if ($product->id === null && $product->getVariantSkus() === null) {
             $product->addError("specify the variants with setVariantSkus()");
+        }
+
+        if ($product->getVariantSkus() !== null) {
+            foreach ($product->getVariantSkus() as $variantSku) {
+                if (array_key_exists($variantSku, $batchProducts)) {
+                    if (!$batchProducts[$variantSku]->isOk()) {
+                        $product->addError("A member product is invalid: " . $variantSku);
+                        break;
+                    }
+                }
+            }
         }
     }
 }

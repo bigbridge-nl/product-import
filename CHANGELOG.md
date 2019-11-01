@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.3.1 : Speed optimization for stock
+## 1.3.2 : Validation for compound members / default url suffix - 01-11-2019
+
+- Importer now invalidates compound products (configurable, bundle, group) when one of its members has errors.
+- Fixed missing price in test file a-configurable.xml
+- Configurable product super attribute check now allows attributes with frontend_input 'boolean'
+- Product url suffix and category url suffix no longer default to '.html' when there is no value in core_config_data, in stead the value from config.xml is taken
+
+## 1.3.1 : Speed optimization for stock - 09-12-2018
 
 Speed optimizations:
 

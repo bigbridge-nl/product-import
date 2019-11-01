@@ -40,6 +40,7 @@
 		<attribute_set_name>Default</attribute_set_name>
 		<global>
 			<name>Scottish Table</name>
+			<price>1200</price>
 			<status>1</status>
 			<visibility>4</visibility>
 			<tax_class_name>Taxable Goods</tax_class_name>

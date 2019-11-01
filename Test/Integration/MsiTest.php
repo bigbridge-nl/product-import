@@ -45,6 +45,10 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
             return;
         }
 
+        if (empty(self::$db->fetchSingleCell("SHOW TABLES LIKE '" . self::$metaData->inventorySourceItem . "'"))) {
+            return;
+        }
+
         $config = new ImportConfig();
         $importer = self::$factory->createImporter($config);
 
@@ -108,6 +112,10 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
     public function testResolveAndValidate()
     {
         if (version_compare(self::$metaData->magentoVersion, '2.3.0') < 0) {
+            return;
+        }
+
+        if (empty(self::$db->fetchSingleCell("SHOW TABLES LIKE '" . self::$metaData->inventorySourceItem . "'"))) {
             return;
         }
 
