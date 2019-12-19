@@ -54,7 +54,7 @@ class ConfigurableValidator
                     if ($info->scope !== EavAttributeInfo::SCOPE_GLOBAL) {
                         $product->addError("attribute does not have global scope: " . $superAttributeCode);
                     }
-                    if (!in_array($info->frontendInput, [EavAttributeInfo::FRONTEND_SELECT, EavAttributeInfo::FRONTEND_BOOLEAN])) {
+                    if ($info->frontendInput !== EavAttributeInfo::FRONTEND_SELECT) {
                         $product->addError("attribute input type is not dropdown: " . $superAttributeCode);
                     }
                 }
