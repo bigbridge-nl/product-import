@@ -15,6 +15,35 @@ The aim of this library is speed. If you find that Magento 2's product importer 
 
 Experiment with the library in a safe webshop. Make sure to create a database backup before you start.
 
+## Sample code
+
+Let me show you a piece of code to give you an impression what it is like to use this library:
+
+        $importer = $factory->createImporter($config);
+
+        foreach ($lines as $i => $line) {
+
+            $product = new SimpleProduct($line[1]);
+
+            // global eav attributes
+            $global = $product->global();
+            $global->setName($line[0]);
+            $global->setPrice($line[2]);
+
+            // German eav attributes
+            $german = $product->storeView('de_store');
+            $german->setName($line[3]);
+            $german->setPrice($line[4]);
+
+            $importer->importSimpleProduct($product);
+        }
+
+        // process any remaining products in the pipeline
+        $importer->flush();
+
+ 
+Continue to read [the full documentation](doc/importer.md)
+
 ## Installation
 
     composer require bigbridge/product-import
