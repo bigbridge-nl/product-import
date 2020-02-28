@@ -22,6 +22,7 @@ use BigBridge\ProductImport\Api\Data\VirtualProduct;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
 use BigBridge\ProductImport\Api\Data\SimpleProduct;
+use BigBridge\ProductImport\Api\Data\Weee;
 use BigBridge\ProductImport\Api\Importer;
 use BigBridge\ProductImport\Model\Data\Image;
 use Exception;
@@ -98,6 +99,9 @@ class ElementHandler
     /** @var Image */
     protected $image;
 
+    /** @var Weee[] */
+    protected $weees;
+
     /** @var TierPrice[] */
     protected $tierPrices;
 
@@ -156,6 +160,8 @@ class ElementHandler
     const DOWNLOAD_SAMPLE_INFORMATION = "download_sample_information";
     const IMAGES = "images";
     const IMAGE = "image";
+    const WEEES = 'weees';
+    const WEEE = 'weee';
     const GALLERY_INFORMATION = "gallery_information";
     const ROLE = "role";
     const TIER_PRICES = "tier_prices";
@@ -260,6 +266,8 @@ class ElementHandler
                 $this->tierPrices = [];
             } elseif ($element === self::CUSTOM_OPTIONS) {
                 $this->customOptions = [];
+            } elseif ($element === self::WEEES) {
+                $this->weees = [];
             }
 
             if ($scope === GroupedProduct::TYPE_GROUPED) {
@@ -353,6 +361,12 @@ class ElementHandler
             } elseif ($element === self::SKU_VALUES) {
                 $this->skuValues = [];
             }
+        } elseif ($scope === self::WEEES) {
+            if ($element === self::WEEE) {
+                $websiteId = isset($attributes['website_id']) ? $attributes['website_id'] : null;
+                $state = isset($attributes['state']) ? $attributes['state'] : null;
+                $this->weees[] = Weee::createWeee($attributes['country'], $attributes['value'], $websiteId, $state);
+            }
         }
 
         if (in_array($element, $this->multiAttributes)) {
@@ -406,6 +420,8 @@ class ElementHandler
                 $this->product->setTierPrices($this->tierPrices);
             } elseif ($element === self::CUSTOM_OPTIONS) {
                 $this->product->setCustomOptions($this->customOptions);
+            } elseif ($element === self::WEEES) {
+                $this->product->setWeees($this->weees);
             }
 
             if ($scope === ConfigurableProduct::TYPE_CONFIGURABLE) {
