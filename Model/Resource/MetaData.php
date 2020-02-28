@@ -278,6 +278,9 @@ class MetaData
     /** @var int[] */
     public $imageAttributeIds;
 
+    /** @var string */
+    public $weeeAttributeId;
+
     /**
      * MetaData constructor.
      *
@@ -380,6 +383,7 @@ class MetaData
         $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
         $this->imageAttributeIds = $this->getImageAttributeIds();
+        $this->weeeAttributeId = $this->getWeeeAttributeId();
 
         if (version_compare($this->magentoVersion, "2.3.0") >= 0) {
             $this->sourceCodeMap = $this->getSourceCodeMap();
@@ -612,6 +616,21 @@ class MetaData
             $this->productEavAttributeInfo[ProductStoreView::SWATCH_IMAGE]->attributeId,
             $this->productEavAttributeInfo[ProductStoreView::THUMBNAIL_IMAGE]->attributeId,
         ];
+    }
+
+    /**
+     * @return string|null
+     */
+    protected function getWeeeAttributeId()
+    {
+        return $this->db->fetchSingleCell("
+            SELECT A.`attribute_id`
+            FROM {$this->attributeTable} A
+            INNER JOIN {$this->catalogAttributeTable} C ON C.`attribute_id` = A.`attribute_id`
+            WHERE A.`entity_type_id` = ? AND A.frontend_input = 'weee'
+         ", [
+            $this->productEntityTypeId
+        ]);
     }
 
     protected function getMediaGalleryAttributeId()
