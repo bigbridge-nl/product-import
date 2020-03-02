@@ -66,7 +66,7 @@ class WeeeStorage
                     $weee->getCountry(),
                     $weee->getValue(),
                     (int)$weee->getState(),
-                    $product->getWeeeId()
+                    $this->metaData->weeeAttributeId
                 ]);
             }
         }

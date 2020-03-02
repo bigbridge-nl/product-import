@@ -35,9 +35,6 @@ abstract class Product
     /** @var array */
     protected $website_ids = [];
 
-    /** @var  int */
-    protected $weeeAttributeId;
-
     /** @var ProductStoreView[] */
     protected $storeViews = [];
 
@@ -286,27 +283,6 @@ abstract class Product
     public function getWeees()
     {
         return $this->unresolvedAttributes[self::WEEE_ATTRIBUTE];
-    }
-
-    public function removeWeeeId()
-    {
-        $this->weeeAttributeId = null;
-    }
-
-    /**
-     * @param int $weeeAttributeId
-     */
-    public function setWeeeId(int $weeeAttributeId)
-    {
-        $this->weeeAttributeId = $weeeAttributeId;
-    }
-
-    /**
-     * @return int
-     */
-    public function getWeeeId()
-    {
-        return $this->weeeAttributeId;
     }
 
     /**

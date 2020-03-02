@@ -132,12 +132,9 @@ class ReferenceResolver
                         }
                         break;
                     case Product::WEEE_ATTRIBUTE:
-                        list($id, $error) = $this->weeeResolver->resolveWeeeAttributeId();
-                        if ($error === "") {
-                            $product->setWeeeId($id);
-                        } else {
+                        $error = $this->weeeResolver->resolveWeeeAttributeId();
+                        if ($error !== "") {
                             $product->addError($error);
-                            $product->removeWeeeId();
                         }
                         break;
                 }

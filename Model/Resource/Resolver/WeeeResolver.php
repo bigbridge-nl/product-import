@@ -15,18 +15,13 @@ class WeeeResolver
         $this->metaData = $metaData;
     }
 
-    public function resolveWeeeAttributeId(): array
+    public function resolveWeeeAttributeId(): string
     {
-        $id = null;
-        $error = "";
-
         if ($this->metaData->weeeAttributeId === null) {
-            $error = "weee attribute not found";
-        } else {
-            $id = (int) $this->metaData->weeeAttributeId;
+            return "weee attribute not found";
         }
 
-        return [$id, $error];
+        return "";
     }
 
 }
