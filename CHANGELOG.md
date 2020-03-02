@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0 : Weee tax
+
+Pull request by Jessica Garcia Santana
+
+- Support for import of a single custom weee attribute (Waste Electrical and Electronic Equipment taxes)
+
 ## 1.3.2 : Validation for compound members / default url suffix - 01-11-2019
 
 - Importer now invalidates compound products (configurable, bundle, group) when one of its members has errors.
