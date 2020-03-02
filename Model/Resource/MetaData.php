@@ -21,6 +21,7 @@ class MetaData
 {
     const ENTITY_TYPE_TABLE = 'eav_entity_type';
     const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
+    const WEEE_TABLE = 'weee_tax';
     const CATEGORY_ENTITY_TABLE = 'catalog_category_entity';
     const URL_REWRITE_TABLE = 'url_rewrite';
     const URL_REWRITE_PRODUCT_CATEGORY_TABLE = 'catalog_url_rewrite_product_category';
@@ -82,6 +83,9 @@ class MetaData
 
     /** @var string */
     public $productEntityTable;
+
+    /** @var string */
+    public $weeeTable;
 
     /** @var string */
     public $categoryEntityTable;
@@ -306,6 +310,7 @@ class MetaData
     {
         $this->entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $this->productEntityTable = $this->db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
+        $this->weeeTable = $this->db->getFullTableName(self::WEEE_TABLE);
         $this->categoryEntityTable = $this->db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
         $this->urlRewriteTable = $this->db->getFullTableName(self::URL_REWRITE_TABLE);
         $this->urlRewriteProductCategoryTable = $this->db->getFullTableName(self::URL_REWRITE_PRODUCT_CATEGORY_TABLE);
