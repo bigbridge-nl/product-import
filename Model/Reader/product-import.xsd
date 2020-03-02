@@ -452,6 +452,18 @@
 			<xs:attribute type="xs:string" name="file_or_url" use="required"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="weee">
+		<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="xs:string">
+					<xs:attribute type="xs:string" name="website_id" use="optional"/>
+					<xs:attribute type="xs:string" name="country" use="required"/>
+					<xs:attribute type="xs:string" name="value" use="required"/>
+					<xs:attribute type="xs:string" name="state" use="optional"/>
+				</xs:extension>
+			</xs:simpleContent>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="tier_price">
 		<xs:complexType>
 			<xs:simpleContent>
@@ -468,6 +480,13 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="image" maxOccurs="unbounded" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="weees">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="weee" maxOccurs="unbounded" minOccurs="0"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
@@ -628,6 +647,7 @@
 				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="weees" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
@@ -651,6 +671,7 @@
 				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="weees" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
@@ -676,6 +697,7 @@
 				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="weees" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
@@ -701,6 +723,7 @@
 				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="weees" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
@@ -725,6 +748,7 @@
 				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="weees" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>
@@ -749,6 +773,7 @@
 				<xs:element ref="related_product_skus" minOccurs="0"/>
 				<xs:element ref="custom_options" minOccurs="0"/>
 				<xs:element ref="images" minOccurs="0"/>
+				<xs:element ref="weees" minOccurs="0"/>
 				<xs:element ref="tier_prices" minOccurs="0"/>
 			</xs:all>
 			<xs:attribute type="xs:string" name="sku" use="required"/>

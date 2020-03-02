@@ -34,6 +34,9 @@ class ReferenceResolver
     /** @var WebsiteResolver */
     protected $websiteResolver;
 
+    /** @var WeeeResolver */
+    protected $weeeResolver;
+
     /** @var OptionResolver */
     protected $optionResolver;
 
@@ -59,6 +62,7 @@ class ReferenceResolver
         StoreViewResolver $storeViewResolver,
         SourceResolver $sourceResolver,
         WebsiteResolver $websiteResolver,
+        WeeeResolver $weeeResolver,
         OptionResolver $optionResolver,
         LinkedProductReferenceResolver $linkedProductReferenceResolver,
         TierPriceResolver $tierPriceResolver,
@@ -73,6 +77,7 @@ class ReferenceResolver
         $this->storeViewResolver = $storeViewResolver;
         $this->sourceResolver = $sourceResolver;
         $this->websiteResolver = $websiteResolver;
+        $this->weeeResolver = $weeeResolver;
         $this->optionResolver = $optionResolver;
         $this->linkedProductReferenceResolver = $linkedProductReferenceResolver;
         $this->tierPriceResolver = $tierPriceResolver;
@@ -124,6 +129,12 @@ class ReferenceResolver
                         } else {
                             $product->addError($error);
                             $product->removeWebsiteIds();
+                        }
+                        break;
+                    case Product::WEEE_ATTRIBUTE:
+                        $error = $this->weeeResolver->resolveWeeeAttributeId();
+                        if ($error !== "") {
+                            $product->addError($error);
                         }
                         break;
                 }

@@ -24,6 +24,7 @@ use BigBridge\ProductImport\Model\Resource\Storage\SourceItemStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\StockItemStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\WeeeStorage;
 use BigBridge\ProductImport\Model\Resource\Validation\Validator;
 use Exception;
 
@@ -71,6 +72,9 @@ class ProductStorage
     /** @var CustomOptionStorage */
     protected $customOptionStorage;
 
+    /** @var WeeeStorage */
+    protected $weeeStorage;
+
     /** @var DownloadableStorage */
     protected $downloadableStorage;
 
@@ -100,6 +104,7 @@ class ProductStorage
         StockItemStorage $stockItemStorage,
         SourceItemStorage $sourceItemStorage,
         CustomOptionStorage $customOptionStorage,
+        WeeeStorage $weeeStorage,
         DownloadableStorage $downloadableStorage,
         ConfigurableStorage $configurableStorage,
         BundleStorage $bundleStorage,
@@ -119,6 +124,7 @@ class ProductStorage
         $this->stockItemStorage = $stockItemStorage;
         $this->sourceItemStorage = $sourceItemStorage;
         $this->customOptionStorage = $customOptionStorage;
+        $this->weeeStorage = $weeeStorage;
         $this->downloadableStorage = $downloadableStorage;
         $this->configurableStorage = $configurableStorage;
         $this->bundleStorage = $bundleStorage;
@@ -315,6 +321,7 @@ class ProductStorage
         }
 
         $this->customOptionStorage->updateCustomOptions($validProducts);
+        $this->weeeStorage->updateWeees($validProducts);
         $this->productEntityStorage->insertCategoryIds($validProducts);
         $this->productEntityStorage->insertWebsiteIds($validProducts);
         $this->stockItemStorage->storeStockItems($validProducts);

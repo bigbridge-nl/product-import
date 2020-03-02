@@ -31,6 +31,9 @@ class Validator
     /** @var CustomOptionsValidator */
     protected $customOptionsValidator;
 
+    /** @var WeeeValidator */
+    protected $weeeValidator;
+
     /** @var ConfigurableValidator */
     protected $configurableValidator;
 
@@ -44,6 +47,7 @@ class Validator
         MetaData $metaData,
         ImageValidator $imageValidator,
         CustomOptionsValidator $customOptionsValidator,
+        WeeeValidator $weeeValidator,
         ConfigurableValidator $configurableValidator,
         BundleValidator $bundleValidator,
         GroupedValidator $groupedValidator)
@@ -51,6 +55,7 @@ class Validator
         $this->metaData = $metaData;
         $this->imageValidator = $imageValidator;
         $this->customOptionsValidator = $customOptionsValidator;
+        $this->weeeValidator = $weeeValidator;
         $this->configurableValidator = $configurableValidator;
         $this->groupedValidator = $groupedValidator;
         $this->bundleValidator = $bundleValidator;
@@ -148,6 +153,9 @@ class Validator
 
         // custom options
         $this->customOptionsValidator->validateCustomOptions($product);
+
+        // weee
+        $this->weeeValidator->validateWeees($product);
 
         // other attributes
         foreach ($storeViews as $storeViewCode => $storeView) {

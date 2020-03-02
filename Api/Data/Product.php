@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
+use BigBridge\ProductImport\Api\Data\Weee;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 
@@ -17,6 +18,7 @@ abstract class Product
     const CATEGORY_IDS = 'category_ids';
     const ATTRIBUTE_SET_ID = 'attribute_set_id';
     const WEBSITE_IDS = 'website_ids';
+    const WEEE_ATTRIBUTE = 'weee';
 
     /** @var  int */
     public $id;
@@ -265,6 +267,22 @@ abstract class Product
     public function setWebsitesByCode(array $websiteCodes)
     {
         $this->unresolvedAttributes[self::WEBSITE_IDS] = $websiteCodes;
+    }
+
+    /**
+     * @param array $weees
+     */
+    public function setWeees(array $weees)
+    {
+        $this->unresolvedAttributes[self::WEEE_ATTRIBUTE] = $weees;
+    }
+
+    /**
+     * @return Weee[]|null
+     */
+    public function getWeees()
+    {
+        return $this->unresolvedAttributes[self::WEEE_ATTRIBUTE];
     }
 
     /**

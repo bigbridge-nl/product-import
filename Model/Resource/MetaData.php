@@ -21,6 +21,7 @@ class MetaData
 {
     const ENTITY_TYPE_TABLE = 'eav_entity_type';
     const PRODUCT_ENTITY_TABLE = 'catalog_product_entity';
+    const WEEE_TABLE = 'weee_tax';
     const CATEGORY_ENTITY_TABLE = 'catalog_category_entity';
     const URL_REWRITE_TABLE = 'url_rewrite';
     const URL_REWRITE_PRODUCT_CATEGORY_TABLE = 'catalog_url_rewrite_product_category';
@@ -82,6 +83,9 @@ class MetaData
 
     /** @var string */
     public $productEntityTable;
+
+    /** @var string */
+    public $weeeTable;
 
     /** @var string */
     public $categoryEntityTable;
@@ -278,6 +282,9 @@ class MetaData
     /** @var int[] */
     public $imageAttributeIds;
 
+    /** @var string */
+    public $weeeAttributeId;
+
     /**
      * MetaData constructor.
      *
@@ -303,6 +310,7 @@ class MetaData
     {
         $this->entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $this->productEntityTable = $this->db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
+        $this->weeeTable = $this->db->getFullTableName(self::WEEE_TABLE);
         $this->categoryEntityTable = $this->db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
         $this->urlRewriteTable = $this->db->getFullTableName(self::URL_REWRITE_TABLE);
         $this->urlRewriteProductCategoryTable = $this->db->getFullTableName(self::URL_REWRITE_PRODUCT_CATEGORY_TABLE);
@@ -380,6 +388,7 @@ class MetaData
         $this->mediaGalleryAttributeId = $this->getMediaGalleryAttributeId();
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
         $this->imageAttributeIds = $this->getImageAttributeIds();
+        $this->weeeAttributeId = $this->getWeeeAttributeId();
 
         if (version_compare($this->magentoVersion, "2.3.0") >= 0) {
             $this->sourceCodeMap = $this->getSourceCodeMap();
@@ -612,6 +621,21 @@ class MetaData
             $this->productEavAttributeInfo[ProductStoreView::SWATCH_IMAGE]->attributeId,
             $this->productEavAttributeInfo[ProductStoreView::THUMBNAIL_IMAGE]->attributeId,
         ];
+    }
+
+    /**
+     * @return string|null
+     */
+    protected function getWeeeAttributeId()
+    {
+        return $this->db->fetchSingleCell("
+            SELECT A.`attribute_id`
+            FROM {$this->attributeTable} A
+            INNER JOIN {$this->catalogAttributeTable} C ON C.`attribute_id` = A.`attribute_id`
+            WHERE A.`entity_type_id` = ? AND A.frontend_input = 'weee'
+         ", [
+            $this->productEntityTypeId
+        ]);
     }
 
     protected function getMediaGalleryAttributeId()
