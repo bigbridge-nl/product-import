@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+	<simple sku="a-refrigerator">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>A refrigerator</name>
+			<price>795</price>
+		</global>
+		<weees>
+			<weee>
+				<website_id>1</website_id>
+				<country>FR</country>
+				<value>5.00</value>
+			</weee>
+			<weee>
+				<website_id>1</website_id>
+				<country>DE</country>
+				<value>4.00</value>
+				<state>11</state>
+			</weee>
+			<weee>
+				<website_id>1</website_id>
+				<country>DE</country>
+				<value>3.00</value>
+				<state>12</state>
+			</weee>
+		</weees>
+	</simple>
+	<simple sku="b-refrigerator">
+		<attribute_set_name>Default</attribute_set_name>
+		<global>
+			<name>B refrigerator</name>
+			<price>645</price>
+		</global>
+		<weees>
+			<weee>
+				<country>NL</country>
+				<value>5.00</value>
+			</weee>
+			<weee>
+				<country>FR</country>
+				<value>4.00</value>
+			</weee>
+		</weees>
+	</simple>
+</import>

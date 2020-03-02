@@ -569,6 +569,19 @@ The first tier price in this example contains a minimum quantity, a price, the n
 
 The second tier price does not contain a customer group and no website code. This signifies that all customer groups and all websites are affected by this tier price.
 
+## Weee taxes
+
+To import Waste Electrical and Electronic Equipment taxes, use
+
+    $product->setWeees([
+        Weee::createWeee('NL', 5.0, 1, Weee::DEFAULT_STATE),
+        Weee::createWeee('ES', 3.0, 1, Weee::DEFAULT_STATE)
+    ]);
+    
+The last argument is the region (state) of the country. If you don't need a specific state, use DEFAULT_STATE. Otherwise you need to look up the region_id of the state in the `directory_country_region` table.
+
+Weee attributes are custom attributes with as "catalog input type" the value "Fixed product tax". The importer assumes and finds only a single attribute. Multiple weee attributes are not supported.     
+
 ## URL keys
 
 The url_key of a product is used by Magento to create the url of the product page. The url_key is not added to a product automatically by the library. You must do so explicitly with
