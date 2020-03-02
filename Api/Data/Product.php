@@ -56,10 +56,18 @@ abstract class Product
     /** @var TierPrice[]|null An array of tier prices. null means: not used in this import */
     protected $tierPrices = null;
 
+    /** @var Weee[]|null  */
+    protected $weees = null;
+
     /** @var CustomOption[]|null */
     protected $customOptions = null;
 
-    /** @var array */
+    /**
+     * Attributes whose value is a name or code, in stead of the final value.
+     * These attributes need to be resolved first.
+     *
+     * @var array
+     */
     protected $unresolvedAttributes = [];
 
     // =========================================
@@ -274,7 +282,7 @@ abstract class Product
      */
     public function setWeees(array $weees)
     {
-        $this->unresolvedAttributes[self::WEEE_ATTRIBUTE] = $weees;
+        $this->weees = $weees;
     }
 
     /**
@@ -282,7 +290,7 @@ abstract class Product
      */
     public function getWeees()
     {
-        return $this->unresolvedAttributes[self::WEEE_ATTRIBUTE];
+        return $this->weees;
     }
 
     /**
