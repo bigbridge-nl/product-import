@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<import>
+    <simple sku="radio-1">
+        <attribute_set_name>Default</attribute_set_name>
+        <global>
+            <name>Radio receiver 1</name>
+            <price>69.96</price>
+
+            <custom code="code_of_attribute">value of attribute</custom>
+            <custom code="manual">radio-1.pdf</custom>
+
+            <multi_select code="special_features">
+                <item>option-value-text-admin</item>
+                <item>cassette</item>
+                <item>cd-player</item>
+            </multi_select>
+
+            <select code="code_of_attribute">option-value-text-admin</select>
+            <select code="format">large</select>
+        </global>
+    </simple>
+</import>

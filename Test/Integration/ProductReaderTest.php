@@ -36,6 +36,10 @@ class ProductReaderTest extends \Magento\TestFramework\TestCase\AbstractControll
                 }
             }
 
+            if (basename($xmlFile) === "custom-attributes.xml") {
+                continue;
+            }
+
             $success = true;
 
             $logger = new ProductImportWebApiLogger();
