@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1 : Fix category url_rewrite
+
+The category entries for generated categories had 0 as store_id. Changed this to the ids of actual stores views.
+
 ## 1.4.0 : Weee tax
 
 Pull request by Jessica Garcia Santana
