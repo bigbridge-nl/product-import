@@ -2,7 +2,6 @@
 
 namespace BigBridge\ProductImport\Api\Data;
 
-use BigBridge\ProductImport\Api\Data\Weee;
 use BigBridge\ProductImport\Model\Data\Image;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 
@@ -243,7 +242,7 @@ abstract class Product
      */
     public function addCategoriesByGlobalName(array $categoryNames)
     {
-        $this->unresolvedAttributes[self::CATEGORY_IDS] = $categoryNames;
+        $this->unresolvedAttributes[self::CATEGORY_IDS] = array_map('trim', $categoryNames);
     }
 
     public function setAttributeSetId(int $attributeSetId)
@@ -269,12 +268,12 @@ abstract class Product
      */
     public function setAttributeSetByName(string $attributeSetName)
     {
-        $this->unresolvedAttributes[self::ATTRIBUTE_SET_ID] = $attributeSetName;
+        $this->unresolvedAttributes[self::ATTRIBUTE_SET_ID] = trim($attributeSetName);
     }
 
     public function setWebsitesByCode(array $websiteCodes)
     {
-        $this->unresolvedAttributes[self::WEBSITE_IDS] = $websiteCodes;
+        $this->unresolvedAttributes[self::WEBSITE_IDS] = array_map('trim', $websiteCodes);
     }
 
     /**

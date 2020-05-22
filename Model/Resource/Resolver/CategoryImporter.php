@@ -248,10 +248,10 @@ class CategoryImporter
         $urlRewriteTable = $this->metaData->urlRewriteTable;
         $attributeSetId = $this->metaData->defaultCategoryAttributeSetId;
 
-        $parentId = $idPath[count($idPath) - 1];
-        $parentPath = implode(self::CATEGORY_ID_PATH_SEPARATOR, $idPath);
-        $parentLevel = count($idPath);
+        $parentLevel = count($idPath) - 1;
         $childLevel = $parentLevel + 1;
+        $parentId = $idPath[$parentLevel];
+        $parentPath = implode(self::CATEGORY_ID_PATH_SEPARATOR, $idPath);
 
         // update parent data
         $this->db->execute("
@@ -268,7 +268,7 @@ class CategoryImporter
             WHERE `path` LIKE ? AND level = ?
         ", [
             "{$parentPath}/%",
-            $parentLevel
+            $childLevel
         ]);
         $nextPosition = is_null($position) ? 1 : $position + 1;
 

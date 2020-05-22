@@ -456,7 +456,7 @@ class ProductStoreView
      */
     public function setCustomOptionTitle(CustomOption $customOption, string $title)
     {
-        $this->customOptionTitles[] = new CustomOptionTitle($customOption, $title);
+        $this->customOptionTitles[] = new CustomOptionTitle($customOption, trim($title));
     }
 
     /**
@@ -466,7 +466,7 @@ class ProductStoreView
      */
     public function setCustomOptionPrice(CustomOption $customOption, string $price, string $priceType)
     {
-        $this->customOptionPrices[] = new CustomOptionPrice($customOption, $price, $priceType);
+        $this->customOptionPrices[] = new CustomOptionPrice($customOption, trim($price), trim($priceType));
     }
 
     /**
