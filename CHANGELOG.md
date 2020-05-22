@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.2 : Fix category level
+
+choleaoum noticed that the level field of created categories was one too high.
+Also some missing trim()'s were added to clean input.  
+
 ## 1.4.1 : Fix category url_rewrite
 
 The category entries for generated categories had 0 as store_id. Changed this to the ids of actual stores views.
