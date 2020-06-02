@@ -142,6 +142,15 @@ It will help you use this library by understanding how I use certain words:
 
 When Magento 2 uses "name" where I would use "code", I follow Magento. "attribute_set_name" For instance, would qualify as a code in my view, but I call it "name" to be consistent with Magento.
 
+## SKU is case sensitive
+
+The SKU is case sensitive. The sku "Red-book" will not match an sku "red-book".
+
+If you have SKU's as input that do not match by case, you need to convert them to case sensitive sku's using
+
+    $information = new Information();   // or inject
+    $sku = $this->information->getCaseSensitiveSku($rawSku);
+
 ## Empty values and removing attributes
 
 Imports often contain empty fields. When this happens this can mean one of two things:

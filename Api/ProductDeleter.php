@@ -51,7 +51,7 @@ class ProductDeleter
         }
 
         $ids = $this->db->fetchSingleColumn("
-            SELECT `entity_id` FROM " . $this->metaData->productEntityTable . " WHERE `sku` IN (" . $this->db->getMarks($skus) . ")
+            SELECT `entity_id` FROM " . $this->metaData->productEntityTable . " WHERE BINARY `sku` IN (" . $this->db->getMarks($skus) . ")
         ", $skus);
 
         $this->deleteProductsByIds($ids);

@@ -46,7 +46,7 @@ class ProductEntityStorage
         return $this->db->fetchMap("
             SELECT `sku`, `entity_id` 
             FROM `{$this->metaData->productEntityTable}`
-            WHERE `sku` IN (" . $this->db->getMarks($skus) . ")
+            WHERE BINARY `sku` IN (" . $this->db->getMarks($skus) . ")
         ", array_values($skus));
     }
 
@@ -78,7 +78,7 @@ class ProductEntityStorage
         $type = $this->db->fetchSingleCell("
             SELECT `type_id`
             FROM {$this->metaData->productEntityTable}
-            WHERE `sku` = ?
+            WHERE BINARY `sku` = ?
         ", [
             $sku
         ]);
@@ -235,7 +235,7 @@ class ProductEntityStorage
             $sku2id = $this->db->fetchMap("
                 SELECT `sku`, `entity_id` 
                 FROM `{$this->metaData->productEntityTable}` 
-                WHERE `sku` IN (" . $this->db->getMarks($skus) . ")
+                WHERE BINARY `sku` IN (" . $this->db->getMarks($skus) . ")
             ", array_values($skus));
 
             foreach ($products as $product) {

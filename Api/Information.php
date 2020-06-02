@@ -48,4 +48,26 @@ class Information
             FROM `" . $this->metaData->productEntityTable . "`
         ");
     }
+
+    /**
+     * Given an SKU with incorrect case, returns the SKU with the right case.
+     *
+     * @param string $caseInsensitiveSku
+     */
+    public function getCaseSensitiveSku(string $caseInsensitiveSku)
+    {
+        $sku = $this->db->fetchSingleCell("
+            SELECT `sku`
+            FROM {$this->metaData->productEntityTable}
+            WHERE `sku` = ?
+        ", [
+            $caseInsensitiveSku
+        ]);
+
+        if (!$sku) {
+            return false;
+        } else {
+            return $sku;
+        }
+    }
 }
