@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.3 : Sku case sensitive
+
+SKU's are explicitly made case sensitive
+Added a function to look up the case sensitive sku in the database.
+
 ## 1.4.2 : Fix category level
 
 choleaoum noticed that the level field of created categories was one too high.
