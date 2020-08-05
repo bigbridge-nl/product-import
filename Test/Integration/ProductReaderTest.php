@@ -35,6 +35,11 @@ class ProductReaderTest extends \Magento\TestFramework\TestCase\AbstractControll
                     continue;
                 }
             }
+            if (basename($xmlFile) === "a-weee.xml") {
+                if ($metaData->weeeAttributeId === null) {
+                    continue;
+                }
+            }
 
             if (basename($xmlFile) === "custom-attributes.xml") {
                 continue;

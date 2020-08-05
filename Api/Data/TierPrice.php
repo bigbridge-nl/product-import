@@ -34,13 +34,15 @@ class TierPrice
      * @param string $value
      * @param string|null $customerGroupName The name (code) of a customer group. Null means: all customer groups
      * @param string|null $websiteCode The code of the website. Null means: all websites
+     * @param string $percentageValue Since Magento 2.2
      */
-    public function __construct(string $quantity, string $value, string $customerGroupName = null, string $websiteCode = null)
+    public function __construct(string $quantity, string $value, string $customerGroupName = null, string $websiteCode = null, string $percentageValue = null)
     {
         $this->quantity = Decimal::format($quantity);
         $this->value = Decimal::format($value);
         $this->customerGroupName = $customerGroupName;
         $this->websiteCode = $websiteCode;
+        $this->percentageValue = $percentageValue !== null ? Decimal::format($percentageValue) : null;
     }
 
     /**
@@ -57,6 +59,15 @@ class TierPrice
     public function getValue(): string
     {
         return $this->value;
+    }
+
+    /**
+     * Since Magento 2.2
+     * @return string|null
+     */
+    public function getPercentageValue()
+    {
+        return $this->percentageValue;
     }
 
     /**

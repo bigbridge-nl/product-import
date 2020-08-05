@@ -48,6 +48,8 @@ class BundleStorage
      */
     public function createOptions(array $products)
     {
+        $magento22 = (version_compare($this->metaData->magentoVersion, "2.2.0") >= 0);
+
         foreach ($products as $product) {
 
             foreach ($product->getOptions() as $i => $option) {
@@ -97,17 +99,36 @@ class BundleStorage
             foreach ($product->getStoreViews() as $storeView) {
                 foreach ($storeView->getOptionInformations() as $optionInformation) {
 
-                    $this->db->execute("
+                    if ($magento22) {
+
+                        $this->db->execute("
+                        INSERT INTO `{$this->metaData->bundleOptionValueTable}`
+                        SET
+                            `option_id` = ?,
+                            `store_id` = ?,
+                            `title` = ?,
+				            `parent_product_id` = ? 
+                    ", [
+                            $optionInformation->getOption()->id,
+                            $storeView->getStoreViewId(),
+                            $optionInformation->getTitle(),
+                            $product->id
+                        ]);
+
+                    } else {
+
+                        $this->db->execute("
                         INSERT INTO `{$this->metaData->bundleOptionValueTable}`
                         SET
                             `option_id` = ?,
                             `store_id` = ?,
                             `title` = ? 
                     ", [
-                        $optionInformation->getOption()->id,
-                        $storeView->getStoreViewId(),
-                        $optionInformation->getTitle()
-                    ]);
+                            $optionInformation->getOption()->id,
+                            $storeView->getStoreViewId(),
+                            $optionInformation->getTitle()
+                        ]);
+                    }
                 }
             }
         }

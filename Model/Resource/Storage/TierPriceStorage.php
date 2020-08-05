@@ -90,6 +90,8 @@ class TierPriceStorage
     {
         $values = [];
 
+        $magento22 = (version_compare($this->metaData->magentoVersion, "2.2.0") >= 0);
+
         foreach ($products as $product) {
 
             $tierPrices = $product->getTierPrices();
@@ -104,12 +106,27 @@ class TierPriceStorage
                     $values[] = $tierPrice->getQuantity();
                     $values[] = $tierPrice->getValue();
                     $values[] = $tierPrice->getWebsiteId();
+                    if ($magento22) {
+                        $values[] = $tierPrice->getPercentageValue();
+                    }
                 }
             }
         }
 
-        $this->db->insertMultipleWithUpdate($this->metaData->tierPriceTable, ['entity_id', 'all_groups', 'customer_group_id', 'qty', 'value', 'website_id'], $values,
-            Magento2DbConnection::_1_KB, "`value` = VALUES(`value`)");
+        $fields = [
+            'entity_id',
+            'all_groups',
+            'customer_group_id',
+            'qty',
+            'value',
+            'website_id'
+        ];
+        if ($magento22) {
+            $fields[] = 'percentage_value';
+        }
+
+        $this->db->insertMultipleWithUpdate($this->metaData->tierPriceTable,
+            $fields, $values,Magento2DbConnection::_1_KB, "`value` = VALUES(`value`)");
     }
 
     /**

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.4 : Support for two added columns since M2.2 
+
+lucafuse94 noticed that parent_product_id was missing from catalog_product_bundle_option_value. 
+
+Started monitoring database changes between Magento versions, using Compalex. Added support for 
+
+* Tier prices, percentage_value (since M2.2)
+* Bundled product option value, parent_product_id (since M2.2)
+
+Magento 2.3 only added MSI, and did not change the existing product tables.
+
 ## 1.4.3 : Sku case sensitive
 
 SKU's are explicitly made case sensitive

@@ -223,6 +223,8 @@
 		<tier_prices>
 			<tier_price qty="10" value="12.25" customer_group_name="General" website_code="base" />
 			<tier_price qty="20" value="12.10" />
+			<!-- Magento 2.2 and up: percentage_value -->
+			<tier_price qty="10" value="12.25" percentage_value="20" customer_group_name="General" website_code="base" />
 		</tier_prices>
 	</simple>
 	<configurable sku="scottish-table">

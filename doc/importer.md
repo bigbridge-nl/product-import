@@ -572,11 +572,14 @@ Import all tier prices of a product with
     $product->setTierPrices([
         new TierPrice(10, '12.25', 'General', 'base'),
         new TierPrice(20, '12.10'),
+        new TierPrice(10, '0', 'General', 'base', '20'),
     ]);
 
 The first tier price in this example contains a minimum quantity, a price, the name (code) of the customer group, and the code of a website.
 
 The second tier price does not contain a customer group and no website code. This signifies that all customer groups and all websites are affected by this tier price.
+
+The third tier price contains a percentage in stead of a fixed value (M2.2+)
 
 ## Weee taxes
 

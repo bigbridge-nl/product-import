@@ -63,3 +63,9 @@ Codes are preferable for use in imports. They cannot be changed by the user, so 
 Please keep the naming the same as Magento uses it. Do not confuse ids, codes and names, as is often done in imports.
 
 Sometimes Magento uses different names for the same thing. A customer group for example is a "code" internally, although it is a name in the user interface.
+
+## Database changes
+
+Magento doesn't report database changes between two major versions, but you can use a tool called [Compalex](https://github.com/dlevsha/compalex) to find out the differences.
+
+Magento rarely makes changes to existing database tables, but if they do, the importer must be aware of it. Use the $magentoVersion field from metadata to check the version of the active shop, and make sure to keep supporting older versions.  

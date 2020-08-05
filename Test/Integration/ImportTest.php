@@ -1546,8 +1546,8 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $importer->flush();
 
         $expected = [
-            [$product1->id, 0, 0, 10, 12.25, 1],
-            [$product1->id, 1, 0, 20, 12.15, 0],
+            [$product1->id, 0, 0, 10, 12.25, 1, 0],
+            [$product1->id, 1, 0, 20, 12.15, 0, 0],
         ];
 
         $this->assertEquals([], $product1->getErrors());
@@ -1570,7 +1570,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $product1->setAttributeSetByName("Default");
 
         $product1->setTierPrices([
-            new TierPrice(10, '12.25', 'General', 'base'),
+            new TierPrice(10, '12.25', 'General', 'base', 12.30),
             new TierPrice(20, '12.10'),
         ]);
 
@@ -1578,8 +1578,8 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $importer->flush();
 
         $expected = [
-            [$product1->id, 0, 1, 10, 12.25, 1],
-            [$product1->id, 1, 0, 20, 12.10, 0],
+            [$product1->id, 0, 1, 10, 12.25, 1, 12.30],
+            [$product1->id, 1, 0, 20, 12.10, 0, 0],
         ];
 
         $this->assertEquals([], $product1->getErrors());
@@ -1593,7 +1593,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
     public function getTierPrices($productId)
     {
         return self::$db->fetchAllNonAssoc("
-            SELECT entity_id, all_groups, customer_group_id, qty, value, website_id
+            SELECT entity_id, all_groups, customer_group_id, qty, value, website_id, percentage_value
             FROM " . self::$metaData->tierPriceTable . "
             WHERE entity_id = {$productId}
             ORDER BY qty
@@ -1902,17 +1902,17 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         ], $selectionResults);
 
         $titleResults = self::$db->fetchAllNonAssoc("
-            SELECT store_id, title
+            SELECT store_id, title, parent_product_id
             FROM " . self::$metaData->bundleOptionValueTable . "
             WHERE option_id IN (" . implode(', ', $optionIds) . ")
             ORDER BY value_id
         ");
 
         $this->assertEquals([
-            [0, 'Monitor'],
-            [0, 'Keyboard'],
-            [1, 'Monitor A'],
-            [1, 'Keyboard A'],
+            [0, 'Monitor', $bundle->id],
+            [0, 'Keyboard', $bundle->id],
+            [1, 'Monitor A', $bundle->id],
+            [1, 'Keyboard A', $bundle->id],
         ], $titleResults);
 
         return min($optionIds);

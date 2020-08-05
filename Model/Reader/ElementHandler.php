@@ -654,7 +654,8 @@ class ElementHandler
             if ($element === self::TIER_PRICE) {
                 $customerGroupName = isset($attributes['customer_group_name']) ? $attributes['customer_group_name'] : null;
                 $websiteCode = isset($attributes['website_code']) ? $attributes['website_code'] : null;
-                $this->tierPrices[] = new TierPrice($attributes['qty'], $attributes['value'], $customerGroupName, $websiteCode);
+                $percentageValue = isset($attributes['percentage_value']) ? $attributes['percentage_value'] : null;
+                $this->tierPrices[] = new TierPrice($attributes['qty'], $attributes['value'], $customerGroupName, $websiteCode, $percentageValue);
             }
         } elseif (in_array($scope, $this->customOptionElements)) {
             if ($element === self::SKU_VALUES) {
