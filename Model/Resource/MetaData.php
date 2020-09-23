@@ -268,10 +268,10 @@ class MetaData
     public $categoryAttributeMap;
 
     /** @var string */
-    public $productUrlSuffix;
+    public $productUrlSuffixes;
 
     /** @var string */
-    public $categoryUrlSuffix;
+    public $categoryUrlSuffixes;
 
     /** @var bool Create 301 rewrite for older url_rewrite entries */
     public $saveRewritesHistory;
@@ -373,8 +373,8 @@ class MetaData
         $this->defaultCategoryAttributeSetId = $this->getDefaultCategoryAttributeSetId();
         $this->defaultProductAttributeSetId = $this->getDefaultProductAttributeSetId();
 
-        $this->productUrlSuffix = $this->getProductUrlSuffix();
-        $this->categoryUrlSuffix = $this->getCategoryUrlSuffix();
+        $this->productUrlSuffixes = $this->getProductUrlSuffixes();
+        $this->categoryUrlSuffixes = $this->getCategoryUrlSuffixes();
         $this->saveRewritesHistory = $this->getSaveRewritesHistory();
 
         $this->storeViewMap = $this->getStoreViewMap();
@@ -652,63 +652,83 @@ class MetaData
 
     }
 
-    protected function getProductUrlSuffix()
+    protected function getProductUrlSuffixes()
     {
         // value in core_config_data may be:
         // - absent, in which case the default from config.xml must be taken
         // - null, in which case it is ""
-        // - an actual value
+        // - an actual value in default scope or store view scope
 
-        $values = $this->db->fetchRow("
-            SELECT `value`
+        $suffixes = [];
+
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `scope`, `scope_id`, `value`
             FROM `{$this->configDataTable}`
             WHERE
-                `scope` = 'default' AND
-                `scope_id` = 0 AND
                 `path` = 'catalog/seo/product_url_suffix'
         ");
 
-        if (!empty($values)) {
-            $value = (string)reset($values);
-        } else {
+        foreach ($rows as $row) {
+            // note: null is cast to string to make ""
+            if ($row['scope'] === "stores") {
+                $suffixes[$row['scope_id']] = (string)$row['value'];
+            } elseif ($row['scope'] === "default") {
+                $suffixes[0] = (string)$row['value'];
+            }
+        }
 
+        if (!array_key_exists(0, $suffixes)) {
             $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
             if (file_exists($file)) {
                 $dom = simplexml_load_file($file);
                 if ($values = $dom->xpath('default/catalog/seo/product_url_suffix')) {
-                    $value = (string)reset($values);
+                    $suffixes[0] = (string)reset($values);
                 }
             }
         }
 
-        return $value;
+        if (!array_key_exists(0, $suffixes)) {
+            $suffixes[0] = ".html";
+        }
+
+        return $suffixes;
     }
 
-    protected function getCategoryUrlSuffix()
+    protected function getCategoryUrlSuffixes()
     {
-        $values = $this->db->fetchRow("
-            SELECT `value`
+        $suffixes = [];
+
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `scope`, `scope_id`, `value`
             FROM `{$this->configDataTable}`
             WHERE
-                `scope` = 'default' AND
-                `scope_id` = 0 AND
                 `path` = 'catalog/seo/category_url_suffix'
         ");
 
-        if (!empty($values)) {
-            $value = (string)reset($values);
-        } else {
+        foreach ($rows as $row) {
+            // note: null is cast to string to make ""
+            if ($row['scope'] === "stores") {
+                $suffixes[$row['scope_id']] = (string)$row['value'];
+            } elseif ($row['scope'] === "default") {
+                $suffixes[0] = (string)$row['value'];
+            }
+        }
 
+        if (!array_key_exists(0, $suffixes)) {
             $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
             if (file_exists($file)) {
                 $dom = simplexml_load_file($file);
                 if ($values = $dom->xpath('default/catalog/seo/category_url_suffix')) {
-                    $value = (string)reset($values);
+                    $suffixes[0] = (string)reset($values);
                 }
             }
         }
 
-        return $value;
+        if (!array_key_exists(0, $suffixes)) {
+            $suffixes[0] = "";
+        }
+
+        return $suffixes;
     }
 
     protected function getSaveRewritesHistory()

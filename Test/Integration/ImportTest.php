@@ -130,7 +130,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $products = [
             ["Big Blue Box", $sku1, 'Default', '3.25', 'admin', [1], 'Taxable Goods'],
-            ["Big Yellow Box", $sku2, 'Default', '4.00', 'admin', [1, 2, 999], 'Taxable Goods'],
+            ["Big Yellow Box", $sku2, 'Default', '4.00', 'admin', [1, 2, 99999], 'Taxable Goods'],
             ["Grote Gele Doos", $sku2, 'Default', '4.25', 'default', [], 'Taxable Goods'],
         ];
 
@@ -148,7 +148,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $product->setAttributeSetByName("Default");
 
         $product->setAttributeSetByName("Default");
-        $product->addCategoryIds([1, 2, 999]);
+        $product->addCategoryIds([1, 2, 99999]);
 
         $global = $product->global();
         $global->setName("Big Yellow Box");

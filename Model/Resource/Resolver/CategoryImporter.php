@@ -315,11 +315,12 @@ class CategoryImporter
                 $parentUrlPath = $this->getParentUrlPath($parentId);
                 $urlPath = $parentUrlPath . '/' . $urlKey;
             }
-            $requestPath = $urlPath . $this->metaData->categoryUrlSuffix;
             $targetPath = "catalog/category/view/id/" . $categoryId;
 
             // url_rewrite
             foreach ($this->metaData->storeViewMap as $storeViewId) {
+                $suffix = $this->metaData->categoryUrlSuffixes[$storeViewId] ?? $this->metaData->categoryUrlSuffixes[0];
+                $requestPath = $urlPath . $suffix;
                 $this->db->execute("
                 INSERT INTO `{$urlRewriteTable}`
                 SET    

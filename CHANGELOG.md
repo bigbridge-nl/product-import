@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.5 : url suffix per store view
+
+Take into account that product and category url suffix may differ per store view.
+
 ## 1.4.4 : Support for two added columns since M2.2 
 
 lucafuse94 noticed that parent_product_id was missing from catalog_product_bundle_option_value. 

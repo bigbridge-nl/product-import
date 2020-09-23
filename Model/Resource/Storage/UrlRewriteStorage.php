@@ -425,7 +425,9 @@ class UrlRewriteStorage
 
         $pieces[] = $productUrlKey;
 
-        return implode('/', $pieces) . $this->metaData->productUrlSuffix;
+        $suffix = $this->metaData->productUrlSuffixes[$storeViewId] ?? $this->metaData->productUrlSuffixes[0];
+
+        return implode('/', $pieces) . $suffix;
     }
 
     /**
