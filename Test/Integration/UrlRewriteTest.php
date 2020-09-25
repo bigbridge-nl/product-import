@@ -580,9 +580,10 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertEquals($expectedRewrites, $actualRewrites);
 
         $actualIndexes = self::$db->fetchAllNonAssoc("
-            SELECT `category_id`, `product_id` FROM `" . $this->metadata->urlRewriteProductCategoryTable . "`
+            SELECT `category_id`, `product_id` FROM `" . $this->metadata->urlRewriteProductCategoryTable . "` p
+            INNER JOIN `" . $this->metadata->urlRewriteTable . "` uw ON uw.url_rewrite_id = p.url_rewrite_id AND uw.store_id = 1  
             WHERE `product_id` IN ({$productIds})
-            ORDER BY `url_rewrite_id`
+            ORDER BY p.url_rewrite_id
         ");
         $this->assertEquals($expectedIndexes, $actualIndexes);
 

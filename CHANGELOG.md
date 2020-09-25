@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.6 : url suffix per website
+
+Take into account that product and category url suffix may differ per website.
+
 ## 1.4.5 : url suffix per store view
 
 Take into account that product and category url suffix may differ per store view.

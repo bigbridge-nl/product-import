@@ -656,77 +656,64 @@ class MetaData
     {
         // value in core_config_data may be:
         // - absent, in which case the default from config.xml must be taken
-        // - null, in which case it is ""
+        // - null (!), in which case it is ""
         // - an actual value in default scope or store view scope
 
-        $suffixes = [];
+        $xmlDefault = ".html";
 
-        $rows = $this->db->fetchAllAssoc("
-            SELECT `scope`, `scope_id`, `value`
-            FROM `{$this->configDataTable}`
-            WHERE
-                `path` = 'catalog/seo/product_url_suffix'
-        ");
-
-        foreach ($rows as $row) {
-            // note: null is cast to string to make ""
-            if ($row['scope'] === "stores") {
-                $suffixes[$row['scope_id']] = (string)$row['value'];
-            } elseif ($row['scope'] === "default") {
-                $suffixes[0] = (string)$row['value'];
+        $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
+        if (file_exists($file)) {
+            $dom = simplexml_load_file($file);
+            if ($values = $dom->xpath('default/catalog/seo/product_url_suffix')) {
+                $xmlDefault = (string)reset($values);
             }
         }
 
-        if (!array_key_exists(0, $suffixes)) {
-            $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
-            if (file_exists($file)) {
-                $dom = simplexml_load_file($file);
-                if ($values = $dom->xpath('default/catalog/seo/product_url_suffix')) {
-                    $suffixes[0] = (string)reset($values);
-                }
-            }
-        }
-
-        if (!array_key_exists(0, $suffixes)) {
-            $suffixes[0] = ".html";
-        }
+        // note: IFNULL will not do, because the suffix value may actually be null
+        $suffixes = $this->db->fetchMap("
+            SELECT
+                s.`store_id`,   
+                IF(cs.scope = 'stores', cs.value, 
+                    IF(cw.scope = 'websites', cw.value, 
+                        IF(cd.scope = 'default', cd.value, ?))) AS suffix
+            FROM `store` s
+            LEFT JOIN `{$this->configDataTable}` cd ON cd.path = 'catalog/seo/product_url_suffix' AND cd.scope = 'default'
+            LEFT JOIN `{$this->configDataTable}` cw ON cw.path = 'catalog/seo/product_url_suffix' AND cw.scope = 'websites' AND cw.scope_id = s.website_id
+            LEFT JOIN `{$this->configDataTable}` cs ON cs.path = 'catalog/seo/product_url_suffix' AND cs.scope = 'stores' AND cs.scope_id = s.store_id
+        ", [$xmlDefault]);
 
         return $suffixes;
     }
 
     protected function getCategoryUrlSuffixes()
     {
-        $suffixes = [];
+        // value in core_config_data may be:
+        // - absent, in which case the default from config.xml must be taken
+        // - null (!), in which case it is ""
+        // - an actual value in default scope or store view scope
 
-        $rows = $this->db->fetchAllAssoc("
-            SELECT `scope`, `scope_id`, `value`
-            FROM `{$this->configDataTable}`
-            WHERE
-                `path` = 'catalog/seo/category_url_suffix'
-        ");
+        $xmlDefault = "";
 
-        foreach ($rows as $row) {
-            // note: null is cast to string to make ""
-            if ($row['scope'] === "stores") {
-                $suffixes[$row['scope_id']] = (string)$row['value'];
-            } elseif ($row['scope'] === "default") {
-                $suffixes[0] = (string)$row['value'];
+        $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
+        if (file_exists($file)) {
+            $dom = simplexml_load_file($file);
+            if ($values = $dom->xpath('default/catalog/seo/category_url_suffix')) {
+                $xmlDefault = (string)reset($values);
             }
         }
 
-        if (!array_key_exists(0, $suffixes)) {
-            $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
-            if (file_exists($file)) {
-                $dom = simplexml_load_file($file);
-                if ($values = $dom->xpath('default/catalog/seo/category_url_suffix')) {
-                    $suffixes[0] = (string)reset($values);
-                }
-            }
-        }
-
-        if (!array_key_exists(0, $suffixes)) {
-            $suffixes[0] = "";
-        }
+        // note: IFNULL will not do, because the suffix value may actually be null
+        $suffixes = $this->db->fetchMap("
+            SELECT
+                s.`store_id`,   
+                IF(cs.scope = 'stores', cs.value, 
+                    IF(cw.scope = 'websites', cw.value, 
+                        IF(cd.scope = 'default', cd.value, ?))) AS suffix
+            FROM `store` s
+            LEFT JOIN `{$this->configDataTable}` cd ON cd.path = 'catalog/seo/category_url_suffix' AND cd.scope = 'default'
+            LEFT JOIN `{$this->configDataTable}` cw ON cw.path = 'catalog/seo/category_url_suffix' AND cw.scope = 'websites' AND cw.scope_id = s.website_id
+            LEFT JOIN `{$this->configDataTable}` cs ON cs.path = 'catalog/seo/category_url_suffix' AND cs.scope = 'stores' AND cs.scope_id = s.store_id
+        ", [$xmlDefault]);
 
         return $suffixes;
     }

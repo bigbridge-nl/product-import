@@ -20,6 +20,9 @@ class ProductReaderTest extends \Magento\TestFramework\TestCase\AbstractControll
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
+        /** @var Magento2DbConnection $db */
+        $db = $objectManager->get(Magento2DbConnection::class);
+
         /** @var MetaData $metaData */
         $metaData = $objectManager->create(MetaData::class);
 
@@ -32,6 +35,9 @@ class ProductReaderTest extends \Magento\TestFramework\TestCase\AbstractControll
 
             if (basename($xmlFile) === "multi-source-inventory.xml") {
                 if (version_compare($metaData->magentoVersion, "2.3.0") < 0) {
+                    continue;
+                }
+                if (empty($db->fetchSingleCell("SHOW TABLES LIKE '" . $metaData->inventorySourceItem . "'"))) {
                     continue;
                 }
             }

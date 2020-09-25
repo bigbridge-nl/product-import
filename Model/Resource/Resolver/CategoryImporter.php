@@ -319,7 +319,7 @@ class CategoryImporter
 
             // url_rewrite
             foreach ($this->metaData->storeViewMap as $storeViewId) {
-                $suffix = $this->metaData->categoryUrlSuffixes[$storeViewId] ?? $this->metaData->categoryUrlSuffixes[0];
+                $suffix = $this->metaData->categoryUrlSuffixes[$storeViewId];
                 $requestPath = $urlPath . $suffix;
                 $this->db->execute("
                 INSERT INTO `{$urlRewriteTable}`
