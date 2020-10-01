@@ -103,10 +103,12 @@ class Validator
 
         // category_ids
         $categoryIds = $product->getCategoryIds();
-        foreach ($categoryIds as $id) {
-            if (!preg_match('/^\d+$/', $id)) {
-                $product->addError("category_ids should be an array of integers");
-                break;
+        if ($categoryIds !== null) {
+            foreach ($categoryIds as $id) {
+                if (!preg_match('/^\d+$/', $id)) {
+                    $product->addError("category_ids should be an array of integers");
+                    break;
+                }
             }
         }
 

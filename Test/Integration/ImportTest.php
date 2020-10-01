@@ -353,6 +353,71 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertEquals(1, count(array_diff($product1->getCategoryIds(), $product2->getCategoryIds())));
     }
 
+
+    /**
+     * @throws Exception
+     */
+    public function testRemoveCategoryLinks()
+    {
+        $success = true;
+
+        $config = new ImportConfig();
+        $config->resultCallback = function (Product $product) use (&$success) {
+            $success = $success && $product->isOk();
+        };
+
+        $importer = self::$factory->createImporter($config);
+
+        $sku = uniqid('bb');
+
+        $product1 = new SimpleProduct($sku);
+        $product1->setAttributeSetByName("Default");
+        $product1->addCategoriesByGlobalName(['Chairs', 'Tables', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $global = $product1->global();
+        $global->setName("Pine trees");
+        $global->setPrice('399.95');
+
+        // store product with 4 categories
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+        $this->assertEquals(4, $this->getCatCount($product1->id));
+
+        // remove a category: should not be removed in database
+        $product1->addCategoriesByGlobalName(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+        $this->assertEquals(4, $this->getCatCount($product1->id));
+
+        // use 'set'
+        $config = new ImportConfig();
+        $config->categoryStrategy = ImportConfig::CATEGORY_STRATEGY_SET;
+        $importer = self::$factory->createImporter($config);
+
+        // name no categories: do not remove any categories
+        $product1 = new SimpleProduct($sku);
+        $global = $product1->global();
+        $global->setName("Pine trees");
+        $global->setPrice('399.95');
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+        $this->assertEquals(4, $this->getCatCount($product1->id));
+
+        // name 3 categories: remove 1
+        $product1->addCategoriesByGlobalName(['Chairs', 'Chairs/Chaises Longues', 'Carpets/Persian Rugs']);
+        $importer->importSimpleProduct($product1);
+        $importer->flush();
+        $this->assertEquals(3, $this->getCatCount($product1->id));
+    }
+
+    protected function getCatCount($productId)
+    {
+        return self::$db->fetchSingleCell("
+            SELECT count(*) 
+            FROM " . self::$metaData->categoryProductTable . "
+            WHERE `product_id` = " . $productId . "
+        ");
+    }
+
     /**
      * @throws Exception
      */

@@ -322,6 +322,9 @@ class ProductStorage
 
         $this->customOptionStorage->updateCustomOptions($validProducts);
         $this->weeeStorage->updateWeees($validProducts);
+        if ($config->categoryStrategy === ImportConfig::CATEGORY_STRATEGY_SET) {
+            $this->productEntityStorage->removeOldCategoryIds($validProducts);
+        }
         $this->productEntityStorage->insertCategoryIds($validProducts);
         $this->productEntityStorage->insertWebsiteIds($validProducts);
         $this->stockItemStorage->storeStockItems($validProducts);

@@ -474,14 +474,20 @@ You can also use ids
 
     $product->addCategoryIds([123, 125]);
 
-The importer does not test whether the the ids exist and will throw an database exception if they don't.
+The importer does not test whether the ids exist and will throw an database exception if they don't.
 
 When your import set contains categories with a / in the name, like "Summer / Winter collection", you may want to change the category name separator into something else, like "$"
 Make sure to update the imported category paths when you do.
 
     $config->categoryNamePathSeparator = "$";
 
-Note: the library only adds and updates categories. It does not remove categories that are not mentioned in the set call.
+By default, the library only adds and updates product-to-category links. It does not remove categories that are not mentioned.
+
+If you do want existing product-to-category links that are not mentioned in the import to be removed, use
+
+    $config->categoryStrategy = ImportConfig::CATEGORY_STRATEGY_SET;
+    
+But a word of warning is needed here. It is very common for a shop administrator to place products in categories manually, even when an automated product sync is in place. Categories like "Sale", for example, may be managed by the administrator. If this has happened before the importer is run with this 'set' option, then these manual changes will be removed. So consider if this happens in the shop, before using this setting.
 
 ## Websites
 

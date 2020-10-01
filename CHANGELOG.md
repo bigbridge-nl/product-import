@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.0 : An option to have old category links removed
+
+Guus Portegies asked for this option to have product-to-category links to be removed as well as added.
+
+Setting `$config->categoryStrategy = ImportConfig::CATEGORY_STRATEGY_SET` will remove product-to-category links that are not named in the import.
+
+Use responsively; the documentation explains when this is not a good idea. 
+
 ## 1.4.6 : url suffix per website
 
 Take into account that product and category url suffix may differ per website.

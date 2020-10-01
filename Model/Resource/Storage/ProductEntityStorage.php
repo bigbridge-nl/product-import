@@ -345,12 +345,63 @@ class ProductEntityStorage
     /**
      * @param Product[] $products
      */
+    public function removeOldCategoryIds(array $products)
+    {
+        if (empty($products)) { return; }
+
+        $productIds = array_column($products, 'id');
+
+        // load existing links
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `category_id`, `product_id`
+            FROM `" . $this->metaData->categoryProductTable . "`
+            WHERE `product_id` IN (" . implode(',', $productIds) . ")
+        ");
+
+        // collect existing links
+        $toBeRemoved = [];
+        foreach ($rows as $row) {
+            $toBeRemoved[$row['product_id']][$row['category_id']] = true;
+        }
+
+        // remove links from this set that are present in the import
+        foreach ($products as $product) {
+            $categoryIds = $product->getCategoryIds();
+            if ($categoryIds === null) {
+                // categories are not used in the import; skip
+                unset($toBeRemoved[$product->id]);
+            } else {
+                foreach ($categoryIds as $categoryId) {
+                    unset($toBeRemoved[$product->id][$categoryId]);
+                }
+            }
+        }
+
+        // delete links one by one (there won't be many)
+        foreach ($toBeRemoved as $productId => $categoryIds) {
+            foreach ($categoryIds as $categoryId => $true) {
+                $this->db->execute("
+                    DELETE FROM `" . $this->metaData->categoryProductTable . "`
+                    WHERE `product_id` = ? AND `category_id` = ?
+                ", [
+                    $productId,
+                    $categoryId
+                ]);
+            }
+        }
+    }
+
+    /**
+     * @param Product[] $products
+     */
     public function insertCategoryIds(array $products)
     {
         $values = [];
 
         foreach ($products as $product) {
-            foreach ($product->getCategoryIds() as $categoryId) {
+            $categoryIds = $product->getCategoryIds();
+            if ($categoryIds === null) { continue; }
+            foreach ($categoryIds as $categoryId) {
                 $values[] = $categoryId;
                 $values[] = $product->id;
             }

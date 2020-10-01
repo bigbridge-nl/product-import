@@ -28,8 +28,8 @@ abstract class Product
     /** @var  string 64 character */
     protected $sku;
 
-    /** @var int[] */
-    protected $category_ids = [];
+    /** @var int[]|null */
+    protected $category_ids = null;
 
     /** @var array */
     protected $website_ids = [];
@@ -226,11 +226,11 @@ abstract class Product
 
     public function addCategoryIds(array $categoryIds)
     {
-        $this->category_ids = $categoryIds;
+        $this->category_ids = array_map('trim', $categoryIds);
     }
 
     /**
-     * @return int[]
+     * @return int[]|null
      */
     public function getCategoryIds()
     {
@@ -297,7 +297,7 @@ abstract class Product
      */
     public function setWebsitesIds(array $websiteIds)
     {
-        $this->website_ids = $websiteIds;
+        $this->website_ids = array_map('trim', $websiteIds);
     }
 
     /**

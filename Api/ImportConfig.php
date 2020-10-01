@@ -50,6 +50,25 @@ class ImportConfig
     public $autoCreateCategories = true;
 
     /**
+     * How to deal with the imported categories?
+     * - add: link products to categories named in the import
+     * - set: like add, and delete links too
+     *
+     * Important!
+     * The 'set' option compares existing product-to-category links with the ones mentioned in the import.
+     * Existing links that are not named in the import are removed.
+     * Consider the possibility that a shop administrator manually adds products to categories that are not part of the import,
+     * such as "New" or "Sale". The importer will remove these links and undo the work of a shop administrator.
+     * So, use this option only if you are certain that the shop administrator does not add products to categories manually.
+     *
+     * @var string
+     */
+    public $categoryStrategy = self::CATEGORY_STRATEGY_ADD;
+
+    const CATEGORY_STRATEGY_ADD = 'add'; // Only add and update category links
+    const CATEGORY_STRATEGY_SET = 'set'; // Add and update category links; and also remove existing category links not named in the import
+
+    /**
      * An array of attribute codes of select or multiple select attributes whose options should be created by the import if they did not exist.
      *
      * @var array
