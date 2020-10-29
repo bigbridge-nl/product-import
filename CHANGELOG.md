@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1 : Fix XSD for multiple store views
+
+The XSD that validates the product import XML did not allow multiple store views. 
+
 ## 1.5.0 : An option to have old category links removed
 
 Guus Portegies asked for this option to have product-to-category links to be removed as well as added.
