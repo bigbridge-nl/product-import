@@ -53,7 +53,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
     /** @var  Metadata */
     protected static $metaData;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
@@ -80,7 +80,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         // create a multiple select attribute
         self::$db->execute("
             INSERT INTO " . self::$metaData->attributeTable . "
-            SET 
+            SET
                 entity_type_id = " . self::$metaData->productEntityTypeId . ",
                 attribute_code = 'color_group_product_importer',
                 frontend_input = 'multiselect',
@@ -91,7 +91,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
 
         self::$db->execute("
             INSERT INTO " . self::$metaData->catalogAttributeTable . "
-            SET 
+            SET
                 attribute_id = " . $insertId . ",
                 is_global = 1
         ");
@@ -99,7 +99,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         self::$metaData->productEavAttributeInfo['color_group_product_importer'] = new EavAttributeInfo('color_group_product_importer', $insertId, false, 'varchar', 'catalog_product_entity_varchar', 'multiselect', 1);
     }
 
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         // remove the multiple select attribute
         self::$db->execute("
@@ -168,17 +168,17 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $product1 = self::$repository->get($sku1);
         $this->assertEquals(4, $product1->getAttributeSetId());
         $this->assertEquals($products[0][0], $product1->getName());
-        $this->assertEquals($products[0][3], $product1->getPrice());
+        $this->assertEquals((float)$products[0][3], (float)$product1->getPrice());
         $this->assertEquals([1], $product1->getCategoryIds());
 
         $product2 = self::$repository->get($sku2, false, 0);
         $this->assertEquals($products[1][0], $product2->getName());
-        $this->assertEquals($products[1][3], $product2->getPrice());
+        $this->assertEquals((float)$products[1][3], (float)$product2->getPrice());
         $this->assertEquals([1, 2], $product2->getCategoryIds());
 
         $product2a = self::$repository->get($sku2, false, 1);
         $this->assertEquals($products[2][0], $product2a->getName());
-        $this->assertEquals($products[2][3], $product2a->getPrice());
+        $this->assertEquals((float)$products[2][3], (float)$product2a->getPrice());
         $this->assertEquals([1, 2], $product2a->getCategoryIds());
 
 
@@ -225,18 +225,18 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         try {
             $product1 = self::$repository->get($sku1, false, 0, true);
             $this->assertEquals($products2[0][0], $product1->getName());
-            $this->assertEquals($products2[0][3], $product1->getPrice());
+            $this->assertEquals((float)$products2[0][3], (float)$product1->getPrice());
             $this->assertEquals([1, 2], $product1->getCategoryIds());
             $this->assertEquals(2, $product1->getTaxClassId());
 
             $product2 = self::$repository->get($sku2, false, 0, true);
             $this->assertEquals($products2[1][0], $product2->getName());
-            $this->assertEquals($products2[1][3], $product2->getPrice());
+            $this->assertEquals((float)$products2[1][3], (float)$product2->getPrice());
             $this->assertEquals([1, 2], $product2->getCategoryIds());
 
             $product2a = self::$repository->get($sku2, false, 1, true);
             $this->assertEquals($products2[2][0], $product2a->getName());
-            $this->assertEquals($products2[2][3], $product2a->getPrice());
+            $this->assertEquals((float)$products2[2][3], (float)$product2a->getPrice());
         } catch (NoSuchEntityException $e) {
             $this->assertTrue(false);
         }
@@ -412,7 +412,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
     protected function getCatCount($productId)
     {
         return self::$db->fetchSingleCell("
-            SELECT count(*) 
+            SELECT count(*)
             FROM " . self::$metaData->categoryProductTable . "
             WHERE `product_id` = " . $productId . "
         ");
@@ -703,7 +703,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $value = self::$metaData->mediaGalleryValueTable;
 
         $valueIds = self::$db->fetchSingleColumn("
-            SELECT value_id 
+            SELECT value_id
             FROM {$toEntity}
             WHERE `entity_id` = " . $product->id . "
             ORDER BY value_id
@@ -722,7 +722,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             SELECT store_id, entity_id, label, position, disabled
             FROM {$value}
             WHERE value_id IN (" . implode(',', $valueIds) . ")
-            ORDER BY value_id            
+            ORDER BY value_id
         ");
 
         $this->assertEquals($valueData, $results);
@@ -874,7 +874,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             'use_config_max_sale_qty' => '0',
             'is_in_stock' => '1',
             'low_stock_date' => '2017-12-17 00:00:00',
-            'notify_stock_qty' => '0.200',
+            'notify_stock_qty' => 0.2,
             'use_config_notify_stock_qty' => '0',
             'manage_stock' => '1',
             'use_config_manage_stock' => '0',
@@ -1399,7 +1399,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             $linkInfo = self::$metaData->linkInfo[$linkType];
 
             $r = self::$db->fetchAllNonAssoc("
-                SELECT L.product_id, L.linked_product_id, L.link_type_id, P.value 
+                SELECT L.product_id, L.linked_product_id, L.link_type_id, P.value
                 FROM " . self::$metaData->linkTable . " L
                 INNER JOIN " . self::$metaData->linkAttributeIntTable . " P ON P.link_id = L.link_id AND P.product_link_attribute_id = {$linkInfo->positionAttributeId}
                 WHERE product_id = {$product->id}
@@ -1470,9 +1470,9 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertSame([], $errors);
 
         $memberData = [
-            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, "2.0000"],
-            [$group->id, $simple2->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, "3.0000"],
-            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, "4.0000"],
+            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, 2.0],
+            [$group->id, $simple2->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, 3.0],
+            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, 4.0],
         ];
 
         $this->assertEquals($memberData, $this->getMemberData($group));
@@ -1501,9 +1501,9 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertSame([], $errors);
 
         $memberData = [
-            [$group->id, $simple4->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, "3.0000"],
-            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, "2.5000"],
-            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, "4.0000"],
+            [$group->id, $simple4->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, 3.0],
+            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, 2.5],
+            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, 4.0],
         ];
 
         $this->assertEquals($memberData, $this->getMemberData($group));
@@ -1516,9 +1516,9 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $importer->flush();
 
         $memberData = [
-            [$group->id, $simple4->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, "3.0000"],
-            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, "2.5000"],
-            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, "4.0000"],
+            [$group->id, $simple4->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 1, 3.0],
+            [$group->id, $simple1->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 2, 2.5],
+            [$group->id, $simple3->id, self::$metaData->linkInfo[LinkInfo::SUPER]->typeId, 3, 4.0],
         ];
 
         $this->assertEquals($memberData, $this->getMemberData($group));
@@ -1795,10 +1795,10 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         ");
 
         $this->assertEquals([
-            ['0', '12.95'],
-            ['0', '22.95'],
-            ['1', '13.45'],
-            ['1', '23.45']
+            ['0', 12.95],
+            ['0', 22.95],
+            ['1', 13.45],
+            ['1', 23.45]
         ], $linkPriceResults);
 
         $linkTitleResults = self::$db->fetchAllNonAssoc("
@@ -2077,12 +2077,12 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         ");
 
         $expected = [
-            ['field', '1', 'inscription', '21', null, '0', '0', '1', '0', 'Inscription', '0', '0.5000', 'fixed'],
-            ['area', '1', 'note', 255, null, '0', '0', '2', '0', 'Note', '0', '0.1000', 'fixed'],
-            ['file', '0', 'id-card', '0', 'jpg jpeg', '5000', '7000', '3', '0', 'Id card', '0', '0.0000', 'fixed'],
-            ['date', '1', null, 0, null, '0', '0', '4', '0', 'Date', '0', '10.0000', 'percent'],
-            ['date_time', '1', null, '0', null, '0', '0', '5', '0', 'Date and time', '0', '20.0000', 'percent'],
-            ['time', '1', 'time', '0', null, '0', '0', '6', '0', 'Time', '0', '30.0000', 'percent'],
+            ['field', '1', 'inscription', '21', null, '0', '0', '1', '0', 'Inscription', '0', 0.5, 'fixed'],
+            ['area', '1', 'note', 255, null, '0', '0', '2', '0', 'Note', '0', 0.1, 'fixed'],
+            ['file', '0', 'id-card', '0', 'jpg jpeg', '5000', '7000', '3', '0', 'Id card', '0', 0., 'fixed'],
+            ['date', '1', null, 0, null, '0', '0', '4', '0', 'Date', '0', 10.0, 'percent'],
+            ['date_time', '1', null, '0', null, '0', '0', '5', '0', 'Date and time', '0', 20.0, 'percent'],
+            ['time', '1', 'time', '0', null, '0', '0', '6', '0', 'Time', '0', 30.0, 'percent'],
             ['drop_down', '1', null, '0', null, '0', '0', '7', '0', 'Color', null, null, null],
             ['radio', '1', null, '0', null, '0', '0', '8', '0', 'Frame', null, null, null],
             ['checkbox', '1', null, '0', null, '0', '0', '9', '0', 'Extras', null, null, null],
@@ -2092,7 +2092,7 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertEquals($expected, $actual);
 
         $optionIds = self::$db->fetchSingleColumn("
-            SELECT option_id FROM catalog_product_option 
+            SELECT option_id FROM catalog_product_option
             WHERE product_id = {$product->id}
         ");
 
@@ -2106,17 +2106,17 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         ");
 
         $expected = [
-            ["red", "1", "0", "Red", "0", "0.1000", "fixed"],
-            ["green", "2", "0", "Green", "0", "0.1500", "fixed"],
-            ["blue", "3", "0", "Blue", "0", "0.2500", "fixed"],
-            [null, "1", "0", "Wood", "0", "10.0000", "percent"],
-            [null, "2", "0", "Iron", "0", "15.0000", "percent"],
-            ["mayonaise", "1", "0", "Mayonaise", "0", "0.0500", "fixed"],
-            ["ketchup", "2", "0", "Ketchup", "0", "0.0500", "fixed"],
-            ["mosterd", "3", "0", "Mosterd", "0", "0.1000", "fixed"],
-            ["nuts", "1", "0", "Nuts", "0", "0.1000", "fixed"],
-            ["syrup", "2", "0", "Syrup", "0", "0.1000", "fixed"],
-            ["m-and-ms", "3", "0", "M & M's", "0", "0.1000", "fixed"],
+            ["red", "1", "0", "Red", "0", 0.1, "fixed"],
+            ["green", "2", "0", "Green", "0", 0.15, "fixed"],
+            ["blue", "3", "0", "Blue", "0", 0.25, "fixed"],
+            [null, "1", "0", "Wood", "0", 10.0, "percent"],
+            [null, "2", "0", "Iron", "0", 15.0, "percent"],
+            ["mayonaise", "1", "0", "Mayonaise", "0", 0.05, "fixed"],
+            ["ketchup", "2", "0", "Ketchup", "0", 0.05, "fixed"],
+            ["mosterd", "3", "0", "Mosterd", "0", 0.1, "fixed"],
+            ["nuts", "1", "0", "Nuts", "0", 0.1, "fixed"],
+            ["syrup", "2", "0", "Syrup", "0", 0.1, "fixed"],
+            ["m-and-ms", "3", "0", "M & M's", "0", 0.1, "fixed"],
         ];
 
         $this->assertEquals($expected, $actual);
@@ -2258,9 +2258,9 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertSame([], $product1->getErrors());
 
         $value = self::$db->fetchSingleCell("
-                SELECT `value` 
+                SELECT `value`
                 FROM `" . self::$metaData->productEntityTable . "_" . $type . "`
-                WHERE entity_id = ? AND attribute_id = ? AND store_id = ? 
+                WHERE entity_id = ? AND attribute_id = ? AND store_id = ?
             ", [
             $product1->id,
             $attributeId,
@@ -2285,9 +2285,9 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
         $this->assertSame([], $product1->getErrors());
 
         $value = self::$db->fetchSingleCell("
-                SELECT `value` 
+                SELECT `value`
                 FROM `" . self::$metaData->productEntityTable . "_" . $type . "`
-                WHERE entity_id = ? AND attribute_id = ? AND store_id = ? 
+                WHERE entity_id = ? AND attribute_id = ? AND store_id = ?
             ", [
             $product1->id,
             $attributeId,
@@ -2328,16 +2328,20 @@ class ImportTest extends \Magento\TestFramework\TestCase\AbstractController
             $type = self::$metaData->productEavAttributeInfo[$attributeCode]->backendType;
 
             $value = self::$db->fetchSingleCell("
-                SELECT `value` 
+                SELECT `value`
                 FROM `" . self::$metaData->productEntityTable . "_" . $type . "`
-                WHERE entity_id = ? AND attribute_id = ? AND store_id = ? 
+                WHERE entity_id = ? AND attribute_id = ? AND store_id = ?
             ", [
                 $product->id,
                 $attributeId,
                 0
             ]);
 
-            $this->assertSame($expectedGlobal[$i], $value);
+            if ($i == 2) {
+                $this->assertSame((float)$expectedGlobal[$i], (float)$value);
+            } else {
+                $this->assertSame($expectedGlobal[$i], $value);
+            }
         }
     }
 }

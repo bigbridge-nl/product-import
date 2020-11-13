@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.2 : Support for Magento 2.4
+
+Support for 20.6 price decimal format.
+
+Fixed import of tier prices in M2.4
+
 ## 1.5.1 : Fix XSD for multiple store views
 
 The XSD that validates the product import XML did not allow multiple store views. 

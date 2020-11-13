@@ -14,7 +14,7 @@ class ConfigTest extends \Magento\TestFramework\TestCase\AbstractController
     /** @var  ImporterFactory */
     private static $factory;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 

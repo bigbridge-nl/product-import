@@ -39,7 +39,7 @@ class TierPrice
     public function __construct(string $quantity, string $value, string $customerGroupName = null, string $websiteCode = null, string $percentageValue = null)
     {
         $this->quantity = Decimal::format($quantity);
-        $this->value = Decimal::format($value);
+        $this->value = Decimal::formatPrice($value);
         $this->customerGroupName = $customerGroupName;
         $this->websiteCode = $websiteCode;
         $this->percentageValue = $percentageValue !== null ? Decimal::format($percentageValue) : null;

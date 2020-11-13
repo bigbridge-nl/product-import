@@ -43,7 +43,7 @@ class BundleProductSelection
         $this->sku = trim($sku);
         $this->isDefault = $isDefault;
         $this->priceType = $priceType;
-        $this->priceValue = Decimal::format($priceValue);
+        $this->priceValue = Decimal::formatPrice($priceValue);
         $this->quantity = Decimal::format($quantity);
         $this->canChangeQuantity = $canChangeQuantity;
     }

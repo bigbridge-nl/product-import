@@ -22,7 +22,7 @@ class MsiTest extends \Magento\TestFramework\TestCase\AbstractController
     /** @var Magento2DbConnection */
     protected static $db;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 

@@ -23,7 +23,7 @@ class IdTest extends \Magento\TestFramework\TestCase\AbstractController
     /** @var  Metadata */
     protected static $metadata;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 

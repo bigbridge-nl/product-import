@@ -12,7 +12,7 @@ class RestApiTest extends \PHPUnit\Framework\TestCase
     const TEST_ADMIN_USER_USERNAME = 'admin';//\Magento\TestFramework\Bootstrap::ADMIN_NAME;
     const TEST_ADMIN_USER_PASSWORD = 'admin123';//\Magento\TestFramework\Bootstrap::ADMIN_PASSWORD;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         // include Magento
         require_once __DIR__ . '/../../../../../index.php';

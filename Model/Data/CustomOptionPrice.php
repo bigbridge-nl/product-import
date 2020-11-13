@@ -22,7 +22,7 @@ class CustomOptionPrice
     public function __construct(CustomOption $customOption, string $price, string $priceType)
     {
         $this->customOption = $customOption;
-        $this->price = Decimal::format($price);
+        $this->price = Decimal::formatPrice($price);
         $this->priceType = trim($priceType);
     }
 

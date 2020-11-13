@@ -4,6 +4,7 @@ namespace BigBridge\ProductImport\Model\Resource;
 
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Helper\Decimal;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Data\LinkInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
@@ -393,6 +394,10 @@ class MetaData
         if (version_compare($this->magentoVersion, "2.3.0") >= 0) {
             $this->sourceCodeMap = $this->getSourceCodeMap();
         }
+
+        if (version_compare($this->magentoVersion, "2.4.0") >= 0) {
+            $this->setNewPriceDecimals();
+        }
     }
 
     /**
@@ -419,6 +424,15 @@ class MetaData
         }
 
         return $magentoVersion;
+    }
+
+    protected function setNewPriceDecimals()
+    {
+        Decimal::$decimalPriceFormat = Decimal::DECIMAL_20_6_FORMAT;
+        Decimal::$decimalPricePattern = Decimal::DECIMAL_20_6_PATTERN;
+
+        Decimal::$decimalEavFormat = Decimal::DECIMAL_20_6_FORMAT;
+        Decimal::$decimalEavPattern = Decimal::DECIMAL_20_6_PATTERN;
     }
 
     protected function getValueSerializer()
@@ -589,7 +603,7 @@ class MetaData
     protected function getProductEavAttributeInfo()
     {
         $rows = $this->db->fetchAllAssoc("
-            SELECT A.`attribute_id`, A.`attribute_code`, A.`is_required`, A.`backend_type`, A.`frontend_input`, C.`is_global` 
+            SELECT A.`attribute_id`, A.`attribute_code`, A.`is_required`, A.`backend_type`, A.`frontend_input`, C.`is_global`
             FROM {$this->attributeTable} A
             INNER JOIN {$this->catalogAttributeTable} C ON C.`attribute_id` = A.`attribute_id`
             WHERE A.`entity_type_id` = ? AND A.backend_type != 'static'
@@ -643,8 +657,8 @@ class MetaData
         $attributeTable = $this->db->getFullTableName(self::ATTRIBUTE_TABLE);
 
         return $this->db->fetchSingleCell("
-            SELECT `attribute_id` 
-            FROM {$attributeTable} 
+            SELECT `attribute_id`
+            FROM {$attributeTable}
             WHERE `entity_type_id` = ? AND attribute_code = 'media_gallery'
         ", [
             $this->productEntityTypeId
@@ -672,9 +686,9 @@ class MetaData
         // note: IFNULL will not do, because the suffix value may actually be null
         $suffixes = $this->db->fetchMap("
             SELECT
-                s.`store_id`,   
-                IF(cs.scope = 'stores', cs.value, 
-                    IF(cw.scope = 'websites', cw.value, 
+                s.`store_id`,
+                IF(cs.scope = 'stores', cs.value,
+                    IF(cw.scope = 'websites', cw.value,
                         IF(cd.scope = 'default', cd.value, ?))) AS suffix
             FROM `store` s
             LEFT JOIN `{$this->configDataTable}` cd ON cd.path = 'catalog/seo/product_url_suffix' AND cd.scope = 'default'
@@ -705,9 +719,9 @@ class MetaData
         // note: IFNULL will not do, because the suffix value may actually be null
         $suffixes = $this->db->fetchMap("
             SELECT
-                s.`store_id`,   
-                IF(cs.scope = 'stores', cs.value, 
-                    IF(cw.scope = 'websites', cw.value, 
+                s.`store_id`,
+                IF(cs.scope = 'stores', cs.value,
+                    IF(cw.scope = 'websites', cw.value,
                         IF(cd.scope = 'default', cd.value, ?))) AS suffix
             FROM `store` s
             LEFT JOIN `{$this->configDataTable}` cd ON cd.path = 'catalog/seo/category_url_suffix' AND cd.scope = 'default'

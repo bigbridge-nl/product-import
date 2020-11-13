@@ -189,7 +189,7 @@ class Validator
                         }
                         break;
                     case EavAttributeInfo::TYPE_DECIMAL:
-                        if (!preg_match(Decimal::DECIMAL_PATTERN, $value)) {
+                        if (!preg_match(Decimal::$decimalEavPattern, $value)) {
                             $product->addError($eavAttribute . " is not a decimal number with dot (" . $value . ")");
                         } elseif ($value < 0.00) {
                             if (in_array($eavAttribute, [ProductStoreView::ATTR_PRICE, ProductStoreView::ATTR_SPECIAL_PRICE, ProductStoreView::ATTR_COST, ProductStoreView::ATTR_WEIGHT, ProductStoreView::ATTR_MSRP])) {

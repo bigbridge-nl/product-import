@@ -23,7 +23,7 @@ class DownloadLinkInformation
     {
         $this->downloadLink = $downloadLink;
         $this->title = trim($title);
-        $this->price = Decimal::format($price);
+        $this->price = Decimal::formatPrice($price);
     }
 
     /**

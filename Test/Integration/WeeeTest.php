@@ -25,7 +25,7 @@ class WeeeTest extends \Magento\TestFramework\TestCase\AbstractController
     /** @var  Metadata */
     protected static $metadata;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
@@ -109,7 +109,7 @@ class WeeeTest extends \Magento\TestFramework\TestCase\AbstractController
         // create a multiple select attribute
         self::$db->execute("
             INSERT INTO " . self::$metadata->attributeTable . "
-            SET 
+            SET
                 entity_type_id = " . self::$metadata->productEntityTypeId . ",
                 attribute_code = 'weee_importer',
                 frontend_input = 'weee',
@@ -120,7 +120,7 @@ class WeeeTest extends \Magento\TestFramework\TestCase\AbstractController
 
         self::$db->execute("
             INSERT INTO " . self::$metadata->catalogAttributeTable . "
-            SET 
+            SET
                 attribute_id = " . $insertId . ",
                 is_global = 1
         ");

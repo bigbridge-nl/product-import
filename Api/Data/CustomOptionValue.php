@@ -20,7 +20,7 @@ class CustomOptionValue
 
     public function __construct(string $price, string $priceType, string $title)
     {
-        $this->price = Decimal::format($price);
+        $this->price = Decimal::formatPrice($price);
         $this->priceType = trim($priceType);
         $this->title = trim($title);
     }

@@ -181,11 +181,11 @@ class ProductStoreView
     }
 
     /**
-     * @param string|null $price A 12.4 decimal field
+     * @param string|null $price A 12.4 / 20.6 decimal field
      */
     public function setPrice(string $price = null)
     {
-        $this->attributes[self::ATTR_PRICE] = Decimal::format($price);
+        $this->attributes[self::ATTR_PRICE] = Decimal::formatPrice($price);
     }
 
     /**
@@ -265,7 +265,7 @@ class ProductStoreView
      */
     public function setSpecialPrice(string $specialPrice = null)
     {
-        $this->attributes[self::ATTR_SPECIAL_PRICE] = Decimal::format($specialPrice);
+        $this->attributes[self::ATTR_SPECIAL_PRICE] = Decimal::formatPrice($specialPrice);
     }
 
     /**
