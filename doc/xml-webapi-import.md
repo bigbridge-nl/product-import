@@ -27,19 +27,10 @@ Supply attributes for automatic option creation
 
     auto-create-option[]=manufacturer&auto-create-option[]=color_group
 
-Is product type changed allowed?
+Is product type changed allowed (default: non-destructive)?
 
     product-type-change=allowed
     product-type-change=forbidden
-
-What image caching to use?
-Check the local cache for existing images
-
-    image-caching=check-import-dir
-
-Use HTTP Cache
-
-    image-caching=http-caching
 
 Create categories automatically:
 
@@ -56,6 +47,20 @@ Specify the base dir for images
 Specify an alternative local image cache directory
 
     image-cache-dir=/tmp
+    
+Specify the type of images caching (default is force-download)
+
+check the directory where images are cached (pub/media/import) first
+
+    image-caching=check-import-dir
+    
+use HTTP caching techniques
+
+    image-caching=http-caching
+
+Set the image strategy to replace existing images (default is: add)
+
+    image=set
 
 Base url_key on SKU
 
