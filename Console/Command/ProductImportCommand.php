@@ -25,7 +25,9 @@ class ProductImportCommand extends Command
     const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
     const OPTION_IMAGE_CACHING = "image-caching";
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
+    const OPTION_CATEGORY_STRATEGY = "category-strategy";
     const OPTION_PATH_SEPARATOR = 'path-separator';
+    const OPTION_IMAGE_STRATEGY = "image";
     const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
     const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
     const OPTION_URL_KEY_SOURCE = "url-key-source";
@@ -35,7 +37,6 @@ class ProductImportCommand extends Command
     const OPTION_SKIP_XSD = "skip-xsd";
     const OPTION_REDIRECTS = 'redirects';
     const OPTION_CATEGORY_PATH_URLS = "category-path-urls";
-    const OPTION_IMAGE = "image";
 
     /** @var ObjectManagerInterface */
     protected $objectManager;
@@ -66,12 +67,6 @@ class ProductImportCommand extends Command
                 'Prepares and validates products, but does not import'
             ),
             new InputOption(
-                self::OPTION_IMAGE_SOURCE_DIR,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Base directory for source images with relative paths'
-            ),
-            new InputOption(
                 self::OPTION_AUTO_CREATE_OPTION,
                 null,
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
@@ -85,25 +80,32 @@ class ProductImportCommand extends Command
                 'Auto-create categories'
             ),
             new InputOption(
-                self::OPTION_PRODUCT_TYPE_CHANGE,
+                self::OPTION_PATH_SEPARATOR,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Changing product type: allowed, forbidden, non-destructive',
-                ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE
+                'Category path separator',
+                ImportConfig::DEFAULT_CATEGORY_PATH_SEPARATOR
             ),
             new InputOption(
-                self::OPTION_IMAGE,
+                self::OPTION_CATEGORY_STRATEGY,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Image handling: add (add or update), set (add, update and delete)',
-                ImportConfig::IMAGE_STRATEGY_ADD
+                'category strategy: How to handle product-category links that are not in the import (set: delete these links)',
+                ImportConfig::CATEGORY_STRATEGY_ADD
             ),
             new InputOption(
-                self::OPTION_IMAGE_CACHING,
+                self::OPTION_EMPTY_TEXT,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Image caching: force-download, check-import-dir, http-caching',
-                ImportConfig::EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD
+                'Handle empty textual values: ignore, remove',
+                ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE
+            ),
+            new InputOption(
+                self::OPTION_EMPTY_NON_TEXT,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Handle empty non-textual values: ignore, remove',
+                ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE
             ),
             new InputOption(
                 self::OPTION_URL_KEY_SOURCE,
@@ -120,11 +122,10 @@ class ProductImportCommand extends Command
                 ImportConfig::DUPLICATE_KEY_STRATEGY_ERROR
             ),
             new InputOption(
-                self::OPTION_PATH_SEPARATOR,
+                self::OPTION_IMAGE_SOURCE_DIR,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Category name path separator',
-                ImportConfig::DEFAULT_CATEGORY_PATH_SEPARATOR
+                'Base directory for source images with relative paths'
             ),
             new InputOption(
                 self::OPTION_IMAGE_CACHE_DIR,
@@ -134,18 +135,25 @@ class ProductImportCommand extends Command
                 ImportConfig::TEMP_PRODUCT_IMAGE_PATH
             ),
             new InputOption(
-                self::OPTION_EMPTY_TEXT,
+                self::OPTION_IMAGE_CACHING,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Handle empty textual values: ignore, remove',
-                ImportConfig::EMPTY_TEXTUAL_VALUE_STRATEGY_IGNORE
+                'Image caching: force-download, check-import-dir, http-caching',
+                ImportConfig::EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD
             ),
             new InputOption(
-                self::OPTION_EMPTY_NON_TEXT,
+                self::OPTION_IMAGE_STRATEGY,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Handle empty non-textual values: ignore, remove',
-                ImportConfig::EMPTY_NONTEXTUAL_VALUE_STRATEGY_IGNORE
+                'Image handling: add (add or update), set (add, update and delete)',
+                ImportConfig::IMAGE_STRATEGY_ADD
+            ),
+            new InputOption(
+                self::OPTION_PRODUCT_TYPE_CHANGE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Changing product type: allowed, forbidden, non-destructive',
+                ImportConfig::PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE
             ),
             new InputOption(
                 self::OPTION_REDIRECTS,
@@ -190,7 +198,7 @@ class ProductImportCommand extends Command
         $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
         $config->autoCreateCategories = $input->getOption(self::OPTION_AUTO_CREATE_CATEGORIES);
         $config->productTypeChange = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE);
-        $config->imageStrategy = $input->getOption(self::OPTION_IMAGE);
+        $config->imageStrategy = $input->getOption(self::OPTION_IMAGE_STRATEGY);
         $config->existingImageStrategy = $input->getOption(self::OPTION_IMAGE_CACHING);
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
         $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
@@ -200,7 +208,7 @@ class ProductImportCommand extends Command
         $config->emptyNonTextValueStrategy = $input->getOption(self::OPTION_EMPTY_NON_TEXT);
         $config->handleRedirects = $input->getOption(self::OPTION_REDIRECTS);
         $config->handleCategoryRewrites = $input->getOption(self::OPTION_CATEGORY_PATH_URLS);
-
+        $config->categoryStrategy = $input->getOption(self::OPTION_CATEGORY_STRATEGY);
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 
         $skipXsdValidation = $input->getOption(self::OPTION_SKIP_XSD);

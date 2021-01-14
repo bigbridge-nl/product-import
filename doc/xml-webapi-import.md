@@ -17,20 +17,21 @@ The main webapi URL is
 
     /rest/V1/bigbridge/products
 
-The url can be extended with extra parameters that will be passed to the import configuration:
+The url can be extended with extra parameters that will be passed to the import configuration.
+
+### Dry run
 
 Perform a dry run only
 
     dry-run=1
 
+### Attribute options
+
 Supply attributes for automatic option creation
 
     auto-create-option[]=manufacturer&auto-create-option[]=color_group
 
-Is product type changed allowed (default: non-destructive)?
-
-    product-type-change=allowed
-    product-type-change=forbidden
+### Categories
 
 Create categories automatically:
 
@@ -39,6 +40,46 @@ Create categories automatically:
 Select an alternative category path separator
 
     path-separator=!
+
+By default, existing product-category links are not removed when they are not part of the import. This is done because content managers often need to place products in categories other than the ones defined in the import.  
+
+If you want these links to be removed anyway, this can be done by:
+
+    category-strategy=set
+
+("Set" here means: set values as specified)
+
+### Empty values
+
+Handling empty element values
+
+Remove existing textual attribute values whose values in the XML are empty
+
+    empty-text=remove
+
+Remove existing non-textual attribute values whose values in the XML are empty
+
+    empty-non-text=remove
+
+### Url keys
+
+Base url_key on SKU
+
+    url-key-source=from-sku
+
+Handling duplicate url_keys: add SKU
+
+    url-key-strategy=add-sku
+
+add serial number
+
+    url-key-strategy=add-serial
+
+allow duplicates
+
+    url-key-strategy=allow
+
+### Images
 
 Specify the base dir for images
 
@@ -58,35 +99,30 @@ use HTTP caching techniques
 
     image-caching=http-caching
 
-Set the image strategy to replace existing images (default is: add)
+Set the image strategy to remove images that are not mentioned in the import (default: add)
 
     image=set
 
-Base url_key on SKU
+### Product types
 
-    url-key-source=from-sku
+Is product type changed allowed (default: non-destructive)?
 
-Handling duplicate url_keys: add SKU
+    product-type-change=allowed
+    product-type-change=forbidden
 
-    url-key-strategy=add-sku
+### Urls rewrites
 
-add serial number
+By default, existing url rewrites are redirected to new url rewrites.
 
-    url-key-strategy=add-serial
+If you don't need redirects, you can skip their creation and remove existing redirects with
 
-allow duplicates
+    redirect=delete
 
-    url-key-strategy=allow
+If you don't need urls with category paths, and remove existing redirects, use
 
-Handling empty element values
+    category-path-urls=delete
 
-Remove existing textual attribute values whose values in the XML are empty
-
-    empty-text=remove
-
-Remove existing non-textual attribute values whose values in the XML are empty
-
-    empty-non-text=remove
+### XSD validation
 
 Skip XSD validation
 

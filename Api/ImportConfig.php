@@ -40,6 +40,13 @@ class ImportConfig
     public $resultCallback = null;
 
     /**
+     * An array of attribute codes of select or multiple select attributes whose options should be created by the import if they did not exist.
+     *
+     * @var array
+     */
+    public $autoCreateOptionAttributes = [];
+
+    /**
      * Create categories if they do not exist.
      *
      * true: creates categories
@@ -48,6 +55,16 @@ class ImportConfig
      * @var bool
      */
     public $autoCreateCategories = true;
+
+    /**
+     * Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials"
+     * When your import set contains categories with a / in the name, like "Summer / Winter collection",
+     * you may want to change the category name separator into something else, like "$"
+     * Make sure to update the imported category paths when you do.
+     *
+     * @var string
+     */
+    public $categoryNamePathSeparator = self::DEFAULT_CATEGORY_PATH_SEPARATOR;
 
     /**
      * How to deal with the imported categories?
@@ -67,13 +84,6 @@ class ImportConfig
 
     const CATEGORY_STRATEGY_ADD = 'add'; // Only add and update category links
     const CATEGORY_STRATEGY_SET = 'set'; // Add and update category links; and also remove existing category links not named in the import
-
-    /**
-     * An array of attribute codes of select or multiple select attributes whose options should be created by the import if they did not exist.
-     *
-     * @var array
-     */
-    public $autoCreateOptionAttributes = [];
 
     /**
      * How to handle varchar and text fields with value ""?
@@ -120,16 +130,6 @@ class ImportConfig
     const DUPLICATE_KEY_STRATEGY_ADD_SKU = 'add-sku';
     const DUPLICATE_KEY_STRATEGY_ADD_SERIAL = 'add-serial';
     const DUPLICATE_KEY_STRATEGY_ALLOW = 'allow';
-
-    /**
-     * Categories are imported by paths of category-names, like this "Doors/Wooden Doors/Specials"
-     * When your import set contains categories with a / in the name, like "Summer / Winter collection",
-     * you may want to change the category name separator into something else, like "$"
-     * Make sure to update the imported category paths when you do.
-     *
-     * @var string
-     */
-    public $categoryNamePathSeparator = self::DEFAULT_CATEGORY_PATH_SEPARATOR;
 
     /**
      * Base directory the source images with relative paths

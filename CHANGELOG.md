@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.3 : Added missing options
+
+Added some options that were missing from the cli command and the rest api.
+
 ## 1.5.2 : Support for Magento 2.4
 
 Support for 20.6 price decimal format.

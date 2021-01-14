@@ -16,8 +16,9 @@ class ProductImportWebApi implements ProductImportWebApiInterface
     const OPTION_PRODUCT_TYPE_CHANGE = "product-type-change";
     const OPTION_IMAGE_CACHING = "image-caching";
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
+    const OPTION_CATEGORY_STRATEGY = "category-strategy";
     const OPTION_PATH_SEPARATOR = 'path-separator';
-    const OPTION_IMAGE = 'image';
+    const OPTION_IMAGE_STRATEGY = 'image';
     const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
     const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
     const OPTION_URL_KEY_SOURCE = "url-key-source";
@@ -25,6 +26,8 @@ class ProductImportWebApi implements ProductImportWebApiInterface
     const OPTION_EMPTY_TEXT = "empty-text";
     const OPTION_EMPTY_NON_TEXT = "empty-non-text";
     const OPTION_SKIP_XSD = "skip-xsd";
+    const OPTION_REDIRECTS = 'redirects';
+    const OPTION_CATEGORY_PATH_URLS = "category-path-urls";
 
     /** @var ImporterFactory */
     protected $importerFactory;
@@ -58,7 +61,7 @@ class ProductImportWebApi implements ProductImportWebApiInterface
         $logger = new ProductImportWebApiLogger();
         $config->resultCallback = [$logger, 'productImported'];
 
-        $skipXsdValidation = !empty($parameters[self::OPTION_AUTO_CREATE_CATEGORIES]);
+        $skipXsdValidation = !empty($parameters[self::OPTION_SKIP_XSD]);
 
         $this->xmlProductReader->import("php://input", $config, $skipXsdValidation, $logger);
 
@@ -87,28 +90,8 @@ class ProductImportWebApi implements ProductImportWebApiInterface
             $config->categoryNamePathSeparator = $parameters[self::OPTION_PATH_SEPARATOR];
         }
 
-        if (isset($parameters[self::OPTION_IMAGE_SOURCE_DIR])) {
-            $config->imageSourceDir = $parameters[self::OPTION_IMAGE_SOURCE_DIR];
-        }
-
-        if (isset($parameters[self::OPTION_IMAGE])) {
-            $config->imageStrategy = $parameters[self::OPTION_IMAGE];
-        }
-
-        if (isset($parameters[self::OPTION_IMAGE_CACHE_DIR])) {
-            $config->imageCacheDir = $parameters[self::OPTION_IMAGE_CACHE_DIR];
-        }
-
-        if (isset($parameters[self::OPTION_PRODUCT_TYPE_CHANGE])) {
-            $config->productTypeChange = $parameters[self::OPTION_PRODUCT_TYPE_CHANGE];
-        }
-
-        if (isset($parameters[self::OPTION_IMAGE_CACHING])) {
-            $config->existingImageStrategy = $parameters[self::OPTION_IMAGE_CACHING];
-        }
-
-        if (isset($parameters[self::OPTION_URL_KEY_SOURCE])) {
-            $config->urlKeyScheme = $parameters[self::OPTION_URL_KEY_SOURCE];
+        if (isset($parameters[self::OPTION_CATEGORY_STRATEGY])) {
+            $config->categoryStrategy = $parameters[self::OPTION_CATEGORY_STRATEGY];
         }
 
         if (isset($parameters[self::OPTION_EMPTY_TEXT])) {
@@ -119,8 +102,40 @@ class ProductImportWebApi implements ProductImportWebApiInterface
             $config->emptyNonTextValueStrategy = $parameters[self::OPTION_EMPTY_NON_TEXT];
         }
 
+        if (isset($parameters[self::OPTION_URL_KEY_SOURCE])) {
+            $config->urlKeyScheme = $parameters[self::OPTION_URL_KEY_SOURCE];
+        }
+
         if (isset($parameters[self::OPTION_URL_KEY_STRATEGY])) {
             $config->duplicateUrlKeyStrategy = $parameters[self::OPTION_URL_KEY_STRATEGY];
+        }
+
+        if (isset($parameters[self::OPTION_IMAGE_SOURCE_DIR])) {
+            $config->imageSourceDir = $parameters[self::OPTION_IMAGE_SOURCE_DIR];
+        }
+
+        if (isset($parameters[self::OPTION_IMAGE_CACHE_DIR])) {
+            $config->imageCacheDir = $parameters[self::OPTION_IMAGE_CACHE_DIR];
+        }
+
+        if (isset($parameters[self::OPTION_IMAGE_CACHING])) {
+            $config->existingImageStrategy = $parameters[self::OPTION_IMAGE_CACHING];
+        }
+
+        if (isset($parameters[self::OPTION_IMAGE_STRATEGY])) {
+            $config->imageStrategy = $parameters[self::OPTION_IMAGE_STRATEGY];
+        }
+
+        if (isset($parameters[self::OPTION_PRODUCT_TYPE_CHANGE])) {
+            $config->productTypeChange = $parameters[self::OPTION_PRODUCT_TYPE_CHANGE];
+        }
+
+        if (isset($parameters[self::OPTION_REDIRECTS])) {
+            $config->handleRedirects = $parameters[self::OPTION_REDIRECTS];
+        }
+
+        if (isset($parameters[self::OPTION_CATEGORY_PATH_URLS])) {
+            $config->handleCategoryRewrites = $parameters[self::OPTION_CATEGORY_PATH_URLS];
         }
 
         return $config;
