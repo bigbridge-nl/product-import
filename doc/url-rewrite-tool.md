@@ -34,7 +34,7 @@ This takes a lot of time in url_rewrite creation and it takes up most of the rec
 
 This is how to get rid of these rewrites:
 
-    bin/magento bigbridge:product:urlrewrite --categories delete
+    bin/magento bigbridge:product:urlrewrite --category-path-urls delete
 
 It makes sure these are not created, and will be removed if they are exist.
 
