@@ -36,6 +36,7 @@ class ProductStoreView
 
     const ATTR_VISIBILITY = 'visibility';
     const ATTR_URL_KEY = 'url_key';
+    const ATTR_URL_PATH = 'url_path';
     const ATTR_TAX_CLASS_ID = 'tax_class_id';
     const ATTR_PRICE = 'price';
     const ATTR_COST = 'cost';

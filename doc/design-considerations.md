@@ -94,6 +94,10 @@ The library provides these possibilities for url_keys:
 * based on sku
 * based on sku (on conflict, add a serial number).
 
+## url_path
+
+The `url_path` property of products serves no purpose, but it does cause problems. Magento still uses it to check if the url_key has changed. Therefore it's best to remove it when updating the url key.  
+
 ## Names and ids
 
 For imports and exports it is customary to use human readable names for attributes. "visibility" for example is exported by Magento's exporter as "Catalog, Search". The internal value is 4.

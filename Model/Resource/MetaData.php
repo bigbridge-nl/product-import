@@ -86,6 +86,9 @@ class MetaData
     public $productEntityTable;
 
     /** @var string */
+    public $productEntityVarcharTable;
+
+    /** @var string */
     public $weeeTable;
 
     /** @var string */
@@ -311,6 +314,7 @@ class MetaData
     {
         $this->entityTypeTable = $this->db->getFullTableName(self::ENTITY_TYPE_TABLE);
         $this->productEntityTable = $this->db->getFullTableName(self::PRODUCT_ENTITY_TABLE);
+        $this->productEntityVarcharTable = sprintf("%s_%s", $this->productEntityTable, EavAttributeInfo::TYPE_VARCHAR);
         $this->weeeTable = $this->db->getFullTableName(self::WEEE_TABLE);
         $this->categoryEntityTable = $this->db->getFullTableName(self::CATEGORY_ENTITY_TABLE);
         $this->urlRewriteTable = $this->db->getFullTableName(self::URL_REWRITE_TABLE);

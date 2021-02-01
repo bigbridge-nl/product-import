@@ -434,4 +434,18 @@ class ProductEntityStorage
 
         $this->db->insertMultipleWithIgnore($this->metaData->productWebsiteTable, ['product_id', 'website_id'], $values, Magento2DbConnection::_1_KB);
     }
+
+    /**
+     * @param Product[] $products
+     */
+    public function removeUrlPaths(array $products)
+    {
+        $productIds = array_column($products, 'id');
+        $attributeId = $this->metaData->productEavAttributeInfo[ProductStoreView::ATTR_URL_PATH]->attributeId;
+
+        $this->db->deleteMultipleWithWhere(
+            $this->metaData->productEntityVarcharTable,
+            "entity_id", $productIds,
+            "attribute_id = {$attributeId}");
+    }
 }

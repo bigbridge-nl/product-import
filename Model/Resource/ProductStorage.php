@@ -312,6 +312,8 @@ class ProductStorage
 
         $this->referenceResolver->resolveProductReferences($validProducts);
 
+        $this->productEntityStorage->removeUrlPaths($validProducts);
+
         foreach ($deleteAttributes as $eavAttribute => $storeViews) {
             $this->productEntityStorage->removeEavAttribute($storeViews, $eavAttribute);
         }

@@ -207,7 +207,7 @@ class Magento2DbConnection
     {
         foreach (array_chunk($keys, self::DELETES_PER_CHUNK) as $chunk) {
             $this->execute("
-                DELETE FROM`{$table}`  
+                DELETE FROM `{$table}`
                 WHERE `{$keyColumn}` IN (?" . str_repeat(',?', count($chunk) - 1) . ") AND {$whereClause}",
                 $chunk);
         }

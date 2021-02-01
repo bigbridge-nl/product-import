@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0 : 
+
+* The attribute `url_path`, if exists, is removed from the imported products
+
 ## 1.5.3 : Added missing options
 
 Added some options that were missing from the cli command and the rest api.
