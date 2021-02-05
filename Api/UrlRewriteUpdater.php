@@ -55,9 +55,10 @@ class UrlRewriteUpdater
         $i = 0;
         while ($chunkedIds = array_slice($productIds, $i, self::BUNCH_SIZE)) {
             $this->urlRewriteStorage->updateRewritesByProductIds($chunkedIds, $storeViewIds, $keepRedirects, $keepCategories);
-            $i += self::BUNCH_SIZE;
 
+            $i += count($chunkedIds);
             $logger->info($i);
         }
+        $logger->info("Done");
     }
 }

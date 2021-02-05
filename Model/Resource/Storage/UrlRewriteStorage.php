@@ -269,7 +269,11 @@ class UrlRewriteStorage
         $inserts = array_diff_key($newRewrites, $oldRewrites);
         $deletes = array_diff_key($oldRewrites, $newRewrites);
 
-        return [$deletes, $inserts];
+        if (count($inserts) == 0 && count($deletes) == 0) {
+            return [[], []];
+        }
+
+        return [$oldRewrites, $newRewrites];
     }
 
     /**
@@ -301,7 +305,11 @@ class UrlRewriteStorage
         $currentZeroRewrite = new UrlRewrite(null, $productId, $requestPath, $targetPath,
             self::NO_REDIRECT, $storeViewId, $categoryId, true, $categoryId);
 
-        $newRewrites = [];
+        // add the active non-redirect up front
+        $newRewrites = [
+            $currentZeroRewrite->getKey() => $currentZeroRewrite
+        ];
+
         /** @var UrlRewrite $existingZeroRewrite */
         $existingZeroRewrite = null;
         if (isset($existingUrlRewrites[$categoryId])) {
@@ -336,9 +344,6 @@ class UrlRewriteStorage
                 $newRewrites[$newRewrite->getKey()] = $newRewrite;
             }
         }
-
-        // add the active non-redirect
-        $newRewrites[$currentZeroRewrite->getKey()] = $currentZeroRewrite;
 
         return $newRewrites;
     }
@@ -491,7 +496,7 @@ class UrlRewriteStorage
             // perform the REPLACE INTO url_rewrite
             $values = [];
             foreach ($replacingUrlRewrites as $urlRewrite) {
-                $values[] = $urlRewrite->getUrlRewriteId();
+                $values[] = 0;
                 $values[] = 'product';
                 $values[] = $urlRewrite->getProductId();
                 $values[] = $urlRewrite->getRequestPath();

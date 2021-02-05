@@ -121,7 +121,6 @@ class Magento2DbConnection
         );
     }
 
-
     /**
      * Replace multiple rows at once, passing a single 1 dimensional array of $values
      *

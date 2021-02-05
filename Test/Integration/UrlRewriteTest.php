@@ -320,12 +320,12 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
             ["product", "dozen/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-            ["product", "dozen/big-grass-green-box-product-import.html", "dozen/a-big-grass-green-box-product-import.html", "301", "1", "0",
-                serialize(['category_id' => (string)$categoryId])],
-
             ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
+
             ["product", "dozen/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+            ["product", "dozen/big-grass-green-box-product-import.html", "dozen/a-big-grass-green-box-product-import.html", "301", "1", "0",
                 serialize(['category_id' => (string)$categoryId])],
         ];
 
@@ -347,12 +347,12 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
             ["product", "dozen/grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-            ["product", "dozen/big-grass-green-box-product-import.html", "dozen/a-big-grass-green-box-product-import.html", "301", "1", "0",
-                serialize(['category_id' => (string)$categoryId])],
-
             ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
+
             ["product", "dozen/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+            ["product", "dozen/big-grass-green-box-product-import.html", "dozen/a-big-grass-green-box-product-import.html", "301", "1", "0",
                 serialize(['category_id' => (string)$categoryId])],
 
             ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
@@ -386,9 +386,9 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         $expectedRewrites = [
             ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-
             ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
 
             ["product", "containers/a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
                 serialize(['category_id' => (string)$newCategoryId])],
@@ -413,9 +413,9 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         $expectedRewrites = [
             ["product", "grote-turquoise-doos-product-import.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
 
-            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
-
             ["product", "a-big-grass-green-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+
+            ["product", "big-grass-green-box-product-import.html", "a-big-grass-green-box-product-import.html", "301", "1", "0", serialize([])],
         ];
 
         $expectedIndexes = [
@@ -542,13 +542,16 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
             ["product", "dozen/grote-rode-doos-product-import.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
                 json_encode(['category_id' => (string)$categoryId])],
 
+            ["product", "a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
+
             ["product", "big-grass-yellow-box-product-import.html", "a-big-grass-yellow-box-product-import.html", "301", "1", "0", json_encode([])],
+
+            ["product", "dozen/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
+                json_encode(['category_id' => (string)$categoryId])],
+
             ["product", "dozen/big-grass-yellow-box-product-import.html", "dozen/a-big-grass-yellow-box-product-import.html", "301", "1", "0",
                 json_encode(['category_id' => (string)$categoryId])],
 
-            ["product", "a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}", "0", "1", "1", null],
-            ["product", "dozen/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$categoryId}", "0", "1", "1",
-                json_encode(['category_id' => (string)$categoryId])],
             ["product", "containers/a-big-grass-yellow-box-product-import.html", "catalog/product/view/id/{$product3->id}/category/{$newCategoryId}", "0", "1", "1",
                 json_encode(['category_id' => (string)$newCategoryId])],
 
@@ -732,13 +735,14 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         $importer->flush();
 
         $expectedRewrites = [
+            ["product", "the-old-name.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
             ["product", "the-oldest-name.html", "the-old-name.html", "301", "1", "0", serialize([])],
+
+            ["product", "names-of-things/the-old-name.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
             ["product", "names-of-things/the-oldest-name.html", "names-of-things/the-old-name.html", "301", "1", "0",
                 serialize(['category_id' => (string)$categoryId])],
 
-            ["product", "the-old-name.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
-            ["product", "names-of-things/the-old-name.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
-                serialize(['category_id' => (string)$categoryId])],
         ];
 
         $expectedIndexes = [
@@ -760,12 +764,12 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
 
         $expectedRewrites = [
 
-            ["product", "the-oldest-name.html", "the-new-name.html", "301", "1", "0", serialize([])],
-            ["product", "names-of-things/the-oldest-name.html", "names-of-things/the-new-name.html", "301", "1", "0",
-                serialize(['category_id' => (string)$categoryId])],
-
             ["product", "the-new-name.html", "catalog/product/view/id/{$product1->id}", "0", "1", "1", null],
+            ["product", "the-oldest-name.html", "the-new-name.html", "301", "1", "0", serialize([])],
+
             ["product", "names-of-things/the-new-name.html", "catalog/product/view/id/{$product1->id}/category/{$categoryId}", "0", "1", "1",
+                serialize(['category_id' => (string)$categoryId])],
+            ["product", "names-of-things/the-oldest-name.html", "names-of-things/the-new-name.html", "301", "1", "0",
                 serialize(['category_id' => (string)$categoryId])],
         ];
 

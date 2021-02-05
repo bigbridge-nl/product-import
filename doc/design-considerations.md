@@ -205,6 +205,14 @@ On conflicts:
 The table catalog_url_rewrite_product_category is rarely used by Magento, but where it is, it is joined to url_rewrite in order to efficiently put a restriction on a category,
 since url_rewrite's category information is encoded in the metadata field.
 
+Note: entries with redirect_type = 0 must be written to the database before entries with redirect_type = 301, because Magento relies on this order.
+
+https://github.com/magento/magento2/blob/2.4-develop/app/code/Magento/Catalog/Model/Product/Url.php
+
+A `$filterData['redirect_type'] = 0` is missing here.
+
+This means that all rewrites must be removed and re-added, whenever a url rewrite changes.
+
 ## Nice to know
 
 * When concatenating sets of values "(a, b, c)" "(d, e, f)" etc, implode(", ", $values) is faster than just string concatenation, even though an array of 1000 items needs to be created

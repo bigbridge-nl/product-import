@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.6.0 : 
+## 1.5.4 : Fix url rewrites problem
 
 * The attribute `url_path`, if exists, is removed from the imported products
+* Writes non-redirects (redirect_type = 0) before redirects (redirect_type = 301) in url_rewrite, because Magento relies on this order when it creates canonical urls and such.
 
 ## 1.5.3 : Added missing options
 
