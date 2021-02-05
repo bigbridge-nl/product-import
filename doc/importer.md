@@ -497,7 +497,7 @@ You can specify on which websites a product is used, by specifying their codes
 
 or their ids
 
-    $product->setWebsiteIds([1, 3, 4]);
+    $product->setWebsitesIds([1, 3, 4]);
 
 ## Images
 
