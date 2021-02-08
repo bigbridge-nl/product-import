@@ -2,6 +2,7 @@
 
 namespace BigBridge\ProductImport\Model\Resource\Resolver;
 
+use BigBridge\ProductImport\Api\ImportConfig;
 use BigBridge\ProductImport\Model\Data\CategoryInfo;
 use BigBridge\ProductImport\Model\Data\EavAttributeInfo;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
@@ -144,9 +145,14 @@ class CategoryImporter
      * @param array $categoryPaths
      * @param bool $autoCreateCategories
      * @param string $categoryNamePathSeparator
+     * @param string $categoryUrlType
      * @return array
      */
-    public function importCategoryPaths(array $categoryPaths, bool $autoCreateCategories, string $categoryNamePathSeparator)
+    public function importCategoryPaths(
+        array $categoryPaths,
+        bool $autoCreateCategories,
+        string $categoryNamePathSeparator,
+        string $categoryUrlType)
     {
         // lazy load categories
         $this->loadCategoryInfo();
@@ -159,7 +165,7 @@ class CategoryImporter
                 $id = $this->categoryCache[$path];
                 $ids[] = $id;
             } else {
-                list($id, $error) = $this->importCategoryPath($path, $autoCreateCategories, $categoryNamePathSeparator);
+                list($id, $error) = $this->importCategoryPath($path, $autoCreateCategories, $categoryNamePathSeparator, $categoryUrlType);
 
                 if ($error !== "") {
                     $ids = [];
@@ -180,9 +186,10 @@ class CategoryImporter
      * @param string $namePath A / separated path of category names.
      * @param bool $autoCreateCategories
      * @param string $categoryNamePathSeparator
+     * @param string $categoryUrlType
      * @return array
      */
-    public function importCategoryPath(string $namePath, bool $autoCreateCategories, string $categoryNamePathSeparator): array
+    public function importCategoryPath(string $namePath, bool $autoCreateCategories, string $categoryNamePathSeparator, string $categoryUrlType): array
     {
         // lazy load categories
         $this->loadCategoryInfo();
@@ -203,7 +210,7 @@ class CategoryImporter
                     $error = "category not found: " . $categoryName;
                     break;
                 } else {
-                    $categoryId = $this->importChildCategory($idPath, $categoryName);
+                    $categoryId = $this->importChildCategory($idPath, $categoryName, $categoryUrlType);
                 }
             }
 
@@ -240,9 +247,10 @@ class CategoryImporter
     /**
      * @param int[] $idPath
      * @param string $categoryName
+     * @param string $categoryUrlType
      * @return int
      */
-    protected function importChildCategory(array $idPath, string $categoryName): int
+    protected function importChildCategory(array $idPath, string $categoryName, string $categoryUrlType): int
     {
         $categoryEntityTable = $this->metaData->categoryEntityTable;
         $urlRewriteTable = $this->metaData->urlRewriteTable;
@@ -270,7 +278,7 @@ class CategoryImporter
             "{$parentPath}/%",
             $childLevel
         ]);
-        $nextPosition = is_null($position) ? 1 : $position + 1;
+        $nextPosition = is_null($position) ? 1 : (int)$position + 1;
 
         // write child data
         $this->db->execute("
@@ -309,7 +317,9 @@ class CategoryImporter
             $existingUrlKeys = $this->getExistingCategoryUrlKeys($parentId, 0);
 
             $urlKey = $this->nameToUrlKeyConverter->createUniqueUrlKeyFromName($categoryName, $existingUrlKeys);
-            if (count($idPath) === 2) {
+            if ($categoryUrlType === ImportConfig::CATEGORY_URL_FLAT) {
+                $urlPath = $urlKey;
+            } else if (count($idPath) === 2) {
                 $urlPath = $urlKey;
             } else {
                 $parentUrlPath = $this->getParentUrlPath($parentId);

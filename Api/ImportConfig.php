@@ -66,6 +66,17 @@ class ImportConfig
      */
     public $categoryNamePathSeparator = self::DEFAULT_CATEGORY_PATH_SEPARATOR;
 
+    const CATEGORY_URL_FLAT = 'flat';
+    const CATEGORY_URL_SEGMENTED = 'segmented';
+
+    /**
+     * A category url_path of generated categories is segmented by default (i.e. 'furniture/tables/corner-chairs')
+     * To create simple a url_path ('corner-chairs'), change it to 'flat'.
+     *
+     * @var string
+     */
+    public $categoryUrlType = self::CATEGORY_URL_SEGMENTED;
+
     /**
      * How to deal with the imported categories?
      * - add: link products to categories named in the import

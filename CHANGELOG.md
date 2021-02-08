@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.0 : Flat type category url paths
+
+* An option, requested by Chris Astley, to create simple url_path attributes for generated categories (i.e 'corner-chairs' instead of the standard 'furniture/tables/corner-chairs'). This extends to the url_rewrite entry as well. 
+
 ## 1.5.4 : Fix url rewrites problem
 
 * The attribute `url_path`, if exists, is removed from the imported products

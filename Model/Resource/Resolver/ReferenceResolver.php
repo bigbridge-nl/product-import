@@ -115,7 +115,7 @@ class ReferenceResolver
                         break;
                     case Product::CATEGORY_IDS:
                         list($ids, $error) = $this->categoryImporter->importCategoryPaths($value,
-                            $config->autoCreateCategories, $config->categoryNamePathSeparator);
+                            $config->autoCreateCategories, $config->categoryNamePathSeparator, $config->categoryUrlType);
                         $product->addCategoryIds($ids);
                         if ($error !== "") {
                             $product->addError($error);

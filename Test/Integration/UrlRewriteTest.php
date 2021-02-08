@@ -75,10 +75,22 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         $db = $objectManager->get(Magento2DbConnection::class);
         /** @var CategoryImporter $categoryImporter */
         $categoryImporter = $objectManager->get(CategoryImporter::class);
-        list($c1,) = $categoryImporter->importCategoryPath("Default Category/Boxes", true, '/');
-        list($c2a,) = $categoryImporter->importCategoryPath("Default Category/Colored Things", true, '/');
-        list($c2b,) = $categoryImporter->importCategoryPath("Default Category/Colored Things/Containers", true, '/');
-        list($c2c,) = $categoryImporter->importCategoryPath("Default Category/Colored Things/Containers/Large", true, '/');
+        list($c1,) = $categoryImporter->importCategoryPath("Default Category/Boxes", true, '/', ImportConfig::CATEGORY_URL_SEGMENTED);
+        list($c2a,) = $categoryImporter->importCategoryPath("Default Category/Colored Things", true, '/', ImportConfig::CATEGORY_URL_SEGMENTED);
+        list($c2b,) = $categoryImporter->importCategoryPath("Default Category/Colored Things/Containers", true, '/', ImportConfig::CATEGORY_URL_SEGMENTED);
+        list($c2c,) = $categoryImporter->importCategoryPath("Default Category/Colored Things/Containers/Large", true, '/', ImportConfig::CATEGORY_URL_FLAT);
+
+        foreach ([$c2b => 'colored-things/containers', $c2c => 'large'] as $id => $urlPath) {
+            $path = self::$db->fetchSingleCell("
+            SELECT value FROM catalog_category_entity_varchar
+            WHERE store_id = 0 AND entity_id = :cat AND attribute_id = 
+                (SELECT attribute_id FROM eav_attribute WHERE attribute_code = 'url_path' AND entity_type_id = 3)
+        ", [
+                'cat' => $id
+            ]);
+
+            $this->assertEquals($urlPath, $path);
+        }
 
         $config = new ImportConfig();
         $this->metadata->valueSerializer = new SerializeValueSerializer();

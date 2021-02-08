@@ -27,6 +27,7 @@ class ProductImportCommand extends Command
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
     const OPTION_CATEGORY_STRATEGY = "category-strategy";
     const OPTION_PATH_SEPARATOR = 'path-separator';
+    const OPTION_CATEGORY_URL_TYPE = 'category-url-type';
     const OPTION_IMAGE_STRATEGY = "image";
     const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
     const OPTION_IMAGE_CACHE_DIR = 'image-cache-dir';
@@ -85,6 +86,13 @@ class ProductImportCommand extends Command
                 InputOption::VALUE_OPTIONAL,
                 'Category path separator',
                 ImportConfig::DEFAULT_CATEGORY_PATH_SEPARATOR
+            ),
+            new InputOption(
+                self::OPTION_CATEGORY_URL_TYPE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Category url path type',
+                ImportConfig::CATEGORY_URL_SEGMENTED
             ),
             new InputOption(
                 self::OPTION_CATEGORY_STRATEGY,
@@ -197,18 +205,19 @@ class ProductImportCommand extends Command
 
         $config->dryRun = $input->getOption(self::OPTION_DRY_RUN);
         $config->autoCreateCategories = $input->getOption(self::OPTION_AUTO_CREATE_CATEGORIES);
+        $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
+        $config->categoryUrlType = $input->getOption(self::OPTION_CATEGORY_URL_TYPE);
+        $config->categoryStrategy = $input->getOption(self::OPTION_CATEGORY_STRATEGY);
         $config->productTypeChange = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE);
         $config->imageStrategy = $input->getOption(self::OPTION_IMAGE_STRATEGY);
         $config->existingImageStrategy = $input->getOption(self::OPTION_IMAGE_CACHING);
         $config->autoCreateOptionAttributes = $input->getOption(self::OPTION_AUTO_CREATE_OPTION);
-        $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
         $config->urlKeyScheme = $input->getOption(self::OPTION_URL_KEY_SOURCE);
         $config->duplicateUrlKeyStrategy = $input->getOption(self::OPTION_URL_KEY_STRATEGY);
         $config->emptyTextValueStrategy = $input->getOption(self::OPTION_EMPTY_TEXT);
         $config->emptyNonTextValueStrategy = $input->getOption(self::OPTION_EMPTY_NON_TEXT);
         $config->handleRedirects = $input->getOption(self::OPTION_REDIRECTS);
         $config->handleCategoryRewrites = $input->getOption(self::OPTION_CATEGORY_PATH_URLS);
-        $config->categoryStrategy = $input->getOption(self::OPTION_CATEGORY_STRATEGY);
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
 
         $skipXsdValidation = $input->getOption(self::OPTION_SKIP_XSD);

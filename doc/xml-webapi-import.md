@@ -41,6 +41,10 @@ Select an alternative category path separator
 
     path-separator=!
 
+The attribute url_path of a generated category contains all parent categories by default (i.e. 'furniture/tables/corner-chairs'). We'll call this "segmented". To create a simple url_path ('corner-chairs'), change this setting to 'flat':
+
+    category-url-type=flat
+
 By default, existing product-category links are not removed when they are not part of the import. This is done because content managers often need to place products in categories other than the ones defined in the import.  
 
 If you want these links to be removed anyway, this can be done by:
