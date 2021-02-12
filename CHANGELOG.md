@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.6.1 : Fix remove temporary images in force-download mode
+
+In the (default) mode where images are re-downloaded each import, the images were left in the temporary directory (even though they were not used again). This is now no longer the case. The images are removed after the import.  
+
 ## 1.6.0 : Flat type category url paths
 
 * An option, requested by Chris Astley, to create simple url_path attributes for generated categories (i.e 'corner-chairs' instead of the standard 'furniture/tables/corner-chairs'). This extends to the url_rewrite entry as well. 

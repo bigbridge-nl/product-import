@@ -185,17 +185,18 @@ class ImageStorage
     /**
      * @param Product[] $products
      * @param bool $removeObsoleteImages
+     * @param bool $removeTemporaryImages
      */
-    public function storeProductImages(array $products, bool $removeObsoleteImages)
+    public function storeProductImages(array $products, bool $removeObsoleteImages, bool $removeTemporaryImages)
     {
         foreach ($products as $product) {
-            $this->storeImages($product, $removeObsoleteImages);
+            $this->storeImages($product, $removeObsoleteImages, $removeTemporaryImages);
         }
 
         $this->insertImageRoles($products);
     }
 
-    protected function storeImages(Product $product, bool $removeObsoleteImages)
+    protected function storeImages(Product $product, bool $removeObsoleteImages, bool $removeTemporaryImages)
     {
         // important! if no images are specified, do not remove all images
         if (empty($product->getImages())) {
@@ -228,6 +229,18 @@ class ImageStorage
             foreach ($storeView->getImageGalleryInformation() as $imageGalleryInformation) {
                 $this->upsertImageGalleryInformation($product->id, $storeView->getStoreViewId(), $imageGalleryInformation);
             }
+        }
+
+        // remove temporary images
+        if ($removeTemporaryImages) {
+            $this->removeTemporaryImages($product);
+        }
+    }
+
+    protected function removeTemporaryImages(Product $product)
+    {
+        foreach ($product->getImages() as $image) {
+            @unlink($image->getTemporaryStoragePath());
         }
     }
 
