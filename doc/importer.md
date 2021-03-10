@@ -640,6 +640,26 @@ Within the import session you want to temporarily allow two products to have the
 
 Needless to say: be careful with this, because it can cause the corrupt state with duplicate url_keys.
 
+## Url keys - the locale
+
+When a url key is generated, the importer uses the TRANSLIT function of `iconv` to convert non-ASCII characters to their closest ASCII representatives. This function uses locale libraries that are provided by the operating system.
+
+The actual locale that iconv uses is determined by the environment variable `LC_CTYPE`.
+
+When is this important?
+
+If you notice that characters are missing from the generated url_key, this may mean that the LC_CTYPE does not match an existing locale.
+
+Find out if your locale has been set explicitly
+
+    echo $LC_CTYPE
+
+Check if it matches one of the installed locales
+
+    locale -a
+    
+There is an other reason you may want to think about the locale. If you are concerned about the way non-ascii characters are converted into ascii, you may set the LC_CTYPE variable explicitly to the one you want. More information [here](https://www.php.net/manual/en/function.iconv.php).
+
 ## Url rewrites
 
 Entries in the table url_rewrite are automatically generated, but only if the attribute visibility is set and is not equal to ProductStoreView::VISIBILITY_NOT_VISIBLE.
