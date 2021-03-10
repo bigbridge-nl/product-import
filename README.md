@@ -77,6 +77,7 @@ Continue to read [the full documentation](doc/importer.md)
 * multi-source inventory (msi)
 * weee taxes
 * removes the url_path attribute of imported products
+* M2EPro notification
 
 Continue to read about [all importer features](doc/importer.md)
 

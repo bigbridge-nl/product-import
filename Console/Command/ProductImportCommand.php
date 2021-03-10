@@ -38,6 +38,7 @@ class ProductImportCommand extends Command
     const OPTION_SKIP_XSD = "skip-xsd";
     const OPTION_REDIRECTS = 'redirects';
     const OPTION_CATEGORY_PATH_URLS = "category-path-urls";
+    const OPTION_M2EPRO = "m2epro";
 
     /** @var ObjectManagerInterface */
     protected $objectManager;
@@ -178,6 +179,13 @@ class ProductImportCommand extends Command
                 ImportConfig::KEEP_CATEGORY_REWRITES
             ),
             new InputOption(
+                self::OPTION_M2EPRO,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Inform M2Pro of product changes (yes: changes are communicated to M2EPro)',
+                ImportConfig::M2EPRO_NO
+            ),
+            new InputOption(
                 self::OPTION_SKIP_XSD,
                 null,
                 InputOption::VALUE_NONE,
@@ -219,6 +227,7 @@ class ProductImportCommand extends Command
         $config->handleRedirects = $input->getOption(self::OPTION_REDIRECTS);
         $config->handleCategoryRewrites = $input->getOption(self::OPTION_CATEGORY_PATH_URLS);
         $config->imageSourceDir = $this->guessImageSourceDir($fileName, $input->getOption(self::OPTION_IMAGE_SOURCE_DIR));
+        $config->M2EPro = $input->getOption(self::OPTION_M2EPRO);
 
         $skipXsdValidation = $input->getOption(self::OPTION_SKIP_XSD);
 

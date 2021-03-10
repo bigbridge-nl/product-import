@@ -126,6 +126,14 @@ If you don't need urls with category paths, and remove existing redirects, use
 
     category-path-urls=delete
 
+### M2EPro updates
+
+[M2EPro](https://m2epro.com/) is an extension that synchronizes data with several sales channels.
+
+To inform M2EPro, if installed, of all changes that were made to products, use:
+
+    m2epro=yes
+
 ### XSD validation
 
 Skip XSD validation

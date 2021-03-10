@@ -29,6 +29,7 @@ class ProductImportWebApi implements ProductImportWebApiInterface
     const OPTION_SKIP_XSD = "skip-xsd";
     const OPTION_REDIRECTS = 'redirects';
     const OPTION_CATEGORY_PATH_URLS = "category-path-urls";
+    const OPTION_M2EPRO = "m2epro";
 
     /** @var ImporterFactory */
     protected $importerFactory;
@@ -141,6 +142,10 @@ class ProductImportWebApi implements ProductImportWebApiInterface
 
         if (isset($parameters[self::OPTION_CATEGORY_PATH_URLS])) {
             $config->handleCategoryRewrites = $parameters[self::OPTION_CATEGORY_PATH_URLS];
+        }
+
+        if (isset($parameters[self::OPTION_M2EPRO])) {
+            $config->M2EPro = $parameters[self::OPTION_M2EPRO];
         }
 
         return $config;

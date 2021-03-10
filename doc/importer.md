@@ -790,6 +790,14 @@ or even
 
 Using these functions excessively affects the performance of the library negatively.
 
+## M2EPro
+
+[M2EPro](https://m2epro.com/) is an extension that synchronizes data with several sales channels.
+
+To inform M2EPro, if installed, of all changes that were made to products, use:
+
+    $config->M2EPro = ImportConfig::M2EPRO_YES;
+
 ## Dry run
 
 If you want to see what errors an import produces without actually adding products to the database, set the config to "dry run"
