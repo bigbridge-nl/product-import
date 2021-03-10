@@ -25,6 +25,7 @@ use BigBridge\ProductImport\Model\Resource\Storage\StockItemStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\TierPriceStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\UrlRewriteStorage;
 use BigBridge\ProductImport\Model\Resource\Storage\WeeeStorage;
+use BigBridge\ProductImport\Model\Resource\ThirdParty\M2EProNotification;
 use BigBridge\ProductImport\Model\Resource\Validation\Validator;
 use Exception;
 
@@ -90,6 +91,9 @@ class ProductStorage
     /** @var ProductTypeChanger */
     protected $productTypeChanger;
 
+    /** @var M2EProNotification */
+    protected $m2EProNotification;
+
     public function __construct(
         Magento2DbConnection $db,
         MetaData $metaData,
@@ -109,6 +113,7 @@ class ProductStorage
         ConfigurableStorage $configurableStorage,
         BundleStorage $bundleStorage,
         GroupedStorage $groupedStorage,
+        M2EProNotification $m2EProNotification,
         ProductTypeChanger $productTypeChanger)
     {
         $this->db = $db;
@@ -130,6 +135,7 @@ class ProductStorage
         $this->bundleStorage = $bundleStorage;
         $this->groupedStorage = $groupedStorage;
         $this->productTypeChanger = $productTypeChanger;
+        $this->m2EProNotification = $m2EProNotification;
     }
 
     /**
@@ -348,6 +354,10 @@ class ProductStorage
 
         if (version_compare($this->metaData->magentoVersion, "2.3.0") >= 0) {
             $this->sourceItemStorage->storeSourceItems($validProducts);
+        }
+
+        if ($config->M2EPro === ImportConfig::M2EPRO_YES) {
+            $this->m2EProNotification->notify($validProducts);
         }
     }
 
