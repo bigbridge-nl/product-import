@@ -816,7 +816,9 @@ Using these functions excessively affects the performance of the library negativ
 
 To inform M2EPro, if installed, of all changes that were made to products, use:
 
-    $config->M2EPro = ImportConfig::M2EPRO_YES;
+    $config->M2EPro0 = ImportConfig::M2EPRO_YES;
+
+Do not enable the Track Direct Database Changes in M2EPro, if you are using this feature.
 
 ## Dry run
 

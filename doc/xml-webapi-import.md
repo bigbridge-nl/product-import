@@ -134,6 +134,8 @@ To inform M2EPro, if installed, of all changes that were made to products, use:
 
     m2epro=yes
 
+Do not enable the Track Direct Database Changes in M2EPro, if you are using this feature.
+
 ### XSD validation
 
 Skip XSD validation
