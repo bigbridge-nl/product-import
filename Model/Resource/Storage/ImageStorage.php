@@ -17,6 +17,7 @@ use BigBridge\ProductImport\Model\Resource\MetaData;
 class ImageStorage
 {
     const PRODUCT_IMAGE_PATH = BP . "/pub/media/catalog/product";
+    const PRODUCT_CACHE_PATH = BP . "/pub/media/catalog/product/cache";
 
     const URL_PATTERN = '#^(http://|https://|//)#i';
 
@@ -244,6 +245,13 @@ class ImageStorage
         }
     }
 
+    protected function emptyCache(string $storagePath)
+    {
+        foreach (glob(self::PRODUCT_CACHE_PATH . "/*/" . $storagePath) as $filePath) {
+            @unlink($filePath);
+        }
+    }
+
     /**
      * Removes all images in $imageData (raw database information) that are not found in $existingImages (new import values)
      * from gallery tables, product attributes, and file system.
@@ -304,8 +312,10 @@ class ImageStorage
                 // note! this only checks if the image has a role in a product, not if it is used in a gallery
                 // the real check would be too slow
                 if ($usageCount == 0) {
-                    // remove from file system
+                    // remove original
                     @unlink(self::PRODUCT_IMAGE_PATH . $storagePath);
+                    // removed resized caches
+                    $this->emptyCache($storagePath);
                 }
 
             }
@@ -433,7 +443,10 @@ class ImageStorage
             // only if the file is different in content will the old file be removed
             if (!$this->filesAreEqual($targetPath, $image->getTemporaryStoragePath())) {
 
+                // remove original
                 unlink($targetPath);
+                // removed resized caches
+                $this->emptyCache($image->getActualStoragePath());
 
                 // link image from its temporary position to its final position
                 link($image->getTemporaryStoragePath(), $targetPath);
