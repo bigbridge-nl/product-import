@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.7.0 : Support for M2EPro
+
+An option to notify the extension M2EPro of changes to products.
+
 # 1.6.2 : Remove cached images
 
 In image-set-mode cached images were not removed when a new image was uploaded with the same name. They are now.

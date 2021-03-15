@@ -210,4 +210,13 @@ class ImportConfig
 
     const KEEP_CATEGORY_REWRITES = "keep"; // keep url_rewrites with category paths, create new ones
     const DELETE_CATEGORY_REWRITES = "delete"; // remove any existing redirects, and do not create new ones
+
+    /**
+     * Support for M2EPro
+     */
+    public $M2EPro = self::M2EPRO_NO;
+
+    const M2EPRO_NO = "no";
+    const M2EPRO_YES = "yes";
+
 }
