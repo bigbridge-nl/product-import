@@ -3,6 +3,7 @@
 namespace BigBridge\ProductImport\Model\Resource\Storage;
 
 use BigBridge\ProductImport\Api\Data\ProductStoreView;
+use BigBridge\ProductImport\Model\Data\CategoryInfo;
 use BigBridge\ProductImport\Model\Data\UrlRewrite;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
@@ -373,8 +374,10 @@ class UrlRewriteStorage
 
         foreach ($categoryIds as $categoryId) {
             $categoryInfo = $this->categoryImporter->getCategoryInfo($categoryId);
-            $categoriesWithUrlKeysIds = array_slice($categoryInfo->path, 2);
-            $parentCategories = array_merge($parentCategories, $categoriesWithUrlKeysIds);
+            if ($categoryInfo instanceof CategoryInfo) {
+                $categoriesWithUrlKeysIds = array_slice($categoryInfo->path, 2);
+                $parentCategories = array_merge($parentCategories, $categoriesWithUrlKeysIds);
+            }
         }
 
         return array_unique($parentCategories);
