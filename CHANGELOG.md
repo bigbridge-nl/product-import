@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.7.1 : More robust when handling non-existing categories.
+
+Stronger getCategoryInfo check when fetching parent categories. Pull request by Duckↄhip.
+
 # 1.7.0 : Support for M2EPro
 
 An option to notify the extension M2EPro of changes to products.
