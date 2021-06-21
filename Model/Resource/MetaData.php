@@ -12,6 +12,8 @@ use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use Exception;
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\App\ProductMetadata;
 
 /**
  * Pre-loads all meta data needed for the core processes once.
@@ -415,14 +417,20 @@ class MetaData
         // $productMetadata = new \Magento\Framework\App\ProductMetadata();
         // $version = $productMetadata->getVersion();
         //
-        // But is takes 0.2 seconds to execute, this is too long
+        // But it takes up to 0.2 seconds to execute, this is too long
         // See also https://magento.stackexchange.com/questions/96858/how-to-get-magento-version-in-magento2-equivalent-of-magegetversion
+        //
+        // However, if magento/magento2-base is not deployed, it falls back to the official method
+        // See https://github.com/bigbridge-nl/product-import/issues/45
 
-        if (preg_match('/"version": "([^\"]+)"/',
-            file_get_contents(BP . '/vendor/magento/magento2-base/composer.json'), $matches)) {
+        $composerFile = BP . '/vendor/magento/magento2-base/composer.json';
 
+        if (!file_exists($composerFile)) {
+            $productMetadata = ObjectManager::getInstance()->get(ProductMetadata::class);
+            $magentoVersion = $productMetadata->getVersion();
+        } else if (preg_match('/"version": "([^\"]+)"/',
+            file_get_contents($composerFile), $matches)) {
             $magentoVersion = $matches[1];
-
         } else {
             throw new Exception("Magento version could not be detected.");
         }

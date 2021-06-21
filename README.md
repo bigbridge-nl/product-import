@@ -6,7 +6,7 @@ This library imports product data into Magento 2 via direct database queries. It
 
 * A programming library to import products
 * An CLI command for product import via XML file
-* An Web API service for product import via Post Request with XML
+* A web API service for product import via Post Request with XML
 * A tool to update url_rewrites
 
 ## Note

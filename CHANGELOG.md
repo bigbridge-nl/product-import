@@ -1,5 +1,9 @@
 # Changelog
 
+# 1.7.2 : Use official Magento version detection when magento/magento2-base is not available
+
+As mentioned by Pieter Hoste, magento/magento2-base may not be available; in this case the official version detection will now be used.
+
 # 1.7.1 : More robust when handling non-existing categories.
 
 Stronger getCategoryInfo check when fetching parent categories. Pull request by Duckↄhip.
