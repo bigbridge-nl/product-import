@@ -32,6 +32,8 @@ class Magento2DbConnection
     // 1 MB / about 270 bytes per path
     const REQUEST_PATHS_PER_CHUNK = 3500;
 
+    const MAX_CONNECTION_RETRIES = 10;
+
     /** @var ResourceConnection $connection */
     protected $connection;
 
@@ -48,8 +50,13 @@ class Magento2DbConnection
     {
         $this->connection = $connection;
 
+        $this->connect();
+    }
+
+    protected function connect()
+    {
         /** @var Mysql $mysql */
-        $mysql = $connection->getConnection();
+        $mysql = $this->connection->getConnection();
 
         /** @var PDO $pdo */
         $this->pdo = $mysql->getConnection();
@@ -79,6 +86,55 @@ class Magento2DbConnection
      * @return \PDOStatement
      */
     public function execute(string $query, $values = [])
+    {
+        $connectionErrors = [
+            2006, // SQLSTATE[HY000]: General error: 2006 MySQL server has gone away
+            2013,  // SQLSTATE[HY000]: General error: 2013 Lost connection to MySQL server during query
+        ];
+        $triesCount = 0;
+
+        do {
+            $retry = false;
+            try {
+                return $this->executeQuery($query, $values);
+            } catch (\Exception $e) {
+                /** @var $pdoException \PDOException */
+                $pdoException = null;
+                if ($e instanceof \PDOException) {
+                    $pdoException = $e;
+                } elseif (($e instanceof Zend_Db_Statement_Exception)
+                    && ($e->getPrevious() instanceof \PDOException)
+                ) {
+                    $pdoException = $e->getPrevious();
+                }
+
+                // Check to reconnect
+                if ($pdoException && $triesCount < self::MAX_CONNECTION_RETRIES
+                    && in_array($pdoException->errorInfo[1], $connectionErrors)
+                ) {
+                    $retry = true;
+                    $triesCount++;
+
+                    $this->connection->closeConnection();
+
+                    $this->connect();
+                }
+
+                if (!$retry) {
+                    throw $e;
+                }
+            }
+        } while ($retry);
+    }
+
+    /**
+     * Prepares and executes an SQL query or statement
+     *
+     * @param string $query
+     * @param array $values
+     * @return \PDOStatement
+     */
+    protected function executeQuery(string $query, $values = [])
     {
 #echo $query . "\n";
 
@@ -115,7 +171,7 @@ class Magento2DbConnection
     public function insertMultiple(string $table, array $columns, array $values, int $magnitude)
     {
         $this->chunkedGroupExecute("
-            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`)
             VALUES {{marks}}",
             $columns, $values, $magnitude
         );
@@ -132,7 +188,7 @@ class Magento2DbConnection
     public function replaceMultiple(string $table, array $columns, array $values, int $magnitude)
     {
         $this->chunkedGroupExecute("
-            REPLACE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            REPLACE INTO `{$table}` (`" . implode('`, `', $columns) . "`)
             VALUES {{marks}}",
             $columns, $values, $magnitude
         );
@@ -151,7 +207,7 @@ class Magento2DbConnection
     public function insertMultipleWithUpdate(string $table, array $columns, array $values, int $magnitude, string $updateClause)
     {
         $this->chunkedGroupExecute("
-            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`)
             VALUES {{marks}}
             ON DUPLICATE KEY UPDATE {$updateClause}",
             $columns, $values, $magnitude
@@ -170,7 +226,7 @@ class Magento2DbConnection
     public function insertMultipleWithIgnore(string $table, array $columns, array $values, int $magnitude)
     {
         $this->chunkedGroupExecute("
-            INSERT IGNORE INTO `{$table}` (`" . implode('`, `', $columns) . "`) 
+            INSERT IGNORE INTO `{$table}` (`" . implode('`, `', $columns) . "`)
             VALUES {{marks}}",
             $columns, $values, $magnitude
         );
@@ -187,7 +243,7 @@ class Magento2DbConnection
     {
         foreach (array_chunk($keys, self::DELETES_PER_CHUNK) as $chunk) {
             $this->execute("
-                DELETE FROM`{$table}`  
+                DELETE FROM`{$table}`
                 WHERE `{$keyColumn}` IN (" . $this->getMarks($chunk) . ")",
                 $chunk);
         }
