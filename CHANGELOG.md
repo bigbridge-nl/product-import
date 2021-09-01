@@ -1,5 +1,13 @@
 # Changelog
 
+# 1.7.4 : Simplify access to core config data 
+
+Pull request by Pieter Hoste, rewrites code that was optimized without need and which also lacked features. 
+
+# 1.7.3 : Reopen a closed MySQL connection
+
+Pull request by Pieter Hoste, reopens a MySQL connection that was closed due to inactivity.
+
 # 1.7.2 : Use official Magento version detection when magento/magento2-base is not available
 
 As mentioned by Pieter Hoste, magento/magento2-base may not be available; in this case the official version detection will now be used.
