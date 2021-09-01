@@ -12,8 +12,10 @@ use BigBridge\ProductImport\Model\Resource\Serialize\JsonValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Serialize\SerializeValueSerializer;
 use BigBridge\ProductImport\Model\Resource\Serialize\ValueSerializer;
 use Exception;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\ProductMetadata;
+use Magento\Store\Model\ScopeInterface;
 
 /**
  * Pre-loads all meta data needed for the core processes once.
@@ -29,7 +31,6 @@ class MetaData
     const URL_REWRITE_TABLE = 'url_rewrite';
     const URL_REWRITE_PRODUCT_CATEGORY_TABLE = 'catalog_url_rewrite_product_category';
     const CATEGORY_PRODUCT_TABLE = 'catalog_category_product';
-    const CONFIG_DATA_TABLE = 'core_config_data';
     const ATTRIBUTE_SET_TABLE = 'eav_attribute_set';
     const ATTRIBUTE_TABLE = 'eav_attribute';
     const ATTRIBUTE_OPTION_TABLE = 'eav_attribute_option';
@@ -75,6 +76,9 @@ class MetaData
     /** @var  Magento2DbConnection */
     protected $db;
 
+    /** @var  ScopeConfigInterface */
+    protected $scopeConfig;
+
     /** @var string */
     public $magentoVersion;
 
@@ -104,9 +108,6 @@ class MetaData
 
     /** @var string */
     public $categoryProductTable;
-
-    /** @var string */
-    public $configDataTable;
 
     /** @var string */
     public $productWebsiteTable;
@@ -297,9 +298,12 @@ class MetaData
      * @param Magento2DbConnection $db
      * @throws Exception
      */
-    public function __construct(Magento2DbConnection $db)
-    {
+    public function __construct(
+        Magento2DbConnection $db,
+        ScopeConfigInterface $scopeConfig
+    ) {
         $this->db = $db;
+        $this->scopeConfig = $scopeConfig;
 
         $this->loadTables();
         $this->reloadCache();
@@ -322,7 +326,6 @@ class MetaData
         $this->urlRewriteTable = $this->db->getFullTableName(self::URL_REWRITE_TABLE);
         $this->urlRewriteProductCategoryTable = $this->db->getFullTableName(self::URL_REWRITE_PRODUCT_CATEGORY_TABLE);
         $this->categoryProductTable = $this->db->getFullTableName(self::CATEGORY_PRODUCT_TABLE);
-        $this->configDataTable = $this->db->getFullTableName(self::CONFIG_DATA_TABLE);
         $this->productWebsiteTable = $this->db->getFullTableName(self::PRODUCT_WEBSITE_TABLE);
         $this->mediaGalleryTable = $this->db->getFullTableName(self::MEDIA_GALLERY_TABLE);
         $this->mediaGalleryValueToEntityTable = $this->db->getFullTableName(self::MEDIA_GALLERY_VALUE_TO_ENTITY_TABLE);
@@ -380,10 +383,6 @@ class MetaData
         $this->defaultCategoryAttributeSetId = $this->getDefaultCategoryAttributeSetId();
         $this->defaultProductAttributeSetId = $this->getDefaultProductAttributeSetId();
 
-        $this->productUrlSuffixes = $this->getProductUrlSuffixes();
-        $this->categoryUrlSuffixes = $this->getCategoryUrlSuffixes();
-        $this->saveRewritesHistory = $this->getSaveRewritesHistory();
-
         $this->storeViewMap = $this->getStoreViewMap();
         $this->storeViewWebsiteMap = $this->getStoreViewWebsiteMap();
         $this->websiteMap = $this->getWebsiteMap();
@@ -396,6 +395,10 @@ class MetaData
         $this->productEavAttributeInfo = $this->getProductEavAttributeInfo();
         $this->imageAttributeIds = $this->getImageAttributeIds();
         $this->weeeAttributeId = $this->getWeeeAttributeId();
+
+        $this->productUrlSuffixes = $this->getProductUrlSuffixes();
+        $this->categoryUrlSuffixes = $this->getCategoryUrlSuffixes();
+        $this->saveRewritesHistory = $this->getSaveRewritesHistory();
 
         if (version_compare($this->magentoVersion, "2.3.0") >= 0) {
             $this->sourceCodeMap = $this->getSourceCodeMap();
@@ -680,80 +683,37 @@ class MetaData
 
     protected function getProductUrlSuffixes()
     {
-        // value in core_config_data may be:
-        // - absent, in which case the default from config.xml must be taken
-        // - null (!), in which case it is ""
-        // - an actual value in default scope or store view scope
-
-        $xmlDefault = ".html";
-
-        $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
-        if (file_exists($file)) {
-            $dom = simplexml_load_file($file);
-            if ($values = $dom->xpath('default/catalog/seo/product_url_suffix')) {
-                $xmlDefault = (string)reset($values);
-            }
+        $suffixes = [];
+        foreach ($this->storeViewMap as $storeViewId) {
+            $suffixes[$storeViewId] = $this->scopeConfig->getValue(
+                'catalog/seo/product_url_suffix',
+                ScopeInterface::SCOPE_STORES,
+                $storeViewId,
+            );
         }
-
-        // note: IFNULL will not do, because the suffix value may actually be null
-        $suffixes = $this->db->fetchMap("
-            SELECT
-                s.`store_id`,
-                IF(cs.scope = 'stores', cs.value,
-                    IF(cw.scope = 'websites', cw.value,
-                        IF(cd.scope = 'default', cd.value, ?))) AS suffix
-            FROM `store` s
-            LEFT JOIN `{$this->configDataTable}` cd ON cd.path = 'catalog/seo/product_url_suffix' AND cd.scope = 'default'
-            LEFT JOIN `{$this->configDataTable}` cw ON cw.path = 'catalog/seo/product_url_suffix' AND cw.scope = 'websites' AND cw.scope_id = s.website_id
-            LEFT JOIN `{$this->configDataTable}` cs ON cs.path = 'catalog/seo/product_url_suffix' AND cs.scope = 'stores' AND cs.scope_id = s.store_id
-        ", [$xmlDefault]);
 
         return $suffixes;
     }
 
     protected function getCategoryUrlSuffixes()
     {
-        // value in core_config_data may be:
-        // - absent, in which case the default from config.xml must be taken
-        // - null (!), in which case it is ""
-        // - an actual value in default scope or store view scope
-
-        $xmlDefault = "";
-
-        $file = BP . '/vendor/magento/module-catalog/etc/config.xml';
-        if (file_exists($file)) {
-            $dom = simplexml_load_file($file);
-            if ($values = $dom->xpath('default/catalog/seo/category_url_suffix')) {
-                $xmlDefault = (string)reset($values);
-            }
+        $suffixes = [];
+        foreach ($this->storeViewMap as $storeViewId) {
+            $suffixes[$storeViewId] = $this->scopeConfig->getValue(
+                'catalog/seo/category_url_suffix',
+                ScopeInterface::SCOPE_STORES,
+                $storeViewId,
+            );
         }
-
-        // note: IFNULL will not do, because the suffix value may actually be null
-        $suffixes = $this->db->fetchMap("
-            SELECT
-                s.`store_id`,
-                IF(cs.scope = 'stores', cs.value,
-                    IF(cw.scope = 'websites', cw.value,
-                        IF(cd.scope = 'default', cd.value, ?))) AS suffix
-            FROM `store` s
-            LEFT JOIN `{$this->configDataTable}` cd ON cd.path = 'catalog/seo/category_url_suffix' AND cd.scope = 'default'
-            LEFT JOIN `{$this->configDataTable}` cw ON cw.path = 'catalog/seo/category_url_suffix' AND cw.scope = 'websites' AND cw.scope_id = s.website_id
-            LEFT JOIN `{$this->configDataTable}` cs ON cs.path = 'catalog/seo/category_url_suffix' AND cs.scope = 'stores' AND cs.scope_id = s.store_id
-        ", [$xmlDefault]);
 
         return $suffixes;
     }
 
     protected function getSaveRewritesHistory()
     {
-        $value = $this->db->fetchSingleCell("
-            SELECT `value`
-            FROM `{$this->configDataTable}`
-            WHERE
-                `scope` = 'default' AND
-                `scope_id` = 0 AND
-                `path` = 'catalog/seo/save_rewrites_history'
-        ");
+        $value = $this->scopeConfig->getValue(
+            'catalog/seo/save_rewrites_history'
+        );
 
         return is_null($value) ? true : (bool)$value;
     }
