@@ -688,7 +688,7 @@ class MetaData
             $suffixes[$storeViewId] = $this->scopeConfig->getValue(
                 'catalog/seo/product_url_suffix',
                 ScopeInterface::SCOPE_STORES,
-                $storeViewId,
+                $storeViewId
             );
         }
 
@@ -702,7 +702,7 @@ class MetaData
             $suffixes[$storeViewId] = $this->scopeConfig->getValue(
                 'catalog/seo/category_url_suffix',
                 ScopeInterface::SCOPE_STORES,
-                $storeViewId,
+                $storeViewId
             );
         }
 
