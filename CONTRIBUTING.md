@@ -7,6 +7,7 @@ Please read the text below if you do.
 ## Admin: processing a change
 
 * Write integration tests for the new feature
+* Check if the code runs on PHP 7.1
 * Run the [integration tests](doc/integration-tests.md)
 * Run the benchmark test before and after the change to see if the code has not become slower
 * Add a comment about the version in CHANGELOG.md
