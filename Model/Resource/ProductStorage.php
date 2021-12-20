@@ -334,6 +334,9 @@ class ProductStorage
             $this->productEntityStorage->removeOldCategoryIds($validProducts);
         }
         $this->productEntityStorage->insertCategoryIds($validProducts);
+        if ($config->categoryStrategy === ImportConfig::WEBSITE_STRATEGY_SET) {
+            $this->productEntityStorage->removeOldWebsiteIds($validProducts);
+        }
         $this->productEntityStorage->insertWebsiteIds($validProducts);
         $this->stockItemStorage->storeStockItems($validProducts);
         $this->linkedProductStorage->updateLinkedProducts($validProducts);

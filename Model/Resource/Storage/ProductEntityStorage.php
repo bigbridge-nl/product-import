@@ -392,6 +392,55 @@ class ProductEntityStorage
     }
 
     /**
+     * @param  Product[] $products
+     */
+    public function removeOldWebsiteIds(array $products)
+    {
+        if (empty($products)) { return; }
+
+        $productIds = array_column($products, 'id');
+
+        // load existing links
+        $rows = $this->db->fetchAllAssoc("
+            SELECT `website_id`, `product_id`
+            FROM `" . $this->metaData->productWebsiteTable . "`
+            WHERE `product_id` IN (" . implode(',', $productIds) . ")
+        ");
+
+        // collect existing links
+        $toBeRemoved = [];
+        foreach ($rows as $row) {
+            $toBeRemoved[$row['product_id']][$row['website_id']] = true;
+        }
+
+        // remove links from this set that are present in the import
+        foreach ($products as $product) {
+            $websiteIds = $product->getWebsiteIds();
+            if ($websiteIds === null) {
+                // websites are not used in the import; skip
+                unset($toBeRemoved[$product->id]);
+            } else {
+                foreach ($websiteIds as $websiteId) {
+                    unset($toBeRemoved[$product->id][$websiteId]);
+                }
+            }
+        }
+
+        // delete links one by one (there won't be many)
+        foreach ($toBeRemoved as $productId => $websiteIds) {
+            foreach ($websiteIds as $websiteId => $true) {
+                $this->db->execute("
+                    DELETE FROM `" . $this->metaData->productWebsiteTable . "`
+                    WHERE `product_id` = ? AND `website_id` = ?
+                ", [
+                    $productId,
+                    $websiteId
+                ]);
+            }
+        }
+    }
+
+    /**
      * @param Product[] $products
      */
     public function insertCategoryIds(array $products)

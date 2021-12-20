@@ -97,6 +97,22 @@ class ImportConfig
     const CATEGORY_STRATEGY_SET = 'set'; // Add and update category links; and also remove existing category links not named in the import
 
     /**
+     * How to deal with the imported websites?
+     * - add: link products to websites named in the import
+     * - set: like add, and delete links too
+     *
+     * Important!
+     * The 'set' option compares existing product-to-website links with the ones mentioned in the import.
+     * Existing links that are not named in the import are removed.
+     *
+     * @var string
+     */
+    public $websiteStrategy = self::WEBSITE_STRATEGY_ADD;
+
+    const WEBSITE_STRATEGY_ADD = 'add'; // Only add and update website links
+    const WEBSITE_STRATEGY_SET = 'set'; // Add and update website links; and also remove existing website links not named in the import
+
+    /**
      * How to handle varchar and text fields with value ""?
      *
      * @var string
