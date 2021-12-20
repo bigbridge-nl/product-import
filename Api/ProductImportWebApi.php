@@ -18,6 +18,7 @@ class ProductImportWebApi implements ProductImportWebApiInterface
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
     const OPTION_CATEGORY_URL_TYPE = "category-url-type";
     const OPTION_CATEGORY_STRATEGY = "category-strategy";
+    const OPTION_WEBSITE_STRATEGY = "website-strategy";
     const OPTION_PATH_SEPARATOR = 'path-separator';
     const OPTION_IMAGE_STRATEGY = 'image';
     const OPTION_IMAGE_SOURCE_DIR = 'image-source-dir';
@@ -98,6 +99,10 @@ class ProductImportWebApi implements ProductImportWebApiInterface
 
         if (isset($parameters[self::OPTION_CATEGORY_STRATEGY])) {
             $config->categoryStrategy = $parameters[self::OPTION_CATEGORY_STRATEGY];
+        }
+
+        if (isset($parameters[self::OPTION_WEBSITE_STRATEGY])) {
+            $config->websiteStrategy = $parameters[self::OPTION_WEBSITE_STRATEGY];
         }
 
         if (isset($parameters[self::OPTION_EMPTY_TEXT])) {
