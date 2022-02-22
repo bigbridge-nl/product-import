@@ -26,6 +26,7 @@ class ProductImportCommand extends Command
     const OPTION_IMAGE_CACHING = "image-caching";
     const OPTION_AUTO_CREATE_CATEGORIES = 'auto-create-categories';
     const OPTION_CATEGORY_STRATEGY = "category-strategy";
+    const OPTION_WEBSITE_STRATEGY = "website-strategy";
     const OPTION_PATH_SEPARATOR = 'path-separator';
     const OPTION_CATEGORY_URL_TYPE = 'category-url-type';
     const OPTION_IMAGE_STRATEGY = "image";
@@ -101,6 +102,13 @@ class ProductImportCommand extends Command
                 InputOption::VALUE_OPTIONAL,
                 'category strategy: How to handle product-category links that are not in the import (set: delete these links)',
                 ImportConfig::CATEGORY_STRATEGY_ADD
+            ),
+            new InputOption(
+                self::OPTION_WEBSITE_STRATEGY,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'website strategy: How to handle product-website links that are not in the import (set: delete these links)',
+                ImportConfig::WEBSITE_STRATEGY_ADD
             ),
             new InputOption(
                 self::OPTION_EMPTY_TEXT,
@@ -216,6 +224,7 @@ class ProductImportCommand extends Command
         $config->categoryNamePathSeparator = $input->getOption(self::OPTION_PATH_SEPARATOR);
         $config->categoryUrlType = $input->getOption(self::OPTION_CATEGORY_URL_TYPE);
         $config->categoryStrategy = $input->getOption(self::OPTION_CATEGORY_STRATEGY);
+        $config->websiteStrategy = $input->getOption(self::OPTION_WEBSITE_STRATEGY);
         $config->productTypeChange = $input->getOption(self::OPTION_PRODUCT_TYPE_CHANGE);
         $config->imageStrategy = $input->getOption(self::OPTION_IMAGE_STRATEGY);
         $config->existingImageStrategy = $input->getOption(self::OPTION_IMAGE_CACHING);
