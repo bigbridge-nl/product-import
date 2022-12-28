@@ -197,6 +197,13 @@ class ImportConfig
     const IMAGE_STRATEGY_SET = 'set'; // Add and update images; and also remove existing product images not named in the import
 
     /**
+     * When imageStrategy is set to IMAGE_STRATEGY_SET, should existing videos and video thumbnails be preserved?
+     *
+     * @var string
+     */
+    public $preserveExistingVideos = false;
+
+    /**
      * How to handle products that change type?
      *
      * @var string

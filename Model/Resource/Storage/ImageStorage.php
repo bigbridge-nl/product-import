@@ -187,17 +187,18 @@ class ImageStorage
      * @param Product[] $products
      * @param bool $removeObsoleteImages
      * @param bool $removeTemporaryImages
+     * @param bool $preserveExistingVideos
      */
-    public function storeProductImages(array $products, bool $removeObsoleteImages, bool $removeTemporaryImages)
+    public function storeProductImages(array $products, bool $removeObsoleteImages, bool $removeTemporaryImages, bool $preserveExistingVideos)
     {
         foreach ($products as $product) {
-            $this->storeImages($product, $removeObsoleteImages, $removeTemporaryImages);
+            $this->storeImages($product, $removeObsoleteImages, $removeTemporaryImages, $preserveExistingVideos);
         }
 
         $this->insertImageRoles($products);
     }
 
-    protected function storeImages(Product $product, bool $removeObsoleteImages, bool $removeTemporaryImages)
+    protected function storeImages(Product $product, bool $removeObsoleteImages, bool $removeTemporaryImages, bool $preserveExistingVideos)
     {
         // important! if no images are specified, do not remove all images
         if (empty($product->getImages())) {
@@ -212,6 +213,16 @@ class ImageStorage
 
         // if specified in the config, remove obsolete images
         if ($removeObsoleteImages) {
+
+            // if specified in the config, preserve existing videos
+            if ($preserveExistingVideos) {
+
+                //filter out images with media_type = external-video
+                $imageData = array_filter($imageData, function($image) {
+                   return $image['media_type'] !== 'external-video';
+               });
+            }
+
             $this->removeObsoleteImages($product, $existingImages, $imageData);
         }
 
@@ -334,7 +345,7 @@ class ImageStorage
     protected function loadExistingImageData(Product $product)
     {
         return $this->db->fetchAllAssoc("
-            SELECT M.`value_id`, M.`value`, M.`disabled` 
+            SELECT M.`value_id`, M.`value`, M.`disabled`, M.`media_type`
             FROM {$this->metaData->mediaGalleryTable} M
             INNER JOIN {$this->metaData->mediaGalleryValueToEntityTable} E ON E.`value_id` = M.`value_id`
             WHERE E.`entity_id` = ? AND M.`attribute_id` = ?
