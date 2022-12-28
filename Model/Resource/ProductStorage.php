@@ -342,7 +342,8 @@ class ProductStorage
         $this->linkedProductStorage->updateLinkedProducts($validProducts);
         $this->imageStorage->storeProductImages($validProducts,
             $config->imageStrategy === ImportConfig::IMAGE_STRATEGY_SET,
-            $config->existingImageStrategy == ImportConfig::EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD);
+            $config->existingImageStrategy == ImportConfig::EXISTING_IMAGE_STRATEGY_FORCE_DOWNLOAD,
+            $config->preserveExistingVideos);
         $this->tierPriceStorage->updateTierPrices($validProducts);
 
         // url_rewrite (must be done after url_key and category_id)
