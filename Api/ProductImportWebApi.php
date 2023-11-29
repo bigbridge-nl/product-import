@@ -64,6 +64,7 @@ class ProductImportWebApi implements ProductImportWebApiInterface
         $logger = new ProductImportWebApiLogger();
         $config->resultCallback = [$logger, 'productImported'];
 
+        $parameters = $_GET;
         $skipXsdValidation = !empty($parameters[self::OPTION_SKIP_XSD]);
 
         $this->xmlProductReader->import("php://input", $config, $skipXsdValidation, $logger);
