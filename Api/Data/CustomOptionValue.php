@@ -18,11 +18,15 @@ class CustomOptionValue
     /** @var string */
     protected $title;
 
-    public function __construct(string $price, string $priceType, string $title)
+    /** @var string */
+    protected $unit;
+
+    public function __construct(string $price, string $priceType, string $title, string $unit)
     {
         $this->price = Decimal::formatPrice($price);
         $this->priceType = trim($priceType);
         $this->title = trim($title);
+        $this->unit = trim($unit);
     }
 
     /**
@@ -47,5 +51,13 @@ class CustomOptionValue
     public function getTitle(): string
     {
         return $this->title;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUnit(): string
+    {
+        return $this->unit;
     }
 }

@@ -663,8 +663,12 @@ class ElementHandler
             }
         } elseif ($scope === self::CUSTOM_OPTION_VALUES) {
             if ($element === self::CUSTOM_OPTION_VALUE) {
-                $this->customOptionValues[] = new CustomOptionValue($attributes['price'],
-                    $attributes['price_type'], $attributes['title']);
+                $this->customOptionValues[] = new CustomOptionValue(
+                    $attributes['price'],
+                    $attributes['price_type'],
+                    $attributes['title'],
+                    $attributes['price_unit'],
+                );
             }
         }
 

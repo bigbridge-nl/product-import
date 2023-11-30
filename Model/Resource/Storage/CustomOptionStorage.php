@@ -5,6 +5,7 @@ namespace BigBridge\ProductImport\Model\Resource\Storage;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
+use Magento\Catalog\Model\Product\Attribute\Repository;
 
 /**
  * @author Patrick van Bergen
@@ -17,10 +18,15 @@ class CustomOptionStorage
     /** @var MetaData */
     protected $metaData;
 
-    public function __construct(Magento2DbConnection $db, MetaData $metaData)
+    protected Repository $productAttributeRepository;
+
+    private $eavOptions = [];
+
+    public function __construct(Magento2DbConnection $db, MetaData $metaData, Repository $productAttributeRepository)
     {
         $this->db = $db;
         $this->metaData = $metaData;
+        $this->productAttributeRepository = $productAttributeRepository;
     }
 
     /**
@@ -165,11 +171,39 @@ class CustomOptionStorage
                                 $value->getPrice(),
                                 $value->getPriceType()
                             ]);
+
+                            $this->db->execute("
+                                UPDATE `{$this->metaData->customOptionTypeValueTable}`
+                                SET `price_unit` = ?
+                                WHERE `option_type_id` = ?
+                            ", [
+                                $this->getUnitId($value->getUnit()),
+                                $optionTypeId,
+                            ]);
                         }
                     }
                 }
             }
         }
+    }
+
+
+    public function getUnitId($label): ?string
+    {
+        if (empty($label)) {
+            return null;
+        }
+        if ($this->eavOptions === []) {
+            $this->eavOptions = $this->productAttributeRepository->get('price_unit')->getOptions();
+        }
+
+        foreach ($this->eavOptions as $option) {
+            if ($option->getLabel() === $label) {
+                return $option->getValue();
+            }
+        }
+
+        return null;
     }
 
     /**

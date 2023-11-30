@@ -132,3 +132,6 @@ Thanks to Marco de Vries for telling me about the intricacies of product import.
 Thanks to Martijn van Berkel for first volunteering to use the importer in production environments and for providing valuable feedback.
 
 This project owes a great deal of ideas and inspiration from Magmi / Magento 1 [Magmi](https://github.com/dweeves/magmi-git)
+
+#Fork
+This is a fork of the original BigBridge Product Importer. It has been modified to work with our custom price unit on options.
