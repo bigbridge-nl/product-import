@@ -57,7 +57,7 @@ class CustomOptionStorage
 
                 $this->db->execute("
                     INSERT INTO `{$this->metaData->customOptionTable}`
-                    SET 
+                    SET
                         `product_id` = ?,
                         `type` = ?,
                         `is_require` = ?,
@@ -87,7 +87,7 @@ class CustomOptionStorage
                 foreach ($customOption->getValues() as $j => $valueSku) {
                     $this->db->execute("
                             INSERT INTO `{$this->metaData->customOptionTypeValueTable}`
-                            SET 
+                            SET
                                 `option_id` = ?,
                                 `sku` = ?,
                                 `sort_order` = ?
@@ -106,7 +106,7 @@ class CustomOptionStorage
                         if ($priceStruct->getCustomOption() === $customOption) {
                             $this->db->execute("
                                 INSERT INTO `{$this->metaData->customOptionPriceTable}`
-                                SET 
+                                SET
                                     `option_id` = ?,
                                     `store_id` = ?,
                                     `price` = ?,
@@ -126,7 +126,7 @@ class CustomOptionStorage
                         if ($titleStruct->getCustomOption() === $customOption) {
                             $this->db->execute("
                                 INSERT INTO `{$this->metaData->customOptionTitleTable}`
-                                SET 
+                                SET
                                     `option_id` = ?,
                                     `store_id` = ?,
                                     `title` = ?
@@ -149,7 +149,7 @@ class CustomOptionStorage
 
                             $this->db->execute("
                             INSERT INTO `{$this->metaData->customOptionTypeTitleTable}`
-                            SET 
+                            SET
                                 `option_type_id` = ?,
                                 `store_id` = ?,
                                 `title` = ?
@@ -160,7 +160,7 @@ class CustomOptionStorage
                             ]);
                             $this->db->execute("
                             INSERT INTO `{$this->metaData->customOptionTypePriceTable}`
-                            SET 
+                            SET
                                 `option_type_id` = ?,
                                 `store_id` = ?,
                                 `price` = ?,
@@ -194,7 +194,7 @@ class CustomOptionStorage
             return null;
         }
         if ($this->eavOptions === []) {
-            $this->eavOptions = $this->productAttributeRepository->get('price_unit')->getOptions();
+            $this->eavOptions = $this->productAttributeRepository->get('price_unit')->setStoreId(0)->getOptions();
         }
 
         foreach ($this->eavOptions as $option) {
