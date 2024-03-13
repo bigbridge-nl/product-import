@@ -176,7 +176,7 @@ class CustomOptionStorage
                                 UPDATE `{$this->metaData->customOptionTypeValueTable}`
                                 SET 
                                     `price_unit` = ?,
-                                    `price_unit_qty` = ?,
+                                    `price_unit_qty` = ?
                                 WHERE `option_type_id` = ?
                             ", [
                                 $this->getUnitId($value->getUnit()),
