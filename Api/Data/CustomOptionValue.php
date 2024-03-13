@@ -21,12 +21,16 @@ class CustomOptionValue
     /** @var string */
     protected $unit;
 
-    public function __construct(string $price, string $priceType, string $title, string $unit)
+    /** @var string */
+    protected $price_unit_qty;
+
+    public function __construct(string $price, string $priceType, string $title, string $unit, string $priceUnitQty)
     {
         $this->price = Decimal::formatPrice($price);
         $this->priceType = trim($priceType);
         $this->title = trim($title);
         $this->unit = trim($unit);
+        $this->price_unit_qty = trim($priceUnitQty);
     }
 
     /**
@@ -59,5 +63,13 @@ class CustomOptionValue
     public function getUnit(): string
     {
         return $this->unit;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPriceUnitQty(): string
+    {
+        return $this->price_unit_qty;
     }
 }

@@ -668,6 +668,7 @@ class ElementHandler
                     $attributes['price_type'],
                     $attributes['title'],
                     $attributes['price_unit'],
+                    $attributes['price_unit_qty']
                 );
             }
         }
