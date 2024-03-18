@@ -5,7 +5,6 @@ namespace BigBridge\ProductImport\Model\Resource\Storage;
 use BigBridge\ProductImport\Api\Data\Product;
 use BigBridge\ProductImport\Model\Persistence\Magento2DbConnection;
 use BigBridge\ProductImport\Model\Resource\MetaData;
-use Magento\Catalog\Model\Product\Attribute\Repository;
 
 /**
  * @author Patrick van Bergen
@@ -18,15 +17,10 @@ class CustomOptionStorage
     /** @var MetaData */
     protected $metaData;
 
-    protected Repository $productAttributeRepository;
-
-    private $eavOptions = [];
-
-    public function __construct(Magento2DbConnection $db, MetaData $metaData, Repository $productAttributeRepository)
+    public function __construct(Magento2DbConnection $db, MetaData $metaData)
     {
         $this->db = $db;
         $this->metaData = $metaData;
-        $this->productAttributeRepository = $productAttributeRepository;
     }
 
     /**
@@ -148,24 +142,25 @@ class CustomOptionStorage
                             $value = $customOptionValues[$index];
 
                             $this->db->execute("
-                            INSERT INTO `{$this->metaData->customOptionTypeTitleTable}`
-                            SET
-                                `option_type_id` = ?,
-                                `store_id` = ?,
-                                `title` = ?
-                        ", [
+                                INSERT INTO `{$this->metaData->customOptionTypeTitleTable}`
+                                SET
+                                    `option_type_id` = ?,
+                                    `store_id` = ?,
+                                    `title` = ?
+                            ", [
                                 $optionTypeId,
                                 $storeView->getStoreViewId(),
                                 $value->getTitle()
                             ]);
+
                             $this->db->execute("
-                            INSERT INTO `{$this->metaData->customOptionTypePriceTable}`
-                            SET
-                                `option_type_id` = ?,
-                                `store_id` = ?,
-                                `price` = ?,
-                                `price_type` = ?
-                        ", [
+                                INSERT INTO `{$this->metaData->customOptionTypePriceTable}`
+                                SET
+                                    `option_type_id` = ?,
+                                    `store_id` = ?,
+                                    `price` = ?,
+                                    `price_type` = ?
+                            ", [
                                 $optionTypeId,
                                 $storeView->getStoreViewId(),
                                 $value->getPrice(),
@@ -179,7 +174,7 @@ class CustomOptionStorage
                                     `price_unit_qty` = ?
                                 WHERE `option_type_id` = ?
                             ", [
-                                $this->getUnitId($value->getUnit()),
+                                $value->getUnit(),
                                 $value->getPriceUnitQty(),
                                 $optionTypeId,
                             ]);
@@ -188,25 +183,6 @@ class CustomOptionStorage
                 }
             }
         }
-    }
-
-
-    public function getUnitId($label): ?string
-    {
-        if (empty($label)) {
-            return null;
-        }
-        if ($this->eavOptions === []) {
-            $this->eavOptions = $this->productAttributeRepository->get('price_unit')->setStoreId(0)->getOptions();
-        }
-
-        foreach ($this->eavOptions as $option) {
-            if ($option->getLabel() === $label) {
-                return $option->getValue();
-            }
-        }
-
-        return null;
     }
 
     /**
