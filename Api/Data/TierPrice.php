@@ -24,6 +24,9 @@ class TierPrice
     /** @var string|null Null means: all websites */
     protected $websiteCode;
 
+    /** @var string|null */
+    protected $percentageValue;
+
     /** @var int */
     protected $websiteId = null;
 
