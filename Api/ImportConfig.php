@@ -208,6 +208,16 @@ class ImportConfig
     const PRODUCT_TYPE_CHANGE_NON_DESTRUCTIVE = 'non-destructive'; // allow only product type changes that do not delete data
 
     /**
+     * Handle rewrites?
+     *
+     * @var bool
+     */
+    public $handleRewrites = self::HANDLE_REWRITES_TRUE;
+
+    const HANDLE_REWRITES_TRUE = true;
+    const HANDLE_REWRITES_FALSE = false;
+
+    /**
      * How to handle url_rewrite 301 redirects?
      *
      * @var string
