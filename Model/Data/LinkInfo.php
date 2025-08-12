@@ -21,7 +21,7 @@ class LinkInfo
     /** @var int */
     public $defaultQuantityAttributeId;
 
-    public function __construct(int $typeId, int $positionAttributeId, int $defaultQuantityAttributeId = null)
+    public function __construct(int $typeId, int $positionAttributeId, ?int $defaultQuantityAttributeId = null)
     {
         $this->typeId = $typeId;
         $this->positionAttributeId = $positionAttributeId;
