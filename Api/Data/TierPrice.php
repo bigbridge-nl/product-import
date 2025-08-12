@@ -39,7 +39,7 @@ class TierPrice
      * @param string|null $websiteCode The code of the website. Null means: all websites
      * @param string $percentageValue Since Magento 2.2
      */
-    public function __construct(string $quantity, string $value, string $customerGroupName = null, string $websiteCode = null, string $percentageValue = null)
+    public function __construct(string $quantity, string $value, ?string $customerGroupName = null, ?string $websiteCode = null, ?string $percentageValue = null)
     {
         $this->quantity = Decimal::format($quantity);
         $this->value = Decimal::formatPrice($value);
