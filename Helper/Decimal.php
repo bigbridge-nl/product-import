@@ -26,7 +26,7 @@ class Decimal
      * @param string|null $in
      * @return string|null
      */
-    public static function format(string $in = null)
+    public static function format(?string $in = null)
     {
         if ($in === null) {
             return $in;
@@ -49,7 +49,7 @@ class Decimal
      * @param string|null $in
      * @return string|null
      */
-    public static function formatPrice(string $in = null)
+    public static function formatPrice(?string $in = null)
     {
         if ($in === null) {
             return $in;
