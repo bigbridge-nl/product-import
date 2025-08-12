@@ -28,7 +28,7 @@ class ProductUrlRewriteCommand extends Command
 
     public function __construct(
         ObjectManagerInterface $objectManager,
-        string $name = null
+        ?string $name = null
     )
     {
         $this->objectManager = $objectManager;
