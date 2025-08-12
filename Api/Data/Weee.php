@@ -27,7 +27,7 @@ class Weee
      * @param string|null $websiteId
      * @param string|null $state
      */
-    public function __construct(string $country, string $value, string $websiteId = null, string $state = null)
+    public function __construct(string $country, string $value, ?string $websiteId = null, ?string $state = null)
     {
         $this->country = $country;
         $this->value = Decimal::format($value);
@@ -42,7 +42,7 @@ class Weee
      * @param string|null $state
      * @return Weee
      */
-    public static function createWeee(string $country, string $value, string $websiteId = null, string $state = null)
+    public static function createWeee(string $country, string $value, ?string $websiteId = null, ?string $state = null)
     {
         return new Weee($country, $value, $websiteId, $state);
     }
