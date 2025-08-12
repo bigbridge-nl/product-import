@@ -135,7 +135,7 @@ class HttpCache
         return false;
     }
 
-    public function downloadFromUrl(string $url, string $localTargetFile, array $conditions = null)
+    public function downloadFromUrl(string $url, string $localTargetFile, ?array $conditions = null)
     {
         $responseHeaders = [
             self::UNIX_TIME => time(),
