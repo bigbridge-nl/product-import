@@ -46,7 +46,7 @@ class ProductImportCommand extends Command
 
     public function __construct(
         ObjectManagerInterface $objectManager,
-        string $name = null)
+        ?string $name = null)
     {
         $this->objectManager = $objectManager;
 
@@ -258,7 +258,7 @@ class ProductImportCommand extends Command
         }
     }
 
-    protected function guessImageSourceDir(string $fileName, string $imageSourceDirOption = null)
+    protected function guessImageSourceDir(string $fileName, ?string $imageSourceDirOption = null)
     {
         // select specified dir
         $dirName = $imageSourceDirOption;
