@@ -144,7 +144,6 @@ class XmlProductReader
         }
 
         // close
-        xml_parser_free($parser);
         fclose($stream);
     }
 }
