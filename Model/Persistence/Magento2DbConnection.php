@@ -90,6 +90,7 @@ class Magento2DbConnection
         $connectionErrors = [
             2006, // SQLSTATE[HY000]: General error: 2006 MySQL server has gone away
             2013,  // SQLSTATE[HY000]: General error: 2013 Lost connection to MySQL server during query
+            4031, // SQLSTATE[HY000]: General error: 4031 The client was disconnected by server because of inactivity.
         ];
         $triesCount = 0;
 
