@@ -53,7 +53,7 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         self::$db->execute("DELETE FROM `{$table}` WHERE request_path LIKE '%product-import.html'");
     }
 
-    public function __construct(string $name = null, array $data = array(), string $dataName = '')
+    public function __construct(?string $name = null, array $data = array(), string $dataName = '')
     {
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
@@ -83,7 +83,7 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
         foreach ([$c2b => 'colored-things/containers', $c2c => 'large'] as $id => $urlPath) {
             $path = self::$db->fetchSingleCell("
             SELECT value FROM catalog_category_entity_varchar
-            WHERE store_id = 0 AND entity_id = :cat AND attribute_id = 
+            WHERE store_id = 0 AND entity_id = :cat AND attribute_id =
                 (SELECT attribute_id FROM eav_attribute WHERE attribute_code = 'url_path' AND entity_type_id = 3)
         ", [
                 'cat' => $id

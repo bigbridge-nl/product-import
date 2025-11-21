@@ -182,7 +182,6 @@ class HttpCache
         $error = curl_error($ch);
         $httpResponseCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        curl_close($ch);
         fclose($fp);
 
         if ($conditions) {
