@@ -189,7 +189,7 @@ class ProductStorage
         $this->productEntityStorage->checkIfIdsExist($products);
 
         // distinguish between inserts and updates (and assign ids)
-        list(, $updateProducts) = $this->assignProductIds($products);
+        [, $updateProducts] = $this->assignProductIds($products);
 
         // replace reference(s) with ids; changes $product->errors
         $this->referenceResolver->resolveExternalReferences($products, $config);
@@ -311,7 +311,7 @@ class ProductStorage
         // start by removing old structures and setting attributes (virtual!)
         $this->productTypeChanger->performTypeChanges($validUpdateProducts);
 
-        list($upsertAttributes, $deleteAttributes) = $this->separateUpsertsFromDeletes($validProducts, $config);
+        [$upsertAttributes, $deleteAttributes] = $this->separateUpsertsFromDeletes($validProducts, $config);
 
         $this->productEntityStorage->insertMainTable($validInsertProducts);
         $this->productEntityStorage->updateMainTable($validUpdateProducts);
@@ -346,9 +346,13 @@ class ProductStorage
         $this->tierPriceStorage->updateTierPrices($validProducts);
 
         // url_rewrite (must be done after url_key and category_id)
-        $this->urlRewriteStorage->updateRewrites($validProducts,
-            $config->handleRedirects === ImportConfig::KEEP_REDIRECTS,
-            $config->handleCategoryRewrites === ImportConfig::KEEP_CATEGORY_REWRITES);
+        if ($config->handleRewrites) {
+            $this->urlRewriteStorage->updateRewrites(
+                $validProducts,
+                $config->handleRedirects === ImportConfig::KEEP_REDIRECTS,
+                $config->handleCategoryRewrites === ImportConfig::KEEP_CATEGORY_REWRITES
+            );
+        }
 
         $this->downloadableStorage->performTypeSpecificStorage($productsByType[DownloadableProduct::TYPE_DOWNLOADABLE]);
         $this->groupedStorage->performTypeSpecificStorage($productsByType[GroupedProduct::TYPE_GROUPED]);
