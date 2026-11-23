@@ -4,7 +4,10 @@ namespace BigBridge\ProductImport\Api;
 
 use BigBridge\ProductImport\Model\Reader\ProductImportWebApiLogger;
 use BigBridge\ProductImport\Model\Reader\XmlProductReader;
+use BigBridge\ProductImport\Model\Resource\Storage\ImageStorage;
+use BigBridge\ProductImport\Model\Resource\Storage\LocalPathGuard;
 use Exception;
+use Magento\Framework\Exception\InputException;
 
 /**
  * @author Patrick van Bergen
@@ -38,13 +41,26 @@ class ProductImportWebApi implements ProductImportWebApiInterface
     /** @var XmlProductReader */
     protected $xmlProductReader;
 
+    /**
+     * Directories (absolute, or relative to the Magento root) that local image and download files,
+     * image-source-dir and image-cache-dir must be inside. Configured in etc/di.xml.
+     *
+     * @var string[]
+     */
+    protected $localFileRoots;
+
     public function __construct(
         ImporterFactory $importerFactory,
-        XmlProductReader $xmlProductReader
+        XmlProductReader $xmlProductReader,
+        array $localFileRoots = []
     )
     {
         $this->importerFactory = $importerFactory;
         $this->xmlProductReader = $xmlProductReader;
+        $this->localFileRoots = array_values(array_map(
+            fn($root) => $root !== '' && $root[0] === '/' ? $root : BP . '/' . $root,
+            array_filter($localFileRoots, fn($root) => is_string($root) && $root !== '')
+        ));
     }
 
     /**
@@ -121,12 +137,21 @@ class ProductImportWebApi implements ProductImportWebApiInterface
             $config->duplicateUrlKeyStrategy = $parameters[self::OPTION_URL_KEY_STRATEGY];
         }
 
+        $config->localFileRoots = $this->localFileRoots;
+
         if (isset($parameters[self::OPTION_IMAGE_SOURCE_DIR])) {
-            $config->imageSourceDir = $parameters[self::OPTION_IMAGE_SOURCE_DIR];
+            $imageSourceDir = (string)$parameters[self::OPTION_IMAGE_SOURCE_DIR];
+            if (preg_match(ImageStorage::URL_PATTERN, $imageSourceDir)) {
+                $config->imageSourceDir = $imageSourceDir;
+            } else {
+                $config->imageSourceDir = LocalPathGuard::resolveDirectory($imageSourceDir, $this->localFileRoots, BP, false)
+                    ?? throw new InputException(__('%1 must be an existing directory inside one of the allowed directories', self::OPTION_IMAGE_SOURCE_DIR));
+            }
         }
 
         if (isset($parameters[self::OPTION_IMAGE_CACHE_DIR])) {
-            $config->imageCacheDir = $parameters[self::OPTION_IMAGE_CACHE_DIR];
+            $config->imageCacheDir = LocalPathGuard::resolveDirectory((string)$parameters[self::OPTION_IMAGE_CACHE_DIR], $this->localFileRoots, BP, true)
+                ?? throw new InputException(__('%1 must be inside one of the allowed directories', self::OPTION_IMAGE_CACHE_DIR));
         }
 
         if (isset($parameters[self::OPTION_IMAGE_CACHING])) {

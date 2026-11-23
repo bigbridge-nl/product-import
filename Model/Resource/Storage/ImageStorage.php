@@ -96,6 +96,18 @@ class ImageStorage
 
         if (!preg_match('/\.(png|jpg|jpeg|gif)$/i', $imagePath)) {
             $product->addError("Filetype not allowed (use .jpg, .png or .gif): " . $imagePath);
+            return null;
+        }
+
+        $isUrl = preg_match(self::URL_PATTERN, $imagePath);
+
+        $localPath = $imagePath;
+        if (!$isUrl && $config->localFileRoots !== null) {
+            $localPath = LocalPathGuard::resolveFile($imagePath, $config->localFileRoots);
+            if ($localPath === null) {
+                $product->addError("File not found or not in an allowed directory: " . $imagePath);
+                return null;
+            }
         }
 
         $temporaryStoragePath = $config->imageCacheDir . '/' . md5($imagePath) . '-' . basename($imagePath);
@@ -113,22 +125,22 @@ class ImageStorage
             }
         }
 
-        if (preg_match(self::URL_PATTERN, $imagePath)) {
+        if ($isUrl) {
 
             $error = $this->httpCache->fetchFromUrl($imagePath, $temporaryStoragePath, $config);
             if ($error !== '') {
                 $product->addError($error);
                 return null;
             }
-        } elseif (!is_file($imagePath)) {
+        } elseif (!is_file($localPath)) {
             $product->addError("File not found: " . $imagePath);
             return null;
-        } elseif (stat($imagePath)['dev'] !== stat(__FILE__)['dev']) {
+        } elseif (stat($localPath)['dev'] !== stat(__FILE__)['dev']) {
             // file is on different device
-            copy($imagePath, $temporaryStoragePath);
+            copy($localPath, $temporaryStoragePath);
         } elseif (!file_exists($temporaryStoragePath)) {
             // file is on same device
-            link($imagePath, $temporaryStoragePath);
+            link($localPath, $temporaryStoragePath);
         }
 
         if (!file_exists($temporaryStoragePath)) {
@@ -138,6 +150,14 @@ class ImageStorage
 
         if (filesize($temporaryStoragePath) === 0) {
             $product->addError("File is empty: " . $imagePath);
+            unlink($temporaryStoragePath);
+            return null;
+        }
+
+        // the extension is not enough: check the contents (not the type in the extension, any allowed type will do)
+        $imageInfo = @getimagesize($temporaryStoragePath);
+        if ($imageInfo === false || !in_array($imageInfo[2], [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF], true)) {
+            $product->addError("File is not a valid .jpg, .png or .gif image: " . $imagePath);
             unlink($temporaryStoragePath);
             return null;
         }
@@ -157,6 +177,15 @@ class ImageStorage
 
             if ($fileOrUrl && $fileOrUrl[0] !== DIRECTORY_SEPARATOR) {
                 $fileOrUrl = $config->imageSourceDir . DIRECTORY_SEPARATOR . $fileOrUrl;
+            }
+
+            if ($config->localFileRoots !== null) {
+                $resolved = LocalPathGuard::resolveFile($fileOrUrl, $config->localFileRoots);
+                if ($resolved === null) {
+                    $product->addError("File not found or not in an allowed directory: " . $fileOrUrl);
+                    return null;
+                }
+                $fileOrUrl = $resolved;
             }
 
             if (!is_file($fileOrUrl)) {
