@@ -91,7 +91,27 @@ Specify the base dir for images
 
 Specify an alternative local image cache directory
 
-    image-cache-dir=/tmp
+    image-cache-dir=pub/media/import/my-feed
+
+Local directories and files are restricted for web api imports. A local `image-source-dir`, the `image-cache-dir`, and local
+image and download files named in the XML must be inside one of these directories (relative paths are relative to the Magento root):
+
+* pub/media/import
+* var/product-import
+
+Add directories in the `di.xml` of your own module:
+
+```xml
+<type name="BigBridge\ProductImport\Api\ProductImportWebApi">
+    <arguments>
+        <argument name="localFileRoots" xsi:type="array">
+            <item name="my_images" xsi:type="string">/data/product-images</item>
+        </argument>
+    </arguments>
+</type>
+```
+
+Don't add a directory that is served by the web server with PHP enabled, or that contains files a catalog admin should not be able to read.
     
 Specify the type of images caching (default is force-download)
 
