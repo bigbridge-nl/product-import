@@ -1,7 +1,5 @@
 # BigBridge Product Import
 
-Hi! My name is Patrick van Bergen. I created this library because I needed product import to be fast.
-
 This library imports product data into Magento 2 via direct database queries. It has these main features
 
 * A programming library to import products
