@@ -9,4 +9,13 @@
 		</arguments>
 	</type>
 	<preference for="BigBridge\ProductImport\Api\ProductImportWebApiInterface" type="BigBridge\ProductImport\Api\ProductImportWebApi" />
+	<type name="BigBridge\ProductImport\Api\ProductImportWebApi">
+		<arguments>
+			<!-- web api imports may only read local files from, and cache images in, these directories (absolute, or relative to the Magento root) -->
+			<argument name="localFileRoots" xsi:type="array">
+				<item name="import" xsi:type="string">pub/media/import</item>
+				<item name="product_import" xsi:type="string">var/product-import</item>
+			</argument>
+		</arguments>
+	</type>
 </config>

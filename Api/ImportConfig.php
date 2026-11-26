@@ -172,6 +172,13 @@ class ImportConfig
     public $imageCacheDir = self::TEMP_PRODUCT_IMAGE_PATH;
 
     /**
+     * When set, local image and download files must resolve (with realpath) to a path inside one of these directories.
+     * null means no restriction. The web API sets this, because its callers may have a restricted admin role.
+     * @var string[]|null
+     */
+    public $localFileRoots = null;
+
+    /**
      * Downloading images can be slow. Choose your image strategy:
      * - force download: (default), images are downloaded over and over again
      * - check import dir: checks the directory where images are cached, pub/media/import first
